@@ -57,11 +57,11 @@ gem "recaptcha", require: "recaptcha/rails"
 gem "sitemap_generator"
 gem "therubyracer", platform: :ruby
 gem "country_select"
+gem 'has_permalink'
 group :development do
   gem "better_errors"
   gem "binding_of_caller"
   gem "quiet_assets"
-  gem "rails-erd"
   gem "annotate", ">=2.6.0"
   gem "pry-rails"
 end
