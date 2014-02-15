@@ -12,8 +12,8 @@ XLog is a simple blogging system, it will utilize rdoc syntax for posts content,
 	like any rails app modify the config/db.yml then run rake db:setup
 
 * Deployment instructions
-	```rdoc
+	=begin shell
 	bundle install
 	rake db:setup
 	rails s
-	```
+	=end
