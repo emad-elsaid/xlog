@@ -1,19 +1,19 @@
 == Xlog
 
-XLog is a simple blogging system, it will utilize rdoc syntax for posts content, simple file manager, and medium.com like style of interaction, also i'll experiment some new UX ideas. 
+XLog is a simple blogging system for hackers, it will utilize rdoc syntax for posts content, simple file manager, and medium.com like style of interaction, also i'll experiment some new UX ideas. 
 
-* Ruby version
-	this project uses Ruby v2.1.0
+== why ?
 
-* System dependencies
-	ruby v.2.1.0, rails v4.0.2, imagemagick
+nothing fancy, i just wanted to build a system in my mind, simple, uses markdown, rdoc ..etc, and some ux ideas i got in my mind, so why not, lets build it :)
 
-* Database creation
-	like any rails app modify the config/db.yml then run rake db:setup
+== install
 
-* Deployment instructions
-	=begin shell
 	bundle install
 	rake db:setup
 	rails s
-	=end
+
+== license
+MIT license personal and commercial usage.
+
+== Credits
+Emad Elsaid. <mailto:blazeeboy@gmail.com>
