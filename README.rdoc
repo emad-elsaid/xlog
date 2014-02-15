@@ -8,9 +8,9 @@ nothing fancy, i just wanted to build a system in my mind, simple, uses markdown
 
 == install
 
-	bundle install
-	rake db:setup
-	rails s
+  bundle install
+  rake db:setup
+  rails s
 
 == license
 MIT license personal and commercial usage.
