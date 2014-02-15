@@ -3,17 +3,17 @@
 XLog is a simple blogging system, it will utilize rdoc syntax for posts content, simple file manager, and medium.com like style of interaction, also i'll experiment some new UX ideas. 
 
 * Ruby version
-this project uses Ruby v2.1.0
+	this project uses Ruby v2.1.0
 
 * System dependencies
-ruby v.2.1.0, rails v4.0.2, imagemagick
+	ruby v.2.1.0, rails v4.0.2, imagemagick
 
 * Database creation
-like any rails app modify the config/db.yml then run rake db:setup
+	like any rails app modify the config/db.yml then run rake db:setup
 
 * Deployment instructions
-```
-bundle install
-rake db:setup
-rails s
-```
+	```rdoc
+	bundle install
+	rake db:setup
+	rails s
+	```
