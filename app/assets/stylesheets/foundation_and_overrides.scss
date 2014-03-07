@@ -6,6 +6,7 @@
 // $rem-base: 16px;
 
 // Allows the use of rem-calc() or lower-bound() in your settings
+@import url("http://fonts.googleapis.com/css?family=Open+Sans:400,700,300");
 @import "foundation/functions";
 
 // $experimental: true;
@@ -36,14 +37,14 @@
 // $total-columns: 12;
 
 // We use these to control various global styles
-// $body-bg: #fff;
-// $body-font-color: #222;
-// $body-font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+$body-bg: #f9f9f9;
+$body-font-color: #303030;
+$body-font-family: "Open Sans", "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
 // $body-font-weight: normal;
 // $body-font-style: normal;
 
 // We use this to control font-smoothing
-// $font-smoothing: antialiased;
+$font-smoothing: antialiased;
 
 // We use these to control text direction settings
 // $text-direction: ltr;
@@ -123,12 +124,12 @@
 // $header-text-rendering: optimizeLegibility;
 
 // We use these to control header font sizes
-// $h1-font-size: rem-calc(44);
-// $h2-font-size: rem-calc(37);
-// $h3-font-size: rem-calc(27);
-// $h4-font-size: rem-calc(23);
-// $h5-font-size: rem-calc(18);
-// $h6-font-size: 1rem;
+$h1-font-size: rem-calc(16);
+$h2-font-size: rem-calc(15);
+$h3-font-size: rem-calc(14);
+$h4-font-size: rem-calc(13);
+$h5-font-size: rem-calc(12);
+$h6-font-size: 1rem;
 
 // These control how subheaders are styled.
 // $subheader-line-height: 1.4;

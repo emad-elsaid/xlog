@@ -16,11 +16,18 @@
   	<%= render 'layouts/navbar' if user_signed_in? %>
 
     <div class="row">
-      <div class="columns large-12">
-      	<p id="notice"><%= notice %></p>
-        <%= yield %>
+      <div class="large-8 medium-10 small-12 small-centered columns">
+        <% if notice %>
+      	  <div class="alert-box success"><%= notice %> <a href="" class="close">×</a></div>
+        <% end %>
+        <div id="container">
+          <%= render 'layouts/pages' %>
+          <%= yield %>
+        </div>
       </div>  
     </div>
+
+    <%= render 'layouts/footer' %>
 
     <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   </body>

@@ -1,43 +1,110 @@
-body {
-  background-color: #fff;
-  color: #333;
-  font-family: verdana, arial, helvetica, sans-serif;
-  font-size: 13px;
-  line-height: 18px;
-}
+@import "foundation/functions";
+@import "foundation_and_overrides.scss";
 
-p, ol, ul, td {
-  font-family: verdana, arial, helvetica, sans-serif;
-  font-size: 13px;
-  line-height: 18px;
-}
+#container{
+  background: #fff;
+  margin: 40px auto 20px;
+  border-radius: 7px;
+  border: 1px solid #eee;
+  line-height: 1.6em;
 
-pre {
-  background-color: #eee;
-  padding: 10px;
-  font-size: 11px;
-}
-
-a {
-  color: #000;
-  &:visited {
-    color: #666;
+  hr{
+    border-top: 1px solid #eee;
+    height: 0px;
+    width: 100%;
   }
-  &:hover {
-    color: #fff;
-    background-color: #000;
+
+  code {
+    display: block;
+    margin: 10px 0px;
+    font-size: 13px;
+    color: #eee;
+    background: #39382e;
+    padding: 10px;
+    border-radius: 2px;
+    line-height: 1.3em;
+    vertical-align: baseline;
+    zoom: 1;
+  }
+
+  h1, h2, h3, h4, h5, h6, p{
+    padding-right: 60px;
+    padding-left: 60px;
+  }
+
+  p, blockquote, ul, ol, li {
+    font-size: 14px;
+    line-height: 1.6em;
+  }
+
+  h1, h2, h3, h4, h5, h6{
+    font-weight: bold;
+  }
+
+  .title{
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 60px;
+    a{
+      color: inherit;
+    }
+  }
+
+  time{
+    color: #d0d0d0;
+    text-transform: uppercase;
+    font-size: rem-calc(10);
+    margin-top: 17.430px;
+  }
+
+  .post.single{
+    time{
+      display: block;
+      text-align: center;
+    }
+  }
+
+  ul, ol{
+    list-style-position: inside;
+    margin: 17.430px 60px;
+    padding: 0px;
+    li{
+      padding: 0px;
+      margin: 10px;
+
+      p{
+        margin: 0px;
+        padding: 0px;
+      }
+    }
+  }
+
+  form, .shared_links{
+    margin: 30px 60px;
+    a{
+      font-size: 14px;
+    }
+
+    input[type="submit"] { @include button; }
+  }
+
+}
+
+.layout_footer{
+  text-align: center;
+  color: #808080;
+  font-size: rem-calc(12);
+  margin: 10px 0px 60px 0px;
+  a{
+    color: inherit;
+    &:hover{
+      color: #444;
+    }
   }
 }
 
-div {
-  &.field, &.actions {
-    margin-bottom: 10px;
-  }
-}
-
-#notice {
-  color: green;
-}
 
 .field_with_errors {
   padding: 2px;
@@ -67,3 +134,4 @@ div {
     list-style: square;
   }
 }
+

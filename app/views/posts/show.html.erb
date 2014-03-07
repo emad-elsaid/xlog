@@ -1,4 +1,14 @@
 <% content_for :title, @post.title %>
-<h1><%= @post.title %></h1>
+<% content_for :navbar do %>
+	<ul class="left">
+	  <li><%= link_to 'Edit Post', edit_post_path %></li>
+	  <li><%= link_to 'Delete Post', post_path, method: :delete, confirm: 'Are you sure?' %></li>
+	</ul>
+<% end %>
 
-<p><%= @post.body %></p>
+<article class="post single">
+	<time datetime="<%= @post.created_at %>"><%= @post.created_at.to_formatted_s(:short) %></time>
+	<h1 class="title"><%= @post.title %></h1>
+
+	<p><%=raw @post.body %></p>	
+</article>

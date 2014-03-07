@@ -1,13 +1,8 @@
-<% @posts.each do |post| %>
-  <article>
-    
-    <h2><%= link_to post.title, post %></h2>
-    <time datetime="<%= post.created_at %>"><%= post.created_at %></time>
-
-    <ul class="actions inline-list">
-      <li><%= link_to 'Edit', edit_post_path(post) %></li>
-      <li><%= link_to 'Delete', post, method: :delete, data: { confirm: 'Are you sure?' } %></li>
-    </ul>
-
-  </article>
-<% end %>
+<ul class="no-bullet">
+	<% @posts.each do |post| %>
+	  <li>
+	    <%= link_to post.title, post %>
+	    <time datetime="<%= post.created_at %>"><%= post.created_at.to_formatted_s(:short) %></time>
+	  </li>
+	<% end %>
+</ul>

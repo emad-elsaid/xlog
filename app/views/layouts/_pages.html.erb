@@ -1,0 +1,8 @@
+<ul class="inline-list pages">
+	<li><%= link_to 'Home', root_path %></li>
+
+	<% unless user_signed_in? %>
+		<li><%= link_to 'Login', new_user_session_path %></li>
+	<% end %>
+</ul>
+<hr/>

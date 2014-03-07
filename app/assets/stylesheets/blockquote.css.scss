@@ -1,0 +1,50 @@
+// credits to : https://raw.github.com/muan/scribble/master/stylesheets/style.css
+blockquote {
+  margin: 0;
+  font-style: normal !important; 
+}
+
+article.post blockquote, article > p blockquote {
+  -webkit-transition: all, 0.3s;
+  -moz-transition: all, 0.3s;
+  -ms-transition: all, 0.3s;
+  -o-transition: all, 0.3s;
+  transition: all, 0.3s;
+  color: #606060;
+  background: #f9f9f9;
+  position: relative;
+  overflow: hidden;
+  display: block;
+  padding: 15px 60px; 
+}
+
+article.post blockquote:hover, article > p blockquote:hover {
+  color: #454545; 
+}
+
+article.post blockquote:hover:before, article > p blockquote:hover:before {
+  color: #b8cec7; 
+}
+
+article.post blockquote:before, article > p blockquote:before {
+  left: -3px; 
+}
+
+article.post blockquote:after, article > p blockquote:after {
+  right: -2px; 
+}
+
+article.post blockquote:before, article.post blockquote:after, article > p blockquote:before, article > p blockquote:after {
+  content: "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^";
+  font-size: 24px;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  line-height: 0.4em;
+  word-break: break-all;
+  color: #d0dfda;
+  display: block;
+  width: 7px !important;
+  white-space: normal; 
+}
