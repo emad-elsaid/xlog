@@ -10,20 +10,20 @@
     <%= javascript_include_tag "vendor/modernizr" %>
     <%= csrf_meta_tags %>
   </head>
-
   <body>
 
   	<%= render 'layouts/navbar' if user_signed_in? %>
 
     <div class="row">
       <div class="large-8 medium-10 small-12 small-centered columns">
-        <% if notice %>
-      	  <div class="alert-box success"><%= notice %> <a href="" class="close">×</a></div>
-        <% end %>
+
+        <%= render 'layouts/messages' %>
+
         <div id="container">
           <%= render 'layouts/pages' %>
           <%= yield %>
         </div>
+
       </div>  
     </div>
 
