@@ -44,7 +44,6 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem "mysql2"
 gem "devise"
 gem "cancan"
 gem "will_paginate", "~> 3.0"
