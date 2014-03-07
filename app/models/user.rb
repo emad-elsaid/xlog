@@ -22,4 +22,10 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
+
+  has_many :posts
+
+  def gravatar size=100
+  	"http://www.gravatar.com/avatar/#{email.hash}?s=#{size}"
+  end
 end

@@ -1,31 +1,13 @@
-<h1>Listing posts</h1>
+<% @posts.each do |post| %>
+  <article>
+    
+    <h2><%= link_to post.title, post %></h2>
+    <time datetime="<%= post.created_at %>"><%= post.created_at %></time>
 
-<table>
-  <thead>
-    <tr>
-      <th>Title</th>
-      <th>Body</th>
-      <th>User</th>
-      <th></th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
+    <ul class="actions inline-list">
+      <li><%= link_to 'Edit', edit_post_path(post) %></li>
+      <li><%= link_to 'Delete', post, method: :delete, data: { confirm: 'Are you sure?' } %></li>
+    </ul>
 
-  <tbody>
-    <% @posts.each do |post| %>
-      <tr>
-        <td><%= post.title %></td>
-        <td><%= post.body %></td>
-        <td><%= post.user %></td>
-        <td><%= link_to 'Show', post %></td>
-        <td><%= link_to 'Edit', edit_post_path(post) %></td>
-        <td><%= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
-
-<%= link_to 'New Post', new_post_path %>
+  </article>
+<% end %>
