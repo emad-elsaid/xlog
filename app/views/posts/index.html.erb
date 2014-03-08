@@ -1,7 +1,7 @@
 <ul class="no-bullet">
 	<% @posts.each do |post| %>
 	  <li>
-	    <%= link_to post.title, post %>
+	    <%= link_to post.title, post_link_path(post) %>
 	    <time datetime="<%= post.created_at %>"><%= post.created_at.to_formatted_s(:short) %></time>
 	  </li>
 	<% end %>
