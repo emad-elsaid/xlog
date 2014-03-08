@@ -1,6 +1,11 @@
 @import "foundation/functions";
 @import "foundation_and_overrides.scss";
 
+.site_title{
+  text-align: center;
+  margin: 60px 0px;
+}
+
 #container{
   background: #fff;
   margin: 40px auto 20px;
@@ -15,21 +20,32 @@
   }
 
   code {
-    display: block;
-    margin: 10px 0px;
     font-size: 13px;
     color: #eee;
     background: #39382e;
-    padding: 10px;
+    padding: 5px;
     border-radius: 2px;
     line-height: 1.3em;
     vertical-align: baseline;
     zoom: 1;
   }
 
-  h1, h2, h3, h4, h5, h6, p{
+  pre{
+    code{
+      padding: 10px;
+      display: block;
+      margin: 10px 0px;
+    }
+  }
+
+  h1, h2, h3, h4, h5, h6, p, dl, pre{
     padding-right: 60px;
     padding-left: 60px;
+  }
+
+  table{
+    margin-right: 60px;
+    margin-left: 60px;
   }
 
   p, blockquote, ul, ol, li {
@@ -47,6 +63,7 @@
     font-weight: bold;
     margin-top: 10px;
     margin-bottom: 60px;
+    font-size: 1.5em;
     a{
       color: inherit;
     }

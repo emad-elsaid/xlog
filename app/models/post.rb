@@ -15,7 +15,12 @@ class Post < ActiveRecord::Base
   has_permalink
   belongs_to :user
 
-  validates :title, presence: true, length: { minimum: 3 }
+  validates :title, presence: true, uniqueness: true, length: { minimum: 3 }
   validates :body, presence: true, length: { minimum: 20 }
+
+  # convert the body written by user to HTML
+  def body_html
+  	GitHub::Markdown.render_gfm body
+  end
 
 end

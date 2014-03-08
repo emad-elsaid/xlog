@@ -10,5 +10,5 @@
 	<time datetime="<%= @post.created_at %>"><%= @post.created_at.to_formatted_s(:short) %></time>
 	<h1 class="title"><%= @post.title %></h1>
 
-	<p><%=raw @post.body %></p>	
+	<p><%=raw @post.body_html %></p>	
 </article>
