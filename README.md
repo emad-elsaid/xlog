@@ -27,13 +27,12 @@ gem install rmagick -v '2.13.2'
 export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 bundle install
 rake db:setup
+rake assets:precompile RAILS_ENV=production
+rails server -d -e production
 ```
 now it is ready to run your server of choice.
 
-## Demo
-
-you can check the demo on my koding vm from here 
-http://blazeeboy.kd.io:3000/
+## Default credentials
 
 ```
 email: admin@example.com
