@@ -33,9 +33,11 @@ rake db:setup
 
 you can check the demo on my koding vm from here 
 http://blazeeboy.kd.io:3000/
+
 ```
 email: admin@example.com
 password: password
+```
 
 now it is ready to run your server of choice.
 
