@@ -28,6 +28,7 @@ export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 bundle install
 rake db:setup
 ```
+now it is ready to run your server of choice.
 
 ## Demo
 
@@ -38,8 +39,6 @@ http://blazeeboy.kd.io:3000/
 email: admin@example.com
 password: password
 ```
-
-now it is ready to run your server of choice.
 
 ## Project Status
 
