@@ -44,6 +44,25 @@ password: password
 project still under development, DO NOT USE IT IN PRODUCTION
 i still didn't add previlages for production. 
 
+## TODO
+
+* code highlight
+* replace links with embeded versions for 
+	* FB
+	* Twitter
+	* Youtube
+	* scribed
+	* gist
+	* soundcloud
+	* ...etc
+* blocks system to add more complex post contents such as:
+	* Fiddles/Codepen style
+* get rid of some gems that is not so important
+* File manager
+* Actions panel like sublime/atom panel and action/extending system
+* keyboard shortcuts (ctrl+p for actions panel for example)
+* enhance design typography
+
 ## license
 
 MIT license personal and commercial usage.
