@@ -20,7 +20,17 @@ class Post < ActiveRecord::Base
 
   # convert the body written by user to HTML
   def body_html
-  	GitHub::Markdown.render_gfm body
+  	renderer = Redcarpet::Markdown.new(PygmentizeHTML, fenced_code_blocks: true)
+  	renderer.render(body)
   end
 
+end
+
+# i think putting two classes in one file
+# is a bad practice, but till we find
+# a suitable place for it just keep it here
+class PygmentizeHTML < Redcarpet::Render::HTML
+  def block_code(code, language)
+    Pygmentize.process(code, language)
+  end
 end

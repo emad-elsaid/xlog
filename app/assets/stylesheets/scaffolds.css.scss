@@ -18,27 +18,15 @@
     height: 0px;
     width: 100%;
   }
-
-  code {
-    font-size: 13px;
-    color: #eee;
-    background: #39382e;
-    padding: 5px;
-    border-radius: 2px;
-    line-height: 1.3em;
-    vertical-align: baseline;
-    zoom: 1;
-  }
-
+  
   pre{
-    code{
-      padding: 10px;
-      display: block;
-      margin: 10px 0px;
-    }
+    padding: 10px 10px 10px 30px;
+    line-height: 1.2em;
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
-  h1, h2, h3, h4, h5, h6, p, dl, pre{
+  h1, h2, h3, h4, h5, h6, p, dl{
     padding-right: 60px;
     padding-left: 60px;
   }

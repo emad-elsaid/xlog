@@ -71,7 +71,6 @@ GEM
     foundation-rails (5.1.1.0)
       railties (>= 3.1.0)
       sass (>= 3.2.0)
-    github-markdown (0.6.4)
     has_permalink (0.1.6)
     hike (1.2.3)
     i18n (0.6.9)
@@ -98,6 +97,7 @@ GEM
       slop (~> 3.4)
     pry-rails (0.3.2)
       pry (>= 0.9.10)
+    pygmentize (0.0.3)
     quiet_assets (1.0.2)
       railties (>= 3.1, < 5.0)
     rack (1.5.2)
@@ -120,6 +120,7 @@ GEM
     rdoc (4.1.1)
       json (~> 1.4)
     recaptcha (0.3.6)
+    redcarpet (2.3.0)
     ref (1.0.5)
     rmagick (2.13.2)
     sass (3.2.14)
@@ -178,14 +179,15 @@ DEPENDENCIES
   font-awesome-sass
   formtastic
   foundation-rails
-  github-markdown
   has_permalink
   jbuilder (~> 1.2)
   jquery-rails
   pry-rails
+  pygmentize
   quiet_assets
   rails (= 4.0.2)
   recaptcha
+  redcarpet
   rmagick
   sass-rails (~> 4.0.0)
   sdoc

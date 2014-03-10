@@ -57,7 +57,8 @@ gem "sitemap_generator"
 gem "therubyracer", platform: :ruby
 gem "country_select"
 gem 'has_permalink'
-gem 'github-markdown'
+gem 'redcarpet'
+gem 'pygmentize'
 group :development do
   gem "better_errors"
   gem "binding_of_caller"

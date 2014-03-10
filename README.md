@@ -46,7 +46,6 @@ i still didn't add previlages for production.
 
 ## TODO
 
-* code highlight
 * replace links with embeded versions for 
 	* FB
 	* Twitter
