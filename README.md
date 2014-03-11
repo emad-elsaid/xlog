@@ -44,6 +44,17 @@ password: password
 project still under development, DO NOT USE IT IN PRODUCTION
 i still didn't add previlages for production. 
 
+## Current Features
+
+* simple theme
+* responsive and mobile ready theme
+* Login/Logout/Forgot password powered by devise
+* Code highlight
+* posts written in github Flavored Markdown
+* Ruby on rails based, so extending won't be a problem
+* Permenant links for posts and SEO friendly URL `domain.com/post-title-here`
+
+
 ## TODO
 
 * replace links with embeded versions for 
