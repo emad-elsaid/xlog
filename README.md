@@ -61,6 +61,10 @@ i still didn't add previlages for production.
 * Actions panel like sublime/atom panel and action/extending system
 * keyboard shortcuts (ctrl+p for actions panel for example)
 * enhance design typography
+* add caching solution for views rendering (i think ryan bates made many screen casts about this)
+* try to save posts to folder instead of sqlite db
+* change views to haml
+* emoticons like github
 
 ## license
 
