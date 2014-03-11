@@ -74,7 +74,6 @@ i still didn't add previlages for production.
 * enhance design typography
 * add caching solution for views rendering (i think ryan bates made many screen casts about this)
 * try to save posts to folder instead of sqlite db
-* change views to haml
 * emoticons like github
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 
