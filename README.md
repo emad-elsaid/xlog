@@ -76,6 +76,7 @@ i still didn't add previlages for production.
 * try to save posts to folder instead of sqlite db
 * change views to haml
 * emoticons like github
+* catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 
 ## license
 

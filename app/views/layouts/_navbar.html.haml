@@ -1,0 +1,19 @@
+%nav.top-bar{ 'data-topbar' => true }
+
+  %ul.title-area
+    %li.name
+      %h1= link_to 'Xlog', root_path
+    %li.toggle-topbar.menu-icon
+      %a{href: '#'} Menu
+
+  %section.top-bar-section
+    %ul.right
+      %li.has-dropdown
+        %a{ href: '#' }
+          = current_user.email
+          = image_tag current_user.gravatar(20)
+        %ul.dropdown
+          %li= link_to 'Logout', destroy_user_session_path, method: :delete
+    %ul.left
+      %li.active= link_to 'New Post', new_post_path
+    = yield :navbar

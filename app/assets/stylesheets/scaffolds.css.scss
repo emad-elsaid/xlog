@@ -20,7 +20,7 @@
   }
   
   pre{
-    padding: 10px 10px 10px 30px;
+    padding: 10px 10px 10px 20px;
     line-height: 1.2em;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -112,9 +112,7 @@
 
 
 .field_with_errors {
-  padding: 2px;
-  background-color: red;
-  display: table;
+  border: 1px solid #ff0000;
 }
 
 #error_explanation {

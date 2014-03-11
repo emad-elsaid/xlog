@@ -9,4 +9,6 @@
 %article.post.single
 	%time{ datetime: @post.created_at}= @post.created_at.to_formatted_s :short
 	%h1.title= @post.title
-	.body=raw @post.body_html
+	.body
+		= preserve do
+			=raw @post.body_html

@@ -1,0 +1,23 @@
+!!! 5
+!!!
+%html{ lang: "en" }
+  %head
+    %meta{ charset: "utf-8" }
+    %meta{ name: "viewport", content: "width=device-width, initial-scale=1.0" }
+    %title= yield(:title) + "Xlog"
+    = stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true
+    = javascript_include_tag "vendor/modernizr"
+    = csrf_meta_tags
+  %body
+    = render 'layouts/navbar' if user_signed_in?
+    .row
+      .large-8.medium-10.small-12.small-centered.columns
+        = render 'layouts/messages'
+        %h1.site_title 
+          Xlog 
+          %small Simple blog for hackers
+        #container
+          = render 'layouts/pages'
+          = yield
+    = render 'layouts/footer'
+    = javascript_include_tag "application", "data-turbolinks-track" => true
