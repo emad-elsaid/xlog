@@ -44,8 +44,9 @@ end
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+gem "haml"
 gem "devise"
-gem "cancan"
+gem 'cancancan', '~> 1.7'
 gem "will_paginate", "~> 3.0"
 gem "foundation-rails"
 gem "carrierwave"

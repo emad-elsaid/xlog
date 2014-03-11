@@ -1,0 +1,12 @@
+- content_for :title do
+	= @post.title
+
+- content_for :navbar do
+	%ul.left
+		%li= link_to 'Edit Post', edit_post_path
+		%li= link_to 'Delete Post', post_path, method: :delete, confirm: 'Are you sure?'		
+		
+%article.post.single
+	%time{ datetime: @post.created_at}= @post.created_at.to_formatted_s :short
+	%h1.title= @post.title
+	.body=raw @post.body_html

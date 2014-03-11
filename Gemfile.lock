@@ -37,7 +37,7 @@ GEM
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     builder (3.1.4)
-    cancan (1.6.10)
+    cancancan (1.7.0)
     carrierwave (0.9.0)
       activemodel (>= 3.2.0)
       activesupport (>= 3.2.0)
@@ -71,6 +71,8 @@ GEM
     foundation-rails (5.1.1.0)
       railties (>= 3.1.0)
       sass (>= 3.2.0)
+    haml (4.0.5)
+      tilt
     has_permalink (0.1.6)
     hike (1.2.3)
     i18n (0.6.9)
@@ -171,7 +173,7 @@ DEPENDENCIES
   annotate (>= 2.6.0)
   better_errors
   binding_of_caller
-  cancan
+  cancancan (~> 1.7)
   carrierwave
   coffee-rails (~> 4.0.0)
   country_select
@@ -179,6 +181,7 @@ DEPENDENCIES
   font-awesome-sass
   formtastic
   foundation-rails
+  haml
   has_permalink
   jbuilder (~> 1.2)
   jquery-rails
