@@ -32,17 +32,6 @@ group :doc do
   gem 'sdoc', require: false
 end
 
-# Use ActiveModel has_secure_password
-# gem 'bcrypt-ruby', '~> 3.1.2'
-
-# Use unicorn as the app server
-# gem 'unicorn'
-
-# Use Capistrano for deployment
-# gem 'capistrano', group: :development
-
-# Use debugger
-# gem 'debugger', group: [:development, :test]
 
 gem "haml"
 gem "devise"
@@ -51,12 +40,8 @@ gem "will_paginate", "~> 3.0"
 gem "foundation-rails"
 gem "carrierwave"
 gem "rmagick"
-gem "formtastic"
 gem "font-awesome-sass"
-gem "recaptcha", require: "recaptcha/rails"
-gem "sitemap_generator"
 gem "therubyracer", platform: :ruby
-gem "country_select"
 gem 'has_permalink'
 gem 'redcarpet'
 gem 'pygmentize'
