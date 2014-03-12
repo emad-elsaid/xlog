@@ -20,7 +20,13 @@ class Post < ActiveRecord::Base
 
   # convert the body written by user to HTML
   def body_html
-  	renderer = Redcarpet::Markdown.new(PygmentizeHTML, fenced_code_blocks: true)
+  	renderer = Redcarpet::Markdown.new(PygmentizeHTML, 
+                            fenced_code_blocks: true,
+                            disable_indented_code_blocks: true,
+                            strikethrough: true,
+                            superscript: true,
+                            underline: true,
+                            autolink: true )
   	renderer.render(body)
   end
 

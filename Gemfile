@@ -60,6 +60,7 @@ gem "country_select"
 gem 'has_permalink'
 gem 'redcarpet'
 gem 'pygmentize'
+gem 'gemoji'
 group :development do
   gem "better_errors"
   gem "binding_of_caller"

@@ -1,0 +1,1 @@
+load 'tasks/emoji.rake'

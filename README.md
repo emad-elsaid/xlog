@@ -38,11 +38,17 @@ now it is ready to run your server of choice.
 email: admin@example.com
 password: password
 ```
+## Available tasks
+
+A Task to copy Gmoji gem images (smile faces) to public, this should sync them with gem latest
+```bash
+$ rake emoji
+``` 
 
 ## Project Status
 
-project still under development, DO NOT USE IT IN PRODUCTION
-i still didn't add previlages for production. 
+we can say that we're still in the alpha phase, it could be used for blogging but
+we didn't test it enough to make sure it is stable enough for production use.
 
 ## Current Features
 
@@ -53,6 +59,7 @@ i still didn't add previlages for production.
 * posts written in github Flavored Markdown
 * Ruby on rails based, so extending won't be a problem
 * Permenant links for posts and SEO friendly URL `domain.com/post-title-here`
+* emoticons like github [sheatsheet](http://www.emoji-cheat-sheet.com/)
 
 
 ## TODO
@@ -74,8 +81,8 @@ i still didn't add previlages for production.
 * enhance design typography
 * add caching solution for views rendering (i think ryan bates made many screen casts about this)
 * try to save posts to folder instead of sqlite db
-* emoticons like github
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
+* add support for MathML
 
 ## license
 

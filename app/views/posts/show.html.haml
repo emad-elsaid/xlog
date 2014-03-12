@@ -11,4 +11,4 @@
 	%h1.title= @post.title
 	.body
 		= preserve do
-			=raw @post.body_html
+			=raw emojify(@post.body_html)
