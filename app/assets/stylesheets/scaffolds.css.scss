@@ -141,3 +141,13 @@
 .alert-box{
   margin: 10px 0px;
 }
+
+.edit_post, .new_post{
+  #post_title{
+    font-size: 1.3em;
+  }
+  #post_title, #post_body{
+    border: 0px none;
+    box-shadow: none;
+  }
+}
