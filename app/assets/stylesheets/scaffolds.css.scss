@@ -95,6 +95,37 @@
     input[type="submit"] { @include button; }
   }
 
+  .embed_youtube{
+    text-align: center;
+    margin: 10px 0px;
+    iframe{
+      width: 480px;
+      height: 360px;
+    }
+  }
+
+  .embed_facebook{
+    margin: 10px 0px;
+    text-align: center;
+  }
+
+  .embed_twitter{
+    margin: 10px 0px;
+    text-align: center;
+    iframe{
+      display: inline !important;
+    }
+  }
+
+  .embed_gist{
+    table{
+      margin: 0px;
+    }
+    pre{
+      line-height: inherit;
+    }
+  }
+
 }
 
 .layout_footer{

@@ -60,16 +60,15 @@ we didn't test it enough to make sure it is stable enough for production use.
 * Ruby on rails based, so extending won't be a problem
 * Permenant links for posts and SEO friendly URL `domain.com/post-title-here`
 * emoticons like github [sheatsheet](http://www.emoji-cheat-sheet.com/)
+* replace Facebook/Twitter linksby embeded version of the post
+* replaces youtube video link by a video player
+* replaces Github Gist link by an embeded version of the gist
 
 
 ## TODO
 
 * replace links with embeded versions for 
-	* FB
-	* Twitter
-	* Youtube
 	* scribed
-	* gist
 	* soundcloud
 	* ...etc
 * blocks system to add more complex post contents such as:
@@ -83,6 +82,8 @@ we didn't test it enough to make sure it is stable enough for production use.
 * try to save posts to folder instead of sqlite db
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 * add support for MathML
+* enhance embeded links style a little bit further
+* replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 
 ## license
 
