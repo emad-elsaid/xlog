@@ -23,7 +23,7 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
   end
 
   def preprocess(full_document)
-    full_document.gsub(/^http(s)?:\/\/\S*^/) do |url|
+    full_document.gsub(/^http(s)?:\/\/\S*/) do |url|
       u = URI.parse(url)
       query = u.query.nil? ? {} : CGI.parse(u.query)
       path = u.path
