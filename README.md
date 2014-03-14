@@ -63,6 +63,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replace Facebook/Twitter linksby embeded version of the post
 * replaces youtube video link by a video player
 * replaces Github Gist link by an embeded version of the gist
+* replace image url by image tag 
 
 
 ## TODO
@@ -84,7 +85,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * add support for MathML
 * enhance embeded links style a little bit further
 * replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
-* replace image url by image tag 
+
 
 ## license
 

@@ -117,6 +117,14 @@
     }
   }
 
+  .embed_image{
+    margin: 10px 0px;
+    text-align: center;
+    img{
+      max-width: 100%;
+    }
+  }
+
   .embed_gist{
     table{
       margin: 0px;
