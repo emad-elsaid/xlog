@@ -29,10 +29,6 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
       path = u.path
       host = u.host
 
-      puts '+'*30
-      puts url
-      puts '+'*30
-
       if host.end_with? 'youtube.com'
         embed_youtube url, path, query
       elsif host.end_with? 'facebook.com' and (path.include?('posts') or path.include?('photo'))
