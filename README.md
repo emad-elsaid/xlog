@@ -86,7 +86,11 @@ we didn't test it enough to make sure it is stable enough for production use.
 * enhance embeded links style a little bit further
 * replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 * add icon name to post and color (choose from font awesome icons list)
-
+* write some tests
+* Disqus comments section
+* user Experience
+	* scrollbar map
+	* loading bar (similar to youtube approach)
 
 ## license
 
