@@ -64,6 +64,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replaces youtube video link by a video player
 * replaces Github Gist link by an embeded version of the gist
 * replace image url by image tag 
+* loading bar (similar to youtube approach)
 
 
 ## TODO
@@ -71,6 +72,8 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replace links with embeded versions for 
 	* scribed
 	* soundcloud
+	* metacafe
+	* vimeo
 	* ...etc
 * blocks system to add more complex post contents such as:
 	* Fiddles/Codepen style
@@ -88,9 +91,9 @@ we didn't test it enough to make sure it is stable enough for production use.
 * add icon name to post and color (choose from font awesome icons list)
 * write some tests
 * Disqus comments section
+* try foundation flex video for youtube videos
 * user Experience
 	* scrollbar map
-	* loading bar (similar to youtube approach)
 
 ## license
 

@@ -10,6 +10,7 @@
     = csrf_meta_tags
   %body
     = render 'layouts/navbar' if user_signed_in?
+    = render 'layouts/loader'
     .row
       .large-8.medium-10.small-12.small-centered.columns
         = render 'layouts/messages'
