@@ -61,7 +61,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * Permenant links for posts and SEO friendly URL `domain.com/post-title-here`
 * emoticons like github [sheatsheet](http://www.emoji-cheat-sheet.com/)
 * replace Facebook/Twitter linksby embeded version of the post
-* replaces youtube video link by a video player
+* replaces youtube video link by a video player with foundation flex-video concept
 * replaces Github Gist link by an embeded version of the gist
 * replace image url by image tag 
 * loading bar (similar to youtube approach)
@@ -91,7 +91,6 @@ we didn't test it enough to make sure it is stable enough for production use.
 * add icon name to post and color (choose from font awesome icons list)
 * write some tests
 * Disqus comments section
-* try foundation flex video for youtube videos
 * user Experience
 	* scrollbar map
 

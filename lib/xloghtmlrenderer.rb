@@ -3,7 +3,7 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
   def embed_youtube url, path, query
     v = query['v'].first || path[1..-1]
     return nil if v.blank?
-    "<div class=\"embed_youtube\"><iframe src=\"//www.youtube.com/embed/#{v}\" frameborder=\"0\" allowfullscreen></iframe></div>"
+    "<div class=\"embed_youtube flex-video\"><iframe src=\"//www.youtube.com/embed/#{v}\" frameborder=\"0\" allowfullscreen></iframe></div>"
   end
 
   def embed_facebook url, path, query
