@@ -65,6 +65,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replaces Github Gist link by an embeded version of the gist
 * replace image url by image tag 
 * loading bar (similar to youtube approach)
+* Disqus comments section (you can change it to your comments from app/views/layouts/_comments.html)
 
 
 ## TODO
@@ -86,11 +87,9 @@ we didn't test it enough to make sure it is stable enough for production use.
 * try to save posts to folder instead of sqlite db
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 * add support for MathML
-* enhance embeded links style a little bit further
 * replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 * add icon name to post and color (choose from font awesome icons list)
 * write some tests
-* Disqus comments section
 * user Experience
 	* scrollbar map
 

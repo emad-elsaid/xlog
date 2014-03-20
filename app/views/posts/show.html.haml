@@ -12,3 +12,5 @@
 	.body
 		= preserve do
 			=raw emojify(@post.body_html)
+	.comments
+		= render 'layouts/comments'
