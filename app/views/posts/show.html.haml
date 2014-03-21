@@ -3,8 +3,14 @@
 
 - content_for :navbar do
 	%ul.left
-		%li= link_to 'Edit Post', edit_post_path
-		%li= link_to 'Delete Post', post_path, method: :delete, confirm: 'Are you sure?'		
+		%li
+			= link_to edit_post_path do
+				%i.fa.fa-pencil
+				Edit
+		%li
+			= link_to post_path, method: :delete, confirm: 'Are you sure?' do
+				%i.fa.fa-trash-o
+				Delete
 		
 %article.post.single
 	%time{ datetime: @post.created_at}= @post.created_at.to_formatted_s :short

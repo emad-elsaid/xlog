@@ -13,7 +13,13 @@
           = current_user.email
           = image_tag current_user.gravatar(20)
         %ul.dropdown
-          %li= link_to 'Logout', destroy_user_session_path, method: :delete
+          %li
+            = link_to destroy_user_session_path, method: :delete do
+              %i.fa.fa-sign-out
+              Sign out
     %ul.left
-      %li.active= link_to 'New Post', new_post_path
+      %li.active
+        = link_to new_post_path do
+          %i.fa.fa-plus
+          New
     = yield :navbar
