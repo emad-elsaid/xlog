@@ -15,9 +15,6 @@ gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .js.coffee assets and views
 gem 'coffee-rails', '~> 4.0.0'
 
-# See https://github.com/sstephenson/execjs#readme for more supported runtimes
-# gem 'therubyracer', platforms: :ruby
-
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 
@@ -38,8 +35,6 @@ gem "devise"
 gem 'cancancan', '~> 1.7'
 gem "will_paginate", "~> 3.0"
 gem "foundation-rails"
-gem "carrierwave"
-gem "rmagick"
 gem "font-awesome-sass"
 gem "therubyracer", platform: :ruby
 gem 'has_permalink'

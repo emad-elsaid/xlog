@@ -38,10 +38,6 @@ GEM
       debug_inspector (>= 0.0.1)
     builder (3.1.4)
     cancancan (1.7.0)
-    carrierwave (0.9.0)
-      activemodel (>= 3.2.0)
-      activesupport (>= 3.2.0)
-      json (>= 1.7)
     coderay (1.1.0)
     coffee-rails (4.0.1)
       coffee-script (>= 2.2.0)
@@ -117,7 +113,6 @@ GEM
       json (~> 1.4)
     redcarpet (2.3.0)
     ref (1.0.5)
-    rmagick (2.13.2)
     sass (3.2.14)
     sass-rails (4.0.1)
       railties (>= 4.0.0, < 5.0)
@@ -165,7 +160,6 @@ DEPENDENCIES
   better_errors
   binding_of_caller
   cancancan (~> 1.7)
-  carrierwave
   coffee-rails (~> 4.0.0)
   devise
   font-awesome-sass
@@ -180,7 +174,6 @@ DEPENDENCIES
   quiet_assets
   rails (= 4.0.2)
   redcarpet
-  rmagick
   sass-rails (~> 4.0.0)
   sdoc
   sqlite3
