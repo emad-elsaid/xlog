@@ -66,6 +66,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replace image url by image tag 
 * loading bar (similar to youtube approach)
 * Disqus comments section (you can change it to your comments from app/views/layouts/_comments.html)
+* pagination for posts index page
 
 
 ## TODO
