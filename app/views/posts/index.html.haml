@@ -3,3 +3,4 @@
 		%li
 			= link_to post.title, post_link_path(post)
 			%time{ datetime: post.created_at }= post.created_at.to_formatted_s :short
+= will_paginate @posts, page_links: false

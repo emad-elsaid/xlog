@@ -1,0 +1,16 @@
+@import "foundation/functions";
+@import "foundation_and_overrides.scss";
+
+.pagination{
+	margin: 5px;
+	text-align: center;
+
+	a{
+		@include button($button-sml, $primary-color, 0px, false, false, false); 
+      	@include radius;
+	}
+	span{
+		@include button($button-sml, $primary-color, 0px, false, true, false); 
+      	@include radius;
+	}
+}
