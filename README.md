@@ -79,7 +79,6 @@ we didn't test it enough to make sure it is stable enough for production use.
 * blocks system to add more complex post contents such as:
 	* Fiddles/Codepen style
 * get rid of some gems that is not so important
-* File manager
 * Actions panel like sublime/atom panel and action/extending system
 * keyboard shortcuts (ctrl+p for actions panel for example)
 * enhance design typography
@@ -88,10 +87,19 @@ we didn't test it enough to make sure it is stable enough for production use.
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 * add support for MathML
 * replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
-* add icon name to post and color (choose from font awesome icons list)
 * write some tests
 * user Experience
 	* scrollbar map
+
+## Plugins
+
+there are no plugins for teh system now, i will keep system very simple and stable and 
+all other features will be plugins.
+
+## Plugins TODO
+
+* file manager
+* add icon name to post and color (choose from font awesome icons list)
 
 ## license
 
