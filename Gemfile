@@ -40,3 +40,7 @@ group :development do
   gem 'annotate', '>=2.6.0'
   gem 'pry-rails'
 end
+
+group :development, :test do
+  gem 'rspec-rails', '~> 3.0.0.beta'
+end
