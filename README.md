@@ -11,6 +11,7 @@ nothing fancy, i just wanted to build a system in my mind, simple, uses markdown
 ```bash
   bundle install
   rake db:setup
+  rake emoji
   rails s
 ```
 ## install on ubuntu
@@ -27,6 +28,7 @@ gem install rmagick -v '2.13.2'
 export PKG_CONFIG_PATH="/opt/local/lib/pkgconfig:$PKG_CONFIG_PATH"
 bundle install
 rake db:setup
+rake emoji
 rake assets:precompile RAILS_ENV=production
 rails server -d -e production
 ```
