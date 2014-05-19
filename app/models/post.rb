@@ -15,7 +15,7 @@ require 'xloghtmlrenderer'
 
 class Post < ActiveRecord::Base
   has_permalink
-  self.per_page = 10
+  self.per_page = 3
   belongs_to :user
 
   validates :title, presence: true, uniqueness: true, length: { minimum: 3 }

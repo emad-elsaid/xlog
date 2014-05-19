@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140214202637) do
+ActiveRecord::Schema.define(version: 20140328003759) do
 
   create_table "posts", force: true do |t|
     t.string   "title"
@@ -24,6 +24,15 @@ ActiveRecord::Schema.define(version: 20140214202637) do
 
   add_index "posts", ["permalink"], name: "index_posts_on_permalink"
   add_index "posts", ["user_id"], name: "index_posts_on_user_id"
+
+  create_table "settings", force: true do |t|
+    t.string   "name"
+    t.text     "value"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "settings", ["name"], name: "index_settings_on_name", unique: true
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
