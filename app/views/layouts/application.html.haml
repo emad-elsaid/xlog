@@ -4,10 +4,11 @@
   %head
     %meta{ charset: "utf-8" }
     %meta{ name: "viewport", content: "width=device-width, initial-scale=1.0" }
-    %title= yield(:title) + "Xlog"
+    %title= yield(:title) + Setting.value('title')
     = stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true
     = javascript_include_tag "vendor/modernizr"
     = javascript_include_tag "application", "data-turbolinks-track" => true
+    = javascript_include_tag "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" if Setting.yes? 'enable_mathml'
     = csrf_meta_tags
   %body
     = render 'layouts/navbar' if user_signed_in?
@@ -16,8 +17,8 @@
       .large-8.medium-10.small-12.small-centered.columns
         = render 'layouts/messages'
         %h1.site_title 
-          Xlog 
-          %small Simple blog for hackers
+          = Setting.value 'title'
+          %small= Setting.value 'tagline'
         #container
           = render 'layouts/pages'
           = yield

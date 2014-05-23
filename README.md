@@ -81,14 +81,11 @@ we didn't test it enough to make sure it is stable enough for production use.
 	* ...etc
 * blocks system to add more complex post contents such as:
 	* Fiddles/Codepen style
-* get rid of some gems that is not so important
 * Actions panel like sublime/atom panel and action/extending system
 * keyboard shortcuts (ctrl+p for actions panel for example)
 * enhance design typography
-* add caching solution for views rendering (i think ryan bates made many screen casts about this)
 * try to save posts to folder instead of sqlite db
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
-* add support for MathML
 * replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 * write some tests
 * user Experience

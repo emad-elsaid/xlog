@@ -1,4 +1,10 @@
 User.create(email: 'admin@example.com', password: 'password')
+Setting.create([
+  {name: 'title', value: 'Xlog'},
+  {name: 'tagline', value: 'Simple blog for hackers'},
+  {name: 'enable_mathml', value: true},
+  ])
+
 
 gfm_template = <<-EOT
 
