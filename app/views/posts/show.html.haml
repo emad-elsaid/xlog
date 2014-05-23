@@ -5,11 +5,11 @@
 	%ul.left
 		%li
 			= link_to edit_post_path do
-				%i.fa.fa-pencil
+				= icon 'pencil'
 				Edit
 		%li
 			= link_to post_path, method: :delete, confirm: 'Are you sure?' do
-				%i.fa.fa-trash-o
+				= icon 'trash-o'
 				Delete
 		
 %article.post.single
@@ -17,6 +17,6 @@
 	%h1.title= @post.title
 	.body
 		= preserve do
-			=raw emojify(@post.body_html)
+			=raw @post.body_html
 	.comments
 		= render 'layouts/comments'

@@ -14,6 +14,8 @@
 require 'xloghtmlrenderer'
 
 class Post < ActiveRecord::Base
+  include EmojiHelper
+  
   has_permalink
   self.per_page = 3
   belongs_to :user
@@ -30,7 +32,7 @@ class Post < ActiveRecord::Base
                             superscript: true,
                             underline: true,
                             autolink: true )
-  	renderer.render(body)
+  	emojify renderer.render(body)
   end
 
 end

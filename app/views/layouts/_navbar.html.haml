@@ -14,11 +14,11 @@
         %ul.dropdown
           %li
             = link_to destroy_user_session_path, method: :delete do
-              %i.fa.fa-sign-out
+              = icon 'sign-out'
               Sign out
     %ul.left
       %li.active
         = link_to new_post_path do
-          %i.fa.fa-plus
+          = icon 'plus'
           New
     = yield :navbar
