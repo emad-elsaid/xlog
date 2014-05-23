@@ -65,6 +65,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replace Facebook/Twitter linksby embeded version of the post
 * replaces youtube video link by a video player with foundation flex-video concept
 * replaces Github Gist link by an embeded version of the gist
+* replace scribd links with embded book
 * replace image url by image tag 
 * loading bar (similar to youtube approach)
 * Disqus comments section (you can change it to your comments from app/views/layouts/_comments.html)
@@ -74,7 +75,6 @@ we didn't test it enough to make sure it is stable enough for production use.
 ## TODO
 
 * replace links with embeded versions for 
-	* scribed
 	* soundcloud
 	* metacafe
 	* vimeo

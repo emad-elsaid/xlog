@@ -22,6 +22,11 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
     '<div class="embed_image"><img src="'+url+'"/></div>'
   end
 
+  def embed_scribd url, path, query
+    id = path.split('/')[2]
+    '<iframe class="embed_scribd" src="//www.scribd.com/embeds/'+id+'/content" frameborder="0"></iframe>'
+  end
+
   def preprocess(full_document)
     full_document.gsub(/^http(s)?:\/\/\S*/) do |url|
       u = URI.parse(url)
@@ -37,6 +42,8 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
         embed_twitter url, path, query
       elsif host.end_with? 'gist.github.com'
         embed_gist url, path, query
+      elsif host.end_with? 'scribd.com'
+        embed_scribd url, path, query
       elsif url.end_with? '.jpg' or url.end_with? '.png' or url.end_with? '.gif'
         embed_image url, path, query
       else
