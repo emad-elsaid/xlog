@@ -18,7 +18,7 @@
               Sign out
     %ul.left
       %li.active
-        = link_to new_post_path do
+        = link_to new_post_path, 'data-key' => 'ctrl+e' do
           = icon 'plus'
           New
     = yield :navbar

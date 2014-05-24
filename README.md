@@ -71,6 +71,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * Disqus comments section (you can change it to your comments from app/views/layouts/_comments.html)
 * pagination for posts index page
 * MathML support
+* ctrl+Key shortcut listner, ctrl+s will sibmit post, ctrl+e will got to new post page
 
 ## TODO
 
@@ -79,15 +80,15 @@ we didn't test it enough to make sure it is stable enough for production use.
 	* metacafe
 	* vimeo
 	* ...etc
+* replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 * blocks system to add more complex post contents such as:
-	* Fiddles/Codepen style
+  * Fiddles/Codepen style
 * Actions panel like sublime/atom panel and action/extending system
-* keyboard shortcuts (ctrl+p for actions panel for example)
 * enhance design typography
 * try to save posts to folder instead of sqlite db
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
-* replace any link by an embeded preview like facebook links preview (this is gonna be hard but we can inspect discourse for it)
 * write some tests
+* change validation error style
 * user Experience
 	* scrollbar map
 
@@ -100,6 +101,8 @@ all other features will be plugins.
 
 * file manager
 * add icon name to post and color (choose from font awesome icons list)
+* content types
+  * js/css/html snippit
 
 ## license
 
