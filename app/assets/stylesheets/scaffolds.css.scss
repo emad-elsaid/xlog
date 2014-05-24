@@ -96,6 +96,7 @@ $background-color: #f9f9f9;
     
     .actions{
       text-align: right;
+      margin-top: 10px;
     }
 
     input[type="submit"] { 
@@ -167,29 +168,21 @@ $background-color: #f9f9f9;
 
 
 .field_with_errors {
-  border: 1px solid #ff0000;
+  border-bottom: 1px solid #c00;
 }
 
 #error_explanation {
-  width: 450px;
-  border: 2px solid red;
-  padding: 7px;
-  padding-bottom: 0;
-  margin-bottom: 20px;
-  background-color: #f0f0f0;
+  @include alert($alert-color, 5px);
   h2 {
-    text-align: left;
-    font-weight: bold;
-    padding: 5px 5px 5px 15px;
-    font-size: 12px;
-    margin: -7px;
-    margin-bottom: 0px;
-    background-color: #c00;
+    padding: 0px;
+    font-size: 14px;
     color: #fff;
   }
-  ul li {
-    font-size: 12px;
-    list-style: square;
+  ul{
+    margin: 0px;
+    li {
+      font-size: 12px;
+    }
   }
 }
 

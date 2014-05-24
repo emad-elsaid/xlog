@@ -88,7 +88,6 @@ we didn't test it enough to make sure it is stable enough for production use.
 * try to save posts to folder instead of sqlite db
 * catch 404 exceptions with 404 page ( make normal post using seeds and create a settings variable and make it the default value)
 * write some tests
-* change validation error style
 * user Experience
 	* scrollbar map
 
