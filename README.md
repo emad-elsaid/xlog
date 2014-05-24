@@ -93,7 +93,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 
 ## Plugins
 
-there are no plugins for teh system now, i will keep system very simple and stable and 
+there are no plugins for the system now, i will keep system very simple and stable and 
 all other features will be plugins.
 
 ## Plugins TODO
