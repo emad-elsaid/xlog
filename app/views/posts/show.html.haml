@@ -8,7 +8,7 @@
 				= icon 'pencil'
 				Edit
 		%li
-			= link_to post_path, method: :delete, confirm: 'Are you sure?' do
+			= link_to post_path, method: :delete, confirm: t('confirm_question') do
 				= icon 'trash-o'
 				Delete
 		

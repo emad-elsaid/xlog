@@ -1,1 +1,17 @@
 en:
+  lang_abbr: en
+  confirm_question: Are you sure ?
+  title_placeholder: Amazing post title here.
+  body_placeholder: Your most exciting post goes here.
+  publish: Publish
+  home: Home
+  login: Login
+  menu: Menu
+  logout: Logout
+  new: New
+  error: 
+    zero: You have no errors
+    one: "One error prohibited this %{subject} from being saved"
+    other: "%{count} prohibited this %{subject} from being saved"
+  loading: Loading
+  footer_note: Powered By Xlog Hackers blog

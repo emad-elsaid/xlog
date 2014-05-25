@@ -3,7 +3,7 @@
     %li.name
       %h1= link_to Setting.value('title'), root_path
     %li.toggle-topbar.menu-icon
-      %a{href: '#'} Menu
+      %a{href: '#'}= t :menu
 
   %section.top-bar-section
     %ul.right
@@ -15,10 +15,10 @@
           %li
             = link_to destroy_user_session_path, method: :delete do
               = icon 'sign-out'
-              Sign out
+              = t :logout
     %ul.left
       %li.active
         = link_to new_post_path, 'data-key' => 'ctrl+e' do
           = icon 'plus'
-          New
+          = t :new
     = yield :navbar

@@ -1,11 +1,11 @@
 = form_for @post do |f|
   - if @post.errors.any?
     #error_explanation
-      %h2= pluralize(@post.errors.count, "error") + " prohibited this post from being saved"
+      %h2= t :error, count: @post.errors.count, subject: Post.model_name.human
       %ul
         - @post.errors.full_messages.each do |msg|
           %li= msg
           
-  .field= f.text_field :title, placeholder: 'Amazing post title here', autofocus: true
-  .field= f.text_area :body, 'data-expanding' => true, 'placeholder' => 'Your most exciting post goes here'
-  .actions= f.submit 'Publish', 'data-key' => 'ctrl+s'
+  .field= f.text_field :title, placeholder: t(:title_placeholder), autofocus: true
+  .field= f.text_area :body, data: {expanding: true}, 'placeholder' => t(:body_placeholder)
+  .actions= f.submit t(:publish), data: {key: 'ctrl+s'}
