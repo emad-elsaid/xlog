@@ -15,3 +15,8 @@ en:
     other: "%{count} prohibited this %{subject} from being saved"
   loading: Loading
   footer_note: Powered By Xlog Hackers blog
+  post:
+    add:
+      success: Post was successfully created.
+    update:
+      success: Post was successfully updated.
