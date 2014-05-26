@@ -76,4 +76,12 @@ class PostsController < ApplicationController
     def post_params
       params.require(:post).permit(:title, :body)
     end
+
+    rescue_from ActiveRecord::RecordNotFound do |exception|
+      if params[:id] != Setting.value('404')
+        redirect_to post_link_url Setting.value '404'
+      else
+        redirect_to main_app.root_url, :alert => exception.message
+      end # if
+    end # rescue
 end

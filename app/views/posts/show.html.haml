@@ -1,3 +1,4 @@
+- add_body_class 'post', 'show'
 - content_for :title do
 	= @post.title
 
@@ -12,7 +13,7 @@
 				= icon 'trash-o'
 				Delete
 		
-%article.post.single
+%article
 	%time{ datetime: @post.created_at}= @post.created_at.to_formatted_s :short
 	%h1.title= @post.title
 	.body

@@ -8,6 +8,13 @@ $background-color: #f9f9f9;
   margin: 60px 0px;
 }
 
+.post.show article{
+  time{
+    display: block;
+    text-align: center;
+  }
+}
+
 #container{
   background: #fff;
   margin: 40px auto 20px;
@@ -64,13 +71,6 @@ $background-color: #f9f9f9;
     text-transform: uppercase;
     font-size: rem-calc(10);
     margin-top: 17.430px;
-  }
-
-  .post.single{
-    time{
-      display: block;
-      text-align: center;
-    }
   }
 
   ul, ol{

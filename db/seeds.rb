@@ -3,6 +3,7 @@ Setting.create([
   {name: 'title', value: 'Xlog'},
   {name: 'tagline', value: 'Simple blog for hackers'},
   {name: 'enable_mathml', value: true},
+  {name: '404', value: '404'}
   ])
 
 
