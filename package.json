@@ -1,0 +1,19 @@
+{
+  "name": "xlog",
+  "private": true,
+  "dependencies": {
+    "@rails/actioncable": "^6.0.0",
+    "@rails/activestorage": "^6.0.0",
+    "@rails/ujs": "^6.0.0",
+    "@rails/webpacker": "^4.2.0",
+    "autosize": "^4.0.2",
+    "foundation-sites": "^6.6.0",
+    "jquery": "^3.4.1",
+    "modernizr": "^3.8.0",
+    "turbolinks": "^5.2.0"
+  },
+  "version": "0.1.0",
+  "devDependencies": {
+    "webpack-dev-server": "^3.9.0"
+  }
+}

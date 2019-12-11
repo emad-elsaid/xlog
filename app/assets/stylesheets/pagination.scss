@@ -1,0 +1,11 @@
+.pagination{
+	margin: 5px;
+	text-align: center;
+
+	a, span{
+      @include button(false, $button-background, $button-background-hover, $button-color, solid);
+      padding: $button-padding;
+      border-radius: $button-radius;
+      display: inline-block !important;
+	}
+}

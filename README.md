@@ -1,6 +1,6 @@
 # Xlog
 
-XLog is a simple blogging system for hackers, it will utilize rdoc syntax for posts content, simple file manager, and medium.com like style of interaction, also i'll experiment some new UX ideas. 
+XLog is a simple blogging system for hackers, it will utilize rdoc syntax for posts content, simple file manager, and medium.com like style of interaction, also i'll experiment some new UX ideas.
 
 ## why ?
 
@@ -10,8 +10,8 @@ nothing fancy, i just wanted to build a system in my mind, simple, uses markdown
 
 ```bash
   bundle install
+  yarn
   rake db:setup
-  rake emoji
   rails s
 ```
 ## install on ubuntu
@@ -45,7 +45,7 @@ password: password
 A Task to copy Gmoji gem images (smile faces) to public, this should sync them with gem latest
 ```bash
 $ rake emoji
-``` 
+```
 
 ## Project Status
 
@@ -66,7 +66,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 * replaces youtube video link by a video player with foundation flex-video concept
 * replaces Github Gist link by an embeded version of the gist
 * replace scribd links with embded book
-* replace image url by image tag 
+* replace image url by image tag
 * loading bar (similar to youtube approach)
 * Disqus comments section (you can change it to your comments from app/views/layouts/_comments.html)
 * pagination for posts index page
@@ -75,7 +75,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 
 ## TODO
 
-* replace links with embeded versions for 
+* replace links with embeded versions for
 	* soundcloud
 	* metacafe
 	* vimeo
@@ -93,7 +93,7 @@ we didn't test it enough to make sure it is stable enough for production use.
 
 ## Plugins
 
-there are no plugins for the system now, i will keep system very simple and stable and 
+there are no plugins for the system now, i will keep system very simple and stable and
 all other features will be plugins.
 
 ## Plugins TODO

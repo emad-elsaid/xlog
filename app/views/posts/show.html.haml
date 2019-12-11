@@ -6,13 +6,13 @@
 	%ul.left
 		%li
 			= link_to edit_post_path do
-				= icon 'pencil'
+				= icon 'fas', 'pencil'
 				Edit
 		%li
 			= link_to post_path, method: :delete, confirm: t('confirm_question') do
-				= icon 'trash-o'
+				= icon 'fas', 'trash-o'
 				Delete
-		
+
 %article
 	%time{ datetime: @post.created_at}= @post.created_at.to_formatted_s :short
 	%h1.title= @post.title

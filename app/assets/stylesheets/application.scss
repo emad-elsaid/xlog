@@ -1,0 +1,10 @@
+@import 'foundation-sites/scss/foundation';
+@import 'blockquote';
+@import 'scaffolds';
+@import 'pagination';
+
+@include foundation-everything;
+
+li.menu-text > a {
+    padding: 0 !important;
+}

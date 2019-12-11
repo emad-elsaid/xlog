@@ -1,5 +1,4 @@
 class XlogHTMLRenderer < Redcarpet::Render::HTML
-
   def embed_youtube url, path, query
     v = query['v'].first || path[1..-1]
     return nil if v.blank?
@@ -53,6 +52,9 @@ class XlogHTMLRenderer < Redcarpet::Render::HTML
   end
 
   def block_code(code, language)
-    Pygmentize.process(code, language)
+    formatter = Rouge::Formatters::HTMLInline.new('github')
+    formatter = Rouge::Formatters::HTMLLineTable.new(formatter)
+    lexer = Rouge::Lexers::Shell.new
+    formatter.format(lexer.lex(code))
   end
 end

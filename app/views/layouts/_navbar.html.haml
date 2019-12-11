@@ -1,24 +1,21 @@
 %nav.top-bar{ 'data-topbar' => true }
-  %ul.title-area
-    %li.name
-      %h1= link_to Setting.value('title'), root_path
-    %li.toggle-topbar.menu-icon
-      %a{href: '#'}= t :menu
+  .top-bar-left
+    %ul.dropdown.menu{ "data-dropdown-menu": true }
+      %li.menu-text= link_to Setting.value('title'), root_path
+      %li
+        = link_to new_post_path, 'data-key': 'ctrl+e' do
+          = icon 'fas', 'plus'
+          = t :new
 
-  %section.top-bar-section
-    %ul.right
-      %li.has-dropdown
+  %section.top-bar-right
+    %ul.dropdown.menu{ "data-dropdown-menu": true }
+      %li
         %a{ href: '#' }
           = current_user.email
           = image_tag current_user.gravatar(20)
-        %ul.dropdown
+        %ul.dropdown.menu
           %li
             = link_to destroy_user_session_path, method: :delete do
-              = icon 'sign-out'
+              = icon 'fas', 'sign-out'
               = t :logout
-    %ul.left
-      %li.active
-        = link_to new_post_path, 'data-key' => 'ctrl+e' do
-          = icon 'plus'
-          = t :new
     = yield :navbar

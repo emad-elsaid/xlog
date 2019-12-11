@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: posts
@@ -15,7 +17,7 @@ require 'xloghtmlrenderer'
 
 class Post < ActiveRecord::Base
   include EmojiHelper
-  
+
   has_permalink
   self.per_page = 20
   belongs_to :user
@@ -25,14 +27,15 @@ class Post < ActiveRecord::Base
 
   # convert the body written by user to HTML
   def body_html
-  	renderer = Redcarpet::Markdown.new(XlogHTMLRenderer, 
-                            fenced_code_blocks: true,
-                            disable_indented_code_blocks: true,
-                            strikethrough: true,
-                            superscript: true,
-                            underline: true,
-                            autolink: true )
-  	emojify renderer.render(body)
+    renderer = Redcarpet::Markdown.new(
+      XlogHTMLRenderer,
+      fenced_code_blocks: true,
+      disable_indented_code_blocks: true,
+      strikethrough: true,
+      superscript: true,
+      underline: true,
+      autolink: true
+    )
+    emojify renderer.render(body)
   end
-
 end

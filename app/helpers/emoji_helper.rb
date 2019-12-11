@@ -1,11 +1,11 @@
 module EmojiHelper
- def emojify(content)
-    content.gsub(/:([a-z0-9\+\-_]+):/) do |match|
-      if Emoji.names.include?($1)
-        "<img title=\"#{$1}\" alt=\"#{$1}\" height=\"20\" src=\"/images/emoji/#{$1}.png\" style=\"vertical-align:middle\" width=\"20\" />"
+  def emojify(content)
+    content.to_str.gsub(/:([\w+-]+):/) do |match|
+      if emoji = Emoji.find_by_alias($1)
+        emoji.raw
       else
         match
       end
-    end if content.present?
+    end.html_safe if content.present?
   end
 end
