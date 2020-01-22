@@ -1,0 +1,28 @@
+<html>
+  <head>
+    <link href="/public/style.css" rel="stylesheet">
+  </head>
+	<body>
+		<form method="POST" action="/{{ .action }}" class="edit">
+      <table>
+        <tr class="collapse">
+          <td>
+			      <input name="title" type="text" value="{{ .title }}" autofocus />
+          </td>
+        </tr>
+        <tr>
+          <td>
+			      <textarea name="content">{{ .content }}</textarea>
+          </td>
+        </tr>
+        <tr class="collapse">
+          <td>
+            <div class="actions">
+              <button type="submit" >Save</button>
+            </div>
+          </td>
+        </tr>
+      </table>
+		</form>
+	</body>
+</html>
