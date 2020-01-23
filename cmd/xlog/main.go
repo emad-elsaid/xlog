@@ -21,9 +21,11 @@ func main() {
 	r.LoadHTMLGlob("templates/*")
 
 	r.GET("/:page", pageHandler)
-	r.GET("/", pageHandler)
-	r.GET("/:page/e", editHandler)
 	r.POST("/:page", updateHandler)
+
+	r.GET("/:page/e", editHandler)
+
+	r.GET("/", pageHandler)
 	r.POST("/", updateHandler)
 
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
@@ -131,7 +133,7 @@ func writePage(page, title, content string) {
 func normalizePage(page string) string {
 	if page == "" {
 		return "index"
-	} else {
-		return page
 	}
+
+	return page
 }
