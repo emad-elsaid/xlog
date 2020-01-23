@@ -8,6 +8,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    font-family: sans-serif;
 }
 
 form.edit {
@@ -61,4 +62,13 @@ form.edit textarea[name=content] {
 .actions button {
     font-size: 1.2em;
     padding: 0.25em;
+}
+
+section.page {
+    padding: 1em;
+    line-height: 1.6em;
+}
+
+a {
+    color: inherit;
 }

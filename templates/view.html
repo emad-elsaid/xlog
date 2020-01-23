@@ -1,5 +1,12 @@
 <html>
+  <head>
+    <link href="/public/style.css" rel="stylesheet">
+    <title>{{.title}}</title>
+  </head>
   <body>
-    {{ .content }}
+    <section class="page">
+      <h1>{{.title}}</h1>
+      {{.content}}
+    </section>
   </body>
 </html>

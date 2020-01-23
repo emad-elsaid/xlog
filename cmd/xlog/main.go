@@ -1,13 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
 )
 
 func main() {
@@ -30,7 +35,8 @@ func pageHandler(c *gin.Context) {
 
 	if pageExists(page) {
 		c.HTML(200, "view.html", gin.H{
-			"content": renderPage(page),
+			"title":   pageTitle(page),
+			"content": template.HTML(renderPage(page)),
 		})
 	} else {
 		c.HTML(200, "edit.html", gin.H{
@@ -67,12 +73,23 @@ func pageExists(p string) bool {
 }
 
 func renderPage(p string) string {
-	dat, err := ioutil.ReadFile(p + ".md")
-	if err != nil {
+	content := pageContent(p)
+
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			highlighting.Highlighting,
+		),
+	)
+
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(content), &buf); err != nil {
 		return err.Error()
 	}
 
-	return string(dat)
+	return buf.String()
 }
 
 func pageTitle(p string) string {
