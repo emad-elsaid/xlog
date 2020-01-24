@@ -23,7 +23,7 @@ func main() {
 	r.GET("/:page", pageHandler)
 	r.POST("/:page", updateHandler)
 
-	r.GET("/:page/e", editHandler)
+	r.GET("/:page/edit", editHandler)
 
 	r.GET("/", pageHandler)
 	r.POST("/", updateHandler)
@@ -64,8 +64,21 @@ func updateHandler(c *gin.Context) {
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 
-	writePage(page, title, content)
-	c.Redirect(302, "/"+page)
+	if content != "" {
+		writePage(page, title, content)
+		c.Redirect(302, "/"+page)
+		return
+	} else if pageExists(page) {
+		deletePage(page)
+	}
+
+	c.Redirect(302, "/")
+}
+
+func deletePage(p string) {
+	if pageExists(p) {
+		os.Remove(p + ".md")
+	}
 }
 
 func pageExists(p string) bool {
@@ -76,22 +89,7 @@ func pageExists(p string) bool {
 
 func renderPage(p string) string {
 	content := pageContent(p)
-
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.DefinitionList,
-			extension.Footnote,
-			highlighting.Highlighting,
-		),
-	)
-
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(content), &buf); err != nil {
-		return err.Error()
-	}
-
-	return buf.String()
+	return renderMarkdown(content)
 }
 
 func pageTitle(p string) string {
@@ -124,6 +122,7 @@ func pageContent(p string) string {
 }
 
 func writePage(page, title, content string) {
+	content = strings.ReplaceAll(content, "\r\n", "\n")
 	err := ioutil.WriteFile(page+".md", []byte(title+"\n=========\n"+content), 0644)
 	if err != nil {
 		panic(err)
@@ -136,4 +135,22 @@ func normalizePage(page string) string {
 	}
 
 	return page
+}
+
+func renderMarkdown(content string) string {
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			highlighting.Highlighting,
+		),
+	)
+
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(content), &buf); err != nil {
+		return err.Error()
+	}
+
+	return buf.String()
 }
