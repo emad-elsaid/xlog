@@ -2,7 +2,7 @@ XLOG
 =========
 ## What is it?
 This about it in the following terms:
-- A personal blog
+- A personal knowledgebase
 - The file system is the storage
 - Uses Markdown format
 - Has a web interface
