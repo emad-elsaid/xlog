@@ -35,7 +35,9 @@ func (p *Page) Exists() bool {
 }
 
 func (p *Page) Render() string {
-	return renderMarkdown(p.Content())
+	html := renderMarkdown(p.Content())
+	html = processShortCodes(html)
+	return html
 }
 
 func (p *Page) Title() string {
