@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"html/template"
 	"net/http"
 	"xlog"
@@ -9,6 +10,9 @@ import (
 )
 
 func main() {
+	bind := flag.String("bind", "127.0.0.1:7000", "IP and port to bind the web server to")
+	flag.Parse()
+
 	r := gin.Default()
 
 	r.LoadHTMLGlob("templates/*")
@@ -21,7 +25,7 @@ func main() {
 	r.GET("/", pageHandler)
 
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
-	r.Run()
+	r.Run(*bind)
 }
 
 func pageHandler(c *gin.Context) {
