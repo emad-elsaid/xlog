@@ -9,87 +9,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	viewTemplate = `
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link href="/public/style.css" rel="stylesheet">
-    <title>{{.title}}</title>
-  </head>
-  <body>
-    <section class="page">
-      <h1>{{.title}}</h1>
-      {{.content}}
-    </section>
-  </body>
-</html>
-`
-	editTemplate = `
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link href="/public/style.css" rel="stylesheet">
-  </head>
-	<body>
-		<form method="POST" action="/{{ .action }}" class="edit">
-      <table>
-        <tr class="collapse">
-          <td>
-			      <input name="title" type="text" value="{{ .title }}" autofocus />
-          </td>
-        </tr>
-        <tr>
-          <td>
-			      <textarea name="content">{{ .content }}</textarea>
-          </td>
-        </tr>
-        <tr class="collapse">
-          <td>
-            <div class="actions">
-              <button type="submit" >Save</button>
-            </div>
-          </td>
-        </tr>
-      </table>
-		</form>
-	</body>
-</html>
-`
-)
-
 func main() {
 	bind := flag.String("bind", "127.0.0.1:7000", "IP and port to bind the web server to")
 	flag.Parse()
 
+	gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
 
-	view, err := template.New("view.html").Parse(viewTemplate)
+	parsedTemplate, err := template.New("").Parse(TEMPLATE)
 	if err != nil {
 		panic(err)
 	}
-	edit, err := view.New("edit.html").Parse(editTemplate)
-	if err != nil {
-		panic(err)
-	}
-	r.SetHTMLTemplate(view)
-	r.SetHTMLTemplate(edit)
+	r.SetHTMLTemplate(parsedTemplate)
 
 	r.GET("/:page", pageHandler)
 	r.POST("/:page", updateHandler)
-
 	r.GET("/:page/edit", editHandler)
-
 	r.GET("/", pageHandler)
-
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
 	r.Run(*bind)
 }
 
 func pageHandler(c *gin.Context) {
 	page := xlog.NewPage(c.Param("page"))
+	if page.Name() == "favicon.ico" {
+		return
+	}
 
 	if page.Exists() {
 		c.HTML(200, "view.html", gin.H{
