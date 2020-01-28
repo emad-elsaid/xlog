@@ -19,7 +19,6 @@ func main() {
 	r.GET("/:page/edit", editHandler)
 
 	r.GET("/", pageHandler)
-	r.POST("/", updateHandler)
 
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
 	r.Run()
