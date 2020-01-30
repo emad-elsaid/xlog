@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	bind := flag.String("bind", "127.0.0.1:7000", "IP and port to bind the web server to")
+	bind := flag.String("bind", "0.0.0.0:7000", "IP and port to bind the web server to")
 	flag.Parse()
 
 	gin.SetMode(gin.ReleaseMode)
