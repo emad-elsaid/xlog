@@ -25,3 +25,13 @@ This about it in the following terms:
 - The content in the short code will be the first argument of the script
 - Scripts can be in any language as long as it's an executable file
 - Checkout the `examples/shortcodes` directory for an example of short code scripts
+
+## Installation
+
+### Docker
+
+You can run xlog on port 7000 serving current directory using the following docker command
+
+```
+docker run -it --rm -p 7000:7000 -v $PWD:/srv/ emadelsaid/xlog
+```
