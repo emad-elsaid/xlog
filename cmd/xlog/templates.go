@@ -2,13 +2,7 @@ package main
 
 const TEMPLATE = `
 {{define "style.css"}}
-html {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
+html, body {
     height: 100%;
     margin: 0;
     padding: 0;
@@ -31,7 +25,6 @@ form.edit table {
 form.edit table td {
     padding: 0;
 }
-
 
 form.edit input[name=title]{
     width: 100%;

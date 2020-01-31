@@ -2,16 +2,25 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 	"xlog"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	cwd, _ := os.Getwd()
 	bind := flag.String("bind", "0.0.0.0:7000", "IP and port to bind the web server to")
+	source := flag.String("source", cwd, "Directory that will act as a storage")
 	flag.Parse()
+
+	absSource, _ := filepath.Abs(*source)
+	fmt.Printf("Bind: %s\nSource: %s\n", *bind, absSource)
+	os.Chdir(absSource)
 
 	gin.SetMode(gin.ReleaseMode)
 
