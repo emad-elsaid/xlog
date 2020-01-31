@@ -38,8 +38,10 @@ docker run -it --rm -p 7000:7000 -v $PWD:/srv/ emadelsaid/xlog
 
 ## Usage
 
+```
 Usage of xlog:
   -bind string
         IP and port to bind the web server to (default "0.0.0.0:7000")
   -source string
         Directory that will act as a storage (default ".")
+```
