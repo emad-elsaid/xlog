@@ -40,19 +40,6 @@ func (p *Page) Render() string {
 	return html
 }
 
-func (p *Page) Title() string {
-	dat, err := ioutil.ReadFile(p.FileName())
-	if err != nil {
-		fmt.Printf("Can't open `%s`, err: %s\n", p.name, err)
-		return ""
-	}
-
-	fileContent := string(dat)
-	endOfLine := strings.Index(fileContent, "\n")
-	title := fileContent[:endOfLine]
-	return title
-}
-
 func (p *Page) Content() string {
 	dat, err := ioutil.ReadFile(p.FileName())
 	if err != nil {
@@ -60,14 +47,7 @@ func (p *Page) Content() string {
 		return ""
 	}
 
-	fileContent := string(dat)
-	endOfLine := strings.Index(fileContent, "\n")
-
-	fileContent = fileContent[endOfLine+1:]
-	endOfLine = strings.Index(fileContent, "\n")
-
-	content := fileContent[endOfLine+1:]
-	return content
+	return string(dat)
 }
 
 func (p *Page) Delete() bool {
@@ -81,9 +61,9 @@ func (p *Page) Delete() bool {
 	return true
 }
 
-func (p *Page) Write(title, content string) bool {
+func (p *Page) Write(content string) bool {
 	content = strings.ReplaceAll(content, "\r\n", "\n")
-	err := ioutil.WriteFile(p.FileName(), []byte(title+"\n=========\n"+content), 0644)
+	err := ioutil.WriteFile(p.FileName(), []byte(content), 0644)
 	if err != nil {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.name, err)
 		return false
