@@ -56,7 +56,7 @@ a {
     <style>{{template "style.css"}}</style>
   </head>
   <body>
-    <section class="page">
+    <section class="page" dir="auto">
       {{.content}}
     </section>
   </body>
