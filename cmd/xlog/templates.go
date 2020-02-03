@@ -39,11 +39,6 @@ form.edit table td {
     padding: 0.25em;
 }
 
-section.page {
-    padding: 1em;
-    line-height: 1.6em;
-}
-
 a {
     color: inherit;
 }
@@ -54,9 +49,10 @@ a {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <style>{{template "style.css"}}</style>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.css">
   </head>
   <body>
-    <section class="page" dir="auto">
+    <section class="container is-fluid content page" dir="auto">
       {{.content}}
     </section>
   </body>
@@ -89,7 +85,7 @@ a {
         </tr>
       </table>
 		</form>
-		<script> var simplemde = new SimpleMDE({autofocus: true}); </script>
+		<script> var simplemde = new SimpleMDE({autofocus: true, spellChecker: false}); </script>
 	</body>
 </html>
 {{end}}
