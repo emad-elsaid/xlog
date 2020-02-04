@@ -9,6 +9,10 @@ html, body {
     font-family: sans-serif;
 }
 
+.page{
+    margin: 1em;
+}
+
 form.edit {
     height: 100%;
     margin: 0;
@@ -39,17 +43,14 @@ form.edit table td {
     padding: 0.25em;
 }
 
-a {
-    color: inherit;
-}
 {{end}}
 {{define "view.html"}}
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <style>{{template "style.css"}}</style>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.css">
+    <style>{{template "style.css"}}</style>
   </head>
   <body>
     <section class="container is-fluid content page" dir="auto">
