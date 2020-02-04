@@ -9,10 +9,6 @@ html, body {
     font-family: sans-serif;
 }
 
-.page{
-    margin: 1em;
-}
-
 form.edit {
     height: 100%;
     margin: 0;
@@ -53,9 +49,11 @@ form.edit table td {
     <style>{{template "style.css"}}</style>
   </head>
   <body>
-    <section class="container is-fluid content page" dir="auto">
-      {{.content}}
-    </section>
+    <section class="section">
+			<div class="container is-fluid content" dir="auto">
+				{{.content}}
+			</div>
+		</section>
   </body>
 </html>
 {{end}}
