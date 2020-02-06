@@ -6,6 +6,7 @@ import (
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 func renderMarkdown(content string) string {
@@ -15,6 +16,9 @@ func renderMarkdown(content string) string {
 			extension.DefinitionList,
 			extension.Footnote,
 			highlighting.Highlighting,
+		),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
 		),
 	)
 
