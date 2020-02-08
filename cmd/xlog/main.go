@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -24,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Bind: %s\nSource: %s\n", *bind, absSource)
+	log.Printf("Bind: %s, Source: %s", *bind, absSource)
 	os.Chdir(absSource)
 
 	gin.SetMode(gin.ReleaseMode)
