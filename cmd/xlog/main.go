@@ -47,11 +47,11 @@ func pageHandler(c *gin.Context) {
 	}
 
 	if page.Exists() {
-		c.HTML(200, "view.html", gin.H{
+		c.HTML(200, "view", gin.H{
 			"content": template.HTML(page.Render()),
 		})
 	} else {
-		c.HTML(200, "edit.html", gin.H{
+		c.HTML(200, "edit", gin.H{
 			"action":  page.Name(),
 			"content": page.Content(),
 		})
@@ -61,7 +61,7 @@ func pageHandler(c *gin.Context) {
 func editHandler(c *gin.Context) {
 	page := xlog.NewPage(c.Param("page"))
 
-	c.HTML(200, "edit.html", gin.H{
+	c.HTML(200, "edit", gin.H{
 		"action":  page.Name(),
 		"content": page.Content(),
 	})

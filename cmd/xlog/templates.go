@@ -1,7 +1,7 @@
 package main
 
 const TEMPLATE = `
-{{define "view.html"}}
+{{define "view"}}
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,7 +18,7 @@ const TEMPLATE = `
 </html>
 {{end}}
 
-{{define "edit.html"}}
+{{define "edit"}}
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
