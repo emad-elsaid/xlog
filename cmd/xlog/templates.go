@@ -28,24 +28,17 @@ const TEMPLATE = `
 		<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
   </head>
 	<body>
-		<section class="section">
-				<form method="POST" action="/{{ .action }}" class="form">
-					<div class="field">
-						<div class="control has-text-right">
-							<button type="submit" class="button is-link">Save</button>
-						</div>
-					</div>
-					<div class="field">
-						<textarea name="content" autofocus>{{ .content }}</textarea>
-					</div>
-					<div class="field">
-						<div class="control has-text-right">
-							<button type="submit" class="button is-link">Save</button>
-						</div>
-					</div>
-				</form>
+		<section class="hero is-fullheight">
+			<form method="POST" action="/{{ .action }}" class="form">
+				<div class="field">
+					<textarea name="content" autofocus>{{ .content }}</textarea>
+				</div>
+				<div class="field has-text-right">
+					<button type="submit" class="button is-link">Save</button>
+				</div>
+			</form>
 		</section>
-		<script> var simplemde = new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false}); </script>
+		<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
 	</body>
 </html>
 {{end}}
