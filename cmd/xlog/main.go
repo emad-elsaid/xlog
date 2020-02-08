@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -18,7 +19,11 @@ func main() {
 	source := flag.String("source", cwd, "Directory that will act as a storage")
 	flag.Parse()
 
-	absSource, _ := filepath.Abs(*source)
+	absSource, err := filepath.Abs(*source)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("Bind: %s\nSource: %s\n", *bind, absSource)
 	os.Chdir(absSource)
 
@@ -37,7 +42,8 @@ func main() {
 	r.GET("/:page/edit", editHandler)
 	r.GET("/", pageHandler)
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
-	r.Run(*bind)
+
+	log.Fatal(r.Run(*bind))
 }
 
 func pageHandler(c *gin.Context) {
