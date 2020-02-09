@@ -30,6 +30,7 @@ const TEMPLATE = `
 	<body>
 		<section class="hero is-fullheight">
 			<form method="POST" action="/{{ .action }}" class="form">
+				<input type="hidden" name="_csrf" value="{{ .csrf }}" />
 				<div class="field">
 					<textarea name="content" autofocus>{{ .content }}</textarea>
 				</div>

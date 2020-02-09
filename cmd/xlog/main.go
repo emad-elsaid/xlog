@@ -9,7 +9,10 @@ import (
 	"path/filepath"
 	"xlog"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	csrf "github.com/utrack/gin-csrf"
 )
 
 func main() {
@@ -36,13 +39,23 @@ func main() {
 	}
 	r.SetHTMLTemplate(parsedTemplate)
 
+	store := cookie.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("xlog-session", store))
+	r.Use(csrf.Middleware(csrf.Options{
+		Secret: string(xlog.CSRFToken()),
+		ErrorFunc: func(c *gin.Context) {
+			c.String(400, "CSRF token incorrect")
+			c.Abort()
+		},
+	}))
+
 	r.GET("/:page", pageHandler)
 	r.POST("/:page", updateHandler)
 	r.GET("/:page/edit", editHandler)
 	r.GET("/", pageHandler)
 	r.NoRoute(gin.WrapH(http.StripPrefix("/public/", http.FileServer(http.Dir("public")))))
 
-	log.Fatal(r.Run(*bind))
+	r.Run(*bind)
 }
 
 func pageHandler(c *gin.Context) {
@@ -59,6 +72,7 @@ func pageHandler(c *gin.Context) {
 		c.HTML(200, "edit", gin.H{
 			"action":  page.Name(),
 			"content": page.Content(),
+			"csrf":    csrf.GetToken(c),
 		})
 	}
 }
@@ -69,6 +83,7 @@ func editHandler(c *gin.Context) {
 	c.HTML(200, "edit", gin.H{
 		"action":  page.Name(),
 		"content": page.Content(),
+		"csrf":    csrf.GetToken(c),
 	})
 }
 
