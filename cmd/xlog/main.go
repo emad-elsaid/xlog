@@ -32,7 +32,7 @@ func main() {
 
 	parsedTemplate, err := template.New("").Parse(TEMPLATE)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	r.SetHTMLTemplate(parsedTemplate)
 
