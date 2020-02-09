@@ -36,8 +36,7 @@ func (p *Page) Exists() bool {
 
 func (p *Page) Render() string {
 	html := renderMarkdown(p.Content())
-	html = processShortCodes(html)
-	return html
+	return processShortCodes(html)
 }
 
 func (p *Page) Content() string {
@@ -46,7 +45,6 @@ func (p *Page) Content() string {
 		fmt.Printf("Can't open `%s`, err: %s\n", p.name, err)
 		return ""
 	}
-
 	return string(dat)
 }
 
@@ -68,6 +66,5 @@ func (p *Page) Write(content string) bool {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.name, err)
 		return false
 	}
-
 	return true
 }
