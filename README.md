@@ -25,6 +25,8 @@ This about it in the following terms:
 - The content in the short code will be the first argument of the script
 - Scripts can be in any language as long as it's an executable file
 - Checkout the `examples/shortcodes` directory for an example of short code scripts
+- If the first line in the output is `text/markdown` the text will be rendered as markdown, if `text/html` it will be printed as is
+- If the first line isn't a mimetype it will be assumed `text/html`
 
 ## Installation
 

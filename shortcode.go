@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
 func processShortCodes(content string) string {
@@ -49,5 +50,16 @@ func shortCode(name, content string) string {
 		return err.Error()
 	}
 
-	return string(output)
+	lines := strings.Split(string(output), "\n")
+	mime := lines[0]
+	out := strings.Join(lines[1:], "\n")
+
+	switch mime {
+	case "text/markdown":
+		return renderMarkdown(out)
+	case "text/html":
+		return out
+	default:
+		return string(output)
+	}
 }
