@@ -26,21 +26,23 @@ func renderMarkdown(content string) string {
 		return err.Error()
 	}
 
-	post := postProcess(buf.String())
-
-	return post
-}
-
-func postProcess(content string) string {
-	r := strings.NewReader(content)
-	doc, err := goquery.NewDocumentFromReader(r)
+	post, err := postProcess(buf.String())
 	if err != nil {
 		return err.Error()
 	}
 
+	return post
+}
+
+func postProcess(content string) (string, error) {
+	r := strings.NewReader(content)
+	doc, err := goquery.NewDocumentFromReader(r)
+	if err != nil {
+		return "", err
+	}
+
 	linkPages(doc)
-	out, _ := doc.Html()
-	return out
+	return doc.Html()
 }
 
 func linkPages(doc *goquery.Document) {
