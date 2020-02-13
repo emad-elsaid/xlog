@@ -15,6 +15,7 @@ This about it in the following terms:
 - Go to any path + `/edit` to edit a post
 - Save a post without content to delete it
 - Short codes
+- Autolinking text to other posts automatically
 
 ## Short codes
 
