@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"strings"
 
@@ -45,12 +46,12 @@ func postProcess(content string) string {
 func linkPages(doc *goquery.Document) {
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-			basename := (file.Name()[:len(file.Name())-3])
+			basename := file.Name()[:len(file.Name())-3]
 			selector := fmt.Sprintf(":contains('%s')", basename)
 
 			doc.Find(selector).Each(func(i int, s *goquery.Selection) {
@@ -60,9 +61,6 @@ func linkPages(doc *goquery.Document) {
 				if s.ParentsFiltered("code,a,pre").Length() > 0 {
 					return
 				}
-
-				h, _ := goquery.OuterHtml(s)
-				fmt.Println(selector, h)
 
 				text, _ := goquery.OuterHtml(s)
 				s.ReplaceWithHtml(strings.ReplaceAll(text, basename, fmt.Sprintf(`<a href="%s">%s</a>`, basename, basename)))
