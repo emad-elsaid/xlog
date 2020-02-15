@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"sort"
 
 	"strings"
 
@@ -46,27 +46,27 @@ func postProcess(content string) (string, error) {
 }
 
 func linkPages(doc *goquery.Document) {
-	files, err := ioutil.ReadDir(".")
-	if err != nil {
-		log.Fatal(err)
-	}
+	files, _ := ioutil.ReadDir(".")
+	sort.Sort(fileInfoByNameLength(files))
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
 			basename := file.Name()[:len(file.Name())-3]
-			selector := fmt.Sprintf(":contains('%s')", basename)
-
-			doc.Find(selector).Each(func(i int, s *goquery.Selection) {
-				if goquery.NodeName(s) != "#text" {
-					return
-				}
-				if s.ParentsFiltered("code,a,pre").Length() > 0 {
-					return
-				}
-
-				text, _ := goquery.OuterHtml(s)
-				s.ReplaceWithHtml(strings.ReplaceAll(text, basename, fmt.Sprintf(`<a href="%s">%s</a>`, basename, basename)))
-			})
+			linkPage(doc, basename)
 		}
 	}
+}
+
+func linkPage(doc *goquery.Document, basename string) {
+	selector := fmt.Sprintf(":contains('%s')", basename)
+	doc.Find(selector).Each(func(i int, s *goquery.Selection) {
+		if goquery.NodeName(s) != "#text" || s.ParentsFiltered("code,a,pre").Length() > 0 {
+			return
+		}
+
+		text, _ := goquery.OuterHtml(s)
+		a := fmt.Sprintf(`<a href="%s">%s</a>`, basename, basename)
+
+		s.ReplaceWithHtml(strings.ReplaceAll(text, basename, a))
+	})
 }
