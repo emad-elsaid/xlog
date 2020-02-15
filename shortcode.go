@@ -11,7 +11,7 @@ import (
 func processShortCodes(content string) string {
 	codes := shortCodes()
 	for _, code := range codes {
-		re := regexp.MustCompile(fmt.Sprintf(`\{%s\}.*\{/%s\}`, code, code))
+		re := regexp.MustCompile(fmt.Sprintf(`(?s)\{%s\}.*?\{/%s\}`, code, code))
 
 		start := fmt.Sprintf("{%s}", code)
 		end := fmt.Sprintf("{/%s}", code)
@@ -25,12 +25,11 @@ func processShortCodes(content string) string {
 	return content
 }
 
-func shortCodes() []string {
-	codes := []string{}
+func shortCodes() (codes []string) {
 
 	files, err := ioutil.ReadDir("shortcodes")
 	if err != nil {
-		return codes
+		return
 	}
 
 	for _, f := range files {
@@ -39,7 +38,7 @@ func shortCodes() []string {
 		}
 	}
 
-	return codes
+	return
 }
 
 func shortCode(name, content string) string {
