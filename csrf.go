@@ -7,6 +7,11 @@ import (
 	"os"
 )
 
+const (
+	CSRFFile    = "security-token"
+	letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+)
+
 func CSRFToken() []byte {
 	if !csrfExists() {
 		writeCSRF()
@@ -16,12 +21,12 @@ func CSRFToken() []byte {
 }
 
 func csrfExists() bool {
-	_, err := os.Stat("security-token")
+	_, err := os.Stat(CSRFFile)
 	return err == nil
 }
 
 func readCSRF() []byte {
-	dat, err := ioutil.ReadFile("security-token")
+	dat, err := ioutil.ReadFile(CSRFFile)
 	if err != nil {
 		log.Fatal("Can't read security-token file")
 		return []byte{}
@@ -31,15 +36,13 @@ func readCSRF() []byte {
 }
 
 func writeCSRF() {
-	err := ioutil.WriteFile("security-token", generateCSRF(), 0644)
+	err := ioutil.WriteFile(CSRFFile, generateCSRF(), 0644)
 	if err != nil {
-		log.Fatal("Can't write security-token file")
+		log.Fatal("Can't write " + CSRFFile + " file")
 	}
 }
 
 func generateCSRF() []byte {
-	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
 	b := make([]byte, 32)
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
