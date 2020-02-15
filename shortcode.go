@@ -26,7 +26,6 @@ func processShortCodes(content string) string {
 }
 
 func shortCodes() (codes []string) {
-
 	files, err := ioutil.ReadDir("shortcodes")
 	if err != nil {
 		return
