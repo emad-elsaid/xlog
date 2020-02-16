@@ -1,7 +1,7 @@
 XLOG
 =========
 ## What is it?
-This about it in the following terms:
+Think about it in the following terms:
 - A personal knowledgebase
 - The file system is the storage
 - Uses Markdown format
