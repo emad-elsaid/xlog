@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+keyword = ARGV.first
+
+puts "text/markdown"
+Dir['*.md'].each do |file|
+  basename = File.basename(file, '.md')
+  content = File.read(file)
+  match = content.lines.select { |line| line.include?(keyword) }
+
+  unless match.empty?
+    puts "# #{basename} (#{match.length} Matches)"
+    puts match
+  end
+end
