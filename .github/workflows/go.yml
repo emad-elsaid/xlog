@@ -1,8 +1,0 @@
-name: Go
-on: [push]
-jobs:
-  build:
-    - name: GoReleaser Action
-  uses: goreleaser/goreleaser-action@v1.3.1
-  with:
-    workdir: ./cmd/xlog/
