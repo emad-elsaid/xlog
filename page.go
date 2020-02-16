@@ -34,9 +34,11 @@ func (p *Page) Exists() bool {
 	return err == nil
 }
 
-func (p *Page) Render() string {
-	html := renderMarkdown(p.Content())
-	return processShortCodes(html)
+func (p *Page) Render() (html string) {
+	html = renderMarkdown(p.Content())
+	html = processShortCodes(html)
+	html, _ = postProcess(html)
+	return
 }
 
 func (p *Page) Content() string {
