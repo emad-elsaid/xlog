@@ -16,6 +16,7 @@ This about it in the following terms:
 - Save a post without content to delete it
 - Short codes
 - Autolinking text to other posts automatically
+- Convert youtube links to embded videos
 
 ## Short codes
 
