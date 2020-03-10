@@ -41,7 +41,21 @@ func shortCodes() (codes []string) {
 }
 
 func shortCode(name, content string) string {
-	cmd := exec.Command("shortcodes/"+name, content)
+	cmd := exec.Command("shortcodes/"+name, "")
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return err.Error()
+	}
+
+	_, err = fmt.Fprint(stdin, content)
+	if err != nil {
+		return err.Error()
+	}
+
+	err = stdin.Close()
+	if err != nil {
+		return err.Error()
+	}
 
 	output, err := cmd.Output()
 	if err != nil {

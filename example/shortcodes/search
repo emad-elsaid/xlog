@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-keyword = ARGV.first
+keyword = $stdin.read
 
 puts "text/markdown"
 Dir['*.md'].each do |file|

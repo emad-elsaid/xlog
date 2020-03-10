@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-echo "<article class=\"message is-info\"><div class=\"message-body\">${@}</div></article>"
+STDIN=$(cat -)
+echo "<article class=\"message is-info\"><div class=\"message-body\">${STDIN}</div></article>"

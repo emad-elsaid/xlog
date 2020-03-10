@@ -24,7 +24,7 @@ Think about it in the following terms:
 - Any executable script in this directory will have be a short code
 - Short code syntax is `{scriptName}script input here{/scriptName}`
 - The short code part will be replaced by the script output
-- The content in the short code will be the first argument of the script
+- The content in the short code will be the STDIN of the script process
 - Scripts can be in any language as long as it's an executable file
 - Checkout the `examples/shortcodes` directory for an example of short code scripts
 - If the first line in the output is `text/markdown` the text will be rendered as markdown, if `text/html` it will be printed as is
