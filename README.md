@@ -42,11 +42,8 @@ docker run -it --rm -p 7000:7000 -v $PWD:/srv/ emadelsaid/xlog
 
 ### From source
 
-You can get the package with `go get` and install xlog from there
 ```
-go get -u github.com/emad-elsaid/xlog
-cd $GOPATH/src/github.com/emad-elsaid/xlog/cmd/xlog
-go install .
+go get github.com/emad-elsaid/xlog/...
 ```
 
 ## Usage
