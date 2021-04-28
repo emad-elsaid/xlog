@@ -7,13 +7,19 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"xlog"
+
+	"github.com/emad-elsaid/xlog"
+
+	_ "embed"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	csrf "github.com/utrack/gin-csrf"
 )
+
+//go:embed template.html
+var TEMPLATE string
 
 func main() {
 	cwd, _ := os.Getwd()
