@@ -1,3 +1,4 @@
+//go:generate goyacc -o markdown_parser.go -p md markdown.y
 package main
 
 import (
