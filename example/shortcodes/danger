@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-STDIN=$(cat -)
-echo "<article class=\"message is-danger\"><div class=\"message-body\">${STDIN}</div></article>"

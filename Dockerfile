@@ -1,8 +1,8 @@
-FROM golang:1.16
+FROM golang:1.17
 ENV CGO_ENABLED=0
 WORKDIR /xlog
 COPY . .
-RUN  go build -o xlog -installsuffix cgo ./cmd/xlog
+RUN  go build -o xlog -installsuffix cgo *.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates

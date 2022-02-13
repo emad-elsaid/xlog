@@ -1,0 +1,12 @@
+		<section class="hero is-fullheight">
+			<form method="POST" action="/{{ .action }}" class="form">
+        {{ .csrf }}
+				<div class="field">
+					<textarea name="content" autofocus>{{ .content }}</textarea>
+				</div>
+				<div class="field has-text-right">
+					<button type="submit" class="button is-link">Save</button>
+				</div>
+			</form>
+		</section>
+		<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
