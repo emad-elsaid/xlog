@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"database/sql"
 	"embed"
 	"fmt"
 	"html/template"
@@ -266,13 +265,6 @@ func atoi32(s string) int32 {
 func atoi64(s string) int64 {
 	i, _ := strconv.ParseInt(s, 10, 64)
 	return i
-}
-
-func NullString(s string) sql.NullString {
-	return sql.NullString{
-		String: s,
-		Valid:  len(s) > 0,
-	}
 }
 
 // VALIDATION ============================

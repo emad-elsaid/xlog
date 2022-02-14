@@ -36,7 +36,6 @@ func (p *Page) Exists() bool {
 
 func (p *Page) Render() (html string) {
 	html = renderMarkdown(p.Content())
-	html = processShortCodes(html)
 	html, _ = postProcess(html)
 	return
 }
