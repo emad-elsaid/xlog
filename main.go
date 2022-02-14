@@ -21,7 +21,7 @@ func main() {
 	os.Chdir(absSource)
 
 	GET("/", func(w Response, r Request) Output {
-		return Redirect("/home")
+		return Redirect("/index")
 	})
 
 	GET("/{page}", func(w Response, r Request) Output {

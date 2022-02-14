@@ -11,7 +11,13 @@ import (
 
 func renderMarkdown(content string) string {
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM, extension.DefinitionList, extension.Footnote, highlighting.Highlighting),
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			highlighting.Highlighting,
+		),
+
 		goldmark.WithRendererOptions(html.WithHardWraps()),
 	)
 

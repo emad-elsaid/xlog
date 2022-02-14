@@ -80,7 +80,7 @@ Lorem ipsum dolor sit amet, **Bold Text** consectetur __Bold Text__ adipiscing *
 
 Lorem ipsum dolor sit amet, ***Bold & Italics Text*** consectetur ___Bold & Italics Text___ adipiscing *Italics* elit. _Italics_Fusce in mauris nunc. Phasellus convallis magna et mollis rhoncus. Mauris vehicula augue feugiat ipsum maximus malesuada. Ut commodo efficitur semper. Suspendisse pretium sollicitudin dapibus. Aenean auctor volutpat est quis commodo. Morbi lacinia condimentum sagittis. Sed sit amet tortor id ex tincidunt facilisis. Vestibulum at imperdiet nibh. Cras dolor libero, tincidunt in risus eget, rhoncus sagittis magna. Duis ac euismod libero.
 
-Lorem ipsum dolor sit amet, ~~Strike through~~ consectetur adipiscing *Italics* elit. _Italics_Fusce in mauris nunc. Phasellus convallis magna et mollis rhoncus. Mauris vehicula augue feugiat ipsum maximus malesuada. Ut commodo efficitur semper. Suspendisse pretium sollicitudin dapibus. Aenean auctor volutpat est quis commodo. Morbi lacinia condimentum sagittis. Sed sit amet tortor id ex tincidunt facilisis. Vestibulum at imperdiet nibh. Cras dolor libero, tincidunt in risus eget, rhoncus sagittis magna. Duis ac euismod libero.
+Lorem "ipsum" dolor sit amet, ~~Strike through~~ consectetur adipiscing *Italics* elit. _Italics_Fusce in mauris nunc. Phasellus convallis magna et mollis rhoncus. Mauris vehicula augue feugiat ipsum maximus malesuada. Ut commodo efficitur semper. Suspendisse pretium sollicitudin dapibus. Aenean auctor volutpat est quis commodo. Morbi lacinia condimentum sagittis. Sed sit amet tortor id ex tincidunt facilisis. Vestibulum at imperdiet nibh. Cras dolor libero, tincidunt in risus eget, rhoncus sagittis magna. Duis ac euismod libero.
 
 # Quotes
 
@@ -116,7 +116,7 @@ func init() {
 
 This site was built using [My website](https://www.emadelsaid.com)
 
-[My website](https://www.emadelsaid.com) Lorem ipsum dolor sit amet, [My website](https://www.emadelsaid.com) consectetur adipiscing *Italics* elit. _Italics_Fusce in mauris nunc. Phasellus convallis magna et mollis rhoncus. Mauris vehicula augue feugiat ipsum maximus malesuada. Ut commodo efficitur semper. Suspendisse pretium sollicitudin dapibus. Aenean auctor volutpat est quis commodo. Morbi lacinia condimentum sagittis. Sed sit amet tortor id ex tincidunt facilisis. Vestibulum at imperdiet nibh. Cras dolor libero, tincidunt in risus eget, rhoncus sagittis magna. Duis ac euismod libero.
+[My website](https://www.emadelsaid.com) Lorem ipsum dolor sit amet, [My website](https://www.emadelsaid.com) consectetur adipiscing elit. Fusce in mauris nunc. Phasellus convallis magna et mollis www.emadelsaid.com rhoncus. Mauris vehicula augue feugiat ipsum maximus malesuada. Ut commodo efficitur semper. Suspendisse pretium sollicitudin dapibus. Aenean auctor volutpat est quis commodo. Morbi lacinia condimentum sagittis. Sed sit amet tortor id ex tincidunt facilisis. Vestibulum at imperdiet nibh. Cras dolor libero, tincidunt in risus eget, rhoncus sagittis magna. Duis ac euismod libero.
 
 # Image
 
@@ -132,3 +132,11 @@ This site was built using [My website](https://www.emadelsaid.com)
 # Emoje
 
 Emojies should be rendered with :1+: or :joy: or :smiley: codes.
+
+# Tables
+
+| Title 1  | Title 2   | Title 3  |
+| -------- | --------- | -------- |
+| Cell 1.1 | Cell 2.1  | Cell 3.1 |
+| Cell 1.2 | Cell 2.2  | Cell 3.2 |
+| Cell 1.3 | Cell 2.3  | Cell 3.3 |
