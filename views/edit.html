@@ -1,12 +1,32 @@
+<html class="has-navbar-fixed-bottom">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+		<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+  </head>
+	<body>
 		<section class="hero is-fullheight">
-			<form method="POST" action="/{{ .action }}" class="form">
+			<form method="POST" id="form" action="/{{ .action }}" class="form">
         {{ .csrf }}
 				<div class="field">
 					<textarea name="content" autofocus>{{ .content }}</textarea>
 				</div>
-				<div class="field has-text-right">
-					<button type="submit" class="button is-link">Save</button>
-				</div>
+
 			</form>
 		</section>
+
+    <nav class="navbar is-white is-fixed-bottom" role="navigation">
+      <div class="navbar-end">
+        <div class="navbar-item">
+          <div class="buttons">
+					  <button type="submit" form="form" class="button is-link">Save</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
 		<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
+  </body>
+</html>

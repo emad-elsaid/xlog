@@ -32,7 +32,8 @@ func main() {
 			return Redirect("/" + page.Name() + "/edit")
 		}
 
-		return Render("layout", "view", Locals{
+		return Render("view", Locals{
+			"edit":    "/" + page.Name() + "/edit",
 			"content": template.HTML(page.Render()),
 		})
 	})
@@ -56,16 +57,12 @@ func main() {
 		vars := VARS(r)
 		page := NewPage(vars["page"])
 
-		return Render("edit_layout", "edit", Locals{
+		return Render("edit", Locals{
 			"action":  page.Name(),
 			"content": page.Content(),
 			"csrf":    CSRF(r),
 		})
 	})
-
-	helpers["partial"] = func(v string, data interface{}) template.HTML {
-		return template.HTML(partial(v, data))
-	}
 
 	Start()
 }

@@ -192,9 +192,8 @@ func partial(path string, data interface{}) string {
 	return w.String()
 }
 
-func Render(path string, view string, data Locals) http.HandlerFunc {
+func Render(path string, data Locals) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data["view"] = view
 		fmt.Fprint(w, partial(path, data))
 	}
 }
