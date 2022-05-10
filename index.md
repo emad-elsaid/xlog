@@ -140,3 +140,15 @@ Emojies should be rendered with :1+: or :joy: or :smiley: codes.
 | Cell 1.1 | Cell 2.1  | Cell 3.1 |
 | Cell 1.2 | Cell 2.2  | Cell 3.2 |
 | Cell 1.3 | Cell 2.3  | Cell 3.3 |
+
+
+# Extra Features
+
+## Image URL
+
+Image URL filling the whole line:
+https://myoctocat.com/assets/images/base-octocat.svg
+Image url with prefix: https://myoctocat.com/assets/images/base-octocat.svg
+https://myoctocat.com/assets/images/base-octocat.svg : image url with suffix
+
+

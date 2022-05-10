@@ -18,7 +18,10 @@ func renderMarkdown(content string) string {
 			highlighting.Highlighting,
 		),
 
-		goldmark.WithRendererOptions(html.WithHardWraps()),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithUnsafe(),
+		),
 	)
 
 	var buf bytes.Buffer
