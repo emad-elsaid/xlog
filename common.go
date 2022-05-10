@@ -45,15 +45,6 @@ type Request = *http.Request
 type Output = http.HandlerFunc
 type Locals map[string]interface{} // passed to views/templates
 
-const (
-	_        = iota
-	KB int64 = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-)
-
 func init() {
 	log.SetFlags(log.Ltime)
 	router = mux.NewRouter()

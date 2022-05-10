@@ -63,6 +63,9 @@ func main() {
 		})
 	})
 
-	Helpers()
+	helpers["partial"] = func(v string, data interface{}) template.HTML {
+		return template.HTML(partial(v, data))
+	}
+
 	Start()
 }
