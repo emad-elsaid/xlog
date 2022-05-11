@@ -63,7 +63,7 @@ func Start() {
 		RequestLoggerHandler,
 	}
 
-	router.PathPrefix("/").Handler(staticWithoutDirectoryListingHandler())
+	router.PathPrefix("/public").Handler(staticWithoutDirectoryListingHandler())
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
@@ -213,7 +213,7 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 func staticWithoutDirectoryListingHandler() http.Handler {
 	dir := http.Dir(STATIC_DIR_PATH)
 	server := http.FileServer(dir)
-	handler := http.StripPrefix("/", server)
+	handler := http.StripPrefix("/public", server)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/") {
