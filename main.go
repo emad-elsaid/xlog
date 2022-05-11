@@ -32,9 +32,15 @@ func main() {
 			return Redirect("/" + page.Name() + "/edit")
 		}
 
+		html, refs := page.Render()
+		refsIn := Search(page.name)
+
 		return Render("view", Locals{
-			"edit":    "/" + page.Name() + "/edit",
-			"content": template.HTML(page.Render()),
+			"edit":         "/" + page.Name() + "/edit",
+			"title":        page.Name(),
+			"content":      template.HTML(html),
+			"references":   refs,
+			"referencedIn": refsIn,
 		})
 	})
 

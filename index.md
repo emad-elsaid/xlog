@@ -152,3 +152,24 @@ Image url with prefix: https://myoctocat.com/assets/images/base-octocat.svg
 https://myoctocat.com/assets/images/base-octocat.svg : image url with suffix
 
 
+## Tweet URL
+
+Tweet URL filling the whole line:
+https://twitter.com/emad__elsaid/status/1523975244603703296
+
+tweet URL with prefix: https://twitter.com/emad__elsaid/status/1523975244603703296
+
+https://twitter.com/emad__elsaid/status/1523975244603703296 tweet URL with suffix
+
+## Auto Reference
+
+Mention of README file should be a link
+
+## Youtube video
+
+Youtube URL filling the whole line
+https://www.youtube.com/watch?v=_cmqniwQz3c
+
+youtube link with prefix: https://www.youtube.com/watch?v=_cmqniwQz3c
+
+https://www.youtube.com/watch?v=_cmqniwQz3c youtube link with suffix

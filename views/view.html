@@ -2,11 +2,21 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css">
   </head>
   <body>
 
     <nav class="navbar is-fixed-top is-white" role="navigation">
+      <div class="navbar-brand has-text-weight-bold is-size-2 is-capitalized ml-2"> {{.title}} </div>
+
+      <div class="navbar-start">
+        <div class="navbar-item">
+          <form action="" method="GET">
+            <input name="q" type="text" value="" class="input is-rounded" placeholder="Search..." />
+          </form>
+        </div>
+      </div>
+
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
@@ -17,8 +27,38 @@
     </nav>
 
     <section class="section">
-	    <div class="container is-fluid content" dir="auto">
-		    {{.content}}
+	    <div class="container is-fluid" dir="auto">
+        <div class="columns">
+
+          {{ if .referencedIn }}
+          <div class="column is-one-fifth">
+            <aside class="menu">
+              <p class="menu-label"> Referenced in </p>
+              <ul class="menu-list">
+                {{ range .referencedIn }}
+                <li><a href="/{{.}}">{{.}}</a></li>
+                {{ end }}
+              </ul>
+            </aside>
+          </div>
+          {{ end }}
+
+          <div class="column content">{{.content}}</div>
+
+          {{ if .references }}
+          <div class="column is-one-fifth">
+            <aside class="menu">
+              <p class="menu-label"> References </p>
+              <ul class="menu-list">
+                {{ range .references }}
+                <li><a href="/{{.}}">{{.}}</a></li>
+                {{ end }}
+              </ul>
+            </aside>
+          </div>
+          {{ end }}
+
+        </div>
 	    </div>
     </section>
   </body>

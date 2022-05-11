@@ -34,11 +34,11 @@ func (p *Page) Exists() bool {
 	return err == nil
 }
 
-func (p *Page) Render() (html string) {
+func (p *Page) Render() (html string, refs []string) {
 	content := p.Content()
 	content = preProcess(content)
 	html = renderMarkdown(content)
-	html, _ = postProcess(html)
+	html, refs, _ = postProcess(html)
 	return
 }
 
