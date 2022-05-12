@@ -173,3 +173,18 @@ https://www.youtube.com/watch?v=_cmqniwQz3c
 youtube link with prefix: https://www.youtube.com/watch?v=_cmqniwQz3c
 
 https://www.youtube.com/watch?v=_cmqniwQz3c youtube link with suffix
+
+
+## Shortcodes
+
+one line short code
+/info Hello this is informational text
+
+success code
+/success This is something that looks successfull
+
+warning 
+/warning this is warning text
+
+alert
+/alert this is text with red background 
