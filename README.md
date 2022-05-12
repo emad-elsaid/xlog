@@ -32,16 +32,6 @@ Think about it in the following terms:
 
 ## Installation
 
-### Docker
-
-You can run xlog on port 7000 serving current directory using the following docker command
-
-```
-docker run -it --rm -p 7000:7000 -v $PWD:/srv/ emadelsaid/xlog
-```
-
-### From source
-
 ```
 go get github.com/emad-elsaid/xlog/...
 ```
