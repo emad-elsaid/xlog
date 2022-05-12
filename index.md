@@ -180,6 +180,14 @@ https://www.youtube.com/watch?v=_cmqniwQz3c youtube link with suffix
 one line short code
 /info Hello this is informational text
 
+Multi-line short code
+```info
+This is a block of multiline short code.
+second line of the block
+third line
+and so on
+```
+
 success code
 /success This is something that looks successfull
 

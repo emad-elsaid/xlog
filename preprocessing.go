@@ -36,24 +36,37 @@ var (
 
 var shortcodes = map[string]preProcessor{
 	"info": func(c string) string {
-		return fmt.Sprintf(`<div class="notification is-info">%s</div>`, c)
+		return fmt.Sprintf(`<pre class="notification is-info">%s</pre>`, c)
 	},
 
 	"success": func(c string) string {
-		return fmt.Sprintf(`<div class="notification is-success">%s</div>`, c)
+		return fmt.Sprintf(`<pre class="notification is-success">%s</pre>`, c)
 	},
 
 	"warning": func(c string) string {
-		return fmt.Sprintf(`<div class="notification is-warning">%s</div>`, c)
+		return fmt.Sprintf(`<pre class="notification is-warning">%s</pre>`, c)
 	},
 
 	"alert": func(c string) string {
-		return fmt.Sprintf(`<div class="notification is-danger">%s</div>`, c)
+		return fmt.Sprintf(`<pre class="notification is-danger">%s</pre>`, c)
 	},
 }
 
 func init() {
+	fillInShortcodes()
+}
+
+func preProcess(content string) string {
+	for _, v := range preProcessors {
+		content = v(content)
+	}
+
+	return content
+}
+
+func fillInShortcodes() {
 	for k, v := range shortcodes {
+		// single line
 		reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(k) + `\s+(.*)$`)
 		skip := len("/" + k + " ")
 
@@ -66,13 +79,19 @@ func init() {
 		}(reg, skip, v)
 
 		preProcessors = append(preProcessors, preprocessor)
-	}
-}
+		headerSkip := len("```" + k + "\n")
 
-func preProcess(content string) string {
-	for _, v := range preProcessors {
-		content = v(content)
-	}
+		// multi line
+		multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(k) + "$(.*)^```$")
+		multilinePreprocessor := func(r *regexp.Regexp, skip int, v preProcessor) preProcessor {
+			return func(c string) string {
+				return multireg.ReplaceAllStringFunc(c, func(i string) string {
+					return v(i[skip : len(i)-4])
+				})
+			}
+		}(reg, headerSkip, v)
 
-	return content
+		preProcessors = append(preProcessors, multilinePreprocessor)
+
+	}
 }
