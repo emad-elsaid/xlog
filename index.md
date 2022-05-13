@@ -182,6 +182,13 @@ https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957
 link with prefix: https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957
 https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957 link suffic
 
+## giphy
+
+https://giphy.com/gifs/star-trek-wow-vp122eOzO0Hxm
+
+
+https://giphy.com/gifs/star-trek-data-snqxwlKBYfEA0
+
 ## Shortcodes
 
 one line short code
@@ -203,3 +210,6 @@ warning
 
 alert
 /alert this is text with red background 
+
+
+![](/public/b5e77eb2c120c7581a998ede6ce4f24449c0ffd8242d556bd6ce9382760feec2.png)

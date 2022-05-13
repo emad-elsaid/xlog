@@ -13,6 +13,7 @@ var (
 	tweetUrlReg   = regexp.MustCompile(`(?imU)^(https\:\/\/twitter.com\/[^ ]+\/status\/[0-9]+)$`)
 	youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=([^ ]+)$`)
 	fbUrlReg      = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9]+)$`)
+	giphyUrlReg   = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/[^ ]+\-([^ \-]+)$`)
 
 	preProcessors = []preProcessor{
 		// image
@@ -40,6 +41,11 @@ var (
 				return fmt.Sprintf(`
 <iframe src="https://www.facebook.com/plugins/post.php?show_text=true&width=500&href=%s" width="500" height="271" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`, url.QueryEscape(l))
 			})
+		},
+
+		// giphy
+		func(c string) string {
+			return giphyUrlReg.ReplaceAllString(c, `<iframe src="https://giphy.com/embed/$1" style="display: block;" width="480" height="333" frameBorder="0" allowFullScreen></iframe>`)
 		},
 	}
 )
