@@ -131,7 +131,7 @@ This site was built using [My website](https://www.emadelsaid.com)
 
 # Emoje
 
-Emojies should be rendered with :1+: or :joy: or :smiley: codes.
+Emojies should be rendered with :100: or :joy: or :smiley: codes.
 
 # Tables
 
