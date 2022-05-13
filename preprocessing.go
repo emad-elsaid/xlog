@@ -45,7 +45,7 @@ var (
 
 		// giphy
 		func(c string) string {
-			return giphyUrlReg.ReplaceAllString(c, `<img src="https://media.giphy.com/media/$1/giphy.gif" style="display:block;"/>`)
+			return giphyUrlReg.ReplaceAllString(c, `![](https://media.giphy.com/media/$1/giphy.gif)`)
 		},
 	}
 )
