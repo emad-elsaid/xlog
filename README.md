@@ -12,23 +12,8 @@ Think about it in the following terms:
 ## Features
 - Run it in any directory to create a blog
 - Go to any path to create a post
-- Go to any path + `/edit` to edit a post
 - Save a post without content to delete it
-- Short codes
-- Autolinking text to other posts automatically
-- Convert youtube links to embded videos
-
-## Short codes
-
-- Create a directory in your blog called `shortcodes`
-- Any executable script in this directory will have be a short code
-- Short code syntax is `{scriptName}script input here{/scriptName}`
-- The short code part will be replaced by the script output
-- The content in the short code will be the STDIN of the script process
-- Scripts can be in any language as long as it's an executable file
-- Checkout the `examples/shortcodes` directory for an example of short code scripts
-- If the first line in the output is `text/markdown` the text will be rendered as markdown, if `text/html` it will be printed as is
-- If the first line isn't a mimetype it will be assumed `text/html`
+- Checkout [index.md](index.md) for additional features
 
 ## Installation
 

@@ -25,7 +25,7 @@
           <div class="column is-one-fifth">
             <aside class="menu">
               <p class="menu-label"> Referenced in </p>
-              <ul class="menu-list">
+              <ul class="menu-list is-capitalized">
                 {{ range .referencedIn }}
                 <li><a href="/{{.}}">{{.}}</a></li>
                 {{ end }}
@@ -35,7 +35,7 @@
           {{ end }}
 
           <div class="column content">
-            <h1 class="title is-1 is-capitalized">{{.title}}</h1>
+            <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
 
             {{.content}}
           </div>
@@ -44,7 +44,7 @@
           <div class="column is-one-fifth">
             <aside class="menu">
               <p class="menu-label"> References </p>
-              <ul class="menu-list">
+              <ul class="menu-list is-capitalized">
                 {{ range .references }}
                 <li><a href="/{{.}}">{{.}}</a></li>
                 {{ end }}
