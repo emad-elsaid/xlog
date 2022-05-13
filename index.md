@@ -174,6 +174,13 @@ youtube link with prefix: https://www.youtube.com/watch?v=_cmqniwQz3c
 
 https://www.youtube.com/watch?v=_cmqniwQz3c youtube link with suffix
 
+## Facebook Post
+
+Link in a line
+https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957
+
+link with prefix: https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957
+https://www.facebook.com/emad.elsaid.hamed/posts/10158885762282957 link suffic
 
 ## Shortcodes
 

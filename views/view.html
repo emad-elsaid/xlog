@@ -8,8 +8,6 @@
   <body>
 
     <nav class="navbar is-fixed-top is-white" role="navigation">
-      <div class="navbar-brand has-text-weight-bold is-size-2 is-capitalized ml-2"> {{.title}} </div>
-
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
@@ -36,7 +34,11 @@
           </div>
           {{ end }}
 
-          <div class="column content">{{.content}}</div>
+          <div class="column content">
+            <h1 class="title is-1 is-capitalized">{{.title}}</h1>
+
+            {{.content}}
+          </div>
 
           {{ if .references }}
           <div class="column is-one-fifth">
