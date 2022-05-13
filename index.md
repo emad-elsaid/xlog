@@ -151,6 +151,9 @@ https://myoctocat.com/assets/images/base-octocat.svg
 Image url with prefix: https://myoctocat.com/assets/images/base-octocat.svg
 https://myoctocat.com/assets/images/base-octocat.svg : image url with suffix
 
+External from Imgur
+
+https://i.imgur.com/eZ1LAjc.gif
 
 ## Tweet URL
 
