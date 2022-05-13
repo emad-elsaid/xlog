@@ -17,7 +17,7 @@ var (
 
 	preProcessors = []preProcessor{
 		// image
-		func(c string) string { return imgUrlReg.ReplaceAllString(c, `<img src="$1"/>`) },
+		func(c string) string { return imgUrlReg.ReplaceAllString(c, `![]($1)`) },
 
 		// twitter
 		func(c string) string {
