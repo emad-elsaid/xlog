@@ -66,6 +66,8 @@ func main() {
 				ext := strings.ToLower(path.Ext(h.Filename))
 				name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
 				p := path.Join("public", name)
+
+				os.Mkdir("public", 0700)
 				out, err := os.Create(p)
 				if err != nil {
 					return InternalServerError(err)
