@@ -66,6 +66,8 @@ func main() {
 				ext := strings.ToLower(path.Ext(h.Filename))
 				name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
 				p := path.Join("public", name)
+				mdName := strings.ReplaceAll(h.Filename, "[", "")
+				mdName = strings.ReplaceAll(mdName, "]", "")
 
 				os.Mkdir("public", 0700)
 				out, err := os.Create(p)
@@ -82,7 +84,7 @@ func main() {
 				if strings.Contains(".jpg,.jpeg,.png,.gif", ext) {
 					content += fmt.Sprintf("\n![](/%s)\n", p)
 				} else {
-					content += fmt.Sprintf("\n[%s](/%s)\n", p, p)
+					content += fmt.Sprintf("\n[%s](/%s)\n", mdName, p)
 				}
 			}
 
