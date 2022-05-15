@@ -7,14 +7,16 @@
 		<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
   </head>
 	<body>
-		<section class="hero is-fullheight">
-			<form method="POST" id="form" action="/{{ .action }}" class="form" enctype="multipart/form-data">
-        {{ .csrf }}
-				<div class="field">
-					<textarea name="content" autofocus>{{ .content }}</textarea>
-				</div>
-			</form>
-		</section>
+    <div class="columns">
+      <div class="column">
+			  <form method="POST" id="form" action="/{{ .action }}" class="form" enctype="multipart/form-data">
+          {{ .csrf }}
+				  <div class="field">
+					  <textarea name="content" autofocus>{{ .content }}</textarea>
+				  </div>
+			  </form>
+      </div>
+    </div>
 
     <nav class="navbar is-white is-fixed-bottom" role="navigation">
 
