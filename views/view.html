@@ -10,6 +10,9 @@
     <nav class="navbar is-fixed-top is-white" role="navigation">
       <div class="navbar-end">
         <div class="navbar-item">
+          <input type="text" class="input is-rounded" accesskey="n" placeholder="New log..." onkeypress="if(event.keyCode == 13){ document.location.pathname = this.value }" autocomplete="off"/>
+        </div>
+        <div class="navbar-item">
           <div class="buttons">
             <a href="{{.edit}}" class="button is-light"> Edit </a>
           </div>
