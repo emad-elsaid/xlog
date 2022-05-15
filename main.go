@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -36,18 +38,17 @@ func main() {
 		page := NewPage(vars["page"])
 
 		if !page.Exists() {
-			return Redirect("/" + page.Name() + "/edit")
+			return Redirect("/" + page.Name + "/edit")
 		}
 
 		html, refs := page.Render()
-		refsIn := Search(page.name)
 
 		return Render("view", Locals{
-			"edit":         "/" + page.Name() + "/edit",
-			"title":        page.Name(),
+			"edit":         "/" + page.Name + "/edit",
+			"title":        page.Name,
 			"content":      template.HTML(html),
 			"references":   refs,
-			"referencedIn": refsIn,
+			"referencedIn": Search(page.Name),
 		})
 	})
 
@@ -89,7 +90,7 @@ func main() {
 			}
 
 			page.Write(content)
-			return Redirect("/" + page.Name())
+			return Redirect("/" + page.Name)
 		} else if page.Exists() {
 			page.Delete()
 		}
@@ -102,11 +103,33 @@ func main() {
 		page := NewPage(vars["page"])
 
 		return Render("edit", Locals{
-			"action":  page.Name(),
+			"action":  page.Name,
 			"content": page.Content(),
 			"csrf":    CSRF(r),
 		})
 	})
 
 	Start()
+}
+
+func Search(keyword string) []string {
+	pages := []string{}
+	files, _ := ioutil.ReadDir(".")
+	sort.Sort(fileInfoByNameLength(files))
+
+	for _, file := range files {
+		if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+			f, err := ioutil.ReadFile(file.Name())
+			if err != nil {
+				continue
+			}
+
+			basename := file.Name()[:len(file.Name())-3]
+			if strings.Contains(string(f), keyword) {
+				pages = append(pages, basename)
+			}
+		}
+	}
+
+	return pages
 }

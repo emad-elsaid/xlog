@@ -8,7 +8,7 @@ import (
 )
 
 type Page struct {
-	name string
+	Name string
 }
 
 func NewPage(name string) Page {
@@ -17,16 +17,12 @@ func NewPage(name string) Page {
 	}
 
 	return Page{
-		name: name,
+		Name: name,
 	}
 }
 
-func (p *Page) Name() string {
-	return p.name
-}
-
 func (p *Page) FileName() string {
-	return p.name + ".md"
+	return p.Name + ".md"
 }
 
 func (p *Page) Exists() bool {
@@ -45,7 +41,7 @@ func (p *Page) Render() (html string, refs []string) {
 func (p *Page) Content() string {
 	dat, err := ioutil.ReadFile(p.FileName())
 	if err != nil {
-		fmt.Printf("Can't open `%s`, err: %s\n", p.name, err)
+		fmt.Printf("Can't open `%s`, err: %s\n", p.Name, err)
 		return ""
 	}
 	return string(dat)
@@ -55,7 +51,7 @@ func (p *Page) Delete() bool {
 	if p.Exists() {
 		err := os.Remove(p.FileName())
 		if err != nil {
-			fmt.Printf("Can't delete `%s`, err: %s\n", p.name, err)
+			fmt.Printf("Can't delete `%s`, err: %s\n", p.Name, err)
 			return false
 		}
 	}
@@ -66,7 +62,7 @@ func (p *Page) Write(content string) bool {
 	content = strings.ReplaceAll(content, "\r\n", "\n")
 	err := ioutil.WriteFile(p.FileName(), []byte(content), 0644)
 	if err != nil {
-		fmt.Printf("Can't write `%s`, err: %s\n", p.name, err)
+		fmt.Printf("Can't write `%s`, err: %s\n", p.Name, err)
 		return false
 	}
 	return true
