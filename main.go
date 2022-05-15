@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"flag"
 	"fmt"
@@ -13,6 +14,12 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/yuin/goldmark"
+	emoji "github.com/yuin/goldmark-emoji"
+	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 const MAX_FILE_UPLOAD = 50 * MB
@@ -132,4 +139,28 @@ func Search(keyword string) []string {
 	}
 
 	return pages
+}
+
+func renderMarkdown(content string) string {
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			highlighting.Highlighting,
+			emoji.Emoji,
+		),
+
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithUnsafe(),
+		),
+	)
+
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(content), &buf); err != nil {
+		return err.Error()
+	}
+
+	return buf.String()
 }
