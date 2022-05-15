@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -50,9 +51,9 @@ func linkPage(doc *goquery.Document, basename string) bool {
 
 		found = true
 		text, _ := goquery.OuterHtml(s)
-		a := fmt.Sprintf(`<a href="%s">%s</a>`, basename, basename)
+		reg := regexp.MustCompile(`(?imU)(?:^|\s)(` + regexp.QuoteMeta(basename) + `)(?:\s|$)`)
 
-		s.ReplaceWithHtml(strings.ReplaceAll(text, basename, a))
+		s.ReplaceWithHtml(reg.ReplaceAllString(text, `<a href="$1">$1</a>`))
 	})
 
 	return found
