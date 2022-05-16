@@ -12,6 +12,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -23,6 +24,8 @@ import (
 )
 
 const MAX_FILE_UPLOAD = 50 * MB
+
+var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 
 func main() {
 	cwd, _ := os.Getwd()
@@ -74,8 +77,7 @@ func main() {
 				ext := strings.ToLower(path.Ext(h.Filename))
 				name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
 				p := path.Join("public", name)
-				mdName := strings.ReplaceAll(h.Filename, "[", "")
-				mdName = strings.ReplaceAll(mdName, "]", "")
+				mdName := filterChars(h.Filename, "[]")
 
 				os.Mkdir("public", 0700)
 				out, err := os.Create(p)
@@ -89,7 +91,7 @@ func main() {
 					return InternalServerError(err)
 				}
 
-				if strings.Contains(".jpg,.jpeg,.png,.gif", ext) {
+				if containString(IMAGES_EXTENSIONS, ext) {
 					content += fmt.Sprintf("\n![](/%s)\n", p)
 				} else {
 					content += fmt.Sprintf("\n[%s](/%s)\n", mdName, p)
@@ -163,4 +165,20 @@ func renderMarkdown(content string) string {
 	}
 
 	return buf.String()
+}
+
+func containString(slice []string, str string) bool {
+	for k := range slice {
+		if slice[k] == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func filterChars(str string, exclude string) string {
+	pattern := regexp.MustCompile("[" + regexp.QuoteMeta(exclude) + "]")
+
+	return pattern.ReplaceAllString(str, "")
 }
