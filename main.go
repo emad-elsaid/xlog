@@ -58,7 +58,7 @@ func main() {
 			"title":        page.Name,
 			"content":      template.HTML(html),
 			"references":   refs,
-			"referencedIn": Search(page.Name),
+			"referencedIn": referencedIn(page.Name),
 		})
 	})
 
@@ -121,19 +121,22 @@ func main() {
 	Start()
 }
 
-func Search(keyword string) []string {
+func referencedIn(keyword string) []string {
 	pages := []string{}
 	files, _ := ioutil.ReadDir(".")
 	sort.Sort(fileInfoByNameLength(files))
 
 	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
+		name := file.Name()
+		ext := path.Ext(name)
+		basename := name[:len(name)-len(ext)]
+
+		if !file.IsDir() && ext == ".md" && basename != keyword {
 			f, err := ioutil.ReadFile(file.Name())
 			if err != nil {
 				continue
 			}
 
-			basename := file.Name()[:len(file.Name())-3]
 			if strings.Contains(string(f), keyword) {
 				pages = append(pages, basename)
 			}
