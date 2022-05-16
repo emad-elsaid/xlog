@@ -76,10 +76,10 @@ func main() {
 				c, _ := io.ReadAll(f)
 				ext := strings.ToLower(path.Ext(h.Filename))
 				name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
-				p := path.Join("public", name)
+				p := path.Join(STATIC_DIR_PATH, name)
 				mdName := filterChars(h.Filename, "[]")
 
-				os.Mkdir("public", 0700)
+				os.Mkdir(STATIC_DIR_PATH, 0700)
 				out, err := os.Create(p)
 				if err != nil {
 					return InternalServerError(err)

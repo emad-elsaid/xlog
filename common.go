@@ -72,7 +72,7 @@ func Start() {
 		RequestLoggerHandler,
 	}
 
-	router.PathPrefix("/public").Handler(staticWithoutDirectoryListingHandler())
+	router.PathPrefix("/" + STATIC_DIR_PATH).Handler(staticWithoutDirectoryListingHandler())
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
