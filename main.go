@@ -7,13 +7,11 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -52,14 +50,12 @@ func main() {
 			return Redirect("/" + page.Name + "/edit")
 		}
 
-		html, refs := page.Render()
+		html := page.Render()
 
 		return Render("view", Locals{
-			"edit":         "/" + page.Name + "/edit",
-			"title":        page.Name,
-			"content":      template.HTML(html),
-			"references":   refs,
-			"referencedIn": referencedIn(page.Name),
+			"edit":    "/" + page.Name + "/edit",
+			"title":   page.Name,
+			"content": template.HTML(html),
 		})
 	})
 
@@ -128,31 +124,6 @@ func main() {
 	})
 
 	Start()
-}
-
-func referencedIn(keyword string) []string {
-	pages := []string{}
-	files, _ := ioutil.ReadDir(".")
-	sort.Sort(fileInfoByNameLength(files))
-
-	for _, file := range files {
-		name := file.Name()
-		ext := path.Ext(name)
-		basename := name[:len(name)-len(ext)]
-
-		if !file.IsDir() && ext == ".md" && basename != keyword {
-			f, err := ioutil.ReadFile(file.Name())
-			if err != nil {
-				continue
-			}
-
-			if strings.Contains(string(f), keyword) {
-				pages = append(pages, basename)
-			}
-		}
-	}
-
-	return pages
 }
 
 func renderMarkdown(content string) string {

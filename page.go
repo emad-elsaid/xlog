@@ -30,12 +30,12 @@ func (p *Page) Exists() bool {
 	return err == nil
 }
 
-func (p *Page) Render() (html string, refs []string) {
+func (p *Page) Render() string {
 	content := p.Content()
 	content = preProcess(content)
-	html = renderMarkdown(content)
-	html, refs, _ = postProcess(html)
-	return
+	html := renderMarkdown(content)
+	html, _ = postProcess(html)
+	return html
 }
 
 func (p *Page) Content() string {

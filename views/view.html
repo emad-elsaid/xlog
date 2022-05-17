@@ -5,42 +5,9 @@
   <body>
     {{ template "navbar" . }}
 
-	  <div class="container is-fluid mt-5" dir="auto">
-      <div class="columns">
-
-        {{ if .referencedIn }}
-        <div class="column is-one-fifth">
-          <aside class="menu">
-            <p class="menu-label"> Referenced in </p>
-            <ul class="menu-list is-capitalized">
-              {{ range .referencedIn }}
-              <li><a href="/{{.}}">{{.}}</a></li>
-              {{ end }}
-            </ul>
-          </aside>
-        </div>
-        {{ end }}
-
-        <div class="column content" style="margin-bottom: 20em;">
-          <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
-
-          {{.content}}
-        </div>
-
-        {{ if .references }}
-        <div class="column is-one-fifth">
-          <aside class="menu">
-            <p class="menu-label"> References </p>
-            <ul class="menu-list is-capitalized">
-              {{ range .references }}
-              <li><a href="/{{.}}">{{.}}</a></li>
-              {{ end }}
-            </ul>
-          </aside>
-        </div>
-        {{ end }}
-
-      </div>
+	  <div class="container content mt-5" dir="auto" style="margin-bottom: 20em;">
+      <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
+      {{.content}}
 	  </div>
   </body>
 </html>
