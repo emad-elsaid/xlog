@@ -38,7 +38,7 @@ func linkPage(doc *goquery.Document, basename string) {
 		text, _ := goquery.OuterHtml(s)
 		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(basename) + `)(\W|$)`)
 
-		s.ReplaceWithHtml(reg.ReplaceAllString(text, `$1<a href="$2">$2</a>$1`))
+		s.ReplaceWithHtml(reg.ReplaceAllString(text, `$1<a href="$2">$2</a>$3`))
 	})
 }
 
