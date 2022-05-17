@@ -14,6 +14,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -164,17 +165,18 @@ var helpers = template.FuncMap{}
 
 func compileViews() {
 	templates = template.New("")
-	fs.WalkDir(views, ".", func(path string, d fs.DirEntry, err error) error {
+	fs.WalkDir(views, ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if strings.HasSuffix(path, VIEWS_EXTENSION) && d.Type().IsRegular() {
-			name := strings.TrimPrefix(path, "views/")
-			name = strings.TrimSuffix(name, VIEWS_EXTENSION)
+		if strings.HasSuffix(p, VIEWS_EXTENSION) && d.Type().IsRegular() {
+			rel := strings.TrimPrefix(p, "views"+string(os.PathSeparator))
+			ext := path.Ext(rel)
+			name := strings.TrimSuffix(rel, ext)
 			defer Log(DEBUG, "View", name)()
 
-			c, err := fs.ReadFile(views, path)
+			c, err := fs.ReadFile(views, p)
 			if err != nil {
 				return err
 			}
@@ -255,6 +257,14 @@ func RequestLoggerHandler(h http.Handler) http.Handler {
 }
 
 // HELPERS FUNCTIONS ======================
+
+func HELPER(name string, f interface{}) {
+	if _, ok := helpers[name]; ok {
+		log.Fatalf("Helper: %s has been defined already", name)
+	}
+
+	helpers[name] = f
+}
 
 func atoi32(s string) int32 {
 	i, _ := strconv.ParseInt(s, 10, 32)

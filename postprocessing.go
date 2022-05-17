@@ -11,6 +11,14 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+type postProcessor func(*goquery.Document)
+
+var postProcessors = []postProcessor{}
+
+func POSTPROCESSOR(f postProcessor) {
+	postProcessors = append(postProcessors, f)
+}
+
 func postProcess(content string) (string, []string, error) {
 	r := strings.NewReader(content)
 	doc, err := goquery.NewDocumentFromReader(r)
@@ -19,6 +27,9 @@ func postProcess(content string) (string, []string, error) {
 	}
 
 	references := linkPages(doc)
+	for _, v := range postProcessors {
+		v(doc)
+	}
 	html, err := doc.Html()
 	return html, references, err
 }
@@ -51,9 +62,9 @@ func linkPage(doc *goquery.Document, basename string) bool {
 
 		found = true
 		text, _ := goquery.OuterHtml(s)
-		reg := regexp.MustCompile(`(?imU)(?:^|\s)(` + regexp.QuoteMeta(basename) + `)(?:\s|$)`)
+		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(basename) + `)(\W|$)`)
 
-		s.ReplaceWithHtml(reg.ReplaceAllString(text, ` <a href="$1">$1</a> `))
+		s.ReplaceWithHtml(reg.ReplaceAllString(text, `$1<a href="$2">$2</a>$1`))
 	})
 
 	return found

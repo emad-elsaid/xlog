@@ -1,46 +1,9 @@
 <html class="has-navbar-fixed-top">
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <link rel="icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css">
-    <title>{{.title}} | XLog</title>
+    {{ template "head" . }}
   </head>
   <body>
-
-    <nav class="navbar is-fixed-top is-white" role="navigation">
-      <div class="navbar-start">
-        <div class="navbar-item">
-          <div class="field has-addons mb-0">
-            <div class="control">
-              <input type="text" id="newNote" class="input is-rounded" accesskey="n" placeholder="New log..." onkeypress="if(event.keyCode == 13){ document.location.pathname = this.value }" autocomplete="off"/>
-            </div>
-            <div class="control">
-              <a class="button is-rounded" onclick="document.location.pathname = document.getElementById('newNote').value">
-                Create
-              </a>
-            </div>
-          </div>
-
-          <script type="application/javascript">
-           document.addEventListener('selectionchange', function() {
-               let selection = window.getSelection().toString();
-               if( selection.length > 0 ) {
-                   document.getElementById('newNote').value = selection
-               }
-           })
-          </script>
-        </div>
-      </div>
-
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <a href="{{.edit}}" class="button"> Edit </a>
-          </div>
-        </div>
-      </div>
-    </nav>
+    {{ template "navbar" . }}
 
 	  <div class="container is-fluid mt-5" dir="auto">
       <div class="columns">

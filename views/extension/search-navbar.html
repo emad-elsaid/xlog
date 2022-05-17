@@ -1,0 +1,39 @@
+<div class="navbar-item">
+  <div class="field has-addons mb-0">
+    <div class="control">
+      <input type="text" id="newNote" list="searchResults" class="input is-rounded" accesskey="n" placeholder="New log..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
+      <datalist id="searchResults"></datalist>
+    </div>
+    <div class="control">
+      <a class="button is-rounded" onclick="document.location.pathname = document.getElementById('newNote').value">
+        Create
+      </a>
+    </div>
+  </div>
+</div>
+
+<script type="application/javascript">
+ document.addEventListener('selectionchange', function() {
+     let selection = window.getSelection().toString();
+     if( selection.length > 0 ) {
+         document.getElementById('newNote').value = selection
+     }
+ })
+
+ function search(keyword) {
+     let results = document.getElementById("searchResults");
+     if (keyword.length == 0) {
+         results.innerHTML = "";
+         return;
+     }
+
+     fetch("/+/search?q="+encodeURIComponent(keyword), {
+         method: 'GET',
+         cache: 'no-cache'
+     }).then(function(resp) {
+         return resp.text();
+     }).then(function(body) {
+         results.innerHTML = body;
+     });
+ }
+</script>

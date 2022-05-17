@@ -1,0 +1,24 @@
+<html class="has-navbar-fixed-top">
+  <head>
+    {{ template "head" .}}
+  </head>
+  <body>
+    {{ template "navbar" . }}
+
+	  <div class="container mt-5" dir="auto">
+      <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
+
+      {{ range .results }}
+      <div class="card is-shadowless">
+        <div class="card-content">
+          <div class="title is-4">
+            <a href="/{{.Page}}" class="is-capitalized">
+              {{ .Page }}
+            </a></div>
+          <div class="content"> {{ .Line }} </div>
+        </div>
+      </div>
+      {{ end }}
+	  </div>
+  </body>
+</html>

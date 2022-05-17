@@ -24,6 +24,7 @@ import (
 )
 
 const MAX_FILE_UPLOAD = 50 * MB
+const MIN_SEARCH_KEYWORD = 3
 
 var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 
@@ -118,6 +119,14 @@ func main() {
 		})
 	})
 
+	HELPER("navbarStart", func() template.HTML {
+		o := template.HTML("")
+		for _, v := range NAVBAR_START_WIDGETS {
+			o += v()
+		}
+		return o
+	})
+
 	Start()
 }
 
@@ -184,4 +193,10 @@ func filterChars(str string, exclude string) string {
 	pattern := regexp.MustCompile("[" + regexp.QuoteMeta(exclude) + "]")
 
 	return pattern.ReplaceAllString(str, "")
+}
+
+var NAVBAR_START_WIDGETS = []func() template.HTML{}
+
+func NAVBAR_START(f func() template.HTML) {
+	NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f)
 }
