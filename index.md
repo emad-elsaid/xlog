@@ -212,6 +212,3 @@ warning
 
 alert
 /alert this is text with red background 
-
-
-![](/public/b5e77eb2c120c7581a998ede6ce4f24449c0ffd8242d556bd6ce9382760feec2.png)

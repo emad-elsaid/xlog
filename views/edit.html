@@ -1,45 +1,24 @@
-<html class="has-navbar-fixed-bottom">
-  <head>
-    {{ template "head" . }}
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
-		<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-  </head>
-	<body>
-    <div class="columns">
-      <div class="column">
-			  <form method="POST" id="form" action="/{{ .action }}" class="form" enctype="multipart/form-data">
-          {{ .csrf }}
-				  <div class="field">
-					  <textarea name="content" autofocus>{{ .content }}</textarea>
-				  </div>
-			  </form>
-      </div>
-    </div>
+{{ template "header" . }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 
-    <nav class="navbar is-white is-fixed-bottom" role="navigation">
+<div class="columns">
+  <div class="column">
+		<form method="POST" action="/{{ .action }}" class="form">
+      {{ .csrf }}
+			<div class="field">
+				<textarea name="content" autofocus>{{ .content }}</textarea>
+			</div>
+      <button type="submit"
+              class="button is-link"
+              accesskey="s"
+              style="position: fixed; right:1em; bottom:1em;z-index: 10;">
+        Save
+      </button>
+		</form>
+  </div>
+</div>
 
-      <div class="navbar-start">
-        <div class="navbar-item">
-          <div class="file">
-            <label class="file-label">
-              <input class="file-input" type="file" name="file" form="form">
-              <span class="file-cta">
-                <span class="file-label"> Upload a file… </span>
-              </span>
-            </label>
-          </div>
-        </div>
-      </div>
 
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-					  <button type="submit" form="form" class="button is-link" accesskey="s">Save</button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-		<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
-  </body>
-</html>
+<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
+{{ template "footer" . }}

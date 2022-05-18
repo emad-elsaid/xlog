@@ -2,17 +2,12 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"flag"
-	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
@@ -20,11 +15,6 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
 )
-
-const MAX_FILE_UPLOAD = 50 * MB
-const MIN_SEARCH_KEYWORD = 3
-
-var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 
 func main() {
 	cwd, _ := os.Getwd()
@@ -36,7 +26,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	os.Chdir(absSource)
+	err = os.Chdir(absSource)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	GET("/", func(w Response, r Request) Output {
 		return Redirect("/index")
@@ -51,50 +44,25 @@ func main() {
 		}
 
 		html := page.Render()
+		sidebar := template.HTML("")
+		for _, v := range SIDEBAR_WIDGETS {
+			sidebar += v(&page)
+		}
 
 		return Render("view", Locals{
 			"edit":    "/" + page.Name + "/edit",
 			"title":   page.Name,
 			"content": template.HTML(html),
+			"sidebar": sidebar,
 		})
 	})
 
 	POST("/{page}", func(w Response, r Request) Output {
-		r.ParseMultipartForm(MAX_FILE_UPLOAD)
-
 		vars := VARS(r)
 		page := NewPage(vars["page"])
 		content := r.FormValue("content")
 
 		if content != "" {
-			f, h, _ := r.FormFile("file")
-			if f != nil {
-				defer f.Close()
-				c, _ := io.ReadAll(f)
-				ext := strings.ToLower(path.Ext(h.Filename))
-				name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
-				p := path.Join(STATIC_DIR_PATH, name)
-				mdName := filterChars(h.Filename, "[]")
-
-				os.Mkdir(STATIC_DIR_PATH, 0700)
-				out, err := os.Create(p)
-				if err != nil {
-					return InternalServerError(err)
-				}
-
-				f.Seek(io.SeekStart, 0)
-				_, err = io.Copy(out, f)
-				if err != nil {
-					return InternalServerError(err)
-				}
-
-				if containString(IMAGES_EXTENSIONS, ext) {
-					content += fmt.Sprintf("\n![](/%s)\n", p)
-				} else {
-					content += fmt.Sprintf("\n[%s](/%s)\n", mdName, p)
-				}
-			}
-
 			page.Write(content)
 			return Redirect("/" + page.Name)
 		} else if page.Exists() {
@@ -109,6 +77,7 @@ func main() {
 		page := NewPage(vars["page"])
 
 		return Render("edit", Locals{
+			"title":   page.Name,
 			"action":  page.Name,
 			"content": page.Content(),
 			"csrf":    CSRF(r),
@@ -166,8 +135,16 @@ func filterChars(str string, exclude string) string {
 	return pattern.ReplaceAllString(str, "")
 }
 
+// WIDGETS ===================================================
+
 var NAVBAR_START_WIDGETS = []func() template.HTML{}
 
 func NAVBAR_START(f func() template.HTML) {
 	NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f)
+}
+
+var SIDEBAR_WIDGETS = []func(*Page) template.HTML{}
+
+func SIDEBAR(f func(*Page) template.HTML) {
+	SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f)
 }

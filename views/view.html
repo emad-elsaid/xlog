@@ -1,13 +1,20 @@
-<html class="has-navbar-fixed-top">
-  <head>
-    {{ template "head" . }}
-  </head>
-  <body>
-    {{ template "navbar" . }}
+{{ template "header" . }}
+<div class="container mt-5" dir="auto" style="margin-bottom: 20em;">
+  <div class="columns">
 
-	  <div class="container content is-max-desktop mt-5" dir="auto" style="margin-bottom: 20em;">
+    <div class="column content">
       <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
       {{.content}}
-	  </div>
-  </body>
-</html>
+    </div>
+
+    {{ if .sidebar }}
+    <div class="column is-one-quarter">
+      <aside class="menu">
+        {{ .sidebar }}
+      </aside>
+    </div>
+    {{ end }}
+
+  </div>
+</div>
+{{ template "footer" . }}

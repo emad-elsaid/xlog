@@ -1,0 +1,17 @@
+{{ template "header" . }}
+<section class="section has-text-centered">
+  <form method="POST" class="form" action="{{ .action }}" enctype="multipart/form-data">
+    {{ .csrf }}
+    <div class="field">
+      <div class="control">
+        <input type="file" name="file">
+      </div>
+    </div>
+    <div class="field">
+      <div class="control">
+        <button class="button is-link">Upload</button>
+      </div>
+    </div>
+  </form>
+</section>
+{{ template "footer" . }}

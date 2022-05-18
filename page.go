@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -66,4 +68,27 @@ func (p *Page) Write(content string) bool {
 		return false
 	}
 	return true
+}
+
+func WalkPages(ctx context.Context, f func(*Page)) {
+	files, _ := ioutil.ReadDir(".")
+	for _, file := range files {
+		select {
+
+		case <-ctx.Done():
+			break
+
+		default:
+			name := file.Name()
+			ext := path.Ext(name)
+			basename := name[:len(name)-len(ext)]
+
+			if !file.IsDir() && ext == ".md" {
+				f(&Page{
+					Name: basename,
+				})
+			}
+
+		}
+	}
 }

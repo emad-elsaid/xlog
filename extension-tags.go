@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 
@@ -33,6 +34,28 @@ func tagHandler(w Response, r Request) Output {
 
 	return Render("extension/tag", Locals{
 		"title":   tag,
-		"results": search(r.Context(), tag),
+		"results": tagPages(r.Context(), tag),
 	})
+}
+
+type tagResult struct {
+	Page string
+	Line string
+}
+
+func tagPages(ctx context.Context, keyword string) []tagResult {
+	results := []tagResult{}
+	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
+
+	WalkPages(ctx, func(p *Page) {
+		match := reg.FindString(p.Content())
+		if len(match) > 0 {
+			results = append(results, tagResult{
+				Page: p.Name,
+				Line: match,
+			})
+		}
+	})
+
+	return results
 }

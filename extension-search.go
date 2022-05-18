@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"html/template"
-	"io/ioutil"
-	"path"
 	"regexp"
 )
+
+const MIN_SEARCH_KEYWORD = 3
 
 func init() {
 	NAVBAR_START(searchNavbarStartWidget)
@@ -34,46 +34,26 @@ func search(ctx context.Context, keyword string) []searchResult {
 		return results
 	}
 
-	files, _ := ioutil.ReadDir(".")
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
-	for _, file := range files {
-		select {
-		case <-ctx.Done():
-			break
-		default:
-
-			name := file.Name()
-			ext := path.Ext(name)
-			basename := name[:len(name)-len(ext)]
-
-			if !file.IsDir() && ext == ".md" {
-
-				match := reg.FindString(file.Name())
-				if len(match) > 0 {
-					results = append(results, searchResult{
-						Page: basename,
-						Line: "Matches the file name",
-					})
-					continue
-				}
-
-				f, err := ioutil.ReadFile(file.Name())
-				if err != nil {
-					continue
-				}
-
-				match = reg.FindString(string(f))
-				if len(match) > 0 {
-					results = append(results, searchResult{
-						Page: basename,
-						Line: match,
-					})
-				}
-			}
-
+	WalkPages(ctx, func(p *Page) {
+		match := reg.FindString(p.Name)
+		if len(match) > 0 {
+			results = append(results, searchResult{
+				Page: p.Name,
+				Line: "Matches the file name",
+			})
+			return
 		}
-	}
+
+		match = reg.FindString(p.Content())
+		if len(match) > 0 {
+			results = append(results, searchResult{
+				Page: p.Name,
+				Line: match,
+			})
+		}
+	})
 
 	return results
 }
