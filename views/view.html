@@ -1,20 +1,82 @@
 {{ template "header" . }}
-<div class="container mt-5" dir="auto" style="margin-bottom: 20em;">
-  <div class="columns">
+<div class="container content mt-5 is-max-desktop" dir="auto" style="margin-bottom: 20em;">
+  <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
+  {{.content}}
+</div>
 
-    <div class="column content">
-      <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
-      {{.content}}
-    </div>
+{{ if .tools }}
+<button class="button is-white has-text-grey js-modal-trigger" data-target="modal-js" style="position: fixed; bottom: 1em; right: 1em;">
+  Tools: Ctrl+K
+</button>
 
-    {{ if .sidebar }}
-    <div class="column is-one-quarter">
+<div id="modal-js" class="modal" tabindex="0">
+  <div class="modal-background"></div>
+
+  <div class="modal-content">
+    <div class="box">
       <aside class="menu">
-        {{ .sidebar }}
+        {{ .tools }}
       </aside>
     </div>
-    {{ end }}
-
   </div>
+
+  <button class="modal-close is-large" aria-label="close"></button>
 </div>
+
+<script>
+ (function() {
+     // Functions to open and close a modal
+     function openModal($el) {
+         $el.classList.add('is-active');
+     }
+
+     function closeModal($el) {
+         $el.classList.remove('is-active');
+     }
+
+     function closeAllModals() {
+         (document.querySelectorAll('.modal') || []).forEach(function($modal) {
+             closeModal($modal);
+         });
+     }
+
+     // Add a click event on buttons to open a specific modal
+     (document.querySelectorAll('.js-modal-trigger') || []).forEach(function($trigger) {
+         const modal = $trigger.dataset.target;
+         const $target = document.getElementById(modal);
+
+         $trigger.addEventListener('click', function() {
+             openModal($target);
+         });
+     });
+
+     // Add a click event on various child elements to close the parent modal
+     (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(function($close) {
+         const $target = $close.closest('.modal');
+
+         $close.addEventListener('click', function() {
+             closeModal($target);
+         });
+     });
+
+     // Add a keyboard event to close all modals
+     document.addEventListener('keydown', function(event) {
+         const e = event || window.event;
+
+         if (e.keyCode === 27) { // Escape key
+             closeAllModals();
+             return;
+         }
+
+         if ( e.keyCode === 75 && e.ctrlKey ) { // K key
+             e.preventDefault();
+             const $target = document.getElementById('modal-js');
+             openModal($target);
+             $target.focus();
+         }
+     });
+ })();
+</script>
+{{ end }}
+
 {{ template "footer" . }}

@@ -28,7 +28,7 @@ import (
 const (
 	APP_NAME         = "xlog"
 	STATIC_DIR_PATH  = "public"
-	BIND_ADDRESS     = "0.0.0.0:3000"
+	BIND_ADDRESS     = "127.0.0.1:3000"
 	VIEWS_EXTENSION  = ".html"
 	CSRF_COOKIE_NAME = APP_NAME + "_csrf"
 )

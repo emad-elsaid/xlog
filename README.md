@@ -2,7 +2,7 @@ XLOG
 =========
 ## What is it?
 Think about it in the following terms:
-- A personal knowledgebase
+- A personal knowledgebase or Digital Garden
 - The file system is the storage
 - Uses Markdown format
 - Has a web interface
@@ -14,11 +14,12 @@ Think about it in the following terms:
 - Go to any path to create a post
 - Save a post without content to delete it
 - Checkout [index.md](index.md) for additional features
+- Go files starting with `extension-` are self contained removing a file removes the feature (`views/extension/` sometimes will have a view files for the feature)
 
 ## Installation
 
 ```
-go get github.com/emad-elsaid/xlog/...
+go install github.com/emad-elsaid/xlog@latest
 ```
 
 ## Usage
@@ -26,7 +27,7 @@ go get github.com/emad-elsaid/xlog/...
 ```
 Usage of xlog:
   -bind string
-        IP and port to bind the web server to (default "0.0.0.0:7000")
+        IP and port to bind the web server to (default "127.0.0.1:7000")
   -source string
         Directory that will act as a storage (default ".")
 ```

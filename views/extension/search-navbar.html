@@ -14,10 +14,13 @@
 
 <script type="application/javascript">
  document.addEventListener('selectionchange', function() {
-     let selection = window.getSelection().toString();
-     if( selection.length > 0 ) {
-         document.getElementById('newNote').value = selection
-     }
+     let selection = window.getSelection();
+     let text = selection.toString();
+
+     if( text.length == 0 ) { return; }
+     if( selection.anchorNode.className == 'control' ) { return; }
+
+     document.getElementById('newNote').value = text;
  })
 
  function search(keyword) {

@@ -3,23 +3,24 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 var shortcodes = map[string]preProcessor{
 	"info": func(c string) string {
-		return fmt.Sprintf(`<pre class="notification is-info">%s</pre>`, c)
+		return fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
 
 	"success": func(c string) string {
-		return fmt.Sprintf(`<pre class="notification is-success">%s</pre>`, c)
+		return fmt.Sprintf(`<p class="notification is-success">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
 
 	"warning": func(c string) string {
-		return fmt.Sprintf(`<pre class="notification is-warning">%s</pre>`, c)
+		return fmt.Sprintf(`<p class="notification is-warning">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
 
 	"alert": func(c string) string {
-		return fmt.Sprintf(`<pre class="notification is-danger">%s</pre>`, c)
+		return fmt.Sprintf(`<p class="notification is-danger">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
 }
 

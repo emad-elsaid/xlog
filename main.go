@@ -44,16 +44,16 @@ func main() {
 		}
 
 		html := page.Render()
-		sidebar := template.HTML("")
-		for _, v := range SIDEBAR_WIDGETS {
-			sidebar += v(&page)
+		tools := template.HTML("")
+		for _, v := range TOOLS_WIDGETS {
+			tools += v(&page)
 		}
 
 		return Render("view", Locals{
 			"edit":    "/" + page.Name + "/edit",
 			"title":   page.Name,
 			"content": template.HTML(html),
-			"sidebar": sidebar,
+			"tools":   tools,
 		})
 	})
 
@@ -143,8 +143,8 @@ func NAVBAR_START(f func() template.HTML) {
 	NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f)
 }
 
-var SIDEBAR_WIDGETS = []func(*Page) template.HTML{}
+var TOOLS_WIDGETS = []func(*Page) template.HTML{}
 
-func SIDEBAR(f func(*Page) template.HTML) {
-	SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f)
+func TOOL(f func(*Page) template.HTML) {
+	TOOLS_WIDGETS = append(TOOLS_WIDGETS, f)
 }
