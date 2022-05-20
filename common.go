@@ -28,6 +28,7 @@ import (
 const (
 	APP_NAME         = "xlog"
 	STATIC_DIR_PATH  = "public"
+	ASSETS_DIR_PATH  = "assets"
 	BIND_ADDRESS     = "127.0.0.1:3000"
 	VIEWS_EXTENSION  = ".html"
 	CSRF_COOKIE_NAME = APP_NAME + "_csrf"
@@ -41,6 +42,9 @@ const (
 	TB
 	PB
 )
+
+//go:embed assets
+var assets embed.FS
 
 var (
 	router *mux.Router
@@ -74,6 +78,7 @@ func Start() {
 	}
 
 	router.PathPrefix("/" + STATIC_DIR_PATH).Handler(staticWithoutDirectoryListingHandler())
+	router.PathPrefix("/" + ASSETS_DIR_PATH).Handler(http.FileServer(http.FS(assets)))
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)

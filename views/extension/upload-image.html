@@ -4,7 +4,7 @@
     {{ .csrf }}
     <div class="field">
       <div class="control">
-        <input type="file" name="file">
+        <input type="file" name="file" id="file" onchange="this.form.submit()">
       </div>
     </div>
     <div class="field">
@@ -14,4 +14,8 @@
     </div>
   </form>
 </section>
+
+<script>
+ document.getElementById("file").click();
+</script>
 {{ template "footer" . }}
