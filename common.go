@@ -47,10 +47,9 @@ const (
 var assets embed.FS
 
 var (
-	router *mux.Router
-
-	VARS = mux.Vars
-	CSRF = csrf.TemplateField
+	router = mux.NewRouter()
+	VARS   = mux.Vars
+	CSRF   = csrf.TemplateField
 )
 
 // Some aliases to make it easier
@@ -61,7 +60,6 @@ type Locals map[string]interface{} // passed to views/templates
 
 func init() {
 	log.SetFlags(log.Ltime)
-	router = mux.NewRouter()
 }
 
 func Start() {
