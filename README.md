@@ -1,4 +1,4 @@
-XLOG
+XLog
 =========
 
 <p align="center"><img src="assets/logo.svg" /></p>
@@ -14,9 +14,9 @@ Think about it in the following terms:
 
 ## Features
 - Run it in any directory to create a blog
-- Go to any path to create a post
-- Save a post without content to delete it
-- Checkout [index.md](index.md) for additional features
+- Go to any path to create a note
+- Save a note without content to delete it
+- Checkout [index.md](index) for additional features
 - Go files starting with `extension-` are self contained removing a file removes the feature (`views/extension/` sometimes will have a view files for the feature)
 
 ## Installation
