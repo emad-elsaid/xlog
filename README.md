@@ -1,5 +1,7 @@
 XLOG
 =========
+<center><img src="assets/logo.svg" /></center>
+
 ## What is it?
 Think about it in the following terms:
 - A personal knowledgebase or Digital Garden
