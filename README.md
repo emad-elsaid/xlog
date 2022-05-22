@@ -1,6 +1,7 @@
 XLOG
 =========
-<center><img src="assets/logo.svg" /></center>
+
+<p align="center"><img src="assets/logo.svg" /></p>
 
 ## What is it?
 Think about it in the following terms:
