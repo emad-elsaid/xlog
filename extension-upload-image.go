@@ -16,33 +16,17 @@ var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp
 
 func init() {
 	TOOL(uploadImageWidget)
-	GET("/+/upload-image/{page}", uploadImagePageHandler)
-
 	POST("/+/upload-image/{page}", uploadImageHandler)
 }
 
-func uploadImageWidget(p *Page) template.HTML {
+func uploadImageWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
 		partial("extension/upload-image-sidebar", Locals{
-			"page": p,
+			"page":   p,
+			"csrf":   CSRF(r),
+			"action": "/+/upload-image/" + p.Name,
 		}),
 	)
-}
-
-func uploadImagePageHandler(w Response, r Request) Output {
-	vars := VARS(r)
-	page := NewPage(vars["page"])
-
-	if !page.Exists() {
-		return Redirect("/" + page.Name + "/edit")
-	}
-
-	return Render("extension/upload-image", Locals{
-		"title":  "Upload image",
-		"page":   page,
-		"action": "/+/upload-image/" + page.Name,
-		"csrf":   CSRF(r),
-	})
 }
 
 func uploadImageHandler(w Response, r Request) Output {

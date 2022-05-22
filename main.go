@@ -46,7 +46,7 @@ func main() {
 		html := page.Render()
 		tools := template.HTML("")
 		for _, v := range TOOLS_WIDGETS {
-			tools += v(&page)
+			tools += v(&page, r)
 		}
 
 		return Render("view", Locals{
@@ -143,8 +143,8 @@ func NAVBAR_START(f func() template.HTML) {
 	NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f)
 }
 
-var TOOLS_WIDGETS = []func(*Page) template.HTML{}
+var TOOLS_WIDGETS = []func(*Page, Request) template.HTML{}
 
-func TOOL(f func(*Page) template.HTML) {
+func TOOL(f func(*Page, Request) template.HTML) {
 	TOOLS_WIDGETS = append(TOOLS_WIDGETS, f)
 }
