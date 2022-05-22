@@ -4,10 +4,10 @@
 <div class="container is-max-desktop">
   <div class="columns">
     <div class="column">
-		  <form method="POST" action="/{{ .action }}" class="form">
+		  <form method="POST" action="/{{ .action }}" class="form" id="editor">
         {{ .csrf }}
 			  <div class="field">
-				  <textarea name="content" autofocus>{{ .content }}</textarea>
+				  <textarea id="content" name="content">{{ .content }}</textarea>
 			  </div>
         <button type="submit"
                 class="button is-link"
@@ -21,5 +21,16 @@
 </div>
 
 
-<script> new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});</script>
+<script>
+ var form = document.getElementById("editor");
+ new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});
+
+ document.addEventListener('keydown', function(event) {
+     const e = event || window.event;
+     if ( e.keyCode === 83 && e.ctrlKey ) { // S key
+         e.preventDefault();
+         form.submit();
+     }
+ });
+</script>
 {{ template "footer" . }}
