@@ -10,8 +10,6 @@ require (
 	github.com/yuin/goldmark-highlighting v0.0.0-20191202084645-78f32c8dd6d5
 )
 
-replace github.com/yuin/goldmark => github.com/emad-elsaid/goldmark v1.4.13-0.20220522124813-d5634d6ec219
-
 require (
 	github.com/alecthomas/chroma v0.7.0 // indirect
 	github.com/andybalholm/cascadia v1.1.0 // indirect
