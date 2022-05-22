@@ -62,14 +62,8 @@ func main() {
 		page := NewPage(vars["page"])
 		content := r.FormValue("content")
 
-		if content != "" {
-			page.Write(content)
-			return Redirect("/" + page.Name)
-		} else if page.Exists() {
-			page.Delete()
-		}
-
-		return Redirect("/")
+		page.Write(content)
+		return Redirect("/" + page.Name)
 	})
 
 	GET("/{page}/edit", func(w Response, r Request) Output {
