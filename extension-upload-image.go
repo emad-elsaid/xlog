@@ -21,7 +21,7 @@ func init() {
 
 func uploadImageWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
-		partial("extension/upload-image-sidebar", Locals{
+		partial("extension/upload-image", Locals{
 			"page":   p,
 			"csrf":   CSRF(r),
 			"action": "/+/upload-image/" + p.Name,
