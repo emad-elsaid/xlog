@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"embed"
+	"flag"
 	"fmt"
 	"html/template"
 	"image"
@@ -29,7 +30,6 @@ const (
 	APP_NAME         = "xlog"
 	STATIC_DIR_PATH  = "public"
 	ASSETS_DIR_PATH  = "assets"
-	BIND_ADDRESS     = "127.0.0.1:3000"
 	VIEWS_EXTENSION  = ".html"
 	CSRF_COOKIE_NAME = APP_NAME + "_csrf"
 )
@@ -47,9 +47,10 @@ const (
 var assets embed.FS
 
 var (
-	router = mux.NewRouter()
-	VARS   = mux.Vars
-	CSRF   = csrf.TemplateField
+	BIND_ADDRESS string
+	router       = mux.NewRouter()
+	VARS         = mux.Vars
+	CSRF         = csrf.TemplateField
 )
 
 // Some aliases to make it easier
@@ -59,6 +60,7 @@ type Output = http.HandlerFunc
 type Locals map[string]interface{} // passed to views/templates
 
 func init() {
+	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	log.SetFlags(log.Ltime)
 }
 
