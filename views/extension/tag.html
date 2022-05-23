@@ -3,13 +3,10 @@
   <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
 
   {{ range .results }}
-  <div class="card is-shadowless">
+  <div class="card">
     <div class="card-content">
-      <div class="title is-4">
-        <a href="/{{.Page}}" class="is-capitalized">
-          {{ .Page }}
-        </a></div>
-      <div class="content"> {{ .Line }} </div>
+      <a href="/{{.Page}}" class="has-text-weight-bold is-capitalized"> {{ .Page }} </a> :
+      {{ .Line }}
     </div>
   </div>
   {{ end }}

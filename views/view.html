@@ -10,9 +10,22 @@
      padding-bottom: 0.5em;
  }
 </style>
-<div class="container content mt-5 is-max-desktop" dir="auto" style="margin-bottom: 20em;">
-  <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
-  {{.content}}
+
+<div class="container mt-5">
+  <div class="columns">
+    {{ if .sidebar }}
+    <div class="column is-one-fifth">
+      {{ .sidebar }}
+    </div>
+    {{ end }}
+
+    <div class="column">
+      <div class="content" dir="auto" style="margin-bottom: 20em;">
+        <h1 class="title is-1 has-text-weight-bold is-capitalized">{{.title}}</h1>
+        {{.content}}
+      </div>
+    </div>
+  </div>
 </div>
 
 {{ if .tools }}
@@ -91,6 +104,11 @@
 
      });
  })();
+
+ // This is a hack to display right to left text correctly
+ document.querySelectorAll('.content p, .content li, .content h1, .content h2, .content h3, .content h4, .content h5, .content h6').forEach(function(ele) {
+     ele.setAttribute("dir", "auto")
+ })
 </script>
 {{ end }}
 

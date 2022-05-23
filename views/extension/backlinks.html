@@ -1,0 +1,11 @@
+{{ if .pages }}
+<aside class="menu">
+  <p class="menu-label">BACKLINKs</p>
+
+  <ul class="menu-list">
+    {{ range .pages }}
+    <li class="is-capitalized"><a href="/{{.}}">{{ . }}</a></li>
+    {{ end }}
+  </ul>
+</aside>
+{{ end }}

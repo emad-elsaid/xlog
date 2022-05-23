@@ -1,0 +1,17 @@
+<aside class="menu">
+  <p class="menu-label">TAGS</p>
+
+  {{ range $tag, $pages := .tags }}
+  <details class="menu">
+    <summary class="menu-label">
+      <a href="/+/tag/{{$tag}}" class="is-capitalized">{{$tag}} ({{ len $pages }})</a>
+    </summary>
+    <ul class="menu-list">
+      {{ range $pages }}
+      <li class="is-capitalized"><a href="/{{.}}">{{ . }}</a></li>
+      {{ end }}
+    </ul>
+  </details>
+  {{ end }}
+
+</aside>

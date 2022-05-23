@@ -1,0 +1,24 @@
+package main
+
+import (
+	"context"
+	"html/template"
+	"regexp"
+)
+
+func init() {
+	SIDEBAR(backlinksSidebar)
+}
+
+func backlinksSidebar(p *Page, r Request) template.HTML {
+	pages := []string{}
+	reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(p.Name) + `)(\W|$)`)
+
+	WalkPages(context.Background(), func(a *Page) {
+		if len(reg.FindString(a.Content())) > 0 {
+			pages = append(pages, a.Name)
+		}
+	})
+
+	return template.HTML(partial("extension/backlinks", Locals{"pages": pages}))
+}
