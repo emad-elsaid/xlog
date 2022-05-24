@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"regexp"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -69,7 +70,7 @@ func hashtagsSidebar(p *Page, r Request) template.HTML {
 		set := map[string]bool{}
 		hashes := hashtagReg.FindAllStringSubmatch(a.Content(), -1)
 		for _, v := range hashes {
-			val := v[1]
+			val := strings.ToLower(v[1])
 
 			// don't use same tag twice for same page
 			if _, ok := set[val]; ok {

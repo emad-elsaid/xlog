@@ -1,10 +1,11 @@
+{{ if .tags }}
 <aside class="menu">
   <p class="menu-label">TAGS</p>
 
   {{ range $tag, $pages := .tags }}
   <details class="menu">
-    <summary class="menu-label">
-      <a href="/+/tag/{{$tag}}" class="is-capitalized">{{$tag}} ({{ len $pages }})</a>
+    <summary class="menu-label is-capitalized is-clickable">
+      {{$tag}}  <a href="/+/tag/{{$tag}}"><span class="tag is-pulled-right">{{ len $pages }}</span></a>
     </summary>
     <ul class="menu-list">
       {{ range $pages }}
@@ -13,5 +14,6 @@
     </ul>
   </details>
   {{ end }}
-
 </aside>
+<hr/>
+{{ end }}

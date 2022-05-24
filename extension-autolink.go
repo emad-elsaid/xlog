@@ -2,13 +2,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"regexp"
 	"sort"
-	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"golang.org/x/net/context"
 )
 
 func init() {
@@ -16,14 +14,15 @@ func init() {
 }
 
 func linkPages(doc *goquery.Document) {
-	files, _ := ioutil.ReadDir(".")
-	sort.Sort(fileInfoByNameLength(files))
+	pages := []*Page{}
+	WalkPages(context.Background(), func(p *Page) {
+		pages = append(pages, p)
+	})
 
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".md") {
-			basename := file.Name()[:len(file.Name())-3]
-			linkPage(doc, basename)
-		}
+	sort.Sort(fileInfoByNameLength(pages))
+
+	for _, p := range pages {
+		linkPage(doc, p.Name)
 	}
 }
 
@@ -42,8 +41,8 @@ func linkPage(doc *goquery.Document, basename string) {
 	})
 }
 
-type fileInfoByNameLength []os.FileInfo
+type fileInfoByNameLength []*Page
 
 func (a fileInfoByNameLength) Len() int           { return len(a) }
 func (a fileInfoByNameLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > len(a[j].Name()) }
+func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name) > len(a[j].Name) }
