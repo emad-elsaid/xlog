@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 type Page struct {
@@ -68,6 +69,15 @@ func (p *Page) Write(content string) bool {
 		return false
 	}
 	return true
+}
+
+func (p *Page) ModTime() time.Time {
+	s, err := os.Stat(p.FileName())
+	if err != nil {
+		return time.Time{}
+	}
+
+	return s.ModTime()
 }
 
 func WalkPages(ctx context.Context, f func(*Page)) {
