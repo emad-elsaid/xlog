@@ -16,6 +16,7 @@ Think about it in the following terms:
 - Run it in any directory to create a blog
 - Go to any path to create a note
 - Checkout [index.md](index) for additional features
+- Create a `template` note. xlog will use its content to prefix the editor when creating a new note
 - Go files starting with `extension-` are self contained removing a file removes the feature (`views/extension/` sometimes will have a view files for the feature)
 
 ## Installation

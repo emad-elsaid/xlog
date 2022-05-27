@@ -16,6 +16,8 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
+const TEMPLATE_NAME = "template"
+
 func main() {
 	cwd, _ := os.Getwd()
 	source := flag.String("source", cwd, "Directory that will act as a storage")
@@ -75,11 +77,19 @@ func main() {
 	GET("/{page}/edit", func(w Response, r Request) Output {
 		vars := VARS(r)
 		page := NewPage(vars["page"])
+		template := NewPage(TEMPLATE_NAME)
+
+		var content string
+		if page.Exists() {
+			content = page.Content()
+		} else if template.Exists() {
+			content = template.Content()
+		}
 
 		return Render("edit", Locals{
 			"title":   page.Name,
 			"action":  page.Name,
-			"content": page.Content(),
+			"content": content,
 			"csrf":    CSRF(r),
 		})
 	})
