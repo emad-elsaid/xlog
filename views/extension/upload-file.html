@@ -1,0 +1,40 @@
+<script>
+ document.body.addEventListener('drop', function(ev){
+     ev.preventDefault();
+     ev.dataTransfer.dropEffect = "copy";
+     var items = ev.dataTransfer.items;
+     if( items < 1 ){
+         return;
+     }
+
+     var item = items[0];
+     if(item.kind !== 'file') {
+         return;
+     }
+
+     var file = item.getAsFile();
+     var data = new FormData()
+
+     data.append('file', file)
+     data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+     fetch('{{ .action }}', {
+         method: 'POST',
+         body: data
+     }).then(function(){ document.location.reload() });
+ });
+
+ document.body.addEventListener('dragover', function(ev){
+     ev.preventDefault();
+ });
+</script>
+
+<ul class="menu-list">
+  <li>
+    <a href="#" onclick="document.getElementById('file-upload-file').click()"> 🖼️ Upload File</a>
+  </li>
+  <form method="POST" class="form is-hidden" action="{{ .action }}" enctype="multipart/form-data">
+    {{ .csrf }}
+    <input class="file-input" type="file" name="file" id="file-upload-file" onchange="this.form.submit()">
+  </form>
+</ul>

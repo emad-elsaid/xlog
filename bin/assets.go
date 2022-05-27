@@ -2,16 +2,26 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
 	"https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css",
+}
+
+var CSS_ZIP = map[string]map[string]string{
+	"https://use.fontawesome.com/releases/v6.1.1/fontawesome-free-6.1.1-web.zip": {
+		"fontawesome-free-6.1.1-web/css/all.min.css": "fontawesome/style.css",
+		"fontawesome-free-6.1.1-web/webfonts/":       "fontawesome/webfonts/",
+	},
 }
 
 var JS_URLS = []string{
@@ -40,6 +50,59 @@ func main() {
 	err = urlsToFile(JS_URLS, JS_DEST)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	for url, files := range CSS_ZIP {
+		resp, err := http.Get(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		buf := bytes.NewBuffer([]byte{})
+		io.Copy(buf, resp.Body)
+		resp.Body.Close()
+
+		z, err := zip.NewReader(bytes.NewReader(buf.Bytes()), resp.ContentLength)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, zf := range z.File {
+			for f, d := range files {
+				if !strings.HasPrefix(zf.Name, f) {
+					continue
+				}
+
+				dpath := path.Join(DEST, d, zf.Name[len(f):])
+				log.Println("Extracting to", dpath)
+
+				if _, err := os.Stat(path.Dir(dpath)); err != nil {
+					log.Println("checking dir: ", path.Dir(dpath))
+					os.Mkdir(path.Dir(dpath), 0700)
+				}
+
+				if zf.FileInfo().IsDir() {
+					os.Mkdir(dpath, 0700)
+					continue
+				}
+
+				dest, err := os.Create(dpath)
+				if err != nil {
+					log.Fatal("Opening the destination file ", err)
+				}
+
+				b, err := zf.Open()
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				io.Copy(dest, b)
+
+				dest.Close()
+				b.Close()
+			}
+		}
+
 	}
 }
 

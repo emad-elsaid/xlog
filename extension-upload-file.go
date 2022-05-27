@@ -15,21 +15,21 @@ const MAX_FILE_UPLOAD = 50 * MB
 var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 
 func init() {
-	TOOL(uploadImageWidget)
-	POST("/+/upload-image/{page}", uploadImageHandler)
+	TOOL(uploadFileWidget)
+	POST("/+/upload-file/{page}", uploadFileHandler)
 }
 
-func uploadImageWidget(p *Page, r Request) template.HTML {
+func uploadFileWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
-		partial("extension/upload-image", Locals{
+		partial("extension/upload-file", Locals{
 			"page":   p,
 			"csrf":   CSRF(r),
-			"action": "/+/upload-image/" + p.Name,
+			"action": "/+/upload-file/" + p.Name,
 		}),
 	)
 }
 
-func uploadImageHandler(w Response, r Request) Output {
+func uploadFileHandler(w Response, r Request) Output {
 	r.ParseMultipartForm(MAX_FILE_UPLOAD)
 
 	vars := VARS(r)
@@ -61,10 +61,12 @@ func uploadImageHandler(w Response, r Request) Output {
 			return InternalServerError(err)
 		}
 
+		content = strings.TrimSpace(content)
+
 		if containString(IMAGES_EXTENSIONS, ext) {
-			content += fmt.Sprintf("\n![](/%s)\n", p)
+			content += fmt.Sprintf("\n\n![](/%s)\n", p)
 		} else {
-			content += fmt.Sprintf("\n[%s](/%s)\n", mdName, p)
+			content += fmt.Sprintf("\n\n[%s](/%s)\n", mdName, p)
 		}
 	}
 

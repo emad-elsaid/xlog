@@ -56,6 +56,7 @@ func main() {
 		return Render("view", Locals{
 			"edit":    "/" + page.Name + "/edit",
 			"title":   page.Name,
+			"updated": page.ModTime().Format("2006-01-02 15:04"),
 			"content": template.HTML(html),
 			"tools":   tools,
 			"sidebar": sidebar,
