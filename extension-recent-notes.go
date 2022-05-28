@@ -18,8 +18,13 @@ func recentNotes(p *Page, r Request) template.HTML {
 
 	sort.Sort(rp)
 
+	if len(rp) > 10 {
+		rp = rp[:10]
+	}
+
 	pages := []string{}
-	for _, v := range rp[0:10] {
+
+	for _, v := range rp {
 		pages = append(pages, v.Name)
 	}
 
