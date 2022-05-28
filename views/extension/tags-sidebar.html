@@ -1,6 +1,9 @@
 {{ if .tags }}
 <aside class="menu" style="user-select: none;">
-  <p class="menu-label">TAGS</p>
+  <p class="menu-label">
+    <span class="icon"><i class="fa-solid fa-tags"></i></span>
+    <span>TAGS</span>
+  </p>
 
   {{ range $tag, $pages := .tags }}
   <details class="menu">

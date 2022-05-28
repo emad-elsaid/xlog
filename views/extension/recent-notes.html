@@ -1,6 +1,9 @@
 {{ if .pages }}
 <aside class="menu">
-  <p class="menu-label">RECENT</p>
+  <p class="menu-label">
+    <span class="icon"> <i class="fa-solid fa-clock-rotate-left"></i> </span>
+    <span> RECENT </span>
+  </p>
 
   <ul class="menu-list">
     {{ range .pages }}
