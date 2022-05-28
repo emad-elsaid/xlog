@@ -33,7 +33,7 @@
 
  document.addEventListener('keydown', function(event) {
      const e = event || window.event;
-     if ( e.keyCode === 83 && e.ctrlKey ) { // S key
+     if ( e.keyCode === 83 && (e.ctrlKey || e.metaKey ) ) { // S key
          e.preventDefault();
          form.submit();
      }

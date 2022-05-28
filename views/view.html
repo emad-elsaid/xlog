@@ -100,12 +100,12 @@
              return;
          }
 
-         if ( e.keyCode === 75 && e.ctrlKey ) { // K key
+         if ( e.keyCode === 75 && ( e.metaKey || e.ctrlKey ) ) { // K key
              e.preventDefault();
              const $target = document.getElementById('modal-js');
              openModal($target);
              $target.focus();
-         } else if ( e.keyCode === 83 && e.ctrlKey ) { // S key
+         } else if ( e.keyCode === 83 && ( e.metaKey || e.ctrlKey ) ) { // S key
              e.preventDefault();
              document.location.pathname = "{{.edit}}";
          }
