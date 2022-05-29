@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,12 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/yuin/goldmark"
+	emoji "github.com/yuin/goldmark-emoji"
+	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 type (
@@ -136,4 +143,28 @@ func (c PageEventsMap) Trigger(e PageEvent, p *Page) {
 			log.Printf("Executing Event %#v handler %#v failed with error: %s\n", e, h, err)
 		}
 	}
+}
+
+func renderMarkdown(content string) string {
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			highlighting.Highlighting,
+			emoji.Emoji,
+		),
+
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithUnsafe(),
+		),
+	)
+
+	var buf bytes.Buffer
+	if err := md.Convert([]byte(content), &buf); err != nil {
+		return err.Error()
+	}
+
+	return buf.String()
 }

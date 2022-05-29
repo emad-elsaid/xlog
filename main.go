@@ -1,19 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"html/template"
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
-
-	"github.com/yuin/goldmark"
-	emoji "github.com/yuin/goldmark-emoji"
-	highlighting "github.com/yuin/goldmark-highlighting"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/renderer/html"
 )
 
 const TEMPLATE_NAME = "template"
@@ -103,46 +95,6 @@ func main() {
 	})
 
 	Start()
-}
-
-func renderMarkdown(content string) string {
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.DefinitionList,
-			extension.Footnote,
-			highlighting.Highlighting,
-			emoji.Emoji,
-		),
-
-		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
-			html.WithUnsafe(),
-		),
-	)
-
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(content), &buf); err != nil {
-		return err.Error()
-	}
-
-	return buf.String()
-}
-
-func containString(slice []string, str string) bool {
-	for k := range slice {
-		if slice[k] == str {
-			return true
-		}
-	}
-
-	return false
-}
-
-func filterChars(str string, exclude string) string {
-	pattern := regexp.MustCompile("[" + regexp.QuoteMeta(exclude) + "]")
-
-	return pattern.ReplaceAllString(str, "")
 }
 
 // WIDGETS ===================================================

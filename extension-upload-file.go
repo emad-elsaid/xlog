@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -73,4 +74,20 @@ func uploadFileHandler(w Response, r Request) Output {
 	page.Write(content)
 
 	return Redirect("/" + page.Name)
+}
+
+func containString(slice []string, str string) bool {
+	for k := range slice {
+		if slice[k] == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func filterChars(str string, exclude string) string {
+	pattern := regexp.MustCompile("[" + regexp.QuoteMeta(exclude) + "]")
+
+	return pattern.ReplaceAllString(str, "")
 }
