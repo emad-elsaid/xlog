@@ -147,20 +147,12 @@ func filterChars(str string, exclude string) string {
 
 // WIDGETS ===================================================
 
-var NAVBAR_START_WIDGETS = []func() template.HTML{}
+var (
+	NAVBAR_START_WIDGETS = []func() template.HTML{}
+	TOOLS_WIDGETS        = []func(*Page, Request) template.HTML{}
+	SIDEBAR_WIDGETS      = []func(*Page, Request) template.HTML{}
+)
 
-func NAVBAR_START(f func() template.HTML) {
-	NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f)
-}
-
-var TOOLS_WIDGETS = []func(*Page, Request) template.HTML{}
-
-func TOOL(f func(*Page, Request) template.HTML) {
-	TOOLS_WIDGETS = append(TOOLS_WIDGETS, f)
-}
-
-var SIDEBAR_WIDGETS = []func(*Page, Request) template.HTML{}
-
-func SIDEBAR(f func(*Page, Request) template.HTML) {
-	SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f)
-}
+func NAVBAR_START(f func() template.HTML)          { NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f) }
+func TOOL(f func(*Page, Request) template.HTML)    { TOOLS_WIDGETS = append(TOOLS_WIDGETS, f) }
+func SIDEBAR(f func(*Page, Request) template.HTML) { SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f) }
