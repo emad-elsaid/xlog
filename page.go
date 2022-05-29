@@ -4,15 +4,28 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strings"
 	"time"
 )
 
-type Page struct {
-	Name string
-}
+type (
+	Page struct {
+		Name string
+	}
+
+	PageEvent        int
+	PageEventHandler func(*Page) error
+	PageEventsMap    map[PageEvent][]PageEventHandler
+)
+
+const (
+	BeforeWrite PageEvent = iota
+)
+
+var PageEvents = PageEventsMap{}
 
 func NewPage(name string) Page {
 	if name == "" {
@@ -62,9 +75,11 @@ func (p *Page) Delete() bool {
 }
 
 func (p *Page) Write(content string) bool {
+	PageEvents.Trigger(BeforeWrite, p)
+
 	content = strings.ReplaceAll(content, "\r\n", "\n")
-	err := ioutil.WriteFile(p.FileName(), []byte(content), 0644)
-	if err != nil {
+
+	if err := ioutil.WriteFile(p.FileName(), []byte(content), 0644); err != nil {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.Name, err)
 		return false
 	}
@@ -99,6 +114,26 @@ func WalkPages(ctx context.Context, f func(*Page)) {
 				})
 			}
 
+		}
+	}
+}
+
+func (c PageEventsMap) Listen(e PageEvent, h PageEventHandler) {
+	if _, ok := c[e]; !ok {
+		c[e] = []PageEventHandler{}
+	}
+
+	c[e] = append(c[e], h)
+}
+
+func (c PageEventsMap) Trigger(e PageEvent, p *Page) {
+	if _, ok := c[e]; !ok {
+		return
+	}
+
+	for _, h := range c[e] {
+		if err := h(p); err != nil {
+			log.Printf("Executing Event %#v handler %#v failed with error: %s\n", e, h, err)
 		}
 	}
 }
