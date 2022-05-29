@@ -20,7 +20,7 @@ var CSS_URLS = []string{
 var CSS_ZIP = map[string]map[string]string{
 	"https://use.fontawesome.com/releases/v6.1.1/fontawesome-free-6.1.1-web.zip": {
 		"fontawesome-free-6.1.1-web/css/all.min.css": "fontawesome/style.css",
-		"fontawesome-free-6.1.1-web/webfonts/":       "fontawesome/webfonts/",
+		"fontawesome-free-6.1.1-web/webfonts/":       "webfonts",
 	},
 }
 
