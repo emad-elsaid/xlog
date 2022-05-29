@@ -33,6 +33,20 @@ const (
 )
 
 var PageEvents = PageEventsMap{}
+var MarkDownRenderer = goldmark.New(
+	goldmark.WithExtensions(
+		extension.GFM,
+		extension.DefinitionList,
+		extension.Footnote,
+		highlighting.Highlighting,
+		emoji.Emoji,
+	),
+
+	goldmark.WithRendererOptions(
+		html.WithHardWraps(),
+		html.WithUnsafe(),
+	),
+)
 
 func NewPage(name string) Page {
 	if name == "" {
@@ -56,7 +70,14 @@ func (p *Page) Exists() bool {
 func (p *Page) Render() string {
 	content := p.Content()
 	content = preProcess(content)
-	html := renderMarkdown(content)
+
+	var buf bytes.Buffer
+	if err := MarkDownRenderer.Convert([]byte(content), &buf); err != nil {
+		return err.Error()
+	}
+
+	html := buf.String()
+
 	html, _ = postProcess(html)
 	return html
 }
@@ -143,28 +164,4 @@ func (c PageEventsMap) Trigger(e PageEvent, p *Page) {
 			log.Printf("Executing Event %#v handler %#v failed with error: %s\n", e, h, err)
 		}
 	}
-}
-
-func renderMarkdown(content string) string {
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.DefinitionList,
-			extension.Footnote,
-			highlighting.Highlighting,
-			emoji.Emoji,
-		),
-
-		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
-			html.WithUnsafe(),
-		),
-	)
-
-	var buf bytes.Buffer
-	if err := md.Convert([]byte(content), &buf); err != nil {
-		return err.Error()
-	}
-
-	return buf.String()
 }
