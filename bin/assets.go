@@ -25,7 +25,7 @@ var CSS_ZIP = map[string]map[string]string{
 }
 
 var JS_URLS = []string{
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.min.js",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/addon/mode/overlay.js",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/markdown/markdown.js",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/xml/xml.js",
