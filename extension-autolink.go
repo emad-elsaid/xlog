@@ -5,15 +5,29 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/util"
 	"golang.org/x/net/context"
 )
 
 func init() {
-	POSTPROCESSOR(linkPages)
+	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+		util.Prioritized(&AutolinkPages{}, -1),
+	))
 }
 
-func linkPages(doc *goquery.Document) {
+type AutolinkPages struct{}
+
+func (h *AutolinkPages) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindText, renderLinkToPages)
+}
+
+func renderLinkToPages(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+
 	pages := []*Page{}
 	WalkPages(context.Background(), func(p *Page) {
 		pages = append(pages, p)
@@ -21,24 +35,16 @@ func linkPages(doc *goquery.Document) {
 
 	sort.Sort(fileInfoByNameLength(pages))
 
+	text := string(n.Text(source))
+
 	for _, p := range pages {
-		linkPage(doc, p.Name)
+		Log(DEBUG, "renderLinkToPages", "iterating on page", p)
+		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(p.Name) + `)(\W|$)`)
+		text = reg.ReplaceAllString(text, `$1<a href="`+p.Name+`">$2</a>$3`)
 	}
-}
 
-func linkPage(doc *goquery.Document, basename string) {
-	selector := fmt.Sprintf(":contains('%s')", basename)
-
-	doc.Find(selector).Each(func(i int, s *goquery.Selection) {
-		if goquery.NodeName(s) != "#text" || s.ParentsFiltered("code,a,pre").Length() > 0 {
-			return
-		}
-
-		text, _ := goquery.OuterHtml(s)
-		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(basename) + `)(\W|$)`)
-
-		s.ReplaceWithHtml(reg.ReplaceAllString(text, `$1<a href="`+basename+`">$2</a>$3`))
-	})
+	fmt.Fprintf(writer, text)
+	return ast.WalkContinue, nil
 }
 
 type fileInfoByNameLength []*Page
