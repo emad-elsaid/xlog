@@ -48,9 +48,21 @@ var assets embed.FS
 
 var (
 	BIND_ADDRESS string
+	AUTORELOAD   bool
+	STARTUP_TIME = time.Now()
 	router       = mux.NewRouter()
 	VARS         = mux.Vars
 	CSRF         = csrf.TemplateField
+	middlewares  = []func(http.Handler) http.Handler{
+		methodOverrideHandler,
+		csrf.Protect(
+			[]byte(os.Getenv("SESSION_SECRET")),
+			csrf.Path("/"),
+			csrf.FieldName("csrf"),
+			csrf.CookieName(CSRF_COOKIE_NAME),
+		),
+		RequestLoggerHandler,
+	}
 )
 
 // Some aliases to make it easier
@@ -61,24 +73,20 @@ type Locals map[string]interface{} // passed to views/templates
 
 func init() {
 	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
+	flag.BoolVar(&AUTORELOAD, "autoload", false, "reload the page when the server restarts")
 	log.SetFlags(log.Ltime)
+	HELPER("autoload", func() bool { return AUTORELOAD })
 }
 
 func Start() {
 	compileViews()
-	middlewares := []func(http.Handler) http.Handler{
-		methodOverrideHandler,
-		csrf.Protect(
-			[]byte(os.Getenv("SESSION_SECRET")),
-			csrf.Path("/"),
-			csrf.FieldName("csrf"),
-			csrf.CookieName(CSRF_COOKIE_NAME),
-		),
-		RequestLoggerHandler,
-	}
-
 	router.PathPrefix("/" + STATIC_DIR_PATH).Handler(staticWithoutDirectoryListingHandler())
 	router.PathPrefix("/" + ASSETS_DIR_PATH).Handler(http.FileServer(http.FS(assets)))
+
+	if AUTORELOAD {
+		router.PathPrefix("/autoreload/token").HandlerFunc(func(w Response, _ Request) { fmt.Fprintf(w, "%d", STARTUP_TIME.Unix()) })
+	}
+
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
@@ -193,7 +201,7 @@ func compileViews() {
 	})
 }
 
-func partial(path string, data interface{}) string {
+func partial(path string, data Locals) string {
 	v := templates.Lookup(path)
 	if v == nil {
 		return fmt.Sprintf("view %s not found", path)

@@ -33,6 +33,8 @@ Usage of xlog:
         IP and port to bind the web server to (default "127.0.0.1:7000")
   -source string
         Directory that will act as a storage (default ".")
+  -autoload
+        reload the page when the server restarts
 ```
 
 Now you can access notes with `localhost:7000`
