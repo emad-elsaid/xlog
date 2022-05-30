@@ -8,13 +8,18 @@ import (
 	"strings"
 
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 )
 
 func init() {
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
+	))
+	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
+		util.Prioritized(&HashTag{}, 999),
 	))
 	SIDEBAR(hashtagsSidebar)
 
@@ -23,21 +28,59 @@ func init() {
 
 var hashtagReg = regexp.MustCompile(`(?imU)#([[:alpha:]]\w+)(\W|$)`)
 
-type HashTag struct{}
+type HashTag struct {
+	ast.BaseInline
+	value []byte
+}
 
 func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(ast.KindText, renderHashtag)
+	reg.Register(KindHashTag, renderHashtag)
+}
+
+func (h *HashTag) Trigger() []byte {
+	return []byte{'#'}
+}
+
+func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
+	line, _ := block.PeekLine()
+	if len(line) < 1 {
+		return nil
+	}
+	i := 1
+	for ; i < len(line); i++ {
+		c := line[i]
+		if !(util.IsAlphaNumeric(c) || c == '_' || c == '-') {
+			break
+		}
+	}
+	if i > len(line) || i == 1 {
+		return nil
+	}
+	block.Advance(i)
+	tag := line[1:i]
+	return &HashTag{value: tag}
+}
+
+func (h *HashTag) Dump(source []byte, level int) {
+	m := map[string]string{
+		"value": fmt.Sprintf("%#v", h.value),
+	}
+	ast.DumpHelper(h, source, level, m, nil)
+}
+
+var KindHashTag = ast.NewNodeKind("Hashtag")
+
+func (h *HashTag) Kind() ast.NodeKind {
+	return KindHashTag
 }
 
 func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
-	if !entering {
+	if !entering || n.Kind() != KindHashTag {
 		return ast.WalkContinue, nil
 	}
 
-	text := string(n.Text(source))
-	text = hashtagReg.ReplaceAllString(text, `<a href="/+/tag/$1" class="tag is-info">#$1</a>$2`)
-
-	fmt.Fprintf(writer, text)
+	tag := n.(*HashTag)
+	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info">#%s</a>`, tag.value, tag.value)
 	return ast.WalkContinue, nil
 }
 
