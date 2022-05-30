@@ -7,11 +7,15 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/renderer"
+	"github.com/yuin/goldmark/util"
 )
 
 func init() {
-	POSTPROCESSOR(linkHashtags)
+	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+		util.Prioritized(&HashTag{}, 0),
+	))
 	SIDEBAR(hashtagsSidebar)
 
 	GET("/+/tag/{tag}", tagHandler)
@@ -19,17 +23,22 @@ func init() {
 
 var hashtagReg = regexp.MustCompile(`(?imU)#([[:alpha:]]\w+)(\W|$)`)
 
-func linkHashtags(doc *goquery.Document) {
-	selector := fmt.Sprintf(":contains('#')")
+type HashTag struct{}
 
-	doc.Find(selector).Each(func(i int, s *goquery.Selection) {
-		if goquery.NodeName(s) != "#text" || s.ParentsFiltered("code,a,pre").Length() > 0 {
-			return
-		}
+func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindText, h.renderHashtag)
+}
 
-		text, _ := goquery.OuterHtml(s)
-		s.ReplaceWithHtml(hashtagReg.ReplaceAllString(text, `<a href="/+/tag/$1" class="tag is-info">#$1</a>$2`))
-	})
+func (h *HashTag) renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+
+	text := string(n.Text(source))
+	text = hashtagReg.ReplaceAllString(text, `<a href="/+/tag/$1" class="tag is-info">#$1</a>$2`)
+
+	fmt.Fprintf(writer, text)
+	return ast.WalkContinue, nil
 }
 
 func tagHandler(w Response, r Request) Output {
