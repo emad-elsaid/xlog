@@ -26,10 +26,10 @@ var hashtagReg = regexp.MustCompile(`(?imU)#([[:alpha:]]\w+)(\W|$)`)
 type HashTag struct{}
 
 func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(ast.KindText, h.renderHashtag)
+	reg.Register(ast.KindText, renderHashtag)
 }
 
-func (h *HashTag) renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	if !entering {
 		return ast.WalkContinue, nil
 	}
