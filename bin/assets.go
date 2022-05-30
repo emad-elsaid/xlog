@@ -14,7 +14,7 @@ import (
 
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
-	"https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.css",
 }
 
 var CSS_ZIP = map[string]map[string]string{
@@ -25,7 +25,13 @@ var CSS_ZIP = map[string]map[string]string{
 }
 
 var JS_URLS = []string{
-	"https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/addon/mode/overlay.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/markdown/markdown.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/xml/xml.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/gfm/gfm.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/javascript/javascript.js",
+	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/go/go.js",
 }
 
 const DEST = "assets"

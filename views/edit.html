@@ -1,8 +1,8 @@
 {{ template "header" . }}
 <script src="/assets/script.js"></script>
 <style>
- .CodeMirror{
-     border: 0 none;
+ .CodeMirror {
+     height: auto;
  }
 </style>
 
@@ -29,7 +29,14 @@
 
 <script>
  var form = document.getElementById("editor");
- new SimpleMDE({autofocus: true, spellChecker: false, toolbar: false, status: false});
+ var content = document.getElementById("content");
+ var myCodeMirror = CodeMirror.fromTextArea(content, {
+     mode: "gfm",
+     autofocus: true,
+     spellcheck: true,
+     lineWrapping: true,
+     viewportMargin: Infinity
+ });
 
  document.addEventListener('keydown', function(event) {
      const e = event || window.event;
