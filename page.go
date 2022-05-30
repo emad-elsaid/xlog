@@ -76,10 +76,7 @@ func (p *Page) Render() string {
 		return err.Error()
 	}
 
-	html := buf.String()
-
-	html, _ = postProcess(html)
-	return html
+	return buf.String()
 }
 
 func (p *Page) Content() string {
