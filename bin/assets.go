@@ -53,6 +53,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err = mergeLines(CSS_DEST); err != nil {
+		log.Fatal(err)
+	}
+
 	err = urlsToFile(JS_URLS, JS_DEST)
 	if err != nil {
 		log.Fatal(err)
@@ -135,4 +139,14 @@ func urlsToFile(urls []string, dest string) error {
 	}
 
 	return nil
+}
+
+func mergeLines(f string) error {
+	c, err := os.ReadFile(f)
+	if err != nil {
+		return err
+	}
+
+	c = bytes.ReplaceAll(c, []byte("\n"), []byte(""))
+	return os.WriteFile(f, c, 0644)
 }
