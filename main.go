@@ -46,6 +46,10 @@ func main() {
 		for _, v := range SIDEBAR_WIDGETS {
 			sidebar += v(&page, r)
 		}
+		meta := template.HTML("")
+		for _, v := range META_WIDGETS {
+			meta += v(&page, r)
+		}
 
 		return Render("view", Locals{
 			"edit":    "/" + page.Name + "/edit",
@@ -54,6 +58,7 @@ func main() {
 			"content": template.HTML(html),
 			"tools":   tools,
 			"sidebar": sidebar,
+			"meta":    meta,
 		})
 	})
 
@@ -103,8 +108,10 @@ var (
 	NAVBAR_START_WIDGETS = []func() template.HTML{}
 	TOOLS_WIDGETS        = []func(*Page, Request) template.HTML{}
 	SIDEBAR_WIDGETS      = []func(*Page, Request) template.HTML{}
+	META_WIDGETS         = []func(*Page, Request) template.HTML{}
 )
 
 func NAVBAR_START(f func() template.HTML)          { NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f) }
 func TOOL(f func(*Page, Request) template.HTML)    { TOOLS_WIDGETS = append(TOOLS_WIDGETS, f) }
 func SIDEBAR(f func(*Page, Request) template.HTML) { SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f) }
+func META(f func(*Page, Request) template.HTML)    { META_WIDGETS = append(META_WIDGETS, f) }

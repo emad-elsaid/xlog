@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
@@ -10,6 +11,7 @@ import (
 
 func init() {
 	PageEvents.Listen(BeforeWrite, WriteVersion)
+	META(VersionMeta)
 }
 
 func WriteVersion(p *Page) error {
@@ -23,4 +25,30 @@ func WriteVersion(p *Page) error {
 
 	os.Mkdir(dir, 0700)
 	return ioutil.WriteFile(path.Join(dir, sum), content, 0644)
+}
+
+func VersionMeta(p *Page, _ Request) (t template.HTML) {
+	dir := p.FileName() + ".versions"
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+
+	i := 0
+	for _, f := range files {
+		if f.Type().IsRegular() && path.Ext(f.Name()) == ".md" {
+			i++
+		}
+	}
+
+	if i == 0 {
+		return
+	}
+
+	return template.HTML(
+		fmt.Sprintf(
+			`<span class="icon"><i class="fa-solid fa-code-branch"></i></span><span>%d versions</span>`,
+			i,
+		),
+	)
 }
