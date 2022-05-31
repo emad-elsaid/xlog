@@ -20,8 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = os.Chdir(absSource)
-	if err != nil {
+	if err = os.Chdir(absSource); err != nil {
 		log.Fatal(err)
 	}
 
@@ -37,28 +36,14 @@ func main() {
 			return Redirect("/" + page.Name + "/edit")
 		}
 
-		html := page.Render()
-		tools := template.HTML("")
-		for _, v := range TOOLS_WIDGETS {
-			tools += v(&page, r)
-		}
-		sidebar := template.HTML("")
-		for _, v := range SIDEBAR_WIDGETS {
-			sidebar += v(&page, r)
-		}
-		meta := template.HTML("")
-		for _, v := range META_WIDGETS {
-			meta += v(&page, r)
-		}
-
 		return Render("view", Locals{
 			"edit":    "/" + page.Name + "/edit",
 			"title":   page.Name,
 			"updated": page.ModTime().Format("2006-01-02 15:04"),
-			"content": template.HTML(html),
-			"tools":   tools,
-			"sidebar": sidebar,
-			"meta":    meta,
+			"content": template.HTML(page.Render()),
+			"tools":   renderWidget(TOOLS_WIDGET, &page, r),
+			"sidebar": renderWidget(SIDEBAR_WIDGET, &page, r),
+			"meta":    renderWidget(META_WIDGET, &page, r),
 		})
 	})
 
@@ -74,12 +59,11 @@ func main() {
 	GET("/{page}/edit", func(w Response, r Request) Output {
 		vars := VARS(r)
 		page := NewPage(vars["page"])
-		template := NewPage(TEMPLATE_NAME)
 
 		var content string
 		if page.Exists() {
 			content = page.Content()
-		} else if template.Exists() {
+		} else if template := NewPage(TEMPLATE_NAME); template.Exists() {
 			content = template.Content()
 		}
 
@@ -93,25 +77,48 @@ func main() {
 
 	HELPER("navbarStart", func() template.HTML {
 		o := template.HTML("")
-		for _, v := range NAVBAR_START_WIDGETS {
+		for _, v := range navbarWidgets {
 			o += v()
 		}
 		return o
 	})
 
-	Start()
+	START()
 }
 
 // WIDGETS ===================================================
 
-var (
-	NAVBAR_START_WIDGETS = []func() template.HTML{}
-	TOOLS_WIDGETS        = []func(*Page, Request) template.HTML{}
-	SIDEBAR_WIDGETS      = []func(*Page, Request) template.HTML{}
-	META_WIDGETS         = []func(*Page, Request) template.HTML{}
+type widgetSpace int
+
+const (
+	TOOLS_WIDGET widgetSpace = iota
+	SIDEBAR_WIDGET
+	META_WIDGET
 )
 
-func NAVBAR_START(f func() template.HTML)          { NAVBAR_START_WIDGETS = append(NAVBAR_START_WIDGETS, f) }
-func TOOL(f func(*Page, Request) template.HTML)    { TOOLS_WIDGETS = append(TOOLS_WIDGETS, f) }
-func SIDEBAR(f func(*Page, Request) template.HTML) { SIDEBAR_WIDGETS = append(SIDEBAR_WIDGETS, f) }
-func META(f func(*Page, Request) template.HTML)    { META_WIDGETS = append(META_WIDGETS, f) }
+var (
+	navbarWidgets = []func() template.HTML{}
+	widgets       = map[widgetSpace][]func(*Page, Request) template.HTML{}
+)
+
+func NAVBAR_START(f func() template.HTML) { navbarWidgets = append(navbarWidgets, f) }
+
+func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
+	if _, ok := widgets[s]; !ok {
+		widgets[s] = []func(*Page, Request) template.HTML{}
+	}
+	widgets[s] = append(widgets[s], f)
+}
+
+func renderWidget(s widgetSpace, p *Page, r Request) template.HTML {
+	o := template.HTML("")
+	ws, ok := widgets[s]
+	if !ok {
+		return o
+	}
+
+	for _, v := range ws {
+		o += v(p, r)
+	}
+	return o
+}

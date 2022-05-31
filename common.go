@@ -73,7 +73,7 @@ func init() {
 	HELPER("autoload", func() bool { return AUTORELOAD })
 }
 
-func Start() {
+func START() {
 	compileViews()
 	var handler http.Handler = router
 	for _, v := range middlewares {

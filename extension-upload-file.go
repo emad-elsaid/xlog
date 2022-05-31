@@ -16,7 +16,7 @@ const MAX_FILE_UPLOAD = 50 * MB
 var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 
 func init() {
-	TOOL(uploadFileWidget)
+	WIDGET(TOOLS_WIDGET, uploadFileWidget)
 	POST("/+/upload-file/{page}", uploadFileHandler)
 }
 

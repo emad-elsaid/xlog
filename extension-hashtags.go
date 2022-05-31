@@ -21,7 +21,7 @@ func init() {
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&HashTag{}, 999),
 	))
-	SIDEBAR(hashtagsSidebar)
+	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
 
 	GET(`/\+/tag/{tag}`, tagHandler)
 }

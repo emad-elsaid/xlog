@@ -11,7 +11,7 @@ import (
 
 func init() {
 	PageEvents.Listen(BeforeWrite, WriteVersion)
-	META(VersionMeta)
+	WIDGET(META_WIDGET, VersionMeta)
 }
 
 func WriteVersion(p *Page) error {

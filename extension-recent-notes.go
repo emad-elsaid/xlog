@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	SIDEBAR(recentNotes)
+	WIDGET(SIDEBAR_WIDGET, recentNotes)
 }
 
 func recentNotes(p *Page, r Request) template.HTML {

@@ -3,7 +3,7 @@ package main
 import "html/template"
 
 func init() {
-	TOOL(fileOperationsWidget)
+	WIDGET(TOOLS_WIDGET, fileOperationsWidget)
 	DELETE("/+/file/delete/{page}", fileOperationsDeleteHandler)
 }
 
