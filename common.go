@@ -7,9 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 	"io/fs"
 	"log"
 	"net/http"
@@ -25,11 +22,10 @@ import (
 )
 
 const (
-	APP_NAME         = "xlog"
 	STATIC_DIR_PATH  = "public"
 	ASSETS_DIR_PATH  = "assets"
 	VIEWS_EXTENSION  = ".html"
-	CSRF_COOKIE_NAME = APP_NAME + "_csrf"
+	CSRF_COOKIE_NAME = "xlog_csrf"
 )
 
 const (
