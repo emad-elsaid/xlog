@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const MAX_FILE_UPLOAD = 50 * MB
+const MAX_FILE_UPLOAD = 1 * GB
 
 var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
 var VIDEOS_EXTENSIONS = []string{".webm"}
