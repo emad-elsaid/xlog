@@ -14,10 +14,11 @@ import (
 const MAX_FILE_UPLOAD = 50 * MB
 
 var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
+var VIDEOS_EXTENSIONS = []string{".webm"}
 
 func init() {
 	WIDGET(TOOLS_WIDGET, uploadFileWidget)
-	POST("/+/upload-file/{page}", uploadFileHandler)
+	POST(`/\+/upload-file/{page}`, uploadFileHandler)
 }
 
 func uploadFileWidget(p *Page, r Request) template.HTML {
@@ -66,6 +67,8 @@ func uploadFileHandler(w Response, r Request) Output {
 
 		if containString(IMAGES_EXTENSIONS, ext) {
 			content += fmt.Sprintf("\n\n![](/%s)\n", p)
+		} else if containString(VIDEOS_EXTENSIONS, ext) {
+			content += fmt.Sprintf("\n\n<video controls src=\"%s\"></video>\n", p)
 		} else {
 			content += fmt.Sprintf("\n\n[%s](/%s)\n", mdName, p)
 		}

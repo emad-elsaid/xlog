@@ -1,6 +1,9 @@
 <ul class="menu-list">
   <li>
-    <a href="#" onclick="if(confirm('Are you sure?')) { document.getElementById('delete-form').submit() }">❌ Delete </a>
+    <a href="#" onclick="if(confirm('Are you sure?')) { document.getElementById('delete-form').submit() }" class="has-text-danger">
+      <span class="icon "><i class="fa-solid fa-trash"></i></span>
+      <span> Delete </span>
+    </a>
   </li>
   <form method="POST" class="is-hidden" id="delete-form" action="{{ .action }}">
     {{ .csrf }}

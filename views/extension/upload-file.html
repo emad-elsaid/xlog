@@ -27,11 +27,57 @@
  document.body.addEventListener('dragover', function(ev){
      ev.preventDefault();
  });
+
+ // Recording
+ (function(){
+     window.record = async function() {
+         var options = { mimeType: "video/webm; codecs=vp9" };
+         var stream = await navigator.mediaDevices.getDisplayMedia({
+             video: {
+                 cursor: "always"
+             },
+             audio: true
+         });
+
+         mediaRecorder = new MediaRecorder(stream, options);
+         mediaRecorder.ondataavailable = function(event) {
+             if (event.data.size > 0) {
+                 download(event.data);
+             }
+         }
+         mediaRecorder.start();
+     }
+
+     function download(recording) {
+         var file = new File([recording], 'recording.webm', {
+             type: "video/webm"
+         });
+         var data = new FormData()
+
+         data.append('file', file)
+         data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+         fetch('{{ .action }}', {
+             method: 'POST',
+             body: data
+         }).then(function(){ document.location.reload() });
+     }
+ })()
+
 </script>
 
 <ul class="menu-list">
   <li>
-    <a href="#" onclick="document.getElementById('file-upload-file').click()"> 🖼️ Upload File</a>
+    <a href="#" onclick="document.getElementById('file-upload-file').click()">
+      <span class="icon"><i class="fa-solid fa-file-arrow-up"></i></span>
+      <span> Upload File </span>
+    </a>
+  </li>
+  <li>
+    <a href="#" onclick="record()">
+      <span class="icon"><i class="fa-solid fa-desktop"></i></span>
+      <span> Record screen </span>
+    </a>
   </li>
   <form method="POST" class="form is-hidden" action="{{ .action }}" enctype="multipart/form-data">
     {{ .csrf }}
