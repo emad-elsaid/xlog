@@ -2,28 +2,26 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"embed"
 	"flag"
 	"fmt"
 	"html/template"
-	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"path"
-	"strconv"
+	"regexp"
 	"strings"
 	"time"
 
 	_ "embed"
 
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 )
 
 const (
@@ -50,10 +48,11 @@ var (
 	BIND_ADDRESS string
 	AUTORELOAD   bool
 	STARTUP_TIME = time.Now()
-	router       = mux.NewRouter()
-	VARS         = mux.Vars
+	router       = &Handler{}
 	CSRF         = csrf.TemplateField
-	middlewares  = []func(http.Handler) http.Handler{
+
+	dynamicSegmentRegexp = regexp.MustCompile("{([^}]*)}")
+	middlewares          = []func(http.Handler) http.Handler{
 		methodOverrideHandler,
 		csrf.Protect(
 			[]byte(os.Getenv("SESSION_SECRET")),
@@ -80,19 +79,20 @@ func init() {
 
 func Start() {
 	compileViews()
-	router.PathPrefix("/" + STATIC_DIR_PATH).Handler(staticWithoutDirectoryListingHandler())
-	router.PathPrefix("/" + ASSETS_DIR_PATH).Handler(http.FileServer(http.FS(assets)))
-
-	if AUTORELOAD {
-		router.PathPrefix("/autoreload/token").HandlerFunc(func(w Response, _ Request) { fmt.Fprintf(w, "%d", STARTUP_TIME.Unix()) })
-	}
-
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
 	}
 
 	http.Handle("/", handler)
+	GET("/"+ASSETS_DIR_PATH+"/.*", assetsHandler())
+	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
+
+	if AUTORELOAD {
+		GET("/autoreload/token", func(_ Response, _ Request) Output {
+			return func(w Response, _ Request) { fmt.Fprintf(w, "%d", STARTUP_TIME.Unix()) }
+		})
+	}
 
 	srv := &http.Server{
 		Handler:      handler,
@@ -103,6 +103,69 @@ func Start() {
 
 	log.Printf("Starting server: %s", BIND_ADDRESS)
 	log.Fatal(srv.ListenAndServe())
+}
+
+// Mux/Handler ===========================================
+type (
+	RouteCheck func(Request) (Request, bool)
+	Route      struct {
+		checks []RouteCheck
+		route  http.HandlerFunc
+	}
+
+	Handler struct {
+		routes []Route
+	}
+)
+
+func (h *Handler) ServeHTTP(w Response, r Request) {
+ROUTES:
+	for _, route := range h.routes {
+		rn := r
+		ok := false
+		for _, check := range route.checks {
+			if rn, ok = check(rn); !ok {
+				continue ROUTES
+			}
+		}
+
+		route.route(w, rn)
+		return
+	}
+}
+
+func checkMethod(method string) RouteCheck {
+	return func(r Request) (Request, bool) { return r, r.Method == method }
+}
+
+const varsIndex int = iota + 1
+
+func checkPath(path string) RouteCheck {
+	path = "^" + dynamicSegmentRegexp.ReplaceAllString(path, "(?P<$1>[^/]+)") + "$"
+	reg := regexp.MustCompile(path)
+	groups := reg.SubexpNames()
+
+	return func(r Request) (Request, bool) {
+		if !reg.MatchString(r.URL.Path) {
+			return r, false
+		}
+
+		values := reg.FindStringSubmatch(r.URL.Path)
+		vars := map[string]string{}
+		for i, g := range groups {
+			vars[g] = values[i]
+		}
+
+		ctx := context.WithValue(r.Context(), varsIndex, vars)
+		return r.WithContext(ctx), true
+	}
+}
+
+func VARS(r Request) map[string]string {
+	if rv := r.Context().Value(varsIndex); rv != nil {
+		return rv.(map[string]string)
+	}
+	return map[string]string{}
 }
 
 // LOGGING ===============================================
@@ -157,16 +220,32 @@ func Redirect(url string) http.HandlerFunc {
 	}
 }
 
+func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
+	router.routes = append(router.routes, Route{
+		checks: checks,
+		route:  route,
+	})
+}
+
 func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("GET").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodGet), checkPath(path),
+	)
 }
 
 func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("POST").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodPost), checkPath(path),
+	)
 }
 
 func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	router.Methods("DELETE").Path(path).HandlerFunc(applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...))
+	ROUTE(
+		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		checkMethod(http.MethodDelete), checkPath(path),
+	)
 }
 
 // VIEWS ====================
@@ -184,7 +263,7 @@ func compileViews() {
 		}
 
 		if strings.HasSuffix(p, VIEWS_EXTENSION) && d.Type().IsRegular() {
-			rel := strings.TrimPrefix(p, "views"+string(os.PathSeparator))
+			rel := strings.TrimPrefix(p, "views/")
 			ext := path.Ext(rel)
 			name := strings.TrimSuffix(rel, ext)
 			defer Log(DEBUG, "View", name)()
@@ -222,31 +301,13 @@ func Render(path string, data Locals) http.HandlerFunc {
 	}
 }
 
-// HANDLERS MIDDLEWARES =============================
+// SERVER MIDDLEWARES ==============================
 
-// First middleware gets executed first
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler)
 	}
 	return handler
-}
-
-// SERVER MIDDLEWARES ==============================
-
-func staticWithoutDirectoryListingHandler() http.Handler {
-	dir := http.Dir(STATIC_DIR_PATH)
-	server := http.FileServer(dir)
-	handler := http.StripPrefix("/public", server)
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/") {
-			http.NotFound(w, r)
-			return
-		}
-
-		handler.ServeHTTP(w, r)
-	})
 }
 
 // Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
@@ -269,6 +330,29 @@ func RequestLoggerHandler(h http.Handler) http.Handler {
 	})
 }
 
+// HANDLERS ==============================
+
+func assetsHandler() HandlerFunc {
+	assetsServer := http.FileServer(http.FS(assets))
+	return func(_ Response, _ Request) Output {
+		return assetsServer.ServeHTTP
+	}
+}
+
+func staticHandler() HandlerFunc {
+	dir := http.Dir(STATIC_DIR_PATH)
+	server := http.FileServer(dir)
+	staticHandler := http.StripPrefix("/"+STATIC_DIR_PATH, server)
+
+	return func(_ Response, r Request) Output {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			return NotFound
+		}
+
+		return staticHandler.ServeHTTP
+	}
+}
+
 // HELPERS FUNCTIONS ======================
 
 func HELPER(name string, f interface{}) {
@@ -277,91 +361,4 @@ func HELPER(name string, f interface{}) {
 	}
 
 	helpers[name] = f
-}
-
-func atoi32(s string) int32 {
-	i, _ := strconv.ParseInt(s, 10, 32)
-	return int32(i)
-}
-
-func atoi64(s string) int64 {
-	i, _ := strconv.ParseInt(s, 10, 64)
-	return i
-}
-
-// VALIDATION ============================
-
-type ValidationErrors map[string][]error
-
-func (v ValidationErrors) Add(field string, err error) {
-	v[field] = append(v[field], err)
-}
-
-func ValidateStringPresent(val, key, label string, ve ValidationErrors) {
-	if len(strings.TrimSpace(val)) == 0 {
-		ve.Add(key, fmt.Errorf("%s can't be empty", label))
-	}
-}
-
-func ValidateStringLength(val, key, label string, ve ValidationErrors, min, max int) {
-	l := len(strings.TrimSpace(val))
-	if l < min || l > max {
-		ve.Add(key, fmt.Errorf("%s has to be between %d and %d characters, length is %d", label, min, max, l))
-	}
-}
-
-func ValidateStringNumeric(val, key, label string, ve ValidationErrors) {
-	for _, c := range val {
-		if !strings.ContainsRune("0123456789", c) {
-			ve.Add(key, fmt.Errorf("%s has to consist of numbers", label))
-			return
-		}
-	}
-}
-
-func ValidateISBN13(val, key, label string, ve ValidationErrors) {
-	if len(val) != 13 {
-		ve.Add(key, fmt.Errorf("%s has to be 13 digits", label))
-		return
-	}
-
-	sum := 0
-	for i, s := range val {
-		digit, _ := strconv.Atoi(string(s))
-		if i%2 == 0 {
-			sum += digit
-		} else {
-			sum += digit * 3
-		}
-	}
-
-	if sum%10 != 0 {
-		ve.Add(key, fmt.Errorf("%s is not a valid ISBN13 number", label))
-	}
-}
-
-func ValidateImage(val io.Reader, key, label string, ve ValidationErrors, maxw, maxh int) {
-	if val == nil {
-		return
-	}
-
-	image, _, err := image.Decode(val)
-	if err != nil {
-		ve.Add(key, fmt.Errorf("%s has an unsupported format supported formats are JPG, GIF, PNG", label))
-		return
-	}
-
-	sz := image.Bounds().Size()
-	if sz.X > maxw {
-		ve.Add(key, fmt.Errorf("%s width should be less than %d px", label, maxw))
-	}
-	if sz.Y > maxh {
-		ve.Add(key, fmt.Errorf("%s height should be less than %d px", label, maxh))
-	}
-}
-
-func ValidateInt32Min(val int32, key, label string, ve ValidationErrors, min int32) {
-	if val < min {
-		ve.Add(key, fmt.Errorf("%s shouldn't be less than %d", label, min))
-	}
 }

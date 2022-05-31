@@ -23,7 +23,7 @@ func init() {
 	))
 	SIDEBAR(hashtagsSidebar)
 
-	GET("/+/tag/{tag}", tagHandler)
+	GET(`/\+/tag/{tag}`, tagHandler)
 }
 
 var hashtagReg = regexp.MustCompile(`(?imU)#([[:alpha:]]\w+)(\W|$)`)

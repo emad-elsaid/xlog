@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/gorilla/csrf v1.6.0
-	github.com/gorilla/mux v1.7.3
 	github.com/yuin/goldmark v1.4.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20191202084645-78f32c8dd6d5
 )

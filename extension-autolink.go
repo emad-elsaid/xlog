@@ -34,11 +34,9 @@ func renderLinkToPages(writer util.BufWriter, source []byte, n ast.Node, enterin
 	})
 
 	sort.Sort(fileInfoByNameLength(pages))
-
 	text := string(n.Text(source))
 
 	for _, p := range pages {
-		Log(DEBUG, "renderLinkToPages", "iterating on page", p)
 		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(p.Name) + `)(\W|$)`)
 		text = reg.ReplaceAllString(text, `$1<a href="`+p.Name+`">$2</a>$3`)
 	}

@@ -10,7 +10,7 @@ const MIN_SEARCH_KEYWORD = 3
 
 func init() {
 	NAVBAR_START(searchNavbarStartWidget)
-	GET("/+/search", searchHandler)
+	GET(`/\+/search`, searchHandler)
 }
 
 func searchNavbarStartWidget() template.HTML {
