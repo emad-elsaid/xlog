@@ -65,10 +65,12 @@ var (
 )
 
 // Some aliases to make it easier
-type Response = http.ResponseWriter
-type Request = *http.Request
-type Output = http.HandlerFunc
-type Locals map[string]interface{} // passed to views/templates
+type (
+	Response = http.ResponseWriter
+	Request  = *http.Request
+	Output   = http.HandlerFunc
+	Locals   map[string]interface{} // passed to views/templates
+)
 
 func init() {
 	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
@@ -84,7 +86,6 @@ func Start() {
 		handler = v(handler)
 	}
 
-	http.Handle("/", handler)
 	GET("/"+ASSETS_DIR_PATH+"/.*", assetsHandler())
 	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
 
