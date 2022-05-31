@@ -16,8 +16,6 @@ import (
 	"strings"
 	"time"
 
-	_ "embed"
-
 	"github.com/gorilla/csrf"
 )
 
