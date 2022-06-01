@@ -28,30 +28,87 @@
      ev.preventDefault();
  });
 
- // Recording
  (function(){
+     window.screenshot = async function() {
+         var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
+
+         stream.getTracks().forEach(async function(track) {
+             var ic = new ImageCapture(track);
+             var bmp = await ic.grabFrame();
+             track.stop();
+
+             const canvas = document.createElement('canvas');
+             canvas.width = bmp.width;
+             canvas.height = bmp.height;
+             const ctx = canvas.getContext('bitmaprenderer');
+             ctx.transferFromImageBitmap(bmp);
+
+             canvas.toBlob(function(recording){
+                 var file = new File([recording], 'screenshot.png', {type: 'image/png'});
+                 var data = new FormData()
+
+                 data.append('file', file)
+                 data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+                 fetch('{{ .action }}', {
+                     method: 'POST',
+                     body: data
+                 }).then(function(){ document.location.reload() });
+             }, "image/png");
+         });
+
+     }
+
      window.record = async function() {
-         var options = { mimeType: "video/webm; codecs=vp9" };
          var stream = await navigator.mediaDevices.getDisplayMedia({
-             video: {
-                 cursor: "always"
-             },
+             video: {cursor: "always"},
              audio: true
          });
 
-         mediaRecorder = new MediaRecorder(stream, options);
-         mediaRecorder.ondataavailable = function(event) {
+         start(stream);
+     }
+
+     var recordCameraStream;
+     window.recordCamera = async function() {
+         if (recordCameraStream!=null) {
+             stop(recordCameraStream);
+             return;
+         }
+
+         recordCameraStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+         start(recordCameraStream);
+     }
+
+     var recordAudioStream;
+     window.recordAudio = async function() {
+         if (recordAudioStream!=null) {
+             stop(recordAudioStream);
+             return;
+         }
+
+         recordAudioStream = await navigator.mediaDevices.getUserMedia({audio: true});
+         start(recordAudioStream);
+     }
+
+     function start(stream) {
+         var options = { mimeType: "video/webm; codecs=vp9" };
+         var recorder = new MediaRecorder(stream, options);
+         recorder.ondataavailable = function(event) {
              if (event.data.size > 0) {
                  download(event.data);
              }
          }
-         mediaRecorder.start();
+         recorder.start();
+     }
+
+     function stop(stream) {
+         stream.getTracks().forEach(function(track) {
+             track.stop();
+         });
      }
 
      function download(recording) {
-         var file = new File([recording], 'recording.webm', {
-             type: "video/webm"
-         });
+         var file = new File([recording], 'recording.webm', {type: "video/webm"});
          var data = new FormData()
 
          data.append('file', file)
@@ -74,9 +131,33 @@
     </a>
   </li>
   <li>
+    <a href="#" onclick="screenshot()">
+      <span class="icon"><i class="fa-solid fa-camera"></i></span>
+      <span> Screenshot </span>
+    </a>
+  </li>
+  <li>
     <a href="#" onclick="record()">
       <span class="icon"><i class="fa-solid fa-desktop"></i></span>
-      <span> Record screen </span>
+      <span> Record screen
+        <small class="has-text-grey is-pulled-right">(stop sharing screen to save)</small>
+      </span>
+    </a>
+  </li>
+  <li>
+    <a href="#" onclick="recordCamera()">
+      <span class="icon"><i class="fa-solid fa-video"></i></span>
+      <span> Record camera
+        <small class="has-text-grey is-pulled-right">(click while recording to save)</small>
+      </span>
+    </a>
+  </li>
+  <li>
+    <a href="#" onclick="recordAudio()">
+      <span class="icon"><i class="fa-solid fa-microphone"></i></span>
+      <span> Record audio
+        <small class="has-text-grey is-pulled-right">(click while recording to save)</small>
+      </span>
     </a>
   </li>
   <form method="POST" class="form is-hidden" action="{{ .action }}" enctype="multipart/form-data">
