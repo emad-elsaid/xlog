@@ -4,7 +4,7 @@ import "html/template"
 
 func init() {
 	WIDGET(TOOLS_WIDGET, fileOperationsWidget)
-	DELETE("/+/file/delete/{page}", fileOperationsDeleteHandler)
+	DELETE(`/\+/file/delete/{page}`, fileOperationsDeleteHandler)
 }
 
 func fileOperationsWidget(p *Page, r Request) template.HTML {
