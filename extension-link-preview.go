@@ -1,9 +1,16 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
+	"os"
+	"path"
 	"regexp"
+	"strings"
 )
 
 func init() {
@@ -12,6 +19,7 @@ func init() {
 	PREPROCESSOR(youtubeUrlPreprocessor)
 	PREPROCESSOR(fbUrlPreprocessor)
 	PREPROCESSOR(giphyUrlPreprocessor)
+	PREPROCESSOR(fallbackURLPreprocessor)
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)
@@ -51,4 +59,107 @@ var giphyUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/[^ ]+\-
 
 func giphyUrlPreprocessor(c string) string {
 	return giphyUrlReg.ReplaceAllString(c, `![](https://media.giphy.com/media/$1/giphy.gif)`)
+}
+
+var (
+	fallbackUrlReg = regexp.MustCompile(`(?imU)^(https?\:\/\/[^ ]+)$`)
+	titleReg       = regexp.MustCompile(`(?imU)<title>(.*)</title>`)
+	metaReg        = regexp.MustCompile(`(?imU)<meta.*\>`)
+	metaNameReg    = regexp.MustCompile(`(?imU)(?:name|property)\s*=\s*"(.*)"`)
+	metaContentReg = regexp.MustCompile(`(?imU)content\s*=\s*"(.*)"`)
+)
+
+func fallbackURLPreprocessor(c string) string {
+	return fallbackUrlReg.ReplaceAllStringFunc(c, func(m string) string {
+		meta, err := getUrlMeta(m)
+		if err != nil {
+			return m
+		}
+
+		var title string
+		if len(meta.Title) > 0 {
+			title = meta.Title
+		} else {
+			title = m
+		}
+
+		var description string
+		if len(meta.Description) > 0 {
+			description = fmt.Sprintf("> %s\n", meta.Description)
+		}
+
+		return fmt.Sprintf("[%s](%s)\n%s", title, m, description)
+	})
+}
+
+type Meta struct {
+	URL         string
+	Title       string
+	Description string
+	Image       string
+}
+
+func getUrlMeta(url string) (*Meta, error) {
+	cacheDir := path.Join(STATIC_DIR_PATH, ".cache")
+	os.Mkdir(cacheDir, 0700)
+
+	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))
+	cache, err := os.ReadFile(cacheFile)
+	var meta Meta
+	if err == nil {
+		if err := json.Unmarshal(cache, &meta); err == nil {
+			return &meta, nil
+		}
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	cont, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	html := string(cont)
+
+	titleMatches := titleReg.FindStringSubmatch(html)
+	title := url
+	if titleMatches != nil && len(titleMatches) >= 1 {
+		title = titleMatches[1]
+	}
+
+	meta = Meta{
+		URL:   url,
+		Title: title,
+	}
+
+	metaMatches := metaReg.FindAllString(html, -1)
+	for _, v := range metaMatches {
+		n := metaNameReg.FindStringSubmatch(v)
+		if len(n) < 2 {
+			continue
+		}
+
+		v := metaContentReg.FindStringSubmatch(v)
+		if len(v) < 2 {
+			continue
+		}
+
+		name := strings.ToLower(n[1])
+		value := v[1]
+
+		if name == "description" || name == "og:description" {
+			meta.Description = value
+		} else if name == "og:image" {
+			meta.Image = value
+		}
+	}
+
+	js, _ := json.Marshal(meta)
+	os.WriteFile(cacheFile, js, 0644)
+
+	return &meta, nil
 }

@@ -28,6 +28,11 @@ func renderLinkToPages(writer util.BufWriter, source []byte, n ast.Node, enterin
 		return ast.WalkContinue, nil
 	}
 
+	if n.Parent().Kind() == ast.KindLink {
+		fmt.Fprintf(writer, string(n.Text(source)))
+		return ast.WalkContinue, nil
+	}
+
 	pages := []*Page{}
 	WalkPages(context.Background(), func(p *Page) {
 		pages = append(pages, p)

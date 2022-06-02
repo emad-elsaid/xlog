@@ -65,7 +65,7 @@
              audio: true
          });
 
-         start(stream);
+         start(stream, "video/webm; codecs=vp9", "webm");
      }
 
      var recordCameraStream;
@@ -76,7 +76,7 @@
          }
 
          recordCameraStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-         start(recordCameraStream);
+         start(recordCameraStream, "video/webm; codecs=vp9", "webm");
      }
 
      var recordAudioStream;
@@ -87,15 +87,15 @@
          }
 
          recordAudioStream = await navigator.mediaDevices.getUserMedia({audio: true});
-         start(recordAudioStream);
+         start(recordAudioStream, 'audio/webm; codecs=opus', "opus");
      }
 
-     function start(stream) {
-         var options = { mimeType: "video/webm; codecs=vp9" };
+     function start(stream, mimetype, extension) {
+         var options = { mimeType: mimetype};
          var recorder = new MediaRecorder(stream, options);
          recorder.ondataavailable = function(event) {
              if (event.data.size > 0) {
-                 download(event.data);
+                 download(event.data, mimetype, extension);
              }
          }
          recorder.start();
@@ -107,8 +107,8 @@
          });
      }
 
-     function download(recording) {
-         var file = new File([recording], 'recording.webm', {type: "video/webm"});
+     function download(recording, mimetype, extension) {
+         var file = new File([recording], 'recording.'+extension, {type: mimetype});
          var data = new FormData()
 
          data.append('file', file)

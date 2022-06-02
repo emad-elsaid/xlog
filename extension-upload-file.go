@@ -13,8 +13,11 @@ import (
 
 const MAX_FILE_UPLOAD = 1 * GB
 
-var IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
-var VIDEOS_EXTENSIONS = []string{".webm"}
+var (
+	IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
+	VIDEOS_EXTENSIONS = []string{".webm"}
+	AUDIO_EXTENSIONS  = []string{".wave", ".ogg", ".opus", ".mp3"}
+)
 
 func init() {
 	WIDGET(TOOLS_WIDGET, uploadFileWidget)
@@ -68,7 +71,9 @@ func uploadFileHandler(w Response, r Request) Output {
 		if containString(IMAGES_EXTENSIONS, ext) {
 			content += fmt.Sprintf("\n\n![](/%s)\n", p)
 		} else if containString(VIDEOS_EXTENSIONS, ext) {
-			content += fmt.Sprintf("\n\n<video controls src=\"%s\"></video>\n", p)
+			content += fmt.Sprintf("\n\n<video controls src=\"%s\"/>\n", p)
+		} else if containString(AUDIO_EXTENSIONS, ext) {
+			content += fmt.Sprintf("\n\n<audio controls src=\"%s\"/>\n", p)
 		} else {
 			content += fmt.Sprintf("\n\n[%s](/%s)\n", mdName, p)
 		}
