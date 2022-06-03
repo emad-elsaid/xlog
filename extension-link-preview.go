@@ -11,6 +11,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/yuin/goldmark/util"
 )
 
 func init() {
@@ -85,7 +87,7 @@ func fallbackURLPreprocessor(c string) string {
 
 		var description string
 		if len(meta.Description) > 0 {
-			description = fmt.Sprintf("> %s\n", meta.Description)
+			description = fmt.Sprintf("> %s\n", util.EscapeHTML([]byte(meta.Description)))
 		}
 
 		return fmt.Sprintf("[%s](%s)\n%s", title, m, description)

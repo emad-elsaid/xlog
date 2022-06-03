@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"regexp"
 	"sort"
 
@@ -21,32 +21,68 @@ type AutolinkPages struct{}
 
 func (h *AutolinkPages) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(ast.KindText, renderLinkToPages)
+	reg.Register(ast.KindAutoLink, renderAutoLink)
 }
 
-func renderLinkToPages(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func renderLinkToPages(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	if !entering {
 		return ast.WalkContinue, nil
 	}
+	n := node.(*ast.Text)
+	segment := n.Segment
+	if n.IsRaw() {
+		w.Write(segment.Value(source))
+	} else {
 
-	if n.Parent().Kind() == ast.KindLink {
-		fmt.Fprintf(writer, string(n.Text(source)))
+		if n.Parent().Kind() == ast.KindLink {
+			w.Write(n.Text(source))
+			return ast.WalkContinue, nil
+		}
+
+		pages := []*Page{}
+		WalkPages(context.Background(), func(p *Page) {
+			pages = append(pages, p)
+		})
+
+		sort.Sort(fileInfoByNameLength(pages))
+		text := string(segment.Value(source))
+
+		for _, p := range pages {
+			reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(p.Name) + `)(\W|$)`)
+			text = reg.ReplaceAllString(text, `$1<a href="`+p.Name+`">$2</a>$3`)
+		}
+
+		w.Write([]byte(text))
+	}
+
+	return ast.WalkContinue, nil
+}
+
+func renderAutoLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.AutoLink)
+	if !entering {
 		return ast.WalkContinue, nil
 	}
-
-	pages := []*Page{}
-	WalkPages(context.Background(), func(p *Page) {
-		pages = append(pages, p)
-	})
-
-	sort.Sort(fileInfoByNameLength(pages))
-	text := string(n.Text(source))
-
-	for _, p := range pages {
-		reg := regexp.MustCompile(`(?imU)(^|\W)(` + regexp.QuoteMeta(p.Name) + `)(\W|$)`)
-		text = reg.ReplaceAllString(text, `$1<a href="`+p.Name+`">$2</a>$3`)
+	_, _ = w.WriteString(`<a href="`)
+	url := n.URL(source)
+	label := n.Label(source)
+	limit := 30
+	if len(label) > limit {
+		label = []byte(string(label[0:limit]) + "…")
 	}
 
-	fmt.Fprintf(writer, text)
+	if n.AutoLinkType == ast.AutoLinkEmail && !bytes.HasPrefix(bytes.ToLower(url), []byte("mailto:")) {
+		_, _ = w.WriteString("mailto:")
+	}
+	_, _ = w.Write(util.EscapeHTML(util.URLEscape(url, false)))
+	if n.Attributes() != nil {
+		_ = w.WriteByte('"')
+		_ = w.WriteByte('>')
+	} else {
+		_, _ = w.WriteString(`">`)
+	}
+	_, _ = w.Write(util.EscapeHTML(label))
+	_, _ = w.WriteString(`</a>`)
 	return ast.WalkContinue, nil
 }
 
