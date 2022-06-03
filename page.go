@@ -30,6 +30,8 @@ type (
 
 const (
 	BeforeWrite PageEvent = iota
+	AfterWrite
+	AfterDelete
 )
 
 var PageEvents = PageEventsMap{}
@@ -89,6 +91,8 @@ func (p *Page) Content() string {
 }
 
 func (p *Page) Delete() bool {
+	defer PageEvents.Trigger(AfterDelete, p)
+
 	if p.Exists() {
 		err := os.Remove(p.FileName())
 		if err != nil {
@@ -101,6 +105,7 @@ func (p *Page) Delete() bool {
 
 func (p *Page) Write(content string) bool {
 	PageEvents.Trigger(BeforeWrite, p)
+	defer PageEvents.Trigger(AfterWrite, p)
 
 	content = strings.ReplaceAll(content, "\r\n", "\n")
 
