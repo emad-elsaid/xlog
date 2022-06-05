@@ -110,15 +110,14 @@ func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
 	widgets[s] = append(widgets[s], f)
 }
 
-func renderWidget(s widgetSpace, p *Page, r Request) template.HTML {
-	o := template.HTML("")
+func renderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
 	ws, ok := widgets[s]
 	if !ok {
-		return o
+		return
 	}
 
 	for _, v := range ws {
 		o += v(p, r)
 	}
-	return o
+	return
 }
