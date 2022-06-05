@@ -38,83 +38,71 @@
 </div>
 
 {{ if .tools }}
-<button class="button is-white has-text-grey js-modal-trigger" data-target="modal-js" style="position: fixed; bottom: 1em; right: 1em;">
+<button
+    class="button is-white has-text-grey"
+    style="position: fixed; bottom: 1em; right: 1em;"
+    onclick="tools.showModal()">
   Tools: Ctrl+K
 </button>
 
-<div id="modal-js" class="modal" tabindex="0">
-  <div class="modal-background"></div>
-
+<dialog id="tools-modal">
   <div class="modal-content">
     <div class="box">
+      <div class="field">
+        <div class="control">
+          <input class="input" type="search" placeholder="Search..." onkeyup="filterToolsList(this.value)" autofocus/>
+        </div>
+      </div>
       <aside class="menu">
         {{ .tools }}
       </aside>
     </div>
   </div>
 
-  <button class="modal-close is-large" aria-label="close"></button>
-</div>
+  <form method="dialog">
+    <button class="modal-close is-large" aria-label="close"></button>
+  </form>
+</dialog>
 
 <script>
- (function() {
-     // Functions to open and close a modal
-     function openModal($el) {
-         $el.classList.add('is-active');
+ const tools = document.getElementById('tools-modal');
+
+ document.addEventListener('keydown', function(e) {
+     const kCharCode = "K".charCodeAt();
+
+     if (e.keyCode === 27) { // Escape key
+         tools.close();
+         return;
      }
 
-     function closeModal($el) {
-         $el.classList.remove('is-active');
+     if ( e.keyCode === kCharCode && ( e.metaKey || e.ctrlKey ) ) {
+         e.preventDefault();
+         tools.showModal();
      }
+ });
 
-     function closeAllModals() {
-         (document.querySelectorAll('.modal') || []).forEach(function($modal) {
-             closeModal($modal);
-         });
-     }
+ function filterToolsList(v) {
+     const keyword = v.toLowerCase();
+     const lis = document.querySelectorAll("#tools-modal li");
 
-     // Add a click event on buttons to open a specific modal
-     (document.querySelectorAll('.js-modal-trigger') || []).forEach(function($trigger) {
-         const modal = $trigger.dataset.target;
-         const $target = document.getElementById(modal);
-
-         $trigger.addEventListener('click', function() {
-             openModal($target);
-         });
-     });
-
-     // Add a click event on various child elements to close the parent modal
-     (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(function($close) {
-         const $target = $close.closest('.modal');
-
-         $close.addEventListener('click', function() {
-             closeModal($target);
-         });
-     });
-
-     // Add a keyboard event to close all modals
-     document.addEventListener('keydown', function(event) {
-         const e = event || window.event;
-         const kCharCode = "K".charCodeAt();
-         const sCharCode = "S".charCodeAt();
-
-         if (e.keyCode === 27) { // Escape key
-             closeAllModals();
-             return;
+     for(var i=0; i < lis.length; i++){
+         const li = lis[i];
+         if( li.textContent.toLowerCase().includes(keyword) ) {
+             li.classList.remove("is-hidden");
+         } else {
+             li.classList.add("is-hidden");
          }
+     }
+ }
 
-         if ( e.keyCode === kCharCode && ( e.metaKey || e.ctrlKey ) ) {
-             e.preventDefault();
-             const $target = document.getElementById('modal-js');
-             openModal($target);
-             $target.focus();
-         } else if ( e.keyCode === sCharCode && ( e.metaKey || e.ctrlKey ) ) {
-             e.preventDefault();
-             document.location.pathname = "{{.edit}}";
-         }
+ document.addEventListener('keydown', function(e) {
+     const sCharCode = "S".charCodeAt();
 
-     });
- })();
+     if ( e.keyCode === sCharCode && ( e.metaKey || e.ctrlKey ) ) {
+         e.preventDefault();
+         document.location.pathname = "{{.edit}}";
+     }
+ });
 
  // This is a hack to display right to left text correctly
  document.querySelectorAll('.content p, .content li, .content h1, .content h2, .content h3, .content h4, .content h5, .content h6').forEach(function(ele) {
