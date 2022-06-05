@@ -40,7 +40,9 @@
 
  document.addEventListener('keydown', function(event) {
      const e = event || window.event;
-     if ( e.keyCode === 83 && (e.ctrlKey || e.metaKey ) ) { // S key
+     const sCharCode = "S".charCodeAt();
+
+     if ( e.keyCode === sCharCode && (e.ctrlKey || e.metaKey ) ) {
          e.preventDefault();
          form.submit();
      }
