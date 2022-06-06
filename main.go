@@ -82,6 +82,7 @@ func main() {
 // WIDGETS ===================================================
 
 type widgetSpace int
+type widgetFunc func(*Page, Request) template.HTML
 
 const (
 	TOOLS_WIDGET widgetSpace = iota
@@ -90,24 +91,17 @@ const (
 	NAVBAR_WIDGET
 )
 
-var (
-	widgets = map[widgetSpace][]func(*Page, Request) template.HTML{}
-)
+var widgets = map[widgetSpace][]widgetFunc{}
 
 func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
-		widgets[s] = []func(*Page, Request) template.HTML{}
+		widgets[s] = []widgetFunc{}
 	}
 	widgets[s] = append(widgets[s], f)
 }
 
 func renderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
-	ws, ok := widgets[s]
-	if !ok {
-		return
-	}
-
-	for _, v := range ws {
+	for _, v := range widgets[s] {
 		o += v(p, r)
 	}
 	return
