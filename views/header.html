@@ -30,22 +30,87 @@
         </a>
       </div>
 
-      {{ if .navbar }}
       <div class="navbar-start">
-        {{ .navbar }}
-      </div>
-      {{ end }}
-
-      {{ if .edit }}
-      <div class="navbar-end">
+        {{ if .title }}
         <div class="navbar-item">
-          <div class="buttons">
-            <a href="{{.edit}}" class="button">
-              <span class="icon"><i class="fa-solid fa-pen"></i></span>
-              <span>Edit</span>
-            </a>
+          <h1 class="title is-3 has-text-weight-bold is-capitalized"> {{.title}} </h1>
+        </div>
+        {{ end }}
+
+        {{ if .edit }}
+        <div class="navbar-item">
+          <a href="{{.edit}}" class="button is-white" title="Ctrl+S">
+            <span class="icon"><i class="fa-solid fa-pen"></i></span>
+            <span>Edit</span>
+          </a>
+        </div>
+        {{ end }}
+      </div>
+
+
+      <div class="navbar-end">
+        {{ .navbar }}
+        {{ if .tools }}
+        <a href="#" class="navbar-item" onclick="tools.showModal()" title="Tools: Ctrl+K">
+          <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
+        </a>
+        {{ end }}
+      </div>
+    </nav>
+
+
+    {{ if .tools }}
+    <dialog id="tools-modal" style="border: none;" class="mt-0">
+      <div class="modal-content">
+        <div class="box">
+          <div class="field">
+            <div class="control">
+              <input class="input"
+                     type="search"
+                     placeholder="Search..."
+                     onkeyup="filterToolsList(this.value)"
+                     autofocus/>
+            </div>
           </div>
+          <aside class="menu" style="height: 30em; overflow-y: auto;"> {{ .tools }} </aside>
         </div>
       </div>
-      {{ end }}
-    </nav>
+
+      <form method="dialog">
+        <button class="modal-close is-large" aria-label="close"></button>
+      </form>
+    </dialog>
+
+    <script>
+     const tools = document.getElementById('tools-modal');
+
+     document.addEventListener('keydown', function(e) {
+         const kCharCode = "K".charCodeAt();
+
+         if (e.keyCode === 27) { // Escape key
+             tools.close();
+             return;
+         }
+
+         if ( e.keyCode === kCharCode && ( e.metaKey || e.ctrlKey ) ) {
+             e.preventDefault();
+             tools.showModal();
+         }
+     });
+
+     function filterToolsList(v) {
+         const keyword = v.toLowerCase();
+         const lis = document.querySelectorAll("#tools-modal li");
+
+         for(var i=0; i < lis.length; i++){
+             const li = lis[i];
+             if( li.textContent.toLowerCase().includes(keyword) ) {
+                 li.classList.remove("is-hidden");
+             } else {
+                 li.classList.add("is-hidden");
+             }
+         }
+     }
+    </script>
+
+    {{ end }}

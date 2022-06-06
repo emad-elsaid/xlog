@@ -1,4 +1,5 @@
 {{ template "header" . }}
+
 <style>
  .content p img:only-child{
      display: block;
@@ -14,17 +15,11 @@
 <div class="container mt-5">
   <div class="columns">
     {{ if .sidebar }}
-    <div class="column is-one-fifth">
-      {{ .sidebar }}
-    </div>
+    <div class="column is-one-fifth"> {{ .sidebar }} </div>
     {{ end }}
 
     <div class="column">
       <div class="content" dir="auto" style="margin-bottom: 20em;">
-        <h1 class="title is-1 has-text-weight-bold is-capitalized">
-          {{.title}}
-        </h1>
-
         <p class="is-size-7 has-text-grey">
           <span class="icon"><i class="fa-solid fa-pen"></i></span>
           <span> Updated: {{.updated}} </span>
@@ -37,65 +32,7 @@
   </div>
 </div>
 
-{{ if .tools }}
-<button
-    class="button is-white has-text-grey"
-    style="position: fixed; bottom: 1em; right: 1em;"
-    onclick="tools.showModal()">
-  <span class="icon"><i class="fa-solid fa-screwdriver-wrench"></i></span>
-  <span>Tools: Ctrl+K</span>
-</button>
-
-<dialog id="tools-modal" style="border: none;" class="mt-0">
-  <div class="modal-content">
-    <div class="box">
-      <div class="field">
-        <div class="control">
-          <input class="input" type="search" placeholder="Search..." onkeyup="filterToolsList(this.value)" autofocus/>
-        </div>
-      </div>
-      <aside class="menu" style="height: 30em; overflow-y: auto;">
-        {{ .tools }}
-      </aside>
-    </div>
-  </div>
-
-  <form method="dialog">
-    <button class="modal-close is-large" aria-label="close"></button>
-  </form>
-</dialog>
-
 <script>
- const tools = document.getElementById('tools-modal');
-
- document.addEventListener('keydown', function(e) {
-     const kCharCode = "K".charCodeAt();
-
-     if (e.keyCode === 27) { // Escape key
-         tools.close();
-         return;
-     }
-
-     if ( e.keyCode === kCharCode && ( e.metaKey || e.ctrlKey ) ) {
-         e.preventDefault();
-         tools.showModal();
-     }
- });
-
- function filterToolsList(v) {
-     const keyword = v.toLowerCase();
-     const lis = document.querySelectorAll("#tools-modal li");
-
-     for(var i=0; i < lis.length; i++){
-         const li = lis[i];
-         if( li.textContent.toLowerCase().includes(keyword) ) {
-             li.classList.remove("is-hidden");
-         } else {
-             li.classList.add("is-hidden");
-         }
-     }
- }
-
  document.addEventListener('keydown', function(e) {
      const sCharCode = "S".charCodeAt();
 
@@ -110,6 +47,5 @@
      ele.setAttribute("dir", "auto")
  })
 </script>
-{{ end }}
 
 {{ template "footer" . }}
