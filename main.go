@@ -71,6 +71,7 @@ func main() {
 		return Render("edit", Locals{
 			"title":   page.Name,
 			"action":  page.Name,
+			"rtl":     page.RTL(),
 			"content": content,
 			"csrf":    CSRF(r),
 		})

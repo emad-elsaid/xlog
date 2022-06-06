@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -123,6 +124,10 @@ func (p *Page) ModTime() time.Time {
 	}
 
 	return s.ModTime()
+}
+
+func (p *Page) RTL() bool {
+	return regexp.MustCompile(`\p{Arabic}`).MatchString(p.Content())
 }
 
 func WalkPages(ctx context.Context, f func(*Page)) {

@@ -33,7 +33,8 @@
      autofocus: true,
      spellcheck: true,
      lineWrapping: true,
-     viewportMargin: Infinity
+     viewportMargin: Infinity,
+     direction: {{ if .rtl }} "rtl" {{ else }} "ltr" {{ end }}
  });
 
  document.addEventListener('keydown', function(event) {
