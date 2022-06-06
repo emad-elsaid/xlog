@@ -43,7 +43,17 @@
  });
 
  // This is a hack to display right to left text correctly
- document.querySelectorAll('.content p, .content li, .content h1, .content h2, .content h3, .content h4, .content h5, .content h6').forEach(function(ele) {
+ const selectors = [
+     '.content p',
+     '.content li',
+     '.content h1',
+     '.content h2',
+     '.content h3',
+     '.content h4',
+     '.content h5',
+     '.content h6'
+ ].join(",")
+ document.querySelectorAll(selectors).forEach(function(ele) {
      ele.setAttribute("dir", "auto")
  })
 </script>
