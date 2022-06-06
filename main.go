@@ -41,6 +41,7 @@ func main() {
 			"title":   page.Name,
 			"updated": page.ModTime().Format("2006-01-02 15:04"),
 			"content": template.HTML(page.Render()),
+			"navbar":  renderWidget(NAVBAR_WIDGET, &page, r),
 			"tools":   renderWidget(TOOLS_WIDGET, &page, r),
 			"sidebar": renderWidget(SIDEBAR_WIDGET, &page, r),
 			"meta":    renderWidget(META_WIDGET, &page, r),
@@ -75,14 +76,6 @@ func main() {
 		})
 	})
 
-	HELPER("navbarStart", func() template.HTML {
-		o := template.HTML("")
-		for _, v := range navbarWidgets {
-			o += v()
-		}
-		return o
-	})
-
 	START()
 }
 
@@ -94,14 +87,12 @@ const (
 	TOOLS_WIDGET widgetSpace = iota
 	SIDEBAR_WIDGET
 	META_WIDGET
+	NAVBAR_WIDGET
 )
 
 var (
-	navbarWidgets = []func() template.HTML{}
-	widgets       = map[widgetSpace][]func(*Page, Request) template.HTML{}
+	widgets = map[widgetSpace][]func(*Page, Request) template.HTML{}
 )
-
-func NAVBAR_START(f func() template.HTML) { navbarWidgets = append(navbarWidgets, f) }
 
 func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {

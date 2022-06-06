@@ -9,11 +9,11 @@ import (
 const MIN_SEARCH_KEYWORD = 3
 
 func init() {
-	NAVBAR_START(searchNavbarStartWidget)
+	WIDGET(NAVBAR_WIDGET, searchNavbarWidget)
 	GET(`/\+/search`, searchHandler)
 }
 
-func searchNavbarStartWidget() template.HTML {
+func searchNavbarWidget(_ *Page, _ Request) template.HTML {
 	return template.HTML(partial("extension/search-navbar", nil))
 }
 

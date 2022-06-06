@@ -30,9 +30,11 @@
         </a>
       </div>
 
+      {{ if .navbar }}
       <div class="navbar-start">
-        {{ navbarStart }}
+        {{ .navbar }}
       </div>
+      {{ end }}
 
       {{ if .edit }}
       <div class="navbar-end">
