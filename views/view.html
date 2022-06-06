@@ -1,17 +1,5 @@
 {{ template "header" . }}
 
-<style>
- .content p img:only-child{
-     display: block;
-     margin-right: auto;
-     margin-left: auto;
- }
- .content h1, .content h2, .content h3, .content h4, .content h5, .content h6 {
-     border-bottom: 1px solid #ddd;
-     padding-bottom: 0.5em;
- }
-</style>
-
 <div class="container mt-5">
   <div class="columns">
     {{ if .sidebar }}
@@ -31,6 +19,19 @@
     </div>
   </div>
 </div>
+
+<style>
+ .content p img:only-child{
+     display: block;
+     margin-right: auto;
+     margin-left: auto;
+ }
+ .content h1, .content h2, .content h3,
+ .content h4, .content h5, .content h6 {
+     border-bottom: 1px solid #ddd;
+     padding-bottom: 0.5em;
+ }
+</style>
 
 <script>
  document.addEventListener('keydown', function(e) {
