@@ -7,11 +7,13 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"regexp"
 )
 
 func init() {
 	PageEvents.Listen(BeforeWrite, WriteVersion)
 	WIDGET(META_WIDGET, VersionMeta)
+	IGNORE_DIR(regexp.MustCompile(`\.versions$`))
 }
 
 func WriteVersion(p *Page) error {

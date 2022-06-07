@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -21,7 +22,7 @@ var (
 
 func init() {
 	WIDGET(TOOLS_WIDGET, uploadFileWidget)
-	POST(`/\+/upload-file/{page}`, uploadFileHandler)
+	POST(`/\+/upload-file`, uploadFileHandler)
 }
 
 func uploadFileWidget(p *Page, r Request) template.HTML {
@@ -29,7 +30,7 @@ func uploadFileWidget(p *Page, r Request) template.HTML {
 		partial("extension/upload-file", Locals{
 			"page":   p,
 			"csrf":   CSRF(r),
-			"action": "/+/upload-file/" + p.Name,
+			"action": "/+/upload-file?page=" + url.QueryEscape(p.Name),
 		}),
 	)
 }
@@ -37,9 +38,7 @@ func uploadFileWidget(p *Page, r Request) template.HTML {
 func uploadFileHandler(w Response, r Request) Output {
 	r.ParseMultipartForm(MAX_FILE_UPLOAD)
 
-	vars := VARS(r)
-	page := NewPage(vars["page"])
-
+	page := NewPage(r.FormValue("page"))
 	if !page.Exists() {
 		return Redirect("/" + page.Name + "/edit")
 	}

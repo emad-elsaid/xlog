@@ -6,21 +6,6 @@
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="stylesheet" href="/assets/fontawesome/style.css">
     <title>{{.title}} | XLog</title>
-    {{ if autoload }}
-    <script>
-     var token = "";
-     setInterval(async function() {
-         var r = await fetch("/autoreload/token");
-         var t = await r.text();
-
-         if ( token == "" ) {
-             token = t;
-         } else if (token != t) {
-             document.location.reload();
-         }
-     }, 1000)
-    </script>
-    {{ end }}
   </head>
   <body>
     <nav class="navbar is-fixed-top" role="navigation">

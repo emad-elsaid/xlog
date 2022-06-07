@@ -40,13 +40,12 @@ var assets embed.FS
 
 var (
 	BIND_ADDRESS string
-	AUTORELOAD   bool
-	STARTUP_TIME = time.Now()
 	router       = &Handler{}
 	CSRF         = csrf.TemplateField
 
-	dynamicSegmentRegexp = regexp.MustCompile("{([^}]*)}")
-	middlewares          = []func(http.Handler) http.Handler{
+	dynamicSegmentWithPatternRegexp = regexp.MustCompile("{([^}]+):([^}]+)}")
+	dynamicSegmentRegexp            = regexp.MustCompile("{([^}]+)}")
+	middlewares                     = []func(http.Handler) http.Handler{
 		methodOverrideHandler,
 		csrf.Protect(
 			[]byte(os.Getenv("SESSION_SECRET")),
@@ -68,9 +67,10 @@ type (
 
 func init() {
 	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
-	flag.BoolVar(&AUTORELOAD, "autoload", false, "reload the page when the server restarts")
 	log.SetFlags(log.Ltime)
-	HELPER("autoload", func() bool { return AUTORELOAD })
+
+	GET("/"+ASSETS_DIR_PATH+"/.*", assetsHandler())
+	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
 }
 
 func START() {
@@ -78,15 +78,6 @@ func START() {
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
-	}
-
-	GET("/"+ASSETS_DIR_PATH+"/.*", assetsHandler())
-	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
-
-	if AUTORELOAD {
-		GET("/autoreload/token", func(_ Response, _ Request) Output {
-			return func(w Response, _ Request) { fmt.Fprintf(w, "%d", STARTUP_TIME.Unix()) }
-		})
 	}
 
 	srv := &http.Server{
@@ -136,7 +127,9 @@ func checkMethod(method string) RouteCheck {
 const varsIndex int = iota + 1
 
 func checkPath(path string) RouteCheck {
-	path = "^" + dynamicSegmentRegexp.ReplaceAllString(path, "(?P<$1>[^/]+)") + "$"
+	path = dynamicSegmentWithPatternRegexp.ReplaceAllString(path, "(?P<$1>$2)")
+	path = dynamicSegmentRegexp.ReplaceAllString(path, "(?P<$1>[^/]+)")
+	path = "^" + path + "$"
 	reg := regexp.MustCompile(path)
 	groups := reg.SubexpNames()
 

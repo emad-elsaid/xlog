@@ -3,11 +3,14 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -34,6 +37,12 @@ const (
 	AfterWrite
 	AfterDelete
 )
+
+var ignoredDirs = []*regexp.Regexp{}
+
+func IGNORE_DIR(r *regexp.Regexp) {
+	ignoredDirs = append(ignoredDirs, r)
+}
 
 var PageEvents = PageEventsMap{}
 var MarkDownRenderer = goldmark.New(
@@ -108,9 +117,11 @@ func (p *Page) Write(content string) bool {
 	PageEvents.Trigger(BeforeWrite, p)
 	defer PageEvents.Trigger(AfterWrite, p)
 
-	content = strings.ReplaceAll(content, "\r\n", "\n")
+	name := p.FileName()
+	os.MkdirAll(filepath.Dir(name), 0700)
 
-	if err := ioutil.WriteFile(p.FileName(), []byte(content), 0644); err != nil {
+	content = strings.ReplaceAll(content, "\r\n", "\n")
+	if err := ioutil.WriteFile(name, []byte(content), 0644); err != nil {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.Name, err)
 		return false
 	}
@@ -131,26 +142,40 @@ func (p *Page) RTL() bool {
 }
 
 func WalkPages(ctx context.Context, f func(*Page)) {
-	files, _ := ioutil.ReadDir(".")
-	for _, file := range files {
+	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
+		if d.IsDir() && name == STATIC_DIR_PATH {
+			return fs.SkipDir
+		}
+
+		if d.IsDir() {
+			for _, v := range ignoredDirs {
+				if v.MatchString(name) {
+					return fs.SkipDir
+				}
+			}
+
+			return nil
+		}
+
 		select {
 
 		case <-ctx.Done():
-			break
+			return errors.New("Context stopped")
 
 		default:
-			name := file.Name()
 			ext := path.Ext(name)
 			basename := name[:len(name)-len(ext)]
 
-			if !file.IsDir() && ext == ".md" {
+			if ext == ".md" {
 				f(&Page{
 					Name: basename,
 				})
 			}
 
 		}
-	}
+
+		return nil
+	})
 }
 
 func (c PageEventsMap) Listen(e PageEvent, h PageEventHandler) {

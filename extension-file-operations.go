@@ -1,10 +1,13 @@
 package main
 
-import "html/template"
+import (
+	"html/template"
+	"net/url"
+)
 
 func init() {
 	WIDGET(TOOLS_WIDGET, fileOperationsWidget)
-	DELETE(`/\+/file/delete/{page}`, fileOperationsDeleteHandler)
+	DELETE(`/\+/file/delete`, fileOperationsDeleteHandler)
 }
 
 func fileOperationsWidget(p *Page, r Request) template.HTML {
@@ -12,16 +15,13 @@ func fileOperationsWidget(p *Page, r Request) template.HTML {
 		partial("extension/file-operations", Locals{
 			"csrf":   CSRF(r),
 			"page":   p.Name,
-			"action": "/+/file/delete/" + p.Name,
+			"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
 		}),
 	)
 }
 
 func fileOperationsDeleteHandler(w Response, r Request) Output {
-	vars := VARS(r)
-	page := NewPage(vars["page"])
-
-	if page.Exists() {
+	if page := NewPage(r.FormValue("page")); page.Exists() {
 		page.Delete()
 	}
 

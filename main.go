@@ -24,60 +24,65 @@ func main() {
 		log.Fatal(err)
 	}
 
-	GET("/", func(w Response, r Request) Output {
-		return Redirect("/index")
-	})
-
-	GET("/{page}", func(w Response, r Request) Output {
-		vars := VARS(r)
-		page := NewPage(vars["page"])
-
-		if !page.Exists() {
-			return Redirect("/" + page.Name + "/edit")
-		}
-
-		return Render("view", Locals{
-			"edit":    "/" + page.Name + "/edit",
-			"title":   page.Name,
-			"updated": page.ModTime().Format("2006-01-02 15:04"),
-			"content": template.HTML(page.Render()),
-			"navbar":  renderWidget(NAVBAR_WIDGET, &page, r),
-			"tools":   renderWidget(TOOLS_WIDGET, &page, r),
-			"sidebar": renderWidget(SIDEBAR_WIDGET, &page, r),
-			"meta":    renderWidget(META_WIDGET, &page, r),
-		})
-	})
-
-	POST("/{page}", func(w Response, r Request) Output {
-		vars := VARS(r)
-		page := NewPage(vars["page"])
-		content := r.FormValue("content")
-
-		page.Write(content)
-		return Redirect("/" + page.Name)
-	})
-
-	GET("/{page}/edit", func(w Response, r Request) Output {
-		vars := VARS(r)
-		page := NewPage(vars["page"])
-
-		var content string
-		if page.Exists() {
-			content = page.Content()
-		} else if template := NewPage(TEMPLATE_NAME); template.Exists() {
-			content = template.Content()
-		}
-
-		return Render("edit", Locals{
-			"title":   page.Name,
-			"action":  page.Name,
-			"rtl":     page.RTL(),
-			"content": content,
-			"csrf":    CSRF(r),
-		})
-	})
+	GET("/", RootHandler)
+	GET("/edit/{page:.*}", GetPageEditHandler)
+	GET("/{page:.*}", GetPageHandler)
+	POST("/{page:.*}", PostPageHandler)
 
 	START()
+}
+
+func RootHandler(w Response, r Request) Output {
+	return Redirect("/index")
+}
+
+func GetPageHandler(w Response, r Request) Output {
+	vars := VARS(r)
+	page := NewPage(vars["page"])
+
+	if !page.Exists() {
+		return Redirect("/edit/" + page.Name)
+	}
+
+	return Render("view", Locals{
+		"edit":    "/edit/" + page.Name,
+		"title":   page.Name,
+		"updated": page.ModTime().Format("2006-01-02 15:04"),
+		"content": template.HTML(page.Render()),
+		"navbar":  renderWidget(NAVBAR_WIDGET, &page, r),
+		"tools":   renderWidget(TOOLS_WIDGET, &page, r),
+		"sidebar": renderWidget(SIDEBAR_WIDGET, &page, r),
+		"meta":    renderWidget(META_WIDGET, &page, r),
+	})
+}
+
+func GetPageEditHandler(w Response, r Request) Output {
+	vars := VARS(r)
+	page := NewPage(vars["page"])
+
+	var content string
+	if page.Exists() {
+		content = page.Content()
+	} else if template := NewPage(TEMPLATE_NAME); template.Exists() {
+		content = template.Content()
+	}
+
+	return Render("edit", Locals{
+		"title":   page.Name,
+		"action":  page.Name,
+		"rtl":     page.RTL(),
+		"content": content,
+		"csrf":    CSRF(r),
+	})
+}
+
+func PostPageHandler(w Response, r Request) Output {
+	vars := VARS(r)
+	page := NewPage(vars["page"])
+	content := r.FormValue("content")
+
+	page.Write(content)
+	return Redirect("/" + page.Name)
 }
 
 // WIDGETS ===================================================
