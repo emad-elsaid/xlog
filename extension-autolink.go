@@ -99,7 +99,7 @@ func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	block.Advance(consumes)
 	n := ast.NewTextSegment(text.NewSegment(start, start+m))
 	link := &PageLink{
-		url:   url,
+		url:   "/" + url,
 		value: n,
 	}
 	return link
