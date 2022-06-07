@@ -71,7 +71,7 @@ func NewPage(name string) Page {
 }
 
 func (p *Page) FileName() string {
-	return p.Name + ".md"
+	return filepath.FromSlash(p.Name) + ".md"
 }
 
 func (p *Page) Exists() bool {
