@@ -80,15 +80,17 @@ func PostPageHandler(w Response, r Request) Output {
 	vars := VARS(r)
 	page := NewPage(vars["page"])
 	content := r.FormValue("content")
-
 	page.Write(content)
+
 	return Redirect("/" + page.Name)
 }
 
 // WIDGETS ===================================================
 
-type widgetSpace int
-type widgetFunc func(*Page, Request) template.HTML
+type (
+	widgetSpace int
+	widgetFunc  func(*Page, Request) template.HTML
+)
 
 const (
 	TOOLS_WIDGET widgetSpace = iota
