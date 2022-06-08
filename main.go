@@ -71,6 +71,7 @@ func GetPageEditHandler(w Response, r Request) Output {
 		"title":   page.Name,
 		"action":  page.Name,
 		"rtl":     page.RTL(),
+		"tools":   renderWidget(TOOLS_WIDGET, &page, r),
 		"content": content,
 		"csrf":    CSRF(r),
 	})

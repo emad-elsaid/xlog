@@ -13,15 +13,25 @@
      }
 
      var file = item.getAsFile();
-     var data = new FormData()
+     var data = new FormData();
+     var editMode = (typeof editor !== 'undefined');
+     var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
 
      data.append('file', file)
      data.append('csrf', document.querySelector('input[name=csrf]').value);
 
-     fetch('{{ .action }}', {
+     fetch(action, {
          method: 'POST',
          body: data
-     }).then(function(){ document.location.reload() });
+     }).then(function(resp) {
+         return resp.text();
+     }).then(function(text){
+         if ( editMode ) {
+             editor.getDoc().replaceSelection(text);
+         } else {
+             document.location.reload();
+         }
+     });
  });
 
  document.body.addEventListener('dragover', function(ev){
@@ -46,14 +56,24 @@
              canvas.toBlob(function(recording){
                  var file = new File([recording], 'screenshot.png', {type: 'image/png'});
                  var data = new FormData()
+                 var editMode = (typeof editor !== 'undefined');
+                 var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
 
                  data.append('file', file)
                  data.append('csrf', document.querySelector('input[name=csrf]').value);
 
-                 fetch('{{ .action }}', {
+                 fetch(action, {
                      method: 'POST',
                      body: data
-                 }).then(function(){ document.location.reload() });
+                 }).then(function(resp) {
+                     return resp.text();
+                 }).then(function(text){
+                     if ( editMode ) {
+                         editor.getDoc().replaceSelection(text);
+                     } else {
+                         document.location.reload();
+                     }
+                 });
              }, "image/png");
          });
 
@@ -110,14 +130,24 @@
      function download(recording, mimetype, extension) {
          var file = new File([recording], 'recording.'+extension, {type: mimetype});
          var data = new FormData()
+         var editMode = (typeof editor !== 'undefined');
+         var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
 
          data.append('file', file)
          data.append('csrf', document.querySelector('input[name=csrf]').value);
 
-         fetch('{{ .action }}', {
+         fetch(action, {
              method: 'POST',
              body: data
-         }).then(function(){ document.location.reload() });
+         }).then(function(resp) {
+             return resp.text();
+         }).then(function(text){
+             if ( editMode ) {
+                 editor.getDoc().replaceSelection(text);
+             } else {
+                 document.location.reload();
+             }
+         });
      }
  })()
 

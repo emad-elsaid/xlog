@@ -28,9 +28,10 @@ func init() {
 func uploadFileWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
 		partial("extension/upload-file", Locals{
-			"page":   p,
-			"csrf":   CSRF(r),
-			"action": "/+/upload-file?page=" + url.QueryEscape(p.Name),
+			"page":           p,
+			"csrf":           CSRF(r),
+			"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),
+			"editModeAction": "/+/upload-file",
 		}),
 	)
 }
@@ -38,12 +39,14 @@ func uploadFileWidget(p *Page, r Request) template.HTML {
 func uploadFileHandler(w Response, r Request) Output {
 	r.ParseMultipartForm(MAX_FILE_UPLOAD)
 
-	page := NewPage(r.FormValue("page"))
-	if !page.Exists() {
+	fileName := r.FormValue("page")
+
+	page := NewPage(fileName)
+	if fileName != "" && !page.Exists() {
 		return Redirect("/" + page.Name + "/edit")
 	}
 
-	content := page.Content()
+	var output string
 	f, h, _ := r.FormFile("file")
 	if f != nil {
 		defer f.Close()
@@ -65,22 +68,24 @@ func uploadFileHandler(w Response, r Request) Output {
 			return InternalServerError(err)
 		}
 
-		content = strings.TrimSpace(content)
-
 		if containString(IMAGES_EXTENSIONS, ext) {
-			content += fmt.Sprintf("\n\n![](/%s)\n", p)
+			output = fmt.Sprintf("![](/%s)", p)
 		} else if containString(VIDEOS_EXTENSIONS, ext) {
-			content += fmt.Sprintf("\n\n<video controls src=\"/%s\"></video>\n", p)
+			output = fmt.Sprintf("<video controls src=\"/%s\"></video>", p)
 		} else if containString(AUDIO_EXTENSIONS, ext) {
-			content += fmt.Sprintf("\n\n<audio controls src=\"/%s\"></audio>\n", p)
+			output = fmt.Sprintf("<audio controls src=\"/%s\"></audio>", p)
 		} else {
-			content += fmt.Sprintf("\n\n[%s](/%s)\n", mdName, p)
+			output = fmt.Sprintf("[%s](/%s)", mdName, p)
 		}
 	}
 
-	page.Write(content)
+	if fileName != "" && page.Exists() {
+		content := strings.TrimSpace(page.Content()) + "\n\n" + output + "\n"
+		page.Write(content)
+		return Redirect("/" + page.Name)
+	}
 
-	return Redirect("/" + page.Name)
+	return PlainText(output)
 }
 
 func containString(slice []string, str string) bool {

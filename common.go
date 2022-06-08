@@ -208,6 +208,12 @@ func Redirect(url string) http.HandlerFunc {
 	}
 }
 
+func PlainText(text string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(text))
+	}
+}
+
 func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
 	router.routes = append(router.routes, Route{
 		checks: checks,
