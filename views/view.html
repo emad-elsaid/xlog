@@ -1,20 +1,22 @@
 {{ template "header" . }}
 
-<div class="container mt-5">
+<div class="container is-fluid mt-5">
   <div class="columns">
     {{ if .sidebar }}
-    <div class="column is-one-fifth"> {{ .sidebar }} </div>
+    <div class="column is-2"> {{ .sidebar }} </div>
     {{ end }}
 
     <div class="column">
-      <div class="content" dir="auto" style="margin-bottom: 20em;">
-        <p class="is-size-7 has-text-grey">
-          <span class="icon"><i class="fa-solid fa-pen"></i></span>
-          <span> Updated: {{.updated}} </span>
-          {{ .meta }}
-        </p>
+      <div class="container is-max-desktop">
+        <div class="content" dir="auto" style="margin-bottom: 20em;">
+          <p class="is-size-7 has-text-grey">
+            <span class="icon"><i class="fa-solid fa-pen"></i></span>
+            <span> Updated: {{.updated}} </span>
+            {{ .meta }}
+          </p>
 
-        {{.content}}
+          {{.content}}
+        </div>
       </div>
     </div>
   </div>
