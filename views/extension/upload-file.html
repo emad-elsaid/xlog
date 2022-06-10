@@ -1,161 +1,8 @@
-<script>
- document.body.addEventListener('drop', function(ev){
-     ev.preventDefault();
-     ev.dataTransfer.dropEffect = "copy";
-     var items = ev.dataTransfer.items;
-     if( items < 1 ){
-         return;
-     }
-
-     var item = items[0];
-     if(item.kind !== 'file') {
-         return;
-     }
-
-     var file = item.getAsFile();
-     var data = new FormData();
-     var editMode = (typeof editor !== 'undefined');
-     var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
-
-     data.append('file', file)
-     data.append('csrf', document.querySelector('input[name=csrf]').value);
-
-     fetch(action, {
-         method: 'POST',
-         body: data
-     }).then(function(resp) {
-         return resp.text();
-     }).then(function(text){
-         if ( editMode ) {
-             editor.getDoc().replaceSelection(text);
-         } else {
-             document.location.reload();
-         }
-     });
- });
-
- document.body.addEventListener('dragover', function(ev){
-     ev.preventDefault();
- });
-
- (function(){
-     window.screenshot = async function() {
-         var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
-
-         stream.getTracks().forEach(async function(track) {
-             var ic = new ImageCapture(track);
-             var bmp = await ic.grabFrame();
-             track.stop();
-
-             const canvas = document.createElement('canvas');
-             canvas.width = bmp.width;
-             canvas.height = bmp.height;
-             const ctx = canvas.getContext('bitmaprenderer');
-             ctx.transferFromImageBitmap(bmp);
-
-             canvas.toBlob(function(recording){
-                 var file = new File([recording], 'screenshot.png', {type: 'image/png'});
-                 var data = new FormData()
-                 var editMode = (typeof editor !== 'undefined');
-                 var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
-
-                 data.append('file', file)
-                 data.append('csrf', document.querySelector('input[name=csrf]').value);
-
-                 fetch(action, {
-                     method: 'POST',
-                     body: data
-                 }).then(function(resp) {
-                     return resp.text();
-                 }).then(function(text){
-                     if ( editMode ) {
-                         editor.getDoc().replaceSelection(text);
-                     } else {
-                         document.location.reload();
-                     }
-                 });
-             }, "image/png");
-         });
-
-     }
-
-     window.record = async function() {
-         var stream = await navigator.mediaDevices.getDisplayMedia({
-             video: {cursor: "always"},
-             audio: true
-         });
-
-         start(stream, "video/webm; codecs=vp9", "webm");
-     }
-
-     var recordCameraStream;
-     window.recordCamera = async function() {
-         if (recordCameraStream!=null) {
-             stop(recordCameraStream);
-             return;
-         }
-
-         recordCameraStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
-         start(recordCameraStream, "video/webm; codecs=vp9", "webm");
-     }
-
-     var recordAudioStream;
-     window.recordAudio = async function() {
-         if (recordAudioStream!=null) {
-             stop(recordAudioStream);
-             return;
-         }
-
-         recordAudioStream = await navigator.mediaDevices.getUserMedia({audio: true});
-         start(recordAudioStream, 'audio/webm; codecs=opus', "opus");
-     }
-
-     function start(stream, mimetype, extension) {
-         var options = { mimeType: mimetype};
-         var recorder = new MediaRecorder(stream, options);
-         recorder.ondataavailable = function(event) {
-             if (event.data.size > 0) {
-                 download(event.data, mimetype, extension);
-             }
-         }
-         recorder.start();
-     }
-
-     function stop(stream) {
-         stream.getTracks().forEach(function(track) {
-             track.stop();
-         });
-     }
-
-     function download(recording, mimetype, extension) {
-         var file = new File([recording], 'recording.'+extension, {type: mimetype});
-         var data = new FormData()
-         var editMode = (typeof editor !== 'undefined');
-         var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
-
-         data.append('file', file)
-         data.append('csrf', document.querySelector('input[name=csrf]').value);
-
-         fetch(action, {
-             method: 'POST',
-             body: data
-         }).then(function(resp) {
-             return resp.text();
-         }).then(function(text){
-             if ( editMode ) {
-                 editor.getDoc().replaceSelection(text);
-             } else {
-                 document.location.reload();
-             }
-         });
-     }
- })()
-
-</script>
+{{ .csrf }}
 
 <ul class="menu-list">
   <li>
-    <a href="#" onclick="document.getElementById('file-upload-file').click()">
+    <a href="#" onclick="upload()">
       <span class="icon"><i class="fa-solid fa-file-arrow-up"></i></span>
       <span> Upload File </span>
     </a>
@@ -177,21 +24,144 @@
   <li>
     <a href="#" onclick="recordCamera()">
       <span class="icon"><i class="fa-solid fa-video"></i></span>
-      <span> Record camera
-        <small class="has-text-grey is-pulled-right">(click while recording to save)</small>
-      </span>
+      <span> Record camera </span>
     </a>
   </li>
   <li>
     <a href="#" onclick="recordAudio()">
       <span class="icon"><i class="fa-solid fa-microphone"></i></span>
-      <span> Record audio
-        <small class="has-text-grey is-pulled-right">(click while recording to save)</small>
-      </span>
+      <span> Record audio </span>
     </a>
   </li>
-  <form method="POST" class="form is-hidden" action="{{ .action }}" enctype="multipart/form-data">
-    {{ .csrf }}
-    <input class="file-input" type="file" name="file" id="file-upload-file" onchange="this.form.submit()">
-  </form>
 </ul>
+
+<div id="recordingBanner" onclick="StopAllRecording()" class="button is-size-4 is-hidden" style="position: fixed; bottom: 1em; left: 1em;">
+  <span class="icon has-text-danger"><i class="fa-solid fa-circle-stop"></i></span>
+  <span> Recording... </span>
+</div>
+
+<script>
+ (() => {
+     var banner = document.getElementById('recordingBanner');
+     banner.remove();
+     document.body.appendChild(banner);
+
+     document.body.addEventListener('dragover', ev => ev.preventDefault());
+
+     document.body.addEventListener('drop', ev => {
+         ev.preventDefault();
+         ev.dataTransfer.dropEffect = "copy";
+         var items = ev.dataTransfer.items;
+         if( items < 1 ) return;
+
+         var item = items[0];
+         if(item.kind !== 'file') return;
+
+         var file = item.getAsFile();
+         uploadFile(file);
+     });
+
+     window.upload = () => {
+         var input = document.createElement('input');
+         input.type = 'file';
+         input.onchange = e => uploadFile(e.target.files[0]);
+         input.click();
+     }
+
+     window.screenshot = async () => {
+         var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
+
+         stream.getTracks().forEach(async function(track) {
+             var ic = new ImageCapture(track);
+             var bmp = await ic.grabFrame();
+             track.stop();
+
+             const canvas = document.createElement('canvas');
+             canvas.width = bmp.width;
+             canvas.height = bmp.height;
+             const ctx = canvas.getContext('bitmaprenderer');
+             ctx.transferFromImageBitmap(bmp);
+
+             canvas.toBlob( recording => {
+                 var file = new File([recording], 'screenshot.png', {type: 'image/png'});
+                 uploadFile(file);
+             }, "image/png");
+         });
+     }
+
+     window.record = async () => {
+         var stream = await navigator.mediaDevices.getDisplayMedia({
+             video: {cursor: "always"},
+             audio: true
+         });
+
+         start(stream, "video/webm; codecs=vp9", "webm");
+     }
+
+     var recordCameraStream;
+     window.recordCamera = async () => {
+         if (recordCameraStream!=null) return
+         recordCameraStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+         start(recordCameraStream, "video/webm; codecs=vp9", "webm");
+         document.getElementById('recordingBanner').classList.remove('is-hidden');
+     }
+
+     var recordAudioStream;
+     window.recordAudio = async () => {
+         if (recordAudioStream!=null) return
+         recordAudioStream = await navigator.mediaDevices.getUserMedia({audio: true});
+         start(recordAudioStream, 'audio/webm; codecs=opus', "opus");
+         document.getElementById('recordingBanner').classList.remove('is-hidden');
+     }
+
+     function start(stream, mimetype, extension) {
+         var options = { mimeType: mimetype};
+         var recorder = new MediaRecorder(stream, options);
+         recorder.ondataavailable = (event) => {
+             if (event.data.size > 0)
+                 download(event.data, mimetype, extension);
+         }
+         recorder.start();
+     }
+
+     function stop(stream) {
+         try {
+             stream.getTracks().forEach((track) => track.stop());
+         } catch(e) {
+             // Don't care about errors here
+ }
+ }
+
+     window.StopAllRecording = () => {
+         document.getElementById('recordingBanner').classList.add('is-hidden');
+         stop(recordAudioStream);
+         recordAudioStream = null;
+         stop(recordCameraStream);
+         recordCameraStream = null;
+     }
+
+
+     function download(recording, mimetype, extension) {
+         uploadFile(new File([recording], 'recording.'+extension, {type: mimetype}));
+     }
+
+     function uploadFile(file) {
+         var data = new FormData()
+         var editMode = (typeof editor !== 'undefined');
+         var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
+
+         data.append('file', file)
+         data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+         var params = {method: 'POST', body: data};
+
+         fetch(action, params).then(resp => resp.text()).then(text => {
+             if ( editMode ) {
+                 editor.getDoc().replaceSelection(text);
+             } else {
+                 document.location.reload();
+             }
+         });
+     }
+ })()
+</script>

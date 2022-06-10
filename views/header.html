@@ -62,8 +62,14 @@
       </form>
     </dialog>
 
-    <script>
+    <script type="application/javascript">
      const tools = document.getElementById('tools-modal');
+
+     tools.querySelectorAll('a').forEach(ele => {
+         ele.addEventListener('mouseup', evt => {
+             tools.close();
+         });
+     });
 
      document.addEventListener('keydown', function(e) {
          const kCharCode = "K".charCodeAt();
