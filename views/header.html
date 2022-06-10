@@ -66,8 +66,9 @@
      const tools = document.getElementById('tools-modal');
 
      tools.querySelectorAll('a').forEach(ele => {
-         ele.addEventListener('mouseup', evt => {
-             tools.close();
+         ele.addEventListener('mouseup', evt => tools.close());
+         ele.addEventListener('keyup', evt => {
+             if( evt.key == 'Enter' ) tools.close();
          });
      });
 
