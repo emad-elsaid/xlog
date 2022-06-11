@@ -7,8 +7,8 @@
     {{ end }}
 
     <div class="column">
-      <div class="container is-max-desktop">
-        <div class="content" dir="auto" style="margin-bottom: 20em;">
+      <div class="container is-max-desktop" style="margin-bottom: 20em;">
+        <div class="content pb-6" dir="auto">
           <p class="is-size-7 has-text-grey">
             <span class="icon"><i class="fa-solid fa-pen"></i></span>
             <span> Updated: {{.updated}} </span>
@@ -17,6 +17,8 @@
 
           {{.content}}
         </div>
+
+        {{ .afterView }}
       </div>
     </div>
   </div>

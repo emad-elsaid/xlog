@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	WIDGET(SIDEBAR_WIDGET, backlinksSidebar)
+	WIDGET(AFTER_VIEW_WIDGET, backlinksSidebar)
 }
 
 func backlinksSidebar(p *Page, r Request) template.HTML {

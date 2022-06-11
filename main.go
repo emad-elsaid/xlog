@@ -45,14 +45,15 @@ func GetPageHandler(w Response, r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"edit":    "/edit/" + page.Name,
-		"title":   page.Name,
-		"updated": page.ModTime().Format("2006-01-02 15:04"),
-		"content": template.HTML(page.Render()),
-		"navbar":  renderWidget(NAVBAR_WIDGET, &page, r),
-		"tools":   renderWidget(TOOLS_WIDGET, &page, r),
-		"sidebar": renderWidget(SIDEBAR_WIDGET, &page, r),
-		"meta":    renderWidget(META_WIDGET, &page, r),
+		"edit":      "/edit/" + page.Name,
+		"title":     page.Name,
+		"updated":   page.ModTime().Format("2006-01-02 15:04"),
+		"content":   template.HTML(page.Render()),
+		"navbar":    renderWidget(NAVBAR_WIDGET, &page, r),
+		"tools":     renderWidget(TOOLS_WIDGET, &page, r),
+		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),
+		"meta":      renderWidget(META_WIDGET, &page, r),
+		"afterView": renderWidget(AFTER_VIEW_WIDGET, &page, r),
 	})
 }
 
@@ -96,6 +97,7 @@ type (
 const (
 	TOOLS_WIDGET widgetSpace = iota
 	SIDEBAR_WIDGET
+	AFTER_VIEW_WIDGET
 	META_WIDGET
 	NAVBAR_WIDGET
 )
