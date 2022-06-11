@@ -41,7 +41,7 @@
 </style>
 
 <script>
- document.addEventListener('keydown', function(e) {
+ document.addEventListener('keydown', e => {
      const sCharCode = "S".charCodeAt();
 
      if ( e.keyCode === sCharCode && ( e.metaKey || e.ctrlKey ) ) {
@@ -51,19 +51,8 @@
  });
 
  // This is a hack to display right to left text correctly
- const selectors = [
-     '.content p',
-     '.content li',
-     '.content h1',
-     '.content h2',
-     '.content h3',
-     '.content h4',
-     '.content h5',
-     '.content h6'
- ].join(",")
- document.querySelectorAll(selectors).forEach(function(ele) {
-     ele.setAttribute("dir", "auto")
- })
+ document.querySelectorAll('.content *')
+         .forEach( ele => ele.setAttribute("dir", "auto") );
 </script>
 
 {{ template "footer" . }}
