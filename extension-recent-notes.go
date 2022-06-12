@@ -8,9 +8,10 @@ import (
 
 func init() {
 	WIDGET(SIDEBAR_WIDGET, recentNotes)
+	GET(`/\+/recent`, recentHandler)
 }
 
-func recentNotes(p *Page, r Request) template.HTML {
+func recentHandler(_ Response, r Request) Output {
 	rp := recentPages{}
 	WalkPages(context.Background(), func(i *Page) {
 		rp = append(rp, i)
@@ -18,8 +19,8 @@ func recentNotes(p *Page, r Request) template.HTML {
 
 	sort.Sort(rp)
 
-	if len(rp) > 10 {
-		rp = rp[:10]
+	if len(rp) > 100 {
+		rp = rp[:100]
 	}
 
 	pages := []string{}
@@ -28,9 +29,15 @@ func recentNotes(p *Page, r Request) template.HTML {
 		pages = append(pages, v.Name)
 	}
 
-	return template.HTML(partial("extension/recent-notes", Locals{
-		"pages": pages,
-	}))
+	return Render("extension/recent", Locals{
+		"title":   "Recent",
+		"pages":   pages,
+		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
+	})
+}
+
+func recentNotes(p *Page, r Request) template.HTML {
+	return template.HTML(partial("extension/recent-sidebar", nil))
 }
 
 type recentPages []*Page

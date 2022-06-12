@@ -23,6 +23,7 @@ func init() {
 	))
 	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
 
+	GET(`/\+/tags`, tagsHandler)
 	GET(`/\+/tag/{tag}`, tagHandler)
 }
 
@@ -84,6 +85,35 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	return ast.WalkContinue, nil
 }
 
+func tagsHandler(_ Response, r Request) Output {
+	tags := map[string][]string{}
+	WalkPages(context.Background(), func(a *Page) {
+		set := map[string]bool{}
+		hashes := hashtagReg.FindAllStringSubmatch(a.Content(), -1)
+		for _, v := range hashes {
+			val := strings.ToLower(v[1])
+
+			// don't use same tag twice for same page
+			if _, ok := set[val]; ok {
+				continue
+			}
+
+			set[val] = true
+			if ps, ok := tags[val]; ok {
+				tags[val] = append(ps, a.Name)
+			} else {
+				tags[val] = []string{a.Name}
+			}
+		}
+	})
+
+	return Render("extension/tags", Locals{
+		"title":   "Hashtags",
+		"tags":    tags,
+		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
+	})
+}
+
 func tagHandler(w Response, r Request) Output {
 	vars := VARS(r)
 	tag := "#" + vars["tag"]
@@ -117,28 +147,5 @@ func tagPages(ctx context.Context, keyword string) []tagResult {
 }
 
 func hashtagsSidebar(p *Page, r Request) template.HTML {
-	tags := map[string][]string{}
-	WalkPages(context.Background(), func(a *Page) {
-		set := map[string]bool{}
-		hashes := hashtagReg.FindAllStringSubmatch(a.Content(), -1)
-		for _, v := range hashes {
-			val := strings.ToLower(v[1])
-
-			// don't use same tag twice for same page
-			if _, ok := set[val]; ok {
-				continue
-			}
-
-			set[val] = true
-			if ps, ok := tags[val]; ok {
-				tags[val] = append(ps, a.Name)
-			} else {
-				tags[val] = []string{a.Name}
-			}
-		}
-	})
-
-	return template.HTML(partial("extension/tags-sidebar", Locals{
-		"tags": tags,
-	}))
+	return template.HTML(partial("extension/tags-sidebar", nil))
 }

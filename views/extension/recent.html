@@ -1,0 +1,25 @@
+{{ template "header" . }}
+
+<div class="container is-fluid mt-5">
+  <div class="columns">
+    {{ if .sidebar }}
+    <div class="column is-2"> {{ .sidebar }} </div>
+    {{ end }}
+
+    <div class="column">
+      <div class="container is-max-desktop" style="margin-bottom: 20em;">
+        <div class="content pb-6" dir="auto">
+
+          <ul class="menu-list">
+            {{ range .pages }}
+            <li class="is-capitalized"><a href="/{{.}}">{{ . }}</a></li>
+            {{ end }}
+          </ul>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ template "footer" . }}
