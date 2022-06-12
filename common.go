@@ -328,7 +328,8 @@ func RequestLoggerHandler(h http.Handler) http.Handler {
 
 func assetsHandler() HandlerFunc {
 	assetsServer := http.FileServer(http.FS(assets))
-	return func(_ Response, _ Request) Output {
+	return func(w Response, _ Request) Output {
+		w.Header().Add("Cache-Control", "max-age=31536000")
 		return assetsServer.ServeHTTP
 	}
 }
@@ -338,11 +339,12 @@ func staticHandler() HandlerFunc {
 	server := http.FileServer(dir)
 	staticHandler := http.StripPrefix("/"+STATIC_DIR_PATH, server)
 
-	return func(_ Response, r Request) Output {
+	return func(w Response, r Request) Output {
 		if strings.HasSuffix(r.URL.Path, "/") {
 			return NotFound
 		}
 
+		w.Header().Add("Cache-Control", "max-age=31536000")
 		return staticHandler.ServeHTTP
 	}
 }
