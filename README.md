@@ -50,3 +50,7 @@ sudo iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-p
 ```
 
 so that means you can create a new note in your browser by visiting `notes/note title here`
+
+## Logo
+
+[Cassette tape icons created by Good Ware - Flaticon](https://www.flaticon.com/free-icons/cassette-tape)
