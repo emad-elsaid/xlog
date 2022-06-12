@@ -121,6 +121,7 @@ func tagHandler(w Response, r Request) Output {
 	return Render("extension/tag", Locals{
 		"title":   tag,
 		"results": tagPages(r.Context(), tag),
+		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 

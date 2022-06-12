@@ -1,12 +1,27 @@
 {{ template "header" . }}
-<div class="container is-max-desktop mt-5" dir="auto">
-  {{ range .results }}
-  <div class="card">
-    <div class="card-content">
-      <a href="/{{.Page}}" class="has-text-weight-bold is-capitalized"> {{ .Page }} </a> :
-      {{ .Line }}
+
+<div class="container is-fluid mt-5">
+  <div class="columns">
+    {{ if .sidebar }}
+    <div class="column is-2"> {{ .sidebar }} </div>
+    {{ end }}
+
+    <div class="column">
+      <div class="container is-max-desktop" style="margin-bottom: 20em;">
+        <div class="content pb-6" dir="auto">
+
+          {{ range .results }}
+          <div class="card">
+            <div class="card-content">
+              <a href="/{{.Page}}" class="has-text-weight-bold is-capitalized"> {{ .Page }} </a>
+            </div>
+          </div>
+          {{ end }}
+
+        </div>
+      </div>
     </div>
   </div>
-  {{ end }}
 </div>
+
 {{ template "footer" . }}
