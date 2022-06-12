@@ -1,7 +1,7 @@
 XLog
 =========
 
-<p align="center"><img src="assets/logo.svg" /></p>
+<p align="center"><img width="256" src="assets/logo.png" /></p>
 
 ## What is it?
 Think about it in the following terms:
