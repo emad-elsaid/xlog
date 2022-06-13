@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/yuin/goldmark/ast"
+	east "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/text"
@@ -69,6 +70,7 @@ func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 		line = line[1:]
 	}
 
+	var found *Page
 	var m int
 	var url string
 
@@ -79,13 +81,14 @@ func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 
 		// Found a page
 		if strings.EqualFold(string(line[0:len(p.Name)]), p.Name) {
+			found = p
 			url = p.Name
 			m = len(p.Name)
 			break
 		}
 	}
 
-	if m == 0 || // can't find a page match
+	if found == nil ||
 		(len(line) > m && util.IsAlphaNumeric(line[m])) { // next character is word character
 		block.Advance(consumes)
 		return nil
@@ -99,6 +102,7 @@ func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	block.Advance(consumes)
 	n := ast.NewTextSegment(text.NewSegment(start, start+m))
 	link := &PageLink{
+		page:  found,
 		url:   "/" + url,
 		value: n,
 	}
@@ -109,6 +113,7 @@ var KindPageLink = ast.NewNodeKind("PageLink")
 
 type PageLink struct {
 	ast.BaseInline
+	page  *Page
 	url   string
 	value *ast.Text
 }
@@ -129,14 +134,52 @@ func renderPageLink(w util.BufWriter, source []byte, node ast.Node, entering boo
 	if !entering {
 		return ast.WalkContinue, nil
 	}
-	_, _ = w.WriteString(`<a href="`)
+
+	w.WriteString(`<a href="`)
 	url := []byte(n.url)
 	label := n.value.Text(source)
-	_, _ = w.Write(util.EscapeHTML(util.URLEscape(url, false)))
-	_, _ = w.WriteString(`">`)
-	_, _ = w.Write(util.EscapeHTML(label))
-	_, _ = w.WriteString(`</a>`)
+
+	w.Write(util.EscapeHTML(util.URLEscape(url, false)))
+	w.WriteString(`">`)
+
+	total, done := countTodos(n.page)
+	if total > 0 {
+		fmt.Fprintf(w, `<span class="tag is-rounded">%d/%d</span> `, done, total)
+	}
+
+	w.Write(util.EscapeHTML(label))
+	w.WriteString(`</a>`)
 	return ast.WalkContinue, nil
+}
+
+func countTodos(p *Page) (total int, done int) {
+	tasks := extractTodos(p.AST())
+	for _, v := range tasks {
+		total++
+		if v.IsChecked {
+			done++
+		}
+	}
+
+	return
+}
+
+func extractTodos(n ast.Node) []*east.TaskCheckBox {
+	a := []*east.TaskCheckBox{}
+
+	if n.Kind() == east.KindTaskCheckBox {
+		t, _ := n.(*east.TaskCheckBox)
+		a = []*east.TaskCheckBox{t}
+	}
+
+	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+		a = append(a, extractTodos(c)...)
+		if c == n.LastChild() {
+			break
+		}
+	}
+
+	return a
 }
 
 func renderAutoLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
