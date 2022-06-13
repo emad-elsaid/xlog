@@ -81,7 +81,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	}
 
 	tag := n.(*HashTag)
-	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info">#%s</a>`, tag.value, tag.value)
+	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">#%s</a>`, tag.value, tag.value)
 	return ast.WalkContinue, nil
 }
 
