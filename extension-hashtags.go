@@ -27,8 +27,6 @@ func init() {
 	GET(`/\+/tag/{tag}`, tagHandler)
 }
 
-var hashtagReg = regexp.MustCompile(`(?imU)#([[:alpha:]]\w+)(\W|$)`)
-
 type HashTag struct {
 	ast.BaseInline
 	value []byte
@@ -85,13 +83,31 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	return ast.WalkContinue, nil
 }
 
+func extractHashtags(n ast.Node) []*HashTag {
+	a := []*HashTag{}
+
+	if n.Kind() == KindHashTag {
+		tag, _ := n.(*HashTag)
+		a = []*HashTag{tag}
+	}
+
+	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+		a = append(a, extractHashtags(c)...)
+		if c == n.LastChild() {
+			break
+		}
+	}
+
+	return a
+}
+
 func tagsHandler(_ Response, r Request) Output {
 	tags := map[string][]string{}
 	WalkPages(context.Background(), func(a *Page) {
 		set := map[string]bool{}
-		hashes := hashtagReg.FindAllStringSubmatch(a.Content(), -1)
+		hashes := extractHashtags(a.AST())
 		for _, v := range hashes {
-			val := strings.ToLower(v[1])
+			val := strings.ToLower(string(v.value))
 
 			// don't use same tag twice for same page
 			if _, ok := set[val]; ok {

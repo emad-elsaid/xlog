@@ -18,8 +18,10 @@ import (
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/text"
 )
 
 type (
@@ -139,6 +141,10 @@ func (p *Page) ModTime() time.Time {
 
 func (p *Page) RTL() bool {
 	return regexp.MustCompile(`\p{Arabic}`).MatchString(p.Content())
+}
+
+func (p *Page) AST() ast.Node {
+	return MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
 }
 
 func WalkPages(ctx context.Context, f func(*Page)) {
