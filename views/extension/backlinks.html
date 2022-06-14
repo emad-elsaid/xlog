@@ -1,18 +1,8 @@
 {{ if .pages }}
-<div class="card">
-  <header class="card-header">
-    <p class="card-header-title">
-      <span class="icon"><i class="fa-solid fa-link"></i></span>
-      <span> Backlinks </span>
-    </p>
-  </header>
-  <div class="card-content">
-    <div class="columns is-multiline">
-      {{ range .pages }}
-      <div class="column is-one-third is-capitalized"><a href="/{{.}}">{{ . }}</a></div>
-      {{ end }}
-    </div>
-  </div>
+<h1> Backlinks </h1>
+<div class="columns is-multiline">
+  {{ range .pages }}
+  <div class="column is-one-third is-capitalized"><a href="/{{.}}">{{ . }}</a></div>
+  {{ end }}
 </div>
-
 {{ end }}

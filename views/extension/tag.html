@@ -1,24 +1,20 @@
 {{ template "header" . }}
 
-<div class="container is-fluid mt-5">
-  <div class="columns">
-    {{ if .sidebar }}
-    <div class="column is-2"> {{ .sidebar }} </div>
-    {{ end }}
+<div class="columns">
+  {{ template "sidebar" . }}
 
-    <div class="column">
-      <div class="container is-max-desktop" style="margin-bottom: 20em;">
-        <div class="content pb-6" dir="auto">
+  <div class="column">
+    <div class="container is-max-desktop" style="margin-bottom: 20em;">
+      <div class="content pb-6 menu" dir="auto">
 
+        <ul class="menu-list">
           {{ range .results }}
-          <div class="card">
-            <div class="card-content">
-              <a href="/{{.Page}}" class="has-text-weight-bold is-capitalized"> {{ .Page }} </a>
-            </div>
-          </div>
+          <li>
+            <a href="/{{.Page}}" class="is-capitalized"> {{ .Page }} </a>
+          </li>
           {{ end }}
+        </ul>
 
-        </div>
       </div>
     </div>
   </div>

@@ -19,13 +19,13 @@
       <div class="navbar-start">
         {{ if .title }}
         <div class="navbar-item">
-          <h1 class="title is-5 has-text-weight-bold is-capitalized"> {{.title}} </h1>
+          <h1 class="has-text-weight-bold is-capitalized"> {{.title}} </h1>
         </div>
         {{ end }}
 
         {{ if .edit }}
         <div class="navbar-item">
-          <a href="{{.edit}}" class="button is-white" title="Ctrl+S">
+          <a href="{{.edit}}" class="button is-white is-small" title="Ctrl+S">
             <span class="icon"><i class="fa-solid fa-pen"></i></span>
             <span>Edit</span>
           </a>
