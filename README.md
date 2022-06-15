@@ -3,21 +3,36 @@ XLog
 
 <p align="center"><img width="256" src="assets/logo.png" /></p>
 
-## What is it?
-Think about it in the following terms:
-- A personal knowledgebase or Digital Garden
-- The file system is the storage
-- Uses Markdown format
-- Has a web interface
-- Minimal interface
-- Avoids Javascript like the plague
+Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between notes.
 
 ## Features
-- Run it in any directory to create a blog
-- Go to any path to create a note
+- Uses any directory of markdown files
+- Supports Github flavor markdown (GFM)
+- One statically compiled binary
+- Converts a page name to link automatically on render time
+- Lists pages that links to the current one.
+- `template.md` content will be used for new pages
+- Support Hashtags `#hashtag`
+- Support for nested directories (although not favored)
+- Lists pages that uses same hashtags in a `See Also` section
+- Full text search
+- Keeps list of pages older versions
+- Supports editing pages with source code
+- Has a list of tools for:
+  - Drop a file or use the tool to upload the file and include/append it to the current page
+  - Record screen/window/tab
+  - Screenshot
+  - Record Camera + Audio
+  - Record Audio only
+  - Tools works in both edit and view modes
+- Preview tweets, Facebook posts, youtube videos, Giphy links
+- Has a system for short codes (one line and block)
+- Shows task list (Done/Total tasks) beside page link (auto links)
+- Star pages to pin them to sidebar
+- Add image to the start of a page to make it a cover photo
+- A web server with a very small footprint thanks to Go.
+- Minimal third party dependencies
 - Checkout [index.md](index) for additional features
-- Create a `template` note. xlog will use its content to prefix the editor when creating a new note
-- Go files starting with `extension-` are self contained removing a file removes the feature (`views/extension/` sometimes will have a view files for the feature)
 
 ## Installation
 
