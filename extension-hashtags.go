@@ -22,6 +22,7 @@ func init() {
 		util.Prioritized(&HashTag{}, 999),
 	))
 	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
+	WIDGET(AFTER_VIEW_WIDGET, relatedHashtagsPages)
 
 	GET(`/\+/tags`, tagsHandler)
 	GET(`/\+/tag/{tag}`, tagHandler)
@@ -165,4 +166,32 @@ func tagPages(ctx context.Context, keyword string) []tagResult {
 
 func hashtagsSidebar(p *Page, r Request) template.HTML {
 	return template.HTML(partial("extension/tags-sidebar", nil))
+}
+
+func relatedHashtagsPages(p *Page, r Request) template.HTML {
+	found_hashtags := extractHashtags(p.AST())
+	hashtags := map[string]bool{}
+	for _, v := range found_hashtags {
+		hashtags[string(v.value)] = true
+	}
+
+	pages := []string{}
+
+	WalkPages(context.Background(), func(rp *Page) {
+		if rp.Name == p.Name {
+			return
+		}
+
+		page_hashtags := extractHashtags(rp.AST())
+		for _, h := range page_hashtags {
+			if _, ok := hashtags[string(h.value)]; ok {
+				pages = append(pages, rp.Name)
+				return
+			}
+		}
+	})
+
+	return template.HTML(partial("extension/related_hashtags_pages", Locals{
+		"pages": pages,
+	}))
 }

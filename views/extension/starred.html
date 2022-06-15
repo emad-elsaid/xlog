@@ -1,0 +1,14 @@
+{{ if .pages }}
+<div class="menu">
+  <ul class="menu-list">
+    {{ range .pages }}
+    <li>
+      <a href="/{{.}}" class="is-capitalized">
+        <span class="icon fa-solid fa-star"></span>
+        <span>{{.}}</span>
+      </a>
+    </li>
+    {{ end }}
+  </ul>
+</div>
+{{ end }}
