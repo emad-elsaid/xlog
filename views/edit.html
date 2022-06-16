@@ -26,7 +26,6 @@
 
 
 <script>
- var form = document.getElementById("editor");
  var content = document.getElementById("content");
  var editor = CodeMirror.fromTextArea(content, {
      mode: "gfm",
@@ -39,11 +38,9 @@
 
  document.addEventListener('keydown', function(event) {
      const e = event || window.event;
-     const sCharCode = "S".charCodeAt();
-
-     if ( e.keyCode === sCharCode && (e.ctrlKey || e.metaKey ) ) {
+     if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
          e.preventDefault();
-         form.submit();
+        document.getElementById("editor").submit();
      }
  });
 </script>

@@ -57,9 +57,7 @@
 
 <script>
  document.addEventListener('keydown', e => {
-     const sCharCode = "S".charCodeAt();
-
-     if ( e.keyCode === sCharCode && ( e.metaKey || e.ctrlKey ) ) {
+     if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {
          e.preventDefault();
          document.location.pathname = "{{.edit}}";
      }
