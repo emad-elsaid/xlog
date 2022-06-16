@@ -12,7 +12,7 @@ const STARRED_PAGES = "starred"
 func init() {
 	WIDGET(META_WIDGET, starMeta)
 	WIDGET(SIDEBAR_WIDGET, starredPages)
-	GET(`/\+/star/{page:.*}`, starHandler)
+	POST(`/\+/star/{page:.*}`, starHandler)
 	DELETE(`/\+/star/{page:.*}`, unstarHandler)
 }
 
