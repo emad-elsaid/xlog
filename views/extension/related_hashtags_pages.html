@@ -2,7 +2,10 @@
 <h1> See Also </h1>
 <ul class="menu-list columns is-multiline is-gapless">
   {{ range .pages }}
-  <li class="column is-one-third"><a href="/{{.}}">{{ . }}</a></li>
+  <li class="column is-one-third"><a href="/{{.}}">
+    <span class="icon"><i class="fa-solid fa-file"></i></span>
+    <span>{{ . }}</span>
+  </a></li>
   {{ end }}
 </ul>
 {{ end }}
