@@ -149,8 +149,12 @@ func renderPageLink(w util.BufWriter, source []byte, node ast.Node, entering boo
 	w.Write(util.EscapeHTML(util.URLEscape(url, false)))
 	w.WriteString(`">`)
 
-	if total, done := countTodos(n.page); total > 0 && total != done {
-		fmt.Fprintf(w, `<span class="tag is-rounded">%d/%d</span> `, done, total)
+	if total, done := countTodos(n.page); total > 0 {
+		isDone := ""
+		if total == done {
+			isDone = "is-success"
+		}
+		fmt.Fprintf(w, `<span class="tag is-rounded %s">%d/%d</span> `, isDone, done, total)
 	}
 
 	w.Write(util.EscapeHTML(label))
