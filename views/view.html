@@ -38,13 +38,11 @@
 </style>
 
     <div class="container content is-max-desktop mt-3" dir="auto" style="margin-bottom: 20em;">
-      <h1 class="title is-capitalized">
-        {{.title}}
-        <a href="{{.edit}}" class="button is-info is-light is-small is-pulled-right" title="Ctrl+S">
-          <span class="icon"><i class="fa-solid fa-pen"></i></span>
-          <span>Edit</span>
-        </a>
-      </h1>
+      <a href="{{.edit}}" class="button is-info is-light is-small is-pulled-right" title="Ctrl+S">
+        <span class="icon"><i class="fa-solid fa-pen"></i></span>
+        <span>Edit</span>
+      </a>
+      {{ template "common/title" .title }}
 
       <div class="is-size-7 has-text-grey mb-5">
         <span class="icon"><i class="fa-solid fa-pen"></i></span>

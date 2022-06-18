@@ -1,3 +1,4 @@
+{{ with .sidebar }}
 <div class="column is-2">
   <ul class="menu-list">
     <li>
@@ -8,5 +9,6 @@
     </li>
   </ul>
 
-  {{ .sidebar }}
+  {{.}}
 </div>
+{{ end }}
