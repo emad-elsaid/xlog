@@ -9,12 +9,12 @@ import (
 const MIN_SEARCH_KEYWORD = 3
 
 func init() {
-	WIDGET(NAVBAR_WIDGET, searchNavbarWidget)
+	PREPEND_WIDGET(SIDEBAR_WIDGET, searchWidget)
 	GET(`/\+/search`, searchHandler)
 }
 
-func searchNavbarWidget(_ *Page, _ Request) template.HTML {
-	return template.HTML(partial("extension/search-navbar", nil))
+func searchWidget(_ *Page, _ Request) template.HTML {
+	return template.HTML(partial("extension/search-widget", nil))
 }
 
 func searchHandler(w Response, r Request) Output {

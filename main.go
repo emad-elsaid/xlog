@@ -49,7 +49,6 @@ func GetPageHandler(w Response, r Request) Output {
 		"title":     page.Name,
 		"updated":   page.ModTime().Format("2006-01-02 15:04"),
 		"content":   template.HTML(page.Render()),
-		"navbar":    renderWidget(NAVBAR_WIDGET, &page, r),
 		"tools":     renderWidget(TOOLS_WIDGET, &page, r),
 		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),
 		"meta":      renderWidget(META_WIDGET, &page, r),
@@ -99,10 +98,16 @@ const (
 	SIDEBAR_WIDGET
 	AFTER_VIEW_WIDGET
 	META_WIDGET
-	NAVBAR_WIDGET
 )
 
 var widgets = map[widgetSpace][]widgetFunc{}
+
+func PREPEND_WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
+	if _, ok := widgets[s]; !ok {
+		widgets[s] = []widgetFunc{}
+	}
+	widgets[s] = append([]widgetFunc{f}, widgets[s]...)
+}
 
 func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {

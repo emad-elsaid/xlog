@@ -1,3 +1,13 @@
-{{ if .sidebar }}
-<div class="column is-2 has-background-white-ter"> {{ .sidebar }} </div>
-{{ end }}
+<div class="column is-2">
+  <ul class="menu-list">
+    <li>
+      <a href="/" class="title is-4 has-text-weight-bold">
+        <span class="icon is-medium"><img src="/assets/logo.png"/></span>
+        <span>XLOG</span>
+      </a>
+    </li>
+  </ul>
+
+  {{ template "tools" . }}
+  {{ .sidebar }}
+</div>

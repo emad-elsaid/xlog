@@ -1,22 +1,17 @@
 {{ template "header" . }}
 
-<div class="columns">
-  {{ template "sidebar" . }}
+<div class="container is-max-desktop mt-3">
+  <div class="content pb-6 menu" dir="auto">
+    {{ template "common/title" .title }}
 
-  <div class="column">
-    <div class="container is-max-desktop" style="margin-bottom: 20em;">
-      <div class="content pb-6 menu" dir="auto">
+    <ul class="menu-list">
+      {{ range .results }}
+      <li>
+        <a href="/{{.Page}}" class="is-capitalized"> {{ .Page }} </a>
+      </li>
+      {{ end }}
+    </ul>
 
-        <ul class="menu-list">
-          {{ range .results }}
-          <li>
-            <a href="/{{.Page}}" class="is-capitalized"> {{ .Page }} </a>
-          </li>
-          {{ end }}
-        </ul>
-
-      </div>
-    </div>
   </div>
 </div>
 

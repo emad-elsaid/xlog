@@ -37,10 +37,6 @@
  }
 </style>
 
-<div class="columns">
-  {{ template "sidebar" . }}
-
-  <div class="column">
     <div class="container content is-max-desktop mt-3" dir="auto" style="margin-bottom: 20em;">
       <h1 class="title is-capitalized">
         {{.title}}
@@ -60,8 +56,6 @@
 
       {{ .afterView }}
     </div>
-  </div>
-</div>
 
 <script>
  document.addEventListener('keydown', e => {
