@@ -43,7 +43,7 @@ var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/wat
 
 func youtubeUrlPreprocessor(c string) string {
 	return youtubeUrlReg.ReplaceAllString(c, `
-<figure class="image is-16by9">
+<figure class="image is-16by9 mx-0">
 	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </figure>`)
 }
