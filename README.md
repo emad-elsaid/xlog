@@ -3,7 +3,7 @@ XLog
 
 <p align="center"><img width="256" src="assets/logo.png" /></p>
 
-Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between notes.
+Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages.
 
 ## Features
 - Uses any directory of markdown files
@@ -45,26 +45,12 @@ go install github.com/emad-elsaid/xlog@latest
 ```
 Usage of xlog:
   -bind string
-        IP and port to bind the web server to (default "127.0.0.1:7000")
+        IP and port to bind the web server to (default "127.0.0.1:3000")
   -source string
         Directory that will act as a storage (default ".")
 ```
 
-Now you can access notes with `localhost:7000`
-
-If you want you can access it with a name like `notes:7000` by adding this line to `/etc/hosts`
-
-```
-127.0.0.1       notes
-```
-
-Also you can use `notes` instead of `notes:7000` by redirecting traffic from port 80 to port 7000
-
-```
-sudo iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 7000
-```
-
-so that means you can create a new note in your browser by visiting `notes/note title here`
+Now you can access xlog with `localhost:3000`
 
 ## Logo
 
