@@ -127,27 +127,18 @@ func renderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
 
 // HELPERS
 
-func ago(t time.Duration) string {
-	o := ""
-
-	t = t.Round(time.Second)
+func ago(t time.Duration) (o string) {
 	const day = time.Hour * 24
 	const week = day * 7
 	const month = day * 30
 	const year = day * 365
 	const maxPrecision = 2
-	precision := 0
 
-	if t.Seconds() == 0 {
+	if t.Seconds() < 1 {
 		return "seconds ago"
 	}
 
-	for t.Seconds() > 0 {
-		if precision >= maxPrecision {
-			break
-		}
-
-		precision++
+	for precision := 0; t.Seconds() > 0 && precision < maxPrecision; precision++ {
 		switch {
 		case t >= year:
 			years := t / year
