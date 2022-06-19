@@ -191,7 +191,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(partial("extension/related_hashtags_pages", Locals{
+	return template.HTML(partial("extension/related-hashtags-pages", Locals{
 		"pages": pages,
 	}))
 }
