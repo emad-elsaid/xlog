@@ -2,10 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const TEMPLATE_NAME = "template"
@@ -47,7 +49,7 @@ func GetPageHandler(w Response, r Request) Output {
 	return Render("view", Locals{
 		"edit":      "/edit/" + page.Name,
 		"title":     page.Name,
-		"updated":   page.ModTime().Format("2006-01-02 15:04"),
+		"updated":   ago(time.Now().Sub(page.ModTime())),
 		"content":   template.HTML(page.Render()),
 		"tools":     renderWidget(TOOLS_WIDGET, &page, r),
 		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),
@@ -121,4 +123,62 @@ func renderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
 		o += v(p, r)
 	}
 	return
+}
+
+// HELPERS
+
+func ago(t time.Duration) string {
+	o := ""
+
+	t = t.Round(time.Second)
+	const day = time.Hour * 24
+	const week = day * 7
+	const month = day * 30
+	const year = day * 365
+	const maxPrecision = 2
+	precision := 0
+
+	if t.Seconds() == 0 {
+		return "seconds ago"
+	}
+
+	for t.Seconds() > 0 {
+		if precision >= maxPrecision {
+			break
+		}
+
+		precision++
+		switch {
+		case t >= year:
+			years := t / year
+			t -= years * year
+			o += fmt.Sprintf("%d years ", years)
+		case t >= month:
+			months := t / month
+			t -= months * month
+			o += fmt.Sprintf("%d months ", months)
+		case t >= week:
+			weeks := t / week
+			t -= weeks * week
+			o += fmt.Sprintf("%d weeks ", weeks)
+		case t >= day:
+			days := t / day
+			t -= days * day
+			o += fmt.Sprintf("%d days ", days)
+		case t >= time.Hour:
+			hours := t / time.Hour
+			t -= hours * time.Hour
+			o += fmt.Sprintf("%d hours ", hours)
+		case t >= time.Minute:
+			minutes := t / time.Minute
+			t -= minutes * time.Minute
+			o += fmt.Sprintf("%d minutes ", minutes)
+		case t >= time.Second:
+			seconds := t / time.Second
+			t -= seconds * time.Second
+			o += fmt.Sprintf("%d seconds ", seconds)
+		}
+	}
+
+	return o + "ago"
 }
