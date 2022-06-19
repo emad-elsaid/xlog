@@ -1,12 +1,15 @@
-{{ if .pages }}
-<ul class="menu-list">
-  {{ range .pages }}
-  <li>
-    <a href="/{{.}}" class="is-capitalized">
-      <span class="icon fa-solid fa-star"></span>
-      <span>{{.}}</span>
-    </a>
-  </li>
-  {{ end }}
-</ul>
+{{ with .pages }}
+<aside class="menu">
+  <p class="menu-label">Starred</p>
+  <ul class="menu-list">
+    {{ range . }}
+    <li>
+      <a href="/{{.}}" class="is-capitalized">
+        <span class="icon fa-solid fa-star"></span>
+        <span>{{.}}</span>
+      </a>
+    </li>
+    {{ end }}
+  </ul>
+</aside>
 {{ end }}
