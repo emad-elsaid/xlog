@@ -1,10 +1,10 @@
-<div class="field has-addons mb-0">
+<div class="field has-addons">
   <div class="control">
-    <input type="text" id="newNote" list="searchResults" class="input is-rounded" accesskey="n" placeholder="New log/Search..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
+    <input type="text" id="newNote" list="searchResults" class="input" placeholder="New log/Search..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
     <datalist id="searchResults"></datalist>
   </div>
   <div class="control">
-    <a class="button is-rounded" onclick="document.location.pathname = document.getElementById('newNote').value">
+    <a class="button" onclick="document.location.pathname = document.getElementById('newNote').value">
       <span class="icon"><i class="fa-solid fa-plus"></i></span>
     </a>
   </div>
