@@ -17,6 +17,7 @@ import (
 
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
+	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -145,6 +146,32 @@ func (p *Page) RTL() bool {
 
 func (p *Page) AST() ast.Node {
 	return MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
+}
+
+func (p *Page) Emoji() string {
+	if e := extractEmoji(p.AST()); e != nil {
+		return string(e.Value.Unicode)
+	}
+
+	return ""
+}
+
+func extractEmoji(n ast.Node) *emojiAst.Emoji {
+	if n.Kind() == emojiAst.KindEmoji {
+		return n.(*emojiAst.Emoji)
+	}
+
+	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+		if a := extractEmoji(c); a != nil {
+			return a
+		}
+
+		if c == n.LastChild() {
+			break
+		}
+	}
+
+	return nil
 }
 
 func WalkPages(ctx context.Context, f func(*Page)) {

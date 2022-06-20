@@ -193,7 +193,7 @@ func extractTodos(n ast.Node) []*east.TaskCheckBox {
 }
 
 func backlinksSidebar(p *Page, r Request) template.HTML {
-	pages := []string{}
+	pages := []*Page{}
 
 	WalkPages(context.Background(), func(a *Page) {
 		// a page shouldn't mention itself
@@ -202,7 +202,7 @@ func backlinksSidebar(p *Page, r Request) template.HTML {
 		}
 
 		if containLinkTo(a.AST(), p) {
-			pages = append(pages, a.Name)
+			pages = append(pages, a)
 		}
 	})
 

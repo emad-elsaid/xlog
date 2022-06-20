@@ -24,8 +24,13 @@ func starredPages(p *Page, r Request) template.HTML {
 	}
 
 	list := strings.Split(content, "\n")
+	ps := make([]*Page, 0, len(list))
+	for _, v := range list {
+		p := NewPage(v)
+		ps = append(ps, &p)
+	}
 	return template.HTML(partial("extension/starred", Locals{
-		"pages": list,
+		"pages": ps,
 	}))
 }
 

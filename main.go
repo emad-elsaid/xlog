@@ -48,7 +48,7 @@ func GetPageHandler(w Response, r Request) Output {
 
 	return Render("view", Locals{
 		"edit":      "/edit/" + page.Name,
-		"title":     page.Name,
+		"title":     page.Emoji() + " " + page.Name,
 		"updated":   ago(time.Now().Sub(page.ModTime())),
 		"content":   template.HTML(page.Render()),
 		"tools":     renderWidget(TOOLS_WIDGET, &page, r),

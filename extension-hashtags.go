@@ -175,7 +175,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		hashtags[string(v.value)] = true
 	}
 
-	pages := []string{}
+	pages := []*Page{}
 
 	WalkPages(context.Background(), func(rp *Page) {
 		if rp.Name == p.Name {
@@ -185,7 +185,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		page_hashtags := extractHashtags(rp.AST())
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[string(h.value)]; ok {
-				pages = append(pages, rp.Name)
+				pages = append(pages, rp)
 				return
 			}
 		}

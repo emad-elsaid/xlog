@@ -32,6 +32,8 @@ Local-first personal knowledge management application with focus on enriching ma
 - Add image to the start of a page to make it a cover photo
 - A web server with a very small footprint thanks to Go.
 - Minimal third party dependencies
+- The first Emoji used in the page will be considered the icon of the page and displayed beside the title
+- Uploading the same file multiple times it will be saved once
 - Checkout [index.md](index) for additional features
 
 ## Installation

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -11,8 +12,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-
-	"github.com/yuin/goldmark/util"
 )
 
 func init() {
@@ -87,10 +86,10 @@ func fallbackURLPreprocessor(c string) string {
 
 		var description string
 		if len(meta.Description) > 0 {
-			description = fmt.Sprintf("> %s\n", util.EscapeHTML([]byte(meta.Description)))
+			description = fmt.Sprintf("> %s\n", html.UnescapeString(meta.Description))
 		}
 
-		return fmt.Sprintf("[%s](%s)\n%s", title, m, description)
+		return fmt.Sprintf("\n[%s](%s)\n%s\n", html.UnescapeString(title), m, description)
 	})
 }
 

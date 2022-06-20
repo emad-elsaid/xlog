@@ -4,9 +4,13 @@
   <ul class="menu-list">
     {{ range . }}
     <li>
-      <a href="/{{.}}" class="is-capitalized">
+      <a href="/{{.Name}}" class="is-capitalized">
+        {{ with .Emoji }}
+        {{.}}
+        {{else}}
         <span class="icon fa-solid fa-star"></span>
-        <span>{{.}}</span>
+        {{end}}
+        <span>{{.Name}}</span>
       </a>
     </li>
     {{ end }}

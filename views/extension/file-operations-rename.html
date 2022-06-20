@@ -1,0 +1,28 @@
+<ul class="menu-list">
+  <li>
+    <a href="#" onclick="renamePage()">
+      <span class="icon "><i class="fa-solid fa-i-cursor"></i></span>
+      <span> Rename </span>
+    </a>
+  </li>
+  {{ .csrf }}
+</ul>
+
+<script>
+ async function renamePage() {
+     const newName = prompt('Page new name:', "{{.page}}");
+     if(newName == null || newName.length == 0) {
+         return
+     }
+
+     var data = new FormData()
+     data.append('csrf', document.querySelector('input[name=csrf]').value);
+     data.append('old', "{{.page}}");
+     data.append('new', newName);
+
+     var params = {method: 'POST', body: data};
+
+     await fetch("{{.action}}", params);
+     document.location = "/" + newName;
+ }
+</script>

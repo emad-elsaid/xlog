@@ -208,6 +208,10 @@ func Redirect(url string) http.HandlerFunc {
 	}
 }
 
+func NoContent(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func PlainText(text string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(text))
