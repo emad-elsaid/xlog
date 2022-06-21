@@ -1,10 +1,10 @@
 <div class="field has-addons">
   <div class="control is-expanded">
-    <input type="text" id="newNote" list="searchResults" class="input" placeholder="New log/Search..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
+    <input type="text" id="newPage" list="searchResults" class="input" placeholder="New log/Search..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
     <datalist id="searchResults"></datalist>
   </div>
   <div class="control">
-    <a class="button" onclick="document.location.pathname = document.getElementById('newNote').value">
+    <a class="button" onclick="document.location.pathname = document.getElementById('newPage').value">
       <span class="icon"><i class="fa-solid fa-plus"></i></span>
     </a>
   </div>
@@ -18,7 +18,7 @@
      if( text.length == 0 ) { return; }
      if( selection.anchorNode.className == 'control' ) { return; }
 
-     document.getElementById('newNote').value = text;
+     document.getElementById('newPage').value = text;
  })
 
  function search(keyword) {

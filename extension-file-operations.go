@@ -14,6 +14,10 @@ func init() {
 }
 
 func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
+	if !p.Exists() {
+		return template.HTML("")
+	}
+
 	return template.HTML(
 		partial("extension/file-operations-delete", Locals{
 			"csrf":   CSRF(r),
@@ -24,6 +28,10 @@ func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
 }
 
 func fileOperationsRenameWidget(p *Page, r Request) template.HTML {
+	if !p.Exists() {
+		return template.HTML("")
+	}
+
 	return template.HTML(
 		partial("extension/file-operations-rename", Locals{
 			"csrf":   CSRF(r),

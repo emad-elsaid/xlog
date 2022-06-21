@@ -4,11 +4,15 @@ import (
 	"context"
 	"html/template"
 	"sort"
+	"time"
 )
 
 func init() {
-	WIDGET(SIDEBAR_WIDGET, recentNotes)
+	WIDGET(SIDEBAR_WIDGET, recent)
 	GET(`/\+/recent`, recentHandler)
+	HELPER("ago", func(t time.Time) string {
+		return ago(time.Now().Sub(t))
+	})
 }
 
 func recentHandler(_ Response, r Request) Output {
@@ -23,20 +27,14 @@ func recentHandler(_ Response, r Request) Output {
 		rp = rp[:100]
 	}
 
-	pages := []string{}
-
-	for _, v := range rp {
-		pages = append(pages, v.Name)
-	}
-
 	return Render("extension/recent", Locals{
 		"title":   "Recent",
-		"pages":   pages,
+		"pages":   rp,
 		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 
-func recentNotes(p *Page, r Request) template.HTML {
+func recent(p *Page, r Request) template.HTML {
 	return template.HTML(partial("extension/recent-sidebar", nil))
 }
 
