@@ -23,6 +23,7 @@ func init() {
 	))
 	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
 	WIDGET(AFTER_VIEW_WIDGET, relatedHashtagsPages)
+	AUTOCOMPLETE(hashtagAutocomplete)
 
 	GET(`/\+/tags`, tagsHandler)
 	GET(`/\+/tag/{tag}`, tagHandler)
@@ -194,4 +195,28 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 	return template.HTML(partial("extension/related-hashtags-pages", Locals{
 		"pages": pages,
 	}))
+}
+
+func hashtagAutocomplete() *Autocomplete {
+	a := &Autocomplete{
+		StartChar:   "#",
+		Suggestions: []*Suggestion{},
+	}
+
+	set := map[string]bool{}
+	WalkPages(context.Background(), func(a *Page) {
+		hashes := extractHashtags(a.AST())
+		for _, v := range hashes {
+			set[strings.ToLower(string(v.value))] = true
+		}
+	})
+
+	for t := range set {
+		a.Suggestions = append(a.Suggestions, &Suggestion{
+			Text:        t,
+			DisplayText: t,
+		})
+	}
+
+	return a
 }

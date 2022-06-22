@@ -53,4 +53,22 @@ func init() {
 
 		PREPROCESSOR(multilinePreprocessor)
 	}
+
+	AUTOCOMPLETE(shortcodeAutocomplete)
+}
+
+func shortcodeAutocomplete() *Autocomplete {
+	a := &Autocomplete{
+		StartChar:   "/",
+		Suggestions: []*Suggestion{},
+	}
+
+	for k := range shortcodes {
+		a.Suggestions = append(a.Suggestions, &Suggestion{
+			Text:        k,
+			DisplayText: k,
+		})
+	}
+
+	return a
 }

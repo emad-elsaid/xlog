@@ -69,13 +69,19 @@ func GetPageEditHandler(w Response, r Request) Output {
 		content = template.Content()
 	}
 
+	acs := []*Autocomplete{}
+	for _, v := range autocompletes {
+		acs = append(acs, v())
+	}
+
 	return Render("edit", Locals{
-		"title":   page.Name,
-		"action":  page.Name,
-		"rtl":     page.RTL(),
-		"tools":   renderWidget(TOOLS_WIDGET, &page, r),
-		"content": content,
-		"csrf":    CSRF(r),
+		"title":        page.Name,
+		"action":       page.Name,
+		"rtl":          page.RTL(),
+		"tools":        renderWidget(TOOLS_WIDGET, &page, r),
+		"content":      content,
+		"autocomplete": acs,
+		"csrf":         CSRF(r),
 	})
 }
 
@@ -172,4 +178,24 @@ func ago(t time.Duration) (o string) {
 	}
 
 	return o + "ago"
+}
+
+// AUTOCOMPLETE ================================================
+
+type Suggestion struct {
+	Text        string
+	DisplayText string
+}
+
+type Autocomplete struct {
+	StartChar   string
+	Suggestions []*Suggestion
+}
+
+type Autocompleter func() *Autocomplete
+
+var autocompletes = []Autocompleter{}
+
+func AUTOCOMPLETE(a func() *Autocomplete) {
+	autocompletes = append(autocompletes, a)
 }

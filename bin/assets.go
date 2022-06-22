@@ -15,6 +15,7 @@ import (
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.css",
+	"https://codemirror.net/5/addon/hint/show-hint.css",
 }
 
 var CSS_ZIP = map[string]map[string]string{
@@ -32,6 +33,7 @@ var JS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/gfm/gfm.js",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/javascript/javascript.js",
 	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/go/go.js",
+	"https://codemirror.net/5/addon/hint/show-hint.js",
 }
 
 const DEST = "assets"

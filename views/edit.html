@@ -25,7 +25,47 @@
   </div>
 </div>
 
-<script>
+<script type="application/javascript">
+ CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
+     cm.on('inputRead', function (cm, change) {
+         var mode = cm.getModeAt(cm.getCursor());
+
+         for (var i = 0, len = value.length; i < len; i++) {
+             if (mode.name === value[i].mode && change.text[0] === value[i].startChar) {
+                 cm.showHint({
+                     completeSingle: false,
+                     hint: (function(iterator){
+                         return function (cm, options) {
+                             var cur = cm.getCursor(),
+                                 token = cm.getTokenAt(cur);
+                             var start = token.start,
+                                 end = token.end;
+                             for(
+                                 start = token.end;
+                                 start>0 && cm.getTokenAt({line: cur.line, ch: start}).string != value[iterator].startChar;
+                                 start--
+                             ){}
+
+                             var filter = editor.getDoc().getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
+                             var allList = value[iterator].listCallback();
+                             var filtered = allList.filter(e => e.text.includes(filter));
+
+                             return {
+                                 list: filtered,
+                                 from: CodeMirror.Pos(cur.line, start),
+                                 to: CodeMirror.Pos(cur.line, end)
+                             };
+                         }
+                     })(i)
+                 });
+             }
+         }
+     });
+ });
+</script>
+
+<script type="application/javascript">
+ var form = document.getElementById("editor");
  var content = document.getElementById("content");
  var editor = CodeMirror.fromTextArea(content, {
      mode: "gfm",
@@ -33,7 +73,27 @@
      spellcheck: true,
      lineWrapping: true,
      viewportMargin: Infinity,
-     direction: {{ if .rtl }} "rtl" {{ else }} "ltr" {{ end }}
+     direction: {{ if .rtl }} "rtl" {{ else }} "ltr" {{ end }},
+     autoSuggest: [
+
+        {{ range .autocomplete }}
+         {
+             mode: 'markdown',
+             startChar: '{{.StartChar}}',
+             listCallback: function() {
+                 return [
+                    {{range .Suggestions }}
+                     {
+                         text: '{{.Text}} ',
+                         displayText: '{{.DisplayText}}'
+                     },
+                    {{end}}
+                 ]
+             }
+         },
+        {{ end }}
+
+     ]
  });
 
  document.addEventListener('keydown', function(event) {
