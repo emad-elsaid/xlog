@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"regexp"
 	"strings"
 
 	"github.com/yuin/goldmark/ast"
@@ -134,31 +133,25 @@ func tagsHandler(_ Response, r Request) Output {
 
 func tagHandler(w Response, r Request) Output {
 	vars := VARS(r)
-	tag := "#" + vars["tag"]
+	tag := vars["tag"]
 
 	return Render("extension/tag", Locals{
-		"title":   tag,
-		"results": tagPages(r.Context(), tag),
+		"title":   "#" + tag,
+		"pages":   tagPages(r.Context(), tag),
 		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 
-type tagResult struct {
-	Page string
-	Line string
-}
-
-func tagPages(ctx context.Context, keyword string) []tagResult {
-	results := []tagResult{}
-	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
+func tagPages(ctx context.Context, keyword string) []*Page {
+	results := []*Page{}
 
 	WalkPages(ctx, func(p *Page) {
-		match := reg.FindString(p.Content())
-		if len(match) > 0 {
-			results = append(results, tagResult{
-				Page: p.Name,
-				Line: match,
-			})
+		tags := extractHashtags(p.AST())
+		for _, t := range tags {
+			if strings.EqualFold(string(t.value), keyword) {
+				results = append(results, p)
+				break
+			}
 		}
 	})
 

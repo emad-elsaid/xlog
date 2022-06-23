@@ -1,18 +1,15 @@
 {{ template "header" . }}
 
-<div class="container is-max-desktop">
-  <div class="content pb-6 menu" dir="auto">
-    {{ template "common/title" .title }}
-
-    <ul class="menu-list">
-      {{ range .results }}
-      <li>
-        <a href="/{{.Page}}" class="is-capitalized"> {{ .Page }} </a>
-      </li>
-      {{ end }}
-    </ul>
-
-  </div>
+<div class="container">
+  {{ template "common/title" .title }}
+  <table class="table is-striped is-hoverable is-fullwidth">
+    {{ range .pages }}
+    <tr>
+      <td class="is-capitalized"><a href="/{{.Name}}">{{ .Emoji }} {{ .Name }}</a></td>
+      <td style="width:0%;white-space: nowrap;"><time>{{ ago .ModTime }}</time></td>
+    </tr>
+    {{ end }}
+  </table>
 </div>
 
 {{ template "footer" . }}

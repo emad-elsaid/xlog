@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -133,51 +134,55 @@ func renderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
 
 // HELPERS
 
-func ago(t time.Duration) (o string) {
+func ago(t time.Duration) string {
 	const day = time.Hour * 24
 	const week = day * 7
 	const month = day * 30
 	const year = day * 365
 	const maxPrecision = 2
 
+	var o strings.Builder
+
 	if t.Seconds() < 1 {
-		return "seconds ago"
+		o.WriteString("Less than a second ")
 	}
 
-	for precision := 0; t.Seconds() > 0 && precision < maxPrecision; precision++ {
+	for precision := 0; t.Seconds() > 1 && precision < maxPrecision; precision++ {
 		switch {
 		case t >= year:
 			years := t / year
 			t -= years * year
-			o += fmt.Sprintf("%d years ", years)
+			o.WriteString(fmt.Sprintf("%d years ", years))
 		case t >= month:
 			months := t / month
 			t -= months * month
-			o += fmt.Sprintf("%d months ", months)
+			o.WriteString(fmt.Sprintf("%d months ", months))
 		case t >= week:
 			weeks := t / week
 			t -= weeks * week
-			o += fmt.Sprintf("%d weeks ", weeks)
+			o.WriteString(fmt.Sprintf("%d weeks ", weeks))
 		case t >= day:
 			days := t / day
 			t -= days * day
-			o += fmt.Sprintf("%d days ", days)
+			o.WriteString(fmt.Sprintf("%d days ", days))
 		case t >= time.Hour:
 			hours := t / time.Hour
 			t -= hours * time.Hour
-			o += fmt.Sprintf("%d hours ", hours)
+			o.WriteString(fmt.Sprintf("%d hours ", hours))
 		case t >= time.Minute:
 			minutes := t / time.Minute
 			t -= minutes * time.Minute
-			o += fmt.Sprintf("%d minutes ", minutes)
+			o.WriteString(fmt.Sprintf("%d minutes ", minutes))
 		case t >= time.Second:
 			seconds := t / time.Second
 			t -= seconds * time.Second
-			o += fmt.Sprintf("%d seconds ", seconds)
+			o.WriteString(fmt.Sprintf("%d seconds ", seconds))
 		}
 	}
 
-	return o + "ago"
+	o.WriteString("ago")
+
+	return o.String()
 }
 
 // AUTOCOMPLETE ================================================
