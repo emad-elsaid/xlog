@@ -206,7 +206,7 @@ func hashtagAutocomplete() *Autocomplete {
 
 	for t := range set {
 		a.Suggestions = append(a.Suggestions, &Suggestion{
-			Text:        t,
+			Text:        "#" + t,
 			DisplayText: t,
 		})
 	}

@@ -32,6 +32,7 @@ func init() {
 	PageEvents.Listen(AfterDelete, UpdatePagesList)
 
 	WIDGET(AFTER_VIEW_WIDGET, backlinksSidebar)
+	AUTOCOMPLETE(autolinkPagesAutocomplete)
 }
 
 type AutolinkPages struct{}
@@ -228,4 +229,20 @@ func containLinkTo(n ast.Node, p *Page) bool {
 	}
 
 	return false
+}
+
+func autolinkPagesAutocomplete() *Autocomplete {
+	a := &Autocomplete{
+		StartChar:   "@",
+		Suggestions: []*Suggestion{},
+	}
+
+	WalkPages(context.Background(), func(p *Page) {
+		a.Suggestions = append(a.Suggestions, &Suggestion{
+			Text:        p.Name,
+			DisplayText: p.Name,
+		})
+	})
+
+	return a
 }

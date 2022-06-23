@@ -65,7 +65,7 @@ func shortcodeAutocomplete() *Autocomplete {
 
 	for k := range shortcodes {
 		a.Suggestions = append(a.Suggestions, &Suggestion{
-			Text:        k,
+			Text:        "/" + k,
 			DisplayText: k,
 		})
 	}

@@ -25,7 +25,7 @@ func init() {
 	for _, v := range emojis {
 		for _, alias := range v.Aliases {
 			emojiAC.Suggestions = append(emojiAC.Suggestions, &Suggestion{
-				Text:        alias + ":",
+				Text:        ":" + alias + ":",
 				DisplayText: v.Emoji + " " + alias,
 			})
 		}

@@ -46,13 +46,16 @@
                                  start--
                              ){}
 
-                             var filter = editor.getDoc().getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
+                             var filter = editor
+                                 .getDoc()
+                                 .getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
+                                 .toLowerCase();
                              var allList = value[iterator].listCallback();
-                             var filtered = allList.filter(e => e.text.includes(filter));
+                             var filtered = allList.filter(e => e.text.toLowerCase().includes(filter));
 
                              return {
                                  list: filtered,
-                                 from: CodeMirror.Pos(cur.line, start),
+                                 from: CodeMirror.Pos(cur.line, start-1),
                                  to: CodeMirror.Pos(cur.line, end)
                              };
                          }
