@@ -11,6 +11,14 @@
 </div>
 
 <script type="application/javascript">
+ document.addEventListener('keydown', function(event) {
+     const e = event || window.event;
+     if ( e.key === 'o' && (e.ctrlKey || e.metaKey ) ) {
+         e.preventDefault();
+         document.getElementById("newPage").focus();
+     }
+ });
+
  document.addEventListener('selectionchange', function() {
      let selection = window.getSelection();
      let text = selection.toString();
