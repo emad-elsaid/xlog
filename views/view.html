@@ -33,23 +33,23 @@
  }
 </style>
 
-    <div class="container content is-max-desktop" dir="auto" style="margin-bottom: 20em;">
-      <a href="{{.edit}}" class="button is-info is-light is-small is-pulled-right" title="Ctrl+S">
-        <span class="icon"><i class="fa-solid fa-pen"></i></span>
-        <span>Edit</span>
-      </a>
-      {{ template "common/title" .title }}
+<div class="container content is-max-desktop" dir="auto" style="margin-bottom: 20em;">
+  <div class="is-size-7 has-text-grey mb-5 is-pulled-right">
+    <span> Updated: {{.updated}} </span>
+    {{ .meta }}
 
-      <div class="is-size-7 has-text-grey mb-5">
-        <span class="icon"><i class="fa-solid fa-pen"></i></span>
-        <span> Updated: {{.updated}} </span>
-        {{ .meta }}
-      </div>
+    <a href="{{.edit}}" title="Ctrl+S">
+      <span class="icon"><i class="fa-solid fa-pen"></i></span>
+      <span>Edit</span>
+    </a>
+  </div>
 
-      <div class="view"> {{.content}} </div>
+  {{ template "common/title" .title }}
 
-      {{ .afterView }}
-    </div>
+  <div class="view"> {{.content}} </div>
+
+  {{ .afterView }}
+</div>
 
 <script>
  document.addEventListener('keydown', e => {
