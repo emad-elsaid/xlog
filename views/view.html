@@ -31,6 +31,43 @@
      font-size: 0.8em;
      margin: 0 0.4em;
  }
+
+ .view    {counter-reset:h1;}
+ .view h1 {counter-reset:h2;}
+ .view h2 {counter-reset:h3;}
+ .view h3 {counter-reset:h4;}
+ .view h4 {counter-reset:h5;}
+ .view h5 {counter-reset:h6;}
+ .view h1, .view h2, .view h3, .view h4, .view h4, .view h5, .view h6 {
+     font-size: 1em;
+     font-weight: bold;
+     margin: 3em 0 2em 0 !important;
+ }
+
+ .view h1:before {
+     counter-increment:h1;
+     content:counter(h1) ". ";
+ }
+ .view h2:before {
+     counter-increment:h2;
+     content:counter(h1) "." counter(h2) " ";
+ }
+ .view h3:before {
+     counter-increment:h3;
+     content:counter(h1) "." counter(h2) "." counter(h3) " ";
+ }
+ .view h4:before {
+     counter-increment:h4;
+     content:counter(h1) "." counter(h2) "." counter(h3)  "." counter(h4) " ";
+ }
+ .view h5:before {
+     counter-increment:h5;
+     content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
+ }
+ .view h6:before {
+     counter-increment:h6;
+     content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5)  "." counter(h6) " ";
+ }
 </style>
 
 <div class="container content is-max-desktop" dir="auto" style="margin-bottom: 20em;">
