@@ -21,6 +21,7 @@ func main() {
 	// and the rest of the program can use relative paths to access files
 	cwd, _ := os.Getwd()
 	source := flag.String("source", cwd, "Directory that will act as a storage")
+	build := flag.String("build", "", "Build all pages as static site in this directory")
 	flag.Parse()
 
 	absSource, err := filepath.Abs(*source)
@@ -38,6 +39,13 @@ func main() {
 	GET("/edit/{page:.*}", GetPageEditHandler)
 	GET("/{page:.*}", GetPageHandler)
 	POST("/{page:.*}", PostPageHandler)
+
+	if len(*build) > 0 {
+		if err := buildStaticSite(*build); err != nil {
+			log.Printf("%s", err.Error())
+		}
+		os.Exit(0)
+	}
 
 	// Start the server
 	START()

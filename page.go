@@ -124,7 +124,6 @@ func (p *Page) Render() string {
 func (p *Page) Content() string {
 	dat, err := ioutil.ReadFile(p.FileName())
 	if err != nil {
-		fmt.Printf("Can't open `%s`, err: %s\n", p.Name, err)
 		return ""
 	}
 	return string(dat)

@@ -73,20 +73,23 @@ func init() {
 	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
 }
 
-func START() {
+func server() *http.Server {
 	compileViews()
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
 	}
 
-	srv := &http.Server{
+	return &http.Server{
 		Handler:      handler,
 		Addr:         BIND_ADDRESS,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+}
 
+func START() {
+	srv := server()
 	log.Printf("Starting server: %s", BIND_ADDRESS)
 	log.Fatal(srv.ListenAndServe())
 }
