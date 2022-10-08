@@ -10,6 +10,7 @@ import (
 func init() {
 	WIDGET(SIDEBAR_WIDGET, recent)
 	GET(`/\+/recent`, recentHandler)
+	EXTENSION_PAGE("/+/recent")
 	HELPER("ago", func(t time.Time) string {
 		return ago(time.Now().Sub(t))
 	})

@@ -25,6 +25,7 @@ func init() {
 	AUTOCOMPLETE(hashtagAutocomplete)
 
 	GET(`/\+/tags`, tagsHandler)
+	EXTENSION_PAGE("/+/tags")
 	GET(`/\+/tag/{tag}`, tagHandler)
 }
 
@@ -81,6 +82,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 	tag := n.(*HashTag)
 	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">#%s</a>`, tag.value, tag.value)
+	EXTENSION_PAGE(fmt.Sprintf("/+/tag/%s", tag.value))
 	return ast.WalkContinue, nil
 }
 

@@ -35,6 +35,10 @@ func starredPages(p *Page, r Request) template.HTML {
 }
 
 func starMeta(p *Page, r Request) template.HTML {
+	if READONLY {
+		return ""
+	}
+
 	starred := isStarred(p)
 
 	return template.HTML(partial("extension/star-meta", Locals{
@@ -45,6 +49,10 @@ func starMeta(p *Page, r Request) template.HTML {
 }
 
 func starHandler(w Response, r Request) Output {
+	if READONLY {
+		return Unauthorized
+	}
+
 	vars := VARS(r)
 	page := NewPage(vars["page"])
 	if !page.Exists() {
@@ -57,6 +65,10 @@ func starHandler(w Response, r Request) Output {
 }
 
 func unstarHandler(w Response, r Request) Output {
+	if READONLY {
+		return Unauthorized
+	}
+
 	vars := VARS(r)
 	page := NewPage(vars["page"])
 	if !page.Exists() {

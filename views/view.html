@@ -75,10 +75,12 @@
     <span> Updated: {{.updated}} </span>
     {{ .meta }}
 
+    {{ if .edit }}
     <a href="{{.edit}}" title="Ctrl+S">
       <span class="icon"><i class="fa-solid fa-pen"></i></span>
       <span>Edit</span>
     </a>
+    {{ end }}
   </div>
 
   {{ template "common/title" .title }}
@@ -89,12 +91,14 @@
 </div>
 
 <script>
+ {{ if .edit }}
  document.addEventListener('keydown', e => {
      if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {
          e.preventDefault();
          document.location.pathname = "{{.edit}}";
      }
  });
+ {{ end }}
 
  // This is a hack to display right to left text correctly
  document.querySelectorAll('.content *')

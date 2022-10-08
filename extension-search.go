@@ -14,6 +14,10 @@ func init() {
 }
 
 func searchWidget(_ *Page, _ Request) template.HTML {
+	if READONLY {
+		return ""
+	}
+
 	return template.HTML(partial("extension/search-widget", nil))
 }
 

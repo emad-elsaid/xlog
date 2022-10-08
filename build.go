@@ -11,6 +11,12 @@ import (
 	"path"
 )
 
+var extension_page = map[string]bool{}
+
+func EXTENSION_PAGE(p string) {
+	extension_page[p] = true
+}
+
 func buildStaticSite(dest string) error {
 	srv := server()
 
@@ -54,6 +60,43 @@ func buildStaticSite(dest string) error {
 			return
 		}
 	})
+
+	for p := range extension_page {
+		req, err := http.NewRequest(http.MethodGet, p, nil)
+		if err != nil {
+			log.Printf("error while processing: %s, err: %s", p, err.Error())
+			continue
+		}
+
+		rec := httptest.NewRecorder()
+		srv.Handler.ServeHTTP(rec, req)
+
+		dir := path.Join(dest, p)
+		file := path.Join(dest, p, "index.html")
+
+		if err := os.MkdirAll(dir, 0700); err != nil {
+			log.Printf("error while processing: %s, err: %s", p, err.Error())
+			continue
+		}
+
+		if rec.Result().StatusCode != http.StatusOK {
+			log.Printf("error while processing: %s, err: %s", p, rec.Result().Status)
+			continue
+		}
+
+		body, err := io.ReadAll(rec.Result().Body)
+		if err != nil {
+			log.Printf("error while processing: %s, err: %s", p, err.Error())
+			continue
+		}
+		defer rec.Result().Body.Close()
+
+		err = os.WriteFile(file, body, 0700)
+		if err != nil {
+			log.Printf("error while processing: %s, err: %s", p, err.Error())
+			continue
+		}
+	}
 
 	fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {

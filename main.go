@@ -15,6 +15,8 @@ import (
 // creating new pages.
 const TEMPLATE_NAME = "template"
 
+var READONLY = false
+
 func main() {
 	// Uses current working directory as default value for source flag. If the
 	// source flag is set by user the program changes working directory to is
@@ -22,7 +24,12 @@ func main() {
 	cwd, _ := os.Getwd()
 	source := flag.String("source", cwd, "Directory that will act as a storage")
 	build := flag.String("build", "", "Build all pages as static site in this directory")
+	flag.BoolVar(&READONLY, "readonly", false, "Should xlog hide write operations, read-only means all write operations will be disabled")
 	flag.Parse()
+
+	if len(*build) > 0 {
+		READONLY = true
+	}
 
 	absSource, err := filepath.Abs(*source)
 	if err != nil {
@@ -36,9 +43,16 @@ func main() {
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
 	GET("/", RootHandler)
-	GET("/edit/{page:.*}", GetPageEditHandler)
+
+	if !READONLY {
+		GET("/edit/{page:.*}", GetPageEditHandler)
+	}
+
 	GET("/{page:.*}", GetPageHandler)
-	POST("/{page:.*}", PostPageHandler)
+
+	if !READONLY {
+		POST("/{page:.*}", PostPageHandler)
+	}
 
 	if len(*build) > 0 {
 		if err := buildStaticSite(*build); err != nil {
@@ -63,11 +77,20 @@ func GetPageHandler(w Response, r Request) Output {
 	page := NewPage(vars["page"])
 
 	if !page.Exists() {
-		return Redirect("/edit/" + page.Name)
+		if READONLY {
+			return NotFound
+		} else {
+			return Redirect("/edit/" + page.Name)
+		}
+	}
+
+	var edit string
+	if !READONLY {
+		edit = "/edit/" + page.Name
 	}
 
 	return Render("view", Locals{
-		"edit":      "/edit/" + page.Name,
+		"edit":      edit,
 		"title":     page.Emoji() + " " + page.Name,
 		"updated":   ago(time.Now().Sub(page.ModTime())),
 		"content":   template.HTML(page.Render()),
