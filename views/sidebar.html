@@ -1,14 +1,13 @@
 {{ with .sidebar }}
 <div class="column is-2"></div>
 <div class="column is-2 is-hidden-mobile sidebar">
-  <ul class="menu-list">
-    <li>
+  <p class="pb-3">
       <a href="/" class="title is-4 has-text-weight-bold">
         <span class="icon is-medium"><img src="/assets/logo.png"/></span>
         <span>XLOG</span>
       </a>
-    </li>
-  </ul>
-  <div class="pl-3"> {{.}} </div>
+  </p>
+
+  {{.}}
 </div>
 {{ end }}

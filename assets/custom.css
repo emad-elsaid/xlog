@@ -83,6 +83,8 @@
     height: 100vh;
     overflow: auto;
     position: fixed;
+    top: 0;
+    left: 0;
     border-right: 1px solid #ddd;
 }
 
