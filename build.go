@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/fs"
 	"log"
@@ -21,79 +22,28 @@ func buildStaticSite(dest string) error {
 	srv := server()
 
 	WalkPages(context.Background(), func(p *Page) {
-		req, err := http.NewRequest(http.MethodGet, "/"+p.Name, nil)
-		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
-			return
-		}
-
-		rec := httptest.NewRecorder()
-		srv.Handler.ServeHTTP(rec, req)
-
+		route := "/" + p.Name
 		dir := path.Join(dest, p.Name)
 		file := path.Join(dest, p.Name, "index.html")
+
 		if p.Name == "index" {
 			dir = dest
 			file = path.Join(dest, "index.html")
 		}
 
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
-			return
-		}
-
-		if rec.Result().StatusCode != http.StatusOK {
-			log.Printf("error while processing: %s, err: %s", p.Name, rec.Result().Status)
-			return
-		}
-
-		body, err := io.ReadAll(rec.Result().Body)
+		err := buildRoute(srv, route, dir, file)
 		if err != nil {
 			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
-			return
-		}
-		defer rec.Result().Body.Close()
-
-		err = os.WriteFile(file, body, 0700)
-		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
-			return
 		}
 	})
 
-	for p := range extension_page {
-		req, err := http.NewRequest(http.MethodGet, p, nil)
+	for route := range extension_page {
+		dir := path.Join(dest, route)
+		file := path.Join(dest, route, "index.html")
+
+		err := buildRoute(srv, route, dir, file)
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p, err.Error())
-			continue
-		}
-
-		rec := httptest.NewRecorder()
-		srv.Handler.ServeHTTP(rec, req)
-
-		dir := path.Join(dest, p)
-		file := path.Join(dest, p, "index.html")
-
-		if err := os.MkdirAll(dir, 0700); err != nil {
-			log.Printf("error while processing: %s, err: %s", p, err.Error())
-			continue
-		}
-
-		if rec.Result().StatusCode != http.StatusOK {
-			log.Printf("error while processing: %s, err: %s", p, rec.Result().Status)
-			continue
-		}
-
-		body, err := io.ReadAll(rec.Result().Body)
-		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p, err.Error())
-			continue
-		}
-		defer rec.Result().Body.Close()
-
-		err = os.WriteFile(file, body, 0700)
-		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p, err.Error())
+			log.Printf("error while processing: %s, err: %s", route, err.Error())
 			continue
 		}
 	}
@@ -124,4 +74,30 @@ func buildStaticSite(dest string) error {
 	})
 
 	return nil
+}
+
+func buildRoute(srv *http.Server, route, dir, file string) error {
+	req, err := http.NewRequest(http.MethodGet, route, nil)
+	if err != nil {
+		return err
+	}
+
+	rec := httptest.NewRecorder()
+	srv.Handler.ServeHTTP(rec, req)
+
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
+	}
+
+	if rec.Result().StatusCode != http.StatusOK {
+		return errors.New(rec.Result().Status)
+	}
+
+	body, err := io.ReadAll(rec.Result().Body)
+	if err != nil {
+		return err
+	}
+	defer rec.Result().Body.Close()
+
+	return os.WriteFile(file, body, 0700)
 }
