@@ -1,22 +1,22 @@
 {{ template "header" . }}
 
-  <div class="is-size-7 has-text-grey mb-5 is-pulled-right">
-    <span> Updated: {{.updated}} </span>
-    {{ .meta }}
+<div class="is-size-7 has-text-grey mb-5 is-pulled-right">
+  <span> Updated: {{.updated}} </span>
+  {{ .meta }}
 
-    {{ if .edit }}
-    <a href="{{.edit}}" title="Ctrl+S">
-      <span class="icon"><i class="fa-solid fa-pen"></i></span>
-      <span>Edit</span>
-    </a>
-    {{ end }}
-  </div>
+  {{ if and .edit (not .READONLY) }}
+  <a href="{{.edit}}" title="Ctrl+S">
+    <span class="icon"><i class="fa-solid fa-pen"></i></span>
+    <span>Edit</span>
+  </a>
+  {{ end }}
+</div>
 
-  {{ template "common/title" .title }}
+{{ template "common/title" .title }}
 
-  <div class="view"> {{.content}} </div>
+<div class="view"> {{.content}} </div>
 
-  {{ .afterView }}
+{{ .afterView }}
 
 <script>
  {{ if .edit }}

@@ -287,6 +287,14 @@ func partial(path string, data Locals) string {
 		return fmt.Sprintf("view %s not found", path)
 	}
 
+	// set extra locals here
+	if data == nil {
+		data = Locals{}
+	}
+
+	data["SITENAME"] = SITENAME
+	data["READONLY"] = READONLY
+
 	w := bytes.NewBufferString("")
 	err := v.Execute(w, data)
 	if err != nil {

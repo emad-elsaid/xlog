@@ -7,11 +7,23 @@
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="stylesheet" href="/assets/fontawesome/style.css">
     <link rel="stylesheet" href="/assets/custom.css">
-    <title>{{.title}} | XLog</title>
+    <title>{{.title}} | {{.SITENAME}}</title>
   </head>
   <body>
+
+    {{ if not .READONLY }}
     {{ template "tools" . }}
+    {{ end }}
+
     <div class="columns">
       {{ template "sidebar" . }}
       <div class="column">
+
+        <p class="p-3">
+          <a href="/" class="title is-4 has-text-weight-bold">
+            <span class="icon is-medium"><img src="/assets/logo.png"/></span>
+            <span>{{.SITENAME}}</span>
+          </a>
+        </p>
+
         <div class="container content is-max-desktop" dir="auto" style="margin-bottom: 20em;">

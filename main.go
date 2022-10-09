@@ -15,7 +15,10 @@ import (
 // creating new pages.
 const TEMPLATE_NAME = "template"
 
-var READONLY = false
+var (
+	READONLY bool
+	SITENAME string
+)
 
 func main() {
 	// Uses current working directory as default value for source flag. If the
@@ -24,6 +27,7 @@ func main() {
 	cwd, _ := os.Getwd()
 	source := flag.String("source", cwd, "Directory that will act as a storage")
 	build := flag.String("build", "", "Build all pages as static site in this directory")
+	flag.StringVar(&SITENAME, "sitename", "XLOG", "Site name is the name that appears on the header beside the logo and in the title tag")
 	flag.BoolVar(&READONLY, "readonly", false, "Should xlog hide write operations, read-only means all write operations will be disabled")
 	flag.Parse()
 
@@ -84,22 +88,12 @@ func GetPageHandler(w Response, r Request) Output {
 		}
 	}
 
-	var edit string
-	if !READONLY {
-		edit = "/edit/" + page.Name
-	}
-
-	var tools template.HTML
-	if !READONLY {
-		tools = renderWidget(TOOLS_WIDGET, &page, r)
-	}
-
 	return Render("view", Locals{
-		"edit":      edit,
+		"edit":      "/edit/" + page.Name,
 		"title":     page.Emoji() + " " + page.Name,
 		"updated":   ago(time.Now().Sub(page.ModTime())),
 		"content":   template.HTML(page.Render()),
-		"tools":     tools,                                     // all tools registered widgets
+		"tools":     renderWidget(TOOLS_WIDGET, &page, r),      // all tools registered widgets
 		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar
 		"meta":      renderWidget(META_WIDGET, &page, r),       // widgets registered to be displayed under the page title
 		"afterView": renderWidget(AFTER_VIEW_WIDGET, &page, r), // widgets registered to be displayed under the page content in the view page
