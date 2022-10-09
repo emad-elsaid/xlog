@@ -1,25 +1,23 @@
 {{ template "header" . }}
 
-<div class="container is-fluid">
-  <div class="content pb-6" dir="auto">
-    {{ template "common/title" .title }}
+<div class="content pb-6" dir="auto">
+  {{ template "common/title" .title }}
 
-    {{ range $tag, $pages := .tags }}
-    <details class="menu">
-      <summary class="menu-label is-capitalized is-clickable">
-        <span class="icon"><i class="fa-solid fa-hashtag"></i></span>
-        <span>{{$tag}}</span>
-        <a href="/+/tag/{{$tag}}"><span class="tag is-pulled-right">{{ len $pages }}</span></a>
-      </summary>
-      <ul class="menu-list">
-        {{ range $pages }}
-        <li class="is-capitalized"><a href="/{{.}}">{{ . }}</a></li>
-        {{ end }}
-      </ul>
-    </details>
-    {{ end }}
+  {{ range $tag, $pages := .tags }}
+  <details class="menu">
+    <summary class="menu-label is-capitalized is-clickable">
+      <span class="icon"><i class="fa-solid fa-hashtag"></i></span>
+      <span>{{$tag}}</span>
+      <a href="/+/tag/{{$tag}}"><span class="tag is-pulled-right">{{ len $pages }}</span></a>
+    </summary>
+    <ul class="menu-list">
+      {{ range $pages }}
+      <li class="is-capitalized"><a href="/{{.}}">{{ . }}</a></li>
+      {{ end }}
+    </ul>
+  </details>
+  {{ end }}
 
-  </div>
 </div>
 
 {{ template "footer" . }}

@@ -1,6 +1,5 @@
 {{ template "header" . }}
 
-<div class="container content is-max-desktop" dir="auto" style="margin-bottom: 20em;">
   <div class="is-size-7 has-text-grey mb-5 is-pulled-right">
     <span> Updated: {{.updated}} </span>
     {{ .meta }}
@@ -18,7 +17,6 @@
   <div class="view"> {{.content}} </div>
 
   {{ .afterView }}
-</div>
 
 <script>
  {{ if .edit }}

@@ -89,12 +89,17 @@ func GetPageHandler(w Response, r Request) Output {
 		edit = "/edit/" + page.Name
 	}
 
+	var tools template.HTML
+	if !READONLY {
+		tools = renderWidget(TOOLS_WIDGET, &page, r)
+	}
+
 	return Render("view", Locals{
 		"edit":      edit,
 		"title":     page.Emoji() + " " + page.Name,
 		"updated":   ago(time.Now().Sub(page.ModTime())),
 		"content":   template.HTML(page.Render()),
-		"tools":     renderWidget(TOOLS_WIDGET, &page, r),      // all tools registered widgets
+		"tools":     tools,                                     // all tools registered widgets
 		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar
 		"meta":      renderWidget(META_WIDGET, &page, r),       // widgets registered to be displayed under the page title
 		"afterView": renderWidget(AFTER_VIEW_WIDGET, &page, r), // widgets registered to be displayed under the page content in the view page
