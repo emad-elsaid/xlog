@@ -1,12 +1,10 @@
 {{ with .pages }}
-<aside class="menu">
-  <p class="menu-label">Starred</p>
   <ul class="menu-list">
     {{ range . }}
     <li>
       <a href="/{{.Name}}" class="is-capitalized">
         {{ with .Emoji }}
-        {{.}}
+        <span class="icon">{{.}}</span>
         {{else}}
         <span class="icon fa-solid fa-star"></span>
         {{end}}
@@ -15,5 +13,4 @@
     </li>
     {{ end }}
   </ul>
-</aside>
 {{ end }}
