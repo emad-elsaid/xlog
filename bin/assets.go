@@ -14,7 +14,8 @@ import (
 
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.css",
+    "https://cdn.jsdelivr.net/npm/bulma-prefers-dark@0.1.0-beta.1/css/bulma-prefers-dark.css",
+    "https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.css",
 	"https://codemirror.net/5/addon/hint/show-hint.css",
 }
 
