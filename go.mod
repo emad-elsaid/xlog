@@ -19,3 +19,5 @@ require (
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
 	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 )
+
+retract [v0.1.0, v0.2.0]
