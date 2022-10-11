@@ -54,6 +54,10 @@ Usage of xlog:
 
 Now you can access xlog with `localhost:3000`
 
+## Generating static site
+
+I used Xlog to generate [my personal blog](https://www.emadelsaid.com/). it uses github workflow to do that [here is an example](https://github.com/emad-elsaid/emad-elsaid.github.io/blob/master/.github/workflows/xlog.yml).
+
 ## Logo
 
 [Cassette tape icons created by Good Ware - Flaticon](https://www.flaticon.com/free-icons/cassette-tape)

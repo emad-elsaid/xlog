@@ -294,6 +294,7 @@ func partial(path string, data Locals) string {
 
 	data["SITENAME"] = SITENAME
 	data["READONLY"] = READONLY
+	data["SIDEBAR"] = SIDEBAR
 
 	w := bytes.NewBufferString("")
 	err := v.Execute(w, data)

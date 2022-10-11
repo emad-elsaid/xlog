@@ -165,6 +165,10 @@ func hashtagsSidebar(p *Page, r Request) template.HTML {
 }
 
 func relatedHashtagsPages(p *Page, r Request) template.HTML {
+	if p.Name == "index" {
+		return ""
+	}
+
 	found_hashtags := extractHashtags(p.AST())
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {

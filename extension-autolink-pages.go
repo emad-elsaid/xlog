@@ -31,7 +31,7 @@ func init() {
 	PageEvents.Listen(AfterWrite, UpdatePagesList)
 	PageEvents.Listen(AfterDelete, UpdatePagesList)
 
-	WIDGET(AFTER_VIEW_WIDGET, backlinksSidebar)
+	WIDGET(AFTER_VIEW_WIDGET, backlinksSection)
 	AUTOCOMPLETE(autolinkPagesAutocomplete)
 }
 
@@ -193,7 +193,11 @@ func extractTodos(n ast.Node) []*east.TaskCheckBox {
 	return a
 }
 
-func backlinksSidebar(p *Page, r Request) template.HTML {
+func backlinksSection(p *Page, r Request) template.HTML {
+	if p.Name == "index" {
+		return ""
+	}
+
 	pages := []*Page{}
 
 	WalkPages(context.Background(), func(a *Page) {

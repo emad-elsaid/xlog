@@ -18,6 +18,7 @@ const TEMPLATE_NAME = "template"
 var (
 	READONLY bool
 	SITENAME string
+	SIDEBAR  bool
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 	build := flag.String("build", "", "Build all pages as static site in this directory")
 	flag.StringVar(&SITENAME, "sitename", "XLOG", "Site name is the name that appears on the header beside the logo and in the title tag")
 	flag.BoolVar(&READONLY, "readonly", false, "Should xlog hide write operations, read-only means all write operations will be disabled")
+	flag.BoolVar(&SIDEBAR, "sidebar", true, "Should render sidebar.")
 	flag.Parse()
 
 	if len(*build) > 0 {
