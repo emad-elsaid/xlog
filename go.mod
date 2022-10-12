@@ -1,6 +1,6 @@
 module github.com/emad-elsaid/xlog
 
-go 1.17
+go 1.19
 
 require (
 	github.com/gorilla/csrf v1.6.0

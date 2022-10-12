@@ -12,7 +12,7 @@ import (
 
 func init() {
 	PageEvents.Listen(BeforeWrite, WriteVersion)
-	WIDGET(META_WIDGET, VersionMeta)
+	WIDGET(ACTION_WIDGET, VersionMeta)
 	IGNORE_DIR(regexp.MustCompile(`\.versions$`))
 }
 

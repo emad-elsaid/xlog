@@ -86,29 +86,11 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	return ast.WalkContinue, nil
 }
 
-func extractHashtags(n ast.Node) []*HashTag {
-	a := []*HashTag{}
-
-	if n.Kind() == KindHashTag {
-		tag, _ := n.(*HashTag)
-		a = []*HashTag{tag}
-	}
-
-	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		a = append(a, extractHashtags(c)...)
-		if c == n.LastChild() {
-			break
-		}
-	}
-
-	return a
-}
-
 func tagsHandler(_ Response, r Request) Output {
 	tags := map[string][]string{}
 	WalkPages(context.Background(), func(a *Page) {
 		set := map[string]bool{}
-		hashes := extractHashtags(a.AST())
+		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
 
@@ -148,7 +130,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 	results := []*Page{}
 
 	WalkPages(ctx, func(p *Page) {
-		tags := extractHashtags(p.AST())
+		tags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
 				results = append(results, p)
@@ -169,7 +151,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		return ""
 	}
 
-	found_hashtags := extractHashtags(p.AST())
+	found_hashtags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {
 		hashtags[string(v.value)] = true
@@ -182,7 +164,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 			return
 		}
 
-		page_hashtags := extractHashtags(rp.AST())
+		page_hashtags := ExtractAllFromAST[*HashTag](rp.AST(), KindHashTag)
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[string(h.value)]; ok {
 				pages = append(pages, rp)
@@ -204,7 +186,7 @@ func hashtagAutocomplete() *Autocomplete {
 
 	set := map[string]bool{}
 	WalkPages(context.Background(), func(a *Page) {
-		hashes := extractHashtags(a.AST())
+		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			set[strings.ToLower(string(v.value))] = true
 		}

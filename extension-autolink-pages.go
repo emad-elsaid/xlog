@@ -164,7 +164,7 @@ func renderPageLink(w util.BufWriter, source []byte, node ast.Node, entering boo
 }
 
 func countTodos(p *Page) (total int, done int) {
-	tasks := extractTodos(p.AST())
+	tasks := ExtractAllFromAST[*east.TaskCheckBox](p.AST(), east.KindTaskCheckBox)
 	for _, v := range tasks {
 		total++
 		if v.IsChecked {
@@ -173,24 +173,6 @@ func countTodos(p *Page) (total int, done int) {
 	}
 
 	return
-}
-
-func extractTodos(n ast.Node) []*east.TaskCheckBox {
-	a := []*east.TaskCheckBox{}
-
-	if n.Kind() == east.KindTaskCheckBox {
-		t, _ := n.(*east.TaskCheckBox)
-		a = []*east.TaskCheckBox{t}
-	}
-
-	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		a = append(a, extractTodos(c)...)
-		if c == n.LastChild() {
-			break
-		}
-	}
-
-	return a
 }
 
 func backlinksSection(p *Page, r Request) template.HTML {

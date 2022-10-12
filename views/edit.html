@@ -1,16 +1,32 @@
 {{ template "header" . }}
 <script src="/assets/script.js"></script>
 
+<style>
+ .editor-controls {
+     position: fixed;
+     right:1em;
+     bottom:1em;
+     z-index: 10;
+ }
+</style>
 <form method="POST" action="/{{ .action }}" class="form" id="editor">
   {{ .csrf }}
 	<div class="field">
 		<textarea id="content" name="content">{{ .content }}</textarea>
 	</div>
-  <button type="submit" class="button is-link"
-          style="position: fixed; right:1em; bottom:1em;z-index: 10;">
-    <span class="icon"><i class="fa-solid fa-floppy-disk"></i></span>
-    <span>Save</span>
-  </button>
+  <div class="editor-controls">
+
+    {{ if .rtl }}
+    <label class="checkbox m-2">
+      <input id="rtl" type="checkbox" value="rtl" checked onclick="toggleRTL(this)" /> RTL
+    </label>
+    {{ end }}
+
+    <button type="submit" class="button is-link">
+      <span class="icon"><i class="fa-solid fa-floppy-disk"></i></span>
+      <span>Save</span>
+    </button>
+  </div>
 </form>
 
 <script type="application/javascript">
@@ -67,22 +83,22 @@
      direction: {{ if .rtl }} "rtl" {{ else }} "ltr" {{ end }},
      autoSuggest: [
 
-        {{ range .autocomplete }}
+         {{ range .autocomplete }}
          {
              mode: 'markdown',
              startChar: '{{.StartChar}}',
              listCallback: function() {
                  return [
-                    {{range .Suggestions }}
+                     {{range .Suggestions }}
                      {
                          text: '{{.Text}} ',
                          displayText: '{{.DisplayText}}'
                      },
-                    {{end}}
+                     {{end}}
                  ]
              }
          },
-        {{ end }}
+         {{ end }}
 
      ]
  });
@@ -91,8 +107,18 @@
      const e = event || window.event;
      if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
          e.preventDefault();
-        document.getElementById("editor").submit();
+         document.getElementById("editor").submit();
      }
  });
+
+ function toggleRTL(ele) {
+     if(ele.hasAttribute('checked')){
+         ele.removeAttribute('checked');
+         editor.setDirection('ltr');
+     }else{
+         ele.setAttribute('checked', 'checked');
+         editor.setDirection('rtl');
+     }
+ }
 </script>
 {{ template "footer" . }}

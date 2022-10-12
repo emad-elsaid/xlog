@@ -97,7 +97,8 @@ func GetPageHandler(w Response, r Request) Output {
 		"content":   template.HTML(page.Render()),
 		"tools":     renderWidget(TOOLS_WIDGET, &page, r),      // all tools registered widgets
 		"sidebar":   renderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar
-		"meta":      renderWidget(META_WIDGET, &page, r),       // widgets registered to be displayed under the page title
+		"action":    renderWidget(ACTION_WIDGET, &page, r),     // widgets registered to be displayed under the page title
+		"head":      renderWidget(HEAD_WIDGET, &page, r),       // widgets registered to be displayed under the page title
 		"afterView": renderWidget(AFTER_VIEW_WIDGET, &page, r), // widgets registered to be displayed under the page content in the view page
 	})
 }
@@ -163,7 +164,8 @@ const (
 	TOOLS_WIDGET widgetSpace = iota
 	SIDEBAR_WIDGET
 	AFTER_VIEW_WIDGET
-	META_WIDGET
+	ACTION_WIDGET
+	HEAD_WIDGET
 )
 
 // A map to keep track of list of widget functions registered in each widget space
