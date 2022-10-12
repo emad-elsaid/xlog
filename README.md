@@ -59,6 +59,9 @@ Now you can access xlog with `localhost:3000`
 I used Xlog to generate [my personal blog](https://www.emadelsaid.com/). it uses github workflow to do that [here is an example](https://github.com/emad-elsaid/emad-elsaid.github.io/blob/master/.github/workflows/xlog.yml).
 
 
+## License
+
+Xlog is released under [MIT license](LICENSE)
 
 ## Logo
 
