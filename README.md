@@ -48,8 +48,16 @@ go install github.com/emad-elsaid/xlog@latest
 Usage of xlog:
   -bind string
         IP and port to bind the web server to (default "127.0.0.1:3000")
+  -build string
+        Build all pages as static site in this directory
+  -readonly
+        Should xlog hide write operations, read-only means all write operations will be disabled
+  -sidebar
+        Should render sidebar. (default true)
+  -sitename string
+        Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
-        Directory that will act as a storage (default ".")
+        Directory that will act as a storage (default current directory)
 ```
 
 Now you can access xlog with `localhost:3000`
