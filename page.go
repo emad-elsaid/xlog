@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/yuin/goldmark"
@@ -25,10 +26,16 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+func init() {
+	PageEvents.Listen(AfterWrite, ClearWalkPagesCache)
+	PageEvents.Listen(AfterDelete, ClearWalkPagesCache)
+}
+
 type (
 	// a Type that represent a page.
 	Page struct {
 		Name string // page name without '.md' extension
+		ast  ast.Node
 	}
 
 	// a type used to define events to be used when the page is manipulated for
@@ -182,7 +189,11 @@ func (p *Page) RTL() bool {
 // parts of the page. for example the following "Emoji" function uses it to
 // extract the first emoji.
 func (p *Page) AST() ast.Node {
-	return MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
+	if p.ast == nil {
+		p.ast = MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
+	}
+
+	return p.ast
 }
 
 // Returns the first emoji of the page.
@@ -229,7 +240,41 @@ func ExtractAllFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
 
 // this function is useful to iterate on all available pages. many extensions
 // uses it to get all pages and maybe parse them and extract needed information
+var walkPagesCache []*Page
+var walkPagesCacheMutex sync.RWMutex
+
+func ClearWalkPagesCache(_ *Page) (err error) {
+	walkPagesCacheMutex.Lock()
+	defer walkPagesCacheMutex.Unlock()
+
+	walkPagesCache = nil
+	return nil
+}
+
 func WalkPages(ctx context.Context, f func(*Page)) {
+	if walkPagesCache == nil {
+		PopulateWalkPagesCache(ctx)
+	}
+
+	walkPagesCacheMutex.RLock()
+	defer walkPagesCacheMutex.RUnlock()
+
+	for _, p := range walkPagesCache {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			f(p)
+		}
+	}
+}
+
+func PopulateWalkPagesCache(ctx context.Context) {
+	walkPagesCacheMutex.Lock()
+	defer walkPagesCacheMutex.Unlock()
+
+	walkPagesCache = []*Page{}
+
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		if d.IsDir() && name == STATIC_DIR_PATH {
 			return fs.SkipDir
@@ -255,9 +300,7 @@ func WalkPages(ctx context.Context, f func(*Page)) {
 			basename := name[:len(name)-len(ext)]
 
 			if ext == ".md" {
-				f(&Page{
-					Name: basename,
-				})
+				walkPagesCache = append(walkPagesCache, &Page{Name: basename})
 			}
 
 		}
