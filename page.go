@@ -238,19 +238,11 @@ func ExtractAllFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
 	return a
 }
 
-// this function is useful to iterate on all available pages. many extensions
-// uses it to get all pages and maybe parse them and extract needed information
 var walkPagesCache []*Page
 var walkPagesCacheMutex sync.RWMutex
 
-func ClearWalkPagesCache(_ *Page) (err error) {
-	walkPagesCacheMutex.Lock()
-	defer walkPagesCacheMutex.Unlock()
-
-	walkPagesCache = nil
-	return nil
-}
-
+// this function is useful to iterate on all available pages. many extensions
+// uses it to get all pages and maybe parse them and extract needed information
 func WalkPages(ctx context.Context, f func(*Page)) {
 	if walkPagesCache == nil {
 		PopulateWalkPagesCache(ctx)
@@ -267,6 +259,14 @@ func WalkPages(ctx context.Context, f func(*Page)) {
 			f(p)
 		}
 	}
+}
+
+func ClearWalkPagesCache(_ *Page) (err error) {
+	walkPagesCacheMutex.Lock()
+	defer walkPagesCacheMutex.Unlock()
+
+	walkPagesCache = nil
+	return nil
 }
 
 func PopulateWalkPagesCache(ctx context.Context) {
