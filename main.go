@@ -19,6 +19,7 @@ var (
 	READONLY bool
 	SITENAME string
 	SIDEBAR  bool
+	INDEX    string
 )
 
 func main() {
@@ -29,6 +30,7 @@ func main() {
 	source := flag.String("source", cwd, "Directory that will act as a storage")
 	build := flag.String("build", "", "Build all pages as static site in this directory")
 	flag.StringVar(&SITENAME, "sitename", "XLOG", "Site name is the name that appears on the header beside the logo and in the title tag")
+	flag.StringVar(&INDEX, "index", "index", "Index file name used as home page")
 	flag.BoolVar(&READONLY, "readonly", false, "Should xlog hide write operations, read-only means all write operations will be disabled")
 	flag.BoolVar(&SIDEBAR, "sidebar", true, "Should render sidebar.")
 	flag.Parse()
@@ -73,7 +75,7 @@ func main() {
 
 // Redirect to `/index` to render the index page.
 func RootHandler(w Response, r Request) Output {
-	return Redirect("/index")
+	return Redirect("/" + INDEX)
 }
 
 // Shows a page. the page name is the path itself. if the page doesn't exist it

@@ -176,7 +176,7 @@ func countTodos(p *Page) (total int, done int) {
 }
 
 func backlinksSection(p *Page, r Request) template.HTML {
-	if p.Name == "index" {
+	if p.Name == INDEX {
 		return ""
 	}
 

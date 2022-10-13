@@ -26,7 +26,7 @@ func buildStaticSite(dest string) error {
 		dir := path.Join(dest, p.Name)
 		file := path.Join(dest, p.Name, "index.html")
 
-		if p.Name == "index" {
+		if p.Name == INDEX {
 			dir = dest
 			file = path.Join(dest, "index.html")
 		}

@@ -50,6 +50,8 @@ Usage of xlog:
         IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string
         Build all pages as static site in this directory
+  -index string
+        Index file name used as home page (default "index")
   -readonly
         Should xlog hide write operations, read-only means all write operations will be disabled
   -sidebar

@@ -93,7 +93,7 @@ var MarkDownRenderer = goldmark.New(
 // Create an instance of Page with name. if no name is passed it's assumed "index"
 func NewPage(name string) Page {
 	if name == "" {
-		name = "index"
+		name = INDEX
 	}
 
 	return Page{

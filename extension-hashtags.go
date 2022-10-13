@@ -147,7 +147,7 @@ func hashtagsSidebar(p *Page, r Request) template.HTML {
 }
 
 func relatedHashtagsPages(p *Page, r Request) template.HTML {
-	if p.Name == "index" {
+	if p.Name == INDEX {
 		return ""
 	}
 
