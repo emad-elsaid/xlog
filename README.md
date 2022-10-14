@@ -39,7 +39,7 @@ Local-first personal knowledge management application with focus on enriching ma
 ## Installation
 
 ```
-go install github.com/emad-elsaid/xlog@latest
+go install github.com/emad-elsaid/xlog/cmd/xlog@latest
 ```
 
 ## Usage
