@@ -1,9 +1,11 @@
-package main
+package extensions
 
 import (
 	"fmt"
 	"html/template"
 	"net/url"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 func init() {
@@ -19,7 +21,7 @@ func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
 	}
 
 	return template.HTML(
-		partial("extension/file-operations-delete", Locals{
+		Partial("extension/file-operations-delete", Locals{
 			"csrf":   CSRF(r),
 			"page":   p.Name,
 			"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
@@ -33,7 +35,7 @@ func fileOperationsRenameWidget(p *Page, r Request) template.HTML {
 	}
 
 	return template.HTML(
-		partial("extension/file-operations-rename", Locals{
+		Partial("extension/file-operations-rename", Locals{
 			"csrf":   CSRF(r),
 			"page":   p.Name,
 			"action": "/+/file/rename",

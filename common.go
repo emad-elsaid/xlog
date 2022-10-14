@@ -1,4 +1,4 @@
-package main
+package xlog
 
 import (
 	"bytes"
@@ -88,7 +88,7 @@ func server() *http.Server {
 	}
 }
 
-func START() {
+func serve() {
 	srv := server()
 	log.Printf("Starting server: %s", BIND_ADDRESS)
 	log.Fatal(srv.ListenAndServe())
@@ -281,7 +281,7 @@ func compileViews() {
 	})
 }
 
-func partial(path string, data Locals) string {
+func Partial(path string, data Locals) string {
 	v := templates.Lookup(path)
 	if v == nil {
 		return fmt.Sprintf("view %s not found", path)
@@ -307,7 +307,7 @@ func partial(path string, data Locals) string {
 
 func Render(path string, data Locals) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, partial(path, data))
+		fmt.Fprint(w, Partial(path, data))
 	}
 }
 

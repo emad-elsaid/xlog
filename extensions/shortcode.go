@@ -1,12 +1,14 @@
-package main
+package extensions
 
 import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
-var shortcodes = map[string]preProcessor{
+var shortcodes = map[string]PreProcessor{
 	"info": func(c string) string {
 		return fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
@@ -30,7 +32,7 @@ func init() {
 		reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(k) + `\s+(.*)$`)
 		skip := len("/" + k + " ")
 
-		preprocessor := func(r *regexp.Regexp, skip int, v preProcessor) preProcessor {
+		preprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
 			return func(c string) string {
 				return reg.ReplaceAllStringFunc(c, func(i string) string {
 					return v(i[skip:])
@@ -43,7 +45,7 @@ func init() {
 
 		// multi line
 		multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(k) + "$(.*)^```$")
-		multilinePreprocessor := func(r *regexp.Regexp, skip int, v preProcessor) preProcessor {
+		multilinePreprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
 			return func(c string) string {
 				return multireg.ReplaceAllStringFunc(c, func(i string) string {
 					return v(i[skip : len(i)-4])

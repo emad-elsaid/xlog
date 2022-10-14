@@ -1,4 +1,4 @@
-package main
+package extensions
 
 import (
 	"crypto/sha256"
@@ -10,6 +10,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 const MAX_FILE_UPLOAD = 1 * GB
@@ -27,7 +29,7 @@ func init() {
 
 func uploadFileWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
-		partial("extension/upload-file", Locals{
+		Partial("extension/upload-file", Locals{
 			"page":           p,
 			"csrf":           CSRF(r),
 			"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),

@@ -1,9 +1,11 @@
-package main
+package extensions
 
 import (
 	"context"
 	"html/template"
 	"regexp"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 const MIN_SEARCH_KEYWORD = 3
@@ -18,7 +20,7 @@ func searchWidget(_ *Page, _ Request) template.HTML {
 		return ""
 	}
 
-	return template.HTML(partial("extension/search-widget", nil))
+	return template.HTML(Partial("extension/search-widget", nil))
 }
 
 func searchHandler(w Response, r Request) Output {

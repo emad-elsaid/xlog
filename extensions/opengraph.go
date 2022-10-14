@@ -1,8 +1,10 @@
-package main
+package extensions
 
 import (
 	"fmt"
 	"html/template"
+
+	. "github.com/emad-elsaid/xlog"
 
 	"github.com/yuin/goldmark/ast"
 )

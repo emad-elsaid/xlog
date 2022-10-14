@@ -1,10 +1,12 @@
-package main
+package extensions
 
 import (
 	"fmt"
 	"html/template"
 	"net/url"
 	"strings"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 const STARRED_PAGES = "starred"
@@ -29,7 +31,7 @@ func starredPages(p *Page, r Request) template.HTML {
 		p := NewPage(v)
 		ps = append(ps, &p)
 	}
-	return template.HTML(partial("extension/starred", Locals{
+	return template.HTML(Partial("extension/starred", Locals{
 		"pages": ps,
 	}))
 }
@@ -41,7 +43,7 @@ func starMeta(p *Page, r Request) template.HTML {
 
 	starred := isStarred(p)
 
-	return template.HTML(partial("extension/star-meta", Locals{
+	return template.HTML(Partial("extension/star-meta", Locals{
 		"csrf":    CSRF(r),
 		"starred": starred,
 		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(p.Name)),

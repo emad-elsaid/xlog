@@ -1,19 +1,17 @@
-package main
+package extensions
 
 import (
 	"context"
 	"html/template"
 	"sort"
-	"time"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 func init() {
 	WIDGET(SIDEBAR_WIDGET, recent)
 	GET(`/\+/recent`, recentHandler)
 	EXTENSION_PAGE("/+/recent")
-	HELPER("ago", func(t time.Time) string {
-		return ago(time.Now().Sub(t))
-	})
 }
 
 func recentHandler(_ Response, r Request) Output {
@@ -31,12 +29,12 @@ func recentHandler(_ Response, r Request) Output {
 	return Render("extension/recent", Locals{
 		"title":   "Recent",
 		"pages":   rp,
-		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
+		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 
 func recent(p *Page, r Request) template.HTML {
-	return template.HTML(partial("extension/recent-sidebar", nil))
+	return template.HTML(Partial("extension/recent-sidebar", nil))
 }
 
 type recentPages []*Page

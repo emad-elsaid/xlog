@@ -1,8 +1,10 @@
-package main
+package extensions
 
 import (
 	_ "embed"
 	"encoding/json"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 //go:embed emoji.json

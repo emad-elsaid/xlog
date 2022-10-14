@@ -1,10 +1,12 @@
-package main
+package extensions
 
 import (
 	"context"
 	"fmt"
 	"html/template"
 	"strings"
+
+	. "github.com/emad-elsaid/xlog"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -14,19 +16,22 @@ import (
 )
 
 func init() {
+	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
+	WIDGET(AFTER_VIEW_WIDGET, relatedHashtagsPages)
+
+	GET(`/\+/tags`, tagsHandler)
+	GET(`/\+/tag/{tag}`, tagHandler)
+
+	EXTENSION_PAGE("/+/tags")
+
+	AUTOCOMPLETE(hashtagAutocomplete)
+
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
 	))
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&HashTag{}, 999),
 	))
-	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
-	WIDGET(AFTER_VIEW_WIDGET, relatedHashtagsPages)
-	AUTOCOMPLETE(hashtagAutocomplete)
-
-	GET(`/\+/tags`, tagsHandler)
-	EXTENSION_PAGE("/+/tags")
-	GET(`/\+/tag/{tag}`, tagHandler)
 }
 
 type HashTag struct {
@@ -111,7 +116,7 @@ func tagsHandler(_ Response, r Request) Output {
 	return Render("extension/tags", Locals{
 		"title":   "Hashtags",
 		"tags":    tags,
-		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
+		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 
@@ -122,7 +127,7 @@ func tagHandler(w Response, r Request) Output {
 	return Render("extension/tag", Locals{
 		"title":   "#" + tag,
 		"pages":   tagPages(r.Context(), tag),
-		"sidebar": renderWidget(SIDEBAR_WIDGET, nil, r),
+		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
 	})
 }
 
@@ -143,7 +148,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 }
 
 func hashtagsSidebar(p *Page, r Request) template.HTML {
-	return template.HTML(partial("extension/tags-sidebar", nil))
+	return template.HTML(Partial("extension/tags-sidebar", nil))
 }
 
 func relatedHashtagsPages(p *Page, r Request) template.HTML {
@@ -173,7 +178,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(partial("extension/related-hashtags-pages", Locals{
+	return template.HTML(Partial("extension/related-hashtags-pages", Locals{
 		"pages": pages,
 	}))
 }

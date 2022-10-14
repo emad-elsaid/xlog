@@ -1,4 +1,4 @@
-package main
+package extensions
 
 import (
 	"crypto/sha256"
@@ -12,6 +12,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	. "github.com/emad-elsaid/xlog"
 )
 
 func init() {

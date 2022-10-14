@@ -1,4 +1,4 @@
-package main
+package extensions
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
 	east "github.com/yuin/goldmark/extension/ast"
 	"github.com/yuin/goldmark/parser"
@@ -193,7 +194,7 @@ func backlinksSection(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(partial("extension/backlinks", Locals{"pages": pages}))
+	return template.HTML(Partial("extension/backlinks", Locals{"pages": pages}))
 }
 
 func containLinkTo(n ast.Node, p *Page) bool {
