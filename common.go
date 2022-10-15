@@ -252,33 +252,44 @@ func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFu
 // VIEWS ====================
 
 //go:embed views
-var views embed.FS
+var defaultViews embed.FS
 var templates *template.Template
 var helpers = template.FuncMap{}
 
+var views []fs.FS
+
+func VIEW(view fs.FS) {
+	views = append(views, view)
+}
+
 func compileViews() {
+	// add default views before everything else
+	sub, _ := fs.Sub(defaultViews, "views")
+	views = append([]fs.FS{sub}, views...)
+
 	templates = template.New("")
-	fs.WalkDir(views, ".", func(p string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if strings.HasSuffix(p, VIEWS_EXTENSION) && d.Type().IsRegular() {
-			rel := strings.TrimPrefix(p, "views/")
-			ext := path.Ext(rel)
-			name := strings.TrimSuffix(rel, ext)
-			defer Log(DEBUG, "View", name)()
-
-			c, err := fs.ReadFile(views, p)
+	for _, view := range views {
+		fs.WalkDir(view, ".", func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
 
-			template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
-		}
+			if strings.HasSuffix(p, VIEWS_EXTENSION) && d.Type().IsRegular() {
+				ext := path.Ext(p)
+				name := strings.TrimSuffix(p, ext)
+				defer Log(DEBUG, "View", name)()
 
-		return nil
-	})
+				c, err := fs.ReadFile(view, p)
+				if err != nil {
+					return err
+				}
+
+				template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
+			}
+
+			return nil
+		})
+	}
 }
 
 func Partial(path string, data Locals) string {

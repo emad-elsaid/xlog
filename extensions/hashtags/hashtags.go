@@ -2,11 +2,15 @@ package hashtags
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
+
+	_ "embed"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -14,6 +18,9 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 )
+
+//go:embed views
+var views embed.FS
 
 func init() {
 	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
@@ -25,6 +32,9 @@ func init() {
 	EXTENSION_PAGE("/+/tags")
 
 	AUTOCOMPLETE(hashtagAutocomplete)
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -113,7 +123,7 @@ func tagsHandler(_ Response, r Request) Output {
 		}
 	})
 
-	return Render("extension/tags", Locals{
+	return Render("tags", Locals{
 		"title":   "Hashtags",
 		"tags":    tags,
 		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
@@ -124,7 +134,7 @@ func tagHandler(w Response, r Request) Output {
 	vars := Vars(r)
 	tag := vars["tag"]
 
-	return Render("extension/tag", Locals{
+	return Render("tag", Locals{
 		"title":   "#" + tag,
 		"pages":   tagPages(r.Context(), tag),
 		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
@@ -148,7 +158,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 }
 
 func hashtagsSidebar(p *Page, r Request) template.HTML {
-	return template.HTML(Partial("extension/tags-sidebar", nil))
+	return template.HTML(Partial("tags-sidebar", nil))
 }
 
 func relatedHashtagsPages(p *Page, r Request) template.HTML {
@@ -178,7 +188,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(Partial("extension/related-hashtags-pages", Locals{
+	return template.HTML(Partial("related-hashtags-pages", Locals{
 		"pages": pages,
 	}))
 }

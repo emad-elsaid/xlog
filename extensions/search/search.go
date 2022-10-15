@@ -2,17 +2,27 @@ package search
 
 import (
 	"context"
+	"embed"
 	"html/template"
+	"io/fs"
 	"regexp"
+
+	_ "embed"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
 const MIN_SEARCH_KEYWORD = 3
 
+//go:embed views
+var views embed.FS
+
 func init() {
 	PREPEND_WIDGET(SIDEBAR_WIDGET, searchWidget)
 	GET(`/\+/search`, searchHandler)
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 func searchWidget(_ *Page, _ Request) template.HTML {
@@ -20,11 +30,11 @@ func searchWidget(_ *Page, _ Request) template.HTML {
 		return ""
 	}
 
-	return template.HTML(Partial("extension/search-widget", nil))
+	return template.HTML(Partial("search-widget", nil))
 }
 
 func searchHandler(w Response, r Request) Output {
-	return Render("extension/search-datalist", Locals{
+	return Render("search-datalist", Locals{
 		"results": search(r.Context(), r.FormValue("q")),
 	})
 }

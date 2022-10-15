@@ -2,10 +2,14 @@ package autolink_pages
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"sort"
 	"strings"
+
+	_ "embed"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -15,6 +19,9 @@ import (
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 )
+
+//go:embed views
+var views embed.FS
 
 type fileInfoByNameLength []*Page
 
@@ -34,6 +41,9 @@ func init() {
 
 	WIDGET(AFTER_VIEW_WIDGET, backlinksSection)
 	AUTOCOMPLETE(autolinkPagesAutocomplete)
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 type AutolinkPages struct{}
@@ -194,7 +204,7 @@ func backlinksSection(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(Partial("extension/backlinks", Locals{"pages": pages}))
+	return template.HTML(Partial("backlinks", Locals{"pages": pages}))
 }
 
 func containLinkTo(n ast.Node, p *Page) bool {

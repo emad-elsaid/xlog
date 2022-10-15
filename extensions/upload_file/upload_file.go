@@ -2,19 +2,26 @@ package upload_file
 
 import (
 	"crypto/sha256"
+	"embed"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/url"
 	"os"
 	"path"
 	"regexp"
 	"strings"
 
+	_ "embed"
+
 	. "github.com/emad-elsaid/xlog"
 )
 
 const MAX_FILE_UPLOAD = 1 * GB
+
+//go:embed views
+var views embed.FS
 
 var (
 	IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
@@ -25,11 +32,14 @@ var (
 func init() {
 	WIDGET(TOOLS_WIDGET, uploadFileWidget)
 	POST(`/\+/upload-file`, uploadFileHandler)
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 func uploadFileWidget(p *Page, r Request) template.HTML {
 	return template.HTML(
-		Partial("extension/upload-file", Locals{
+		Partial("upload-file", Locals{
 			"page":           p,
 			"csrf":           CSRF(r),
 			"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),

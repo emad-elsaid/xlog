@@ -2,16 +2,26 @@ package recent
 
 import (
 	"context"
+	"embed"
 	"html/template"
+	"io/fs"
 	"sort"
+
+	_ "embed"
 
 	. "github.com/emad-elsaid/xlog"
 )
+
+//go:embed views
+var views embed.FS
 
 func init() {
 	WIDGET(SIDEBAR_WIDGET, recent)
 	GET(`/\+/recent`, recentHandler)
 	EXTENSION_PAGE("/+/recent")
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 func recentHandler(_ Response, r Request) Output {
@@ -26,7 +36,7 @@ func recentHandler(_ Response, r Request) Output {
 		rp = rp[:100]
 	}
 
-	return Render("extension/recent", Locals{
+	return Render("recent", Locals{
 		"title":   "Recent",
 		"pages":   rp,
 		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
@@ -34,7 +44,7 @@ func recentHandler(_ Response, r Request) Output {
 }
 
 func recent(p *Page, r Request) template.HTML {
-	return template.HTML(Partial("extension/recent-sidebar", nil))
+	return template.HTML(Partial("recent-sidebar", nil))
 }
 
 type recentPages []*Page

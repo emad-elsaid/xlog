@@ -1,21 +1,30 @@
 package star
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/url"
 	"strings"
+
+	_ "embed"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
 const STARRED_PAGES = "starred"
 
+//go:embed views
+var views embed.FS
+
 func init() {
 	WIDGET(ACTION_WIDGET, starMeta)
 	WIDGET(SIDEBAR_WIDGET, starredPages)
 	POST(`/\+/star/{page:.*}`, starHandler)
 	DELETE(`/\+/star/{page:.*}`, unstarHandler)
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 func starredPages(p *Page, r Request) template.HTML {
@@ -31,7 +40,7 @@ func starredPages(p *Page, r Request) template.HTML {
 		p := NewPage(v)
 		ps = append(ps, &p)
 	}
-	return template.HTML(Partial("extension/starred", Locals{
+	return template.HTML(Partial("starred", Locals{
 		"pages": ps,
 	}))
 }
@@ -43,7 +52,7 @@ func starMeta(p *Page, r Request) template.HTML {
 
 	starred := isStarred(p)
 
-	return template.HTML(Partial("extension/star-meta", Locals{
+	return template.HTML(Partial("star-meta", Locals{
 		"csrf":    CSRF(r),
 		"starred": starred,
 		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(p.Name)),

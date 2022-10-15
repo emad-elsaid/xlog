@@ -1,18 +1,28 @@
 package file_operations
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/url"
+
+	_ "embed"
 
 	. "github.com/emad-elsaid/xlog"
 )
+
+//go:embed views
+var views embed.FS
 
 func init() {
 	WIDGET(TOOLS_WIDGET, fileOperationsDeleteWidget)
 	WIDGET(TOOLS_WIDGET, fileOperationsRenameWidget)
 	DELETE(`/\+/file/delete`, fileOperationsDeleteHandler)
 	POST(`/\+/file/rename`, fileOperationsRenameHandler)
+
+	fs, _ := fs.Sub(views, "views")
+	VIEW(fs)
 }
 
 func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
@@ -21,7 +31,7 @@ func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
 	}
 
 	return template.HTML(
-		Partial("extension/file-operations-delete", Locals{
+		Partial("file-operations-delete", Locals{
 			"csrf":   CSRF(r),
 			"page":   p.Name,
 			"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
@@ -35,7 +45,7 @@ func fileOperationsRenameWidget(p *Page, r Request) template.HTML {
 	}
 
 	return template.HTML(
-		Partial("extension/file-operations-rename", Locals{
+		Partial("file-operations-rename", Locals{
 			"csrf":   CSRF(r),
 			"page":   p.Name,
 			"action": "/+/file/rename",
