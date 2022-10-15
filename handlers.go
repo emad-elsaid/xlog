@@ -44,7 +44,7 @@ func RootHandler(w Response, r Request) Output {
 // Shows a page. the page name is the path itself. if the page doesn't exist it
 // redirect to edit page otherwise will render it to HTML
 func GetPageHandler(w Response, r Request) Output {
-	vars := VARS(r)
+	vars := Vars(r)
 	page := NewPage(vars["page"])
 
 	if !page.Exists() {
@@ -75,7 +75,7 @@ func GetPageEditHandler(w Response, r Request) Output {
 		return NotFound
 	}
 
-	vars := VARS(r)
+	vars := Vars(r)
 	page := NewPage(vars["page"])
 
 	var content string
@@ -109,7 +109,7 @@ func PostPageHandler(w Response, r Request) Output {
 		return NotFound
 	}
 
-	vars := VARS(r)
+	vars := Vars(r)
 	page := NewPage(vars["page"])
 	content := r.FormValue("content")
 	page.Write(content)

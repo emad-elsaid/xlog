@@ -27,8 +27,8 @@ import (
 )
 
 func init() {
-	PageEvents.Listen(AfterWrite, ClearWalkPagesCache)
-	PageEvents.Listen(AfterDelete, ClearWalkPagesCache)
+	PageEvents.Listen(AfterWrite, clearWalkPagesCache)
+	PageEvents.Listen(AfterDelete, clearWalkPagesCache)
 }
 
 type (
@@ -245,7 +245,7 @@ var walkPagesCacheMutex sync.RWMutex
 // uses it to get all pages and maybe parse them and extract needed information
 func WalkPages(ctx context.Context, f func(*Page)) {
 	if walkPagesCache == nil {
-		PopulateWalkPagesCache(ctx)
+		populateWalkPagesCache(ctx)
 	}
 
 	walkPagesCacheMutex.RLock()
@@ -261,7 +261,7 @@ func WalkPages(ctx context.Context, f func(*Page)) {
 	}
 }
 
-func ClearWalkPagesCache(_ *Page) (err error) {
+func clearWalkPagesCache(_ *Page) (err error) {
 	walkPagesCacheMutex.Lock()
 	defer walkPagesCacheMutex.Unlock()
 
@@ -269,7 +269,7 @@ func ClearWalkPagesCache(_ *Page) (err error) {
 	return nil
 }
 
-func PopulateWalkPagesCache(ctx context.Context) {
+func populateWalkPagesCache(ctx context.Context) {
 	walkPagesCacheMutex.Lock()
 	defer walkPagesCacheMutex.Unlock()
 

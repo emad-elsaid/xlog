@@ -53,7 +53,7 @@ var (
 			csrf.FieldName("csrf"),
 			csrf.CookieName(CSRF_COOKIE_NAME),
 		),
-		RequestLoggerHandler,
+		requestLoggerHandler,
 	}
 )
 
@@ -152,7 +152,7 @@ func checkPath(path string) RouteCheck {
 	}
 }
 
-func VARS(r Request) map[string]string {
+func Vars(r Request) map[string]string {
 	if rv := r.Context().Value(varsIndex); rv != nil {
 		return rv.(map[string]string)
 	}
@@ -333,7 +333,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 	})
 }
 
-func RequestLoggerHandler(h http.Handler) http.Handler {
+func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer Log(INFO, r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)

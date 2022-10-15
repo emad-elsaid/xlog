@@ -55,7 +55,7 @@ func starHandler(w Response, r Request) Output {
 		return Unauthorized
 	}
 
-	vars := VARS(r)
+	vars := Vars(r)
 	page := NewPage(vars["page"])
 	if !page.Exists() {
 		return Redirect("/")
@@ -71,7 +71,7 @@ func unstarHandler(w Response, r Request) Output {
 		return Unauthorized
 	}
 
-	vars := VARS(r)
+	vars := Vars(r)
 	page := NewPage(vars["page"])
 	if !page.Exists() {
 		return Redirect("/")

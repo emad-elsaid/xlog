@@ -121,7 +121,7 @@ func tagsHandler(_ Response, r Request) Output {
 }
 
 func tagHandler(w Response, r Request) Output {
-	vars := VARS(r)
+	vars := Vars(r)
 	tag := vars["tag"]
 
 	return Render("extension/tag", Locals{
