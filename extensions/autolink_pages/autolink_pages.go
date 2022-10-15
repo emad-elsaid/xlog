@@ -1,4 +1,4 @@
-package extensions
+package autolink_pages
 
 import (
 	"context"

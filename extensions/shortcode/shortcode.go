@@ -1,4 +1,4 @@
-package extensions
+package shortcode
 
 import (
 	"fmt"

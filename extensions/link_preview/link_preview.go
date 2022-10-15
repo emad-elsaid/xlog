@@ -1,4 +1,4 @@
-package extensions
+package link_preview
 
 import (
 	"crypto/sha256"

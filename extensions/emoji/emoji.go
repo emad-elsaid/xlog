@@ -1,4 +1,4 @@
-package extensions
+package emoji
 
 import (
 	_ "embed"

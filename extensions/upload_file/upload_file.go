@@ -1,4 +1,4 @@
-package extensions
+package upload_file
 
 import (
 	"crypto/sha256"

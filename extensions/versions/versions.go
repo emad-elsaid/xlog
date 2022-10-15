@@ -1,4 +1,4 @@
-package extensions
+package versions
 
 import (
 	"crypto/sha256"
