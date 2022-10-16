@@ -60,6 +60,8 @@ func buildStaticSite(dest string) error {
 			if err := os.MkdirAll(destPath, BUILD_PERMS); err != nil {
 				return err
 			}
+		} else if _, err := os.Stat(destPath); err == nil {
+			log.Printf("Asset %s already exists", destPath)
 		} else {
 			content, err := fs.ReadFile(assets, p)
 			if err != nil {
