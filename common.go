@@ -68,9 +68,6 @@ type (
 func init() {
 	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	log.SetFlags(log.Ltime)
-
-	GET("/"+ASSETS_DIR_PATH+"/.*", assetsHandler())
-	GET("/"+STATIC_DIR_PATH+"/.*", staticHandler())
 }
 
 func server() *http.Server {
@@ -349,31 +346,6 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 		defer Log(INFO, r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
-}
-
-// HANDLERS ==============================
-
-func assetsHandler() HandlerFunc {
-	assetsServer := http.FileServer(http.FS(assets))
-	return func(w Response, _ Request) Output {
-		w.Header().Add("Cache-Control", "max-age=31536000")
-		return assetsServer.ServeHTTP
-	}
-}
-
-func staticHandler() HandlerFunc {
-	dir := http.Dir(STATIC_DIR_PATH)
-	server := http.FileServer(dir)
-	staticHandler := http.StripPrefix("/"+STATIC_DIR_PATH, server)
-
-	return func(w Response, r Request) Output {
-		if strings.HasSuffix(r.URL.Path, "/") {
-			return NotFound
-		}
-
-		w.Header().Add("Cache-Control", "max-age=31536000")
-		return staticHandler.ServeHTTP
-	}
 }
 
 // HELPERS FUNCTIONS ======================

@@ -95,6 +95,9 @@ Now you can access xlog with `localhost:3000`
 
 I used Xlog to generate [my personal blog](https://www.emadelsaid.com/). it uses github workflow to do that [here is an example](https://github.com/emad-elsaid/emad-elsaid.github.io/blob/master/.github/workflows/xlog.yml).
 
+## Overriding Assets
+
+assets is served from `assets` directory if it exists in the source directory. otherwise the default assets are served from xlog binary. any file under `assets` that has the same name as the ones xlog uses will be used instead of the default files.
 
 ## License
 
