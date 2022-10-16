@@ -5,36 +5,63 @@ XLog
 
 Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages.
 
-## Features
+## Core Features
+
 - Uses any directory of markdown files
 - Supports Github flavor markdown (GFM)
 - One statically compiled binary
-- Converts a page name to link automatically on render time
-- Lists pages that links to the current one.
 - `template.md` content will be used for new pages
-- Support Hashtags `#hashtag`
 - Support for nested directories (although not favored)
-- Lists pages that uses same hashtags in a `See Also` section
-- Full text search
-- Keeps list of pages older versions
-- Supports editing pages with source code
-- Has a list of tools for:
+- Has a list of tools defined by extensions
+- Add image to the start of a page to make it a cover photo
+- A web server with a very small footprint thanks to Go.
+- Minimal third party dependencies
+- The first Emoji used in the page will be considered the icon of the page and displayed beside the title
+- Shows task list (Done/Total tasks) beside page link (auto links)
+
+## Extensions
+
+Extensions are defined under `/extensions` sub package. each extension is a subpackage. importing the package in `cmd/xlog/xlog.go` has the side effect of registering the extension hooks. removing the extension from the list of imports will removing the features it provides.
+
+* autolink:
+  -Shorten a link string so it wouldn't take unnecessary space
+* autolink_pages:
+  - Convert a page name mentions in the middle of text to a link
+  - List pages that links to the current one in a section at the end of the page.
+* emoji:
+  - Emoji autocomplete while editing
+* file_operations
+  - Add a tool item to delete current page
+  - Add a tool item to rename current page
+* hashtags
+  - Support Hashtags `#hashtag`.
+  - Convert any `#hashtag` to a link to list all pages the uses the hashtag
+  - Adds an item in the sidebar to list all hashtags
+  - Adds a section after the page to list all pages that used the same hashtags
+* link_preview
+  - Preview tweets, Facebook posts, youtube videos, Giphy links
+* opengraph
+  - Adds Opengraph meta tags for title, type, image
+* recent
+  - Adds an item to sidebar to list all pages ordered by last modified page file.
+* search
+  - Full text search
+  - Adds a searchbox to the top of the sidebar to search pages and make it easier to create a page from selected text.
+* shortcode
+  - adds a way for short codes (one line and block)
+  - Defines functions that can be used to add more shortcodes
+  - '/' in editor autocompletes from the list of defined shortcodes
+* star
+  - Star pages to pin them to sidebar
+* upload_file
   - Drop a file or use the tool to upload the file and include/append it to the current page
   - Record screen/window/tab
   - Screenshot
   - Record Camera + Audio
   - Record Audio only
-  - Tools works in both edit and view modes
-- Preview tweets, Facebook posts, youtube videos, Giphy links
-- Has a system for short codes (one line and block)
-- Shows task list (Done/Total tasks) beside page link (auto links)
-- Star pages to pin them to sidebar
-- Add image to the start of a page to make it a cover photo
-- A web server with a very small footprint thanks to Go.
-- Minimal third party dependencies
-- The first Emoji used in the page will be considered the icon of the page and displayed beside the title
-- Uploading the same file multiple times it will be saved once
-- Checkout [index.md](index) for additional features
+* versions
+  - Keeps list of pages older versions
+
 
 ## Installation
 
