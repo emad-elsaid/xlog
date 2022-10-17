@@ -1,6 +1,6 @@
 {{ template "header" . }}
 
-<div class="is-size-7 has-text-grey mb-5 is-pulled-right">
+<div class="is-size-7 has-text-grey my-5">
   <span> Updated: {{ ago .updated}} </span>
 
   {{ .action }}
@@ -13,11 +13,12 @@
   {{ end }}
 </div>
 
-{{ template "common/title" .title }}
+<div class="view">
+  {{.content}}
 
-<div class="view"> {{.content}} </div>
+  {{ .afterView }}
+</div>
 
-{{ .afterView }}
 
 <script>
  {{ if not .READONLY }}
