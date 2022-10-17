@@ -36,7 +36,7 @@
 .view h3 {counter-reset:h4;}
 .view h4 {counter-reset:h5;}
 .view h5 {counter-reset:h6;}
-.view h1, .view h2, .view h3, .view h4, .view h4, .view h5, .view h6 {
+.view h1, .view h2, .view h3, .view h4, .view h5, .view h6 {
     font-size: 1em;
     font-weight: bold;
     margin: 3em 0 2em 0 !important;
