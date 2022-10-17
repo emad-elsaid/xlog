@@ -30,6 +30,15 @@
     transition: max-height 0.5s;
 }
 
+.view h1:before,
+.view h2:before,
+.view h3:before,
+.view h4:before,
+.view h5:before,
+.view h6:before {
+    color: #888;
+}
+
 .view    {counter-reset:h1;}
 .view h1 {counter-reset:h2;}
 .view h2 {counter-reset:h3;}
