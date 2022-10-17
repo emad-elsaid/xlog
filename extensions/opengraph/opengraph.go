@@ -14,7 +14,10 @@ func init() {
 }
 
 func opengraphTags(p *Page, r Request) template.HTML {
-	tags := `<meta property="og:type" content="article" />`
+	tags := `
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary" />
+`
 	name := p.Name
 	if p.Name == INDEX {
 		name = SITENAME
