@@ -1,9 +1,7 @@
 {{ template "header" . }}
 
 <div class="is-size-7 has-text-grey mb-5 is-pulled-right">
-  {{ if not .READONLY }}
   <span> Updated: {{.updated}} </span>
-  {{ end }}
 
   {{ .action }}
 
