@@ -1,7 +1,7 @@
 {{ template "header" . }}
 
 <div class="is-size-7 has-text-grey mb-5 is-pulled-right">
-  <span> Updated: {{.updated}} </span>
+  <span> Updated: {{ ago .updated}} </span>
 
   {{ .action }}
 

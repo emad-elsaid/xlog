@@ -9,7 +9,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -61,15 +60,10 @@ func GetPageHandler(w Response, r Request) Output {
 		}
 	}
 
-	updated := ago(time.Now().Sub(page.ModTime()))
-	if READONLY {
-		updated = page.ModTime().UTC().Format("Monday 2 January 2006")
-	}
-
 	return Render("view", Locals{
 		"edit":      "/edit/" + page.Name,
 		"title":     page.Emoji() + " " + page.Name,
-		"updated":   updated,
+		"updated":   page.ModTime(),
 		"content":   template.HTML(page.Render()),
 		"tools":     RenderWidget(TOOLS_WIDGET, &page, r),      // all tools registered widgets
 		"sidebar":   RenderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar

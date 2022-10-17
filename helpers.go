@@ -8,7 +8,11 @@ import (
 
 func init() {
 	HELPER("ago", func(t time.Time) string {
-		return ago(time.Now().Sub(t))
+		if READONLY {
+			return t.Format("Monday 2 January 2006")
+		} else {
+			return ago(time.Now().Sub(t))
+		}
 	})
 }
 
