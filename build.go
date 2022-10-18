@@ -33,11 +33,6 @@ func buildStaticSite(dest string) error {
 		dir := path.Join(dest, p.Name)
 		file := path.Join(dest, p.Name, "index.html")
 
-		if p.Name == INDEX {
-			dir = dest
-			file = path.Join(dest, "index.html")
-		}
-
 		err := buildRoute(srv, route, dir, file)
 		if err != nil {
 			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
