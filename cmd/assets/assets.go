@@ -106,7 +106,7 @@ func main() {
 				if strings.HasSuffix(zf.Name, ".css") {
 					flags = os.O_APPEND | os.O_WRONLY | os.O_CREATE
 				} else {
-					flags = os.O_CREATE
+					flags = os.O_CREATE | os.O_WRONLY
 				}
 
 				dest, err := os.OpenFile(dpath, flags, 0744)
