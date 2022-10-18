@@ -22,6 +22,12 @@ func EXTENSION_PAGE(p string) {
 func buildStaticSite(dest string) error {
 	srv := server()
 
+	// building Index separately
+	err := buildRoute(srv, "/"+INDEX, dest, path.Join(dest, "index.html"))
+	if err != nil {
+		log.Printf("error while processing root path, err: %s", err.Error())
+	}
+
 	WalkPages(context.Background(), func(p *Page) {
 		route := "/" + p.Name
 		dir := path.Join(dest, p.Name)
