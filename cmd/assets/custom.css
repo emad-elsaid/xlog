@@ -150,3 +150,12 @@
   outline: max(2px, 0.15em) solid currentColor;
   outline-offset: max(2px, 0.15em);
 }
+
+/* Editor */
+
+.editor-controls {
+    position: fixed;
+    right:1em;
+    bottom:1em;
+    z-index: 10;
+}

@@ -102,7 +102,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 }
 
 func tagsHandler(_ Response, r Request) Output {
-	tags := map[string][]string{}
+	tags := map[string][]*Page{}
 	WalkPages(context.Background(), func(a *Page) {
 		set := map[string]bool{}
 		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
@@ -116,9 +116,9 @@ func tagsHandler(_ Response, r Request) Output {
 
 			set[val] = true
 			if ps, ok := tags[val]; ok {
-				tags[val] = append(ps, a.Name)
+				tags[val] = append(ps, a)
 			} else {
-				tags[val] = []string{a.Name}
+				tags[val] = []*Page{a}
 			}
 		}
 	})

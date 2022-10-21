@@ -177,13 +177,6 @@ func (p *Page) ModTime() time.Time {
 	return s.ModTime()
 }
 
-// checks if the page includes any arabic character if so it returns true. this
-// is used by the editor to switch direction. it could be useful too for
-// extensions or something
-func (p *Page) RTL() bool {
-	return regexp.MustCompile(`\p{Arabic}`).MatchString(p.Content())
-}
-
 // Parses the page content and returns the Abstract Syntax Tree (AST).
 // extensions can use it to walk the tree and modify it or collect statistics or
 // parts of the page. for example the following "Emoji" function uses it to

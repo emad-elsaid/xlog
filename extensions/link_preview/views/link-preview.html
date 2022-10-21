@@ -1,0 +1,12 @@
+<div class="media">
+  <div class="media-left">
+    {{ if .image }}
+    <figure class="image is-128x128"><img src="{{.image}}"></figure>
+    {{ end }}
+  </div>
+  <div class="media-content">
+    <strong><a href="{{.url}}">{{.title}}</a></strong>
+    <p>{{.description}}</p>
+    <p><a href="{{.url}}">{{.url}}</a></p>
+  </div>
+</div>

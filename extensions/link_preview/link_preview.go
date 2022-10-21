@@ -2,10 +2,11 @@ package link_preview
 
 import (
 	"crypto/sha256"
+	"embed"
 	"encoding/json"
 	"fmt"
-	"html"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,8 +14,13 @@ import (
 	"regexp"
 	"strings"
 
+	_ "embed"
+
 	. "github.com/emad-elsaid/xlog"
 )
+
+//go:embed views
+var views embed.FS
 
 func init() {
 	PREPROCESSOR(imgUrlPreprocessor)
@@ -23,6 +29,9 @@ func init() {
 	PREPROCESSOR(fbUrlPreprocessor)
 	PREPROCESSOR(giphyUrlPreprocessor)
 	PREPROCESSOR(fallbackURLPreprocessor)
+
+	f, _ := fs.Sub(views, "views")
+	VIEW(f)
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)
@@ -86,12 +95,14 @@ func fallbackURLPreprocessor(c string) string {
 			title = m
 		}
 
-		var description string
-		if len(meta.Description) > 0 {
-			description = fmt.Sprintf("> %s\n", html.UnescapeString(meta.Description))
-		}
+		var view string = Partial("link-preview", Locals{
+			"url":         m,
+			"title":       title,
+			"description": meta.Description,
+			"image":       meta.Image,
+		})
 
-		return fmt.Sprintf("\n[%s](%s)\n%s\n", html.UnescapeString(title), m, description)
+		return strings.ReplaceAll(view, "\n", "")
 	})
 }
 

@@ -1,27 +1,10 @@
 {{ template "header" . }}
 <script src="/assets/script.js"></script>
 
-<style>
- .editor-controls {
-     position: fixed;
-     right:1em;
-     bottom:1em;
-     z-index: 10;
- }
-</style>
 <form method="POST" action="/{{ .action }}" class="form" id="editor">
   {{ .csrf }}
-	<div class="field">
-		<textarea id="content" name="content">{{ .content }}</textarea>
-	</div>
+	<textarea id="content" name="content">{{ .content }}</textarea>
   <div class="editor-controls">
-
-    {{ if .rtl }}
-    <label class="checkbox m-2">
-      <input id="rtl" type="checkbox" value="rtl" checked onclick="toggleRTL(this)" /> RTL
-    </label>
-    {{ end }}
-
     <button type="submit" class="button is-link">
       <span class="icon"><i class="fa-solid fa-floppy-disk"></i></span>
       <span>Save</span>
@@ -32,46 +15,48 @@
 <script type="application/javascript">
  CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
      cm.on('inputRead', function (cm, change) {
-         var mode = cm.getModeAt(cm.getCursor());
-
-         for (var i = 0, len = value.length; i < len; i++) {
-             if (mode.name === value[i].mode && change.text[0] === value[i].startChar) {
-                 cm.showHint({
-                     completeSingle: false,
-                     hint: (function(iterator){
-                         return function (cm, options) {
-                             var cur = cm.getCursor(),
-                                 token = cm.getTokenAt(cur);
-                             var start = token.start,
-                                 end = token.end;
-                             for(
-                                 start = token.end;
-                                 start>0 && cm.getTokenAt({line: cur.line, ch: start}).string != value[iterator].startChar;
-                                 start--
-                             ){}
-
-                             var filter = editor
-                                 .getDoc()
-                                 .getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
-                                 .toLowerCase();
-                             var allList = value[iterator].listCallback();
-                             var filtered = allList.filter(e => e.text.toLowerCase().includes(filter));
-
-                             return {
-                                 list: filtered,
-                                 from: CodeMirror.Pos(cur.line, start-1),
-                                 to: CodeMirror.Pos(cur.line, end)
-                             };
-                         }
-                     })(i)
-                 });
-             }
-         }
+         autoSuggest(cm, value, change);
      });
  });
-</script>
 
-<script type="application/javascript">
+ function autoSuggest(cm, value, change) {
+     var mode = cm.getModeAt(cm.getCursor());
+
+     for (var i = 0, len = value.length; i < len; i++) {
+         if (mode.name === value[i].mode && change.text[0] === value[i].startChar) {
+             cm.showHint({
+                 completeSingle: false,
+                 hint: (function(iterator){
+                     return function (cm, options) {
+                         var cur = cm.getCursor(),
+                             token = cm.getTokenAt(cur);
+                         var start = token.start,
+                             end = token.end;
+                         for(
+                             start = token.end;
+                             start>0 && cm.getTokenAt({line: cur.line, ch: start}).string != value[iterator].startChar;
+                             start--
+                         ){}
+
+                         var filter = editor
+                             .getDoc()
+                             .getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
+                             .toLowerCase();
+                         var allList = value[iterator].listCallback();
+                         var filtered = allList.filter(e => e.text.toLowerCase().includes(filter));
+
+                         return {
+                             list: filtered,
+                             from: CodeMirror.Pos(cur.line, start-1),
+                             to: CodeMirror.Pos(cur.line, end)
+                         };
+                     }
+                 })(i)
+             });
+         }
+     }
+ }
+
  var form = document.getElementById("editor");
  var content = document.getElementById("content");
  var editor = CodeMirror.fromTextArea(content, {
@@ -80,7 +65,6 @@
      spellcheck: true,
      lineWrapping: true,
      viewportMargin: Infinity,
-     direction: {{ if .rtl }} "rtl" {{ else }} "ltr" {{ end }},
      autoSuggest: [
 
          {{ range .autocomplete }}
@@ -105,19 +89,25 @@
 
  document.addEventListener('keydown', function(event) {
      const e = event || window.event;
+     toggleRTL(e.key);
+
      if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
          e.preventDefault();
          document.getElementById("editor").submit();
      }
  });
 
- function toggleRTL(ele) {
-     if(ele.hasAttribute('checked')){
-         ele.removeAttribute('checked');
-         editor.setDirection('ltr');
-     }else{
-         ele.setAttribute('checked', 'checked');
+ function toggleRTL(char) {
+     if(char == "Backspace") return;
+
+     const punc = /[\s.,\/#!$%\^&\*;:{}=\-_`~()]/;
+     if(punc.test(char)) return;
+
+     const arabic = /[\u0600-\u06FF]/;
+     if(arabic.test(char)){
          editor.setDirection('rtl');
+     }else{
+         editor.setDirection('ltr');
      }
  }
 </script>
