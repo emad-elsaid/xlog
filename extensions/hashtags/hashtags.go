@@ -169,7 +169,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 	found_hashtags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {
-		hashtags[string(v.value)] = true
+		hashtags[strings.ToLower(string(v.value))] = true
 	}
 
 	pages := []*Page{}
@@ -181,7 +181,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 
 		page_hashtags := ExtractAllFromAST[*HashTag](rp.AST(), KindHashTag)
 		for _, h := range page_hashtags {
-			if _, ok := hashtags[string(h.value)]; ok {
+			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
 				pages = append(pages, rp)
 				return
 			}
