@@ -9,13 +9,13 @@ import (
 
 //go:embed emoji.json
 var emojiFile []byte
-var emojiAC = Autocomplete{
+var autocomplete = Autocomplete{
 	StartChar:   ":",
 	Suggestions: []*Suggestion{},
 }
 
 func init() {
-	AUTOCOMPLETE(emojiAutocomplete)
+	AUTOCOMPLETE(autocompleter)
 
 	emojis := []struct {
 		Emoji   string   `json:"emoji"`
@@ -26,7 +26,7 @@ func init() {
 
 	for _, v := range emojis {
 		for _, alias := range v.Aliases {
-			emojiAC.Suggestions = append(emojiAC.Suggestions, &Suggestion{
+			autocomplete.Suggestions = append(autocomplete.Suggestions, &Suggestion{
 				Text:        ":" + alias + ":",
 				DisplayText: v.Emoji + " " + alias,
 			})
@@ -34,6 +34,6 @@ func init() {
 	}
 }
 
-func emojiAutocomplete() *Autocomplete {
-	return &emojiAC
+func autocompleter() *Autocomplete {
+	return &autocomplete
 }

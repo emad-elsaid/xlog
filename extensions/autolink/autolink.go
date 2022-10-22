@@ -11,17 +11,17 @@ import (
 
 func init() {
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&Autolink{}, -1),
+		util.Prioritized(&extension{}, -1),
 	))
 }
 
-type Autolink struct{}
+type extension struct{}
 
-func (h *Autolink) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(ast.KindAutoLink, renderAutoLink)
+func (h *extension) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(ast.KindAutoLink, render)
 }
 
-func renderAutoLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	n := node.(*ast.AutoLink)
 	if !entering {
 		return ast.WalkContinue, nil

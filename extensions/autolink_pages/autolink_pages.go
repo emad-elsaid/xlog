@@ -31,45 +31,33 @@ func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name) > len(
 
 func init() {
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&AutolinkPages{}, -1),
+		util.Prioritized(&extension{}, -1),
 	))
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(&AutolinkPages{}, 999),
+		util.Prioritized(&extension{}, 999),
 	))
 	Listen(AfterWrite, UpdatePagesList)
 	Listen(AfterDelete, UpdatePagesList)
 
 	WIDGET(AFTER_VIEW_WIDGET, backlinksSection)
-	AUTOCOMPLETE(autolinkPagesAutocomplete)
+	AUTOCOMPLETE(autocompleter)
 
 	fs, _ := fs.Sub(views, "views")
 	VIEW(fs)
 }
 
-type AutolinkPages struct{}
+type extension struct{}
 
-func (h *AutolinkPages) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(KindPageLink, renderPageLink)
+func (h *extension) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
+	reg.Register(KindPageLink, render)
 }
 
-func (_ *AutolinkPages) Trigger() []byte {
+func (_ *extension) Trigger() []byte {
 	// ' ' indicates any white spaces and a line head
 	return []byte{' ', '*', '_', '~', '('}
 }
 
-var autolinkPages []*Page
-
-func UpdatePagesList(_ *Page) (err error) {
-	ps := []*Page{}
-	WalkPages(context.Background(), func(p *Page) {
-		ps = append(ps, p)
-	})
-	sort.Sort(fileInfoByNameLength(ps))
-	autolinkPages = ps
-	return
-}
-
-func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
+func (s *extension) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	if pc.IsInLinkLabel() {
 		return nil
 	}
@@ -128,6 +116,18 @@ func (s *AutolinkPages) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	return link
 }
 
+var autolinkPages []*Page
+
+func UpdatePagesList(_ *Page) (err error) {
+	ps := []*Page{}
+	WalkPages(context.Background(), func(p *Page) {
+		ps = append(ps, p)
+	})
+	sort.Sort(fileInfoByNameLength(ps))
+	autolinkPages = ps
+	return
+}
+
 var KindPageLink = ast.NewNodeKind("PageLink")
 
 type PageLink struct {
@@ -148,7 +148,7 @@ func (p *PageLink) Dump(source []byte, level int) {
 	ast.DumpHelper(p, source, level, m, nil)
 }
 
-func renderPageLink(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	n := node.(*PageLink)
 	if !entering {
 		return ast.WalkContinue, nil
@@ -228,7 +228,7 @@ func containLinkTo(n ast.Node, p *Page) bool {
 	return false
 }
 
-func autolinkPagesAutocomplete() *Autocomplete {
+func autocompleter() *Autocomplete {
 	a := &Autocomplete{
 		StartChar:   "@",
 		Suggestions: []*Suggestion{},
