@@ -16,7 +16,7 @@ import (
 func Start() {
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
-	GET("/", RootHandler)
+	GET("/", rootHandler)
 	GET("/"+ASSETS_DIR_PATH+"/.+", assetsHandler)
 	GET("/"+STATIC_DIR_PATH+"/.+", staticHandler)
 	GET("/edit/{page:.+}", getPageEditHandler)
@@ -42,7 +42,7 @@ func Start() {
 }
 
 // Redirect to `/index` to render the index page.
-func RootHandler(w Response, r Request) Output {
+func rootHandler(w Response, r Request) Output {
 	return Redirect("/" + INDEX)
 }
 
