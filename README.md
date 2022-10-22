@@ -114,18 +114,4 @@ Xlog is released under [MIT license](LICENSE)
 
 ## Screenshots
 
-![](/public/f583bb0cbdf12641666e6f10b26171f61caee3330a68eb825ecbf77eab0227bd.png)
-
-![](/public/e070d8b44a069a6b7336d9be02da4be9020d381aabeb073aa3399df71ca0492b.png)
-
-![](/public/5a182dba45298d4bbc837a6d719c5c194c00f0fce8be363e33f85e9f7f849903.png)
-
-![](/public/7fb69b1749f666f57bcc4044496efd943a84e0f2330cdd724177b4a225baef38.png)
-
-![](/public/bbf6f8be4d374a33338938aeefe70a2f77eb841af8e77b6b79e2659b872e3933.png)
-
-![](/public/9e732a37a60ea4e75c66e5acee8eb493e58d69f52c7121970f4ca24a8f69c8bd.png)
-
-![](/public/8428b0390a330ebc3a815a9efac7b8b6a7b9891f772e6bec5ab73c07d0b9bda4.png)
-
-![](/public/47ef8360209b86693a93794abafb5cccde08499ced4bd5250b77af1e0fce70cd.png)
+![](/public/285b89e20358e9ea5d1b01893b011665f6282df816983ef1de0d223de698e366.png)![](/public/e9d44ada9ec4190c2ee325df4bbeb789cc67d22dee6bdcdb74393dfa1d8784a3.png)![](/public/75555f02341e1a8ae2775c5f4395b8a52716bd1eeba94cc576c6b6dec5d8c261.png)![](/public/acb69decf484c750f15440c2b39972a03ddaef20509426ed0bb905907fa6154d.png)![](/public/fc52149f89c1e2c1f1b8a352b3eba0743141ed28542a145b1603b3e3f4449db9.png)![](/public/2a8112a513c61a27292753dbbc219eac15f3432b667d38379e79a1d1bb0a629e.png)![](/public/ffa8e45754fca41ff1d76a8e48a296ed13014a2db14eac15eccfea7a83fae1aa.png)
