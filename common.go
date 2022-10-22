@@ -26,22 +26,14 @@ const (
 	CSRF_COOKIE_NAME = "xlog_csrf"
 )
 
-const (
-	_        = iota
-	KB int64 = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-)
-
 //go:embed assets
 var assets embed.FS
 
 var (
-	BIND_ADDRESS string
+	bind_address string
 	router       = &Handler{}
-	CSRF         = csrf.TemplateField
+	// a function that renders CSRF hidden input field
+	CSRF = csrf.TemplateField
 
 	dynamicSegmentWithPatternRegexp = regexp.MustCompile("{([^}]+):([^}]+)}")
 	dynamicSegmentRegexp            = regexp.MustCompile("{([^}]+)}")
@@ -66,7 +58,7 @@ type (
 )
 
 func init() {
-	flag.StringVar(&BIND_ADDRESS, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
+	flag.StringVar(&bind_address, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	log.SetFlags(log.Ltime)
 }
 
@@ -79,7 +71,7 @@ func server() *http.Server {
 
 	return &http.Server{
 		Handler:      handler,
-		Addr:         BIND_ADDRESS,
+		Addr:         bind_address,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -87,11 +79,10 @@ func server() *http.Server {
 
 func serve() {
 	srv := server()
-	log.Printf("Starting server: %s", BIND_ADDRESS)
+	log.Printf("Starting server: %s", bind_address)
 	log.Fatal(srv.ListenAndServe())
 }
 
-// Mux/Handler ===========================================
 type (
 	RouteCheck func(Request) (Request, bool)
 	Route      struct {
@@ -156,8 +147,6 @@ func Vars(r Request) map[string]string {
 	return map[string]string{}
 }
 
-// LOGGING ===============================================
-
 const (
 	DEBUG = "\033[97;42m"
 	INFO  = "\033[97;42m"
@@ -174,9 +163,9 @@ func Log(level, label, text string, args ...interface{}) func() {
 	}
 }
 
-// ROUTES HELPERS ==========================================
-
-type HandlerFunc func(http.ResponseWriter, *http.Request) http.HandlerFunc
+// HandlerFunc is the type of an HTTP handler function + returns output function.
+// it makes it easier to return the output directly instead of writing the output to w then return.
+type HandlerFunc func(http.ResponseWriter, *http.Request) Output
 
 func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -184,40 +173,49 @@ func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// NotFound an output function that writes 404 NotFound to http response
 func NotFound(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "", http.StatusNotFound)
 }
 
+// BadRequest an output function that writes BadRequest http response
 func BadRequest(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "", http.StatusBadRequest)
 }
 
+// Unauthorized an output function that writes Unauthorized http response
 func Unauthorized(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "", http.StatusUnauthorized)
 }
 
+// InternalServerError an output function that writes InternalServerError http response
 func InternalServerError(err error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func Redirect(url string) http.HandlerFunc {
+// Redirect returns an output function that writes Found http response to provided URL
+func Redirect(url string) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, url, http.StatusFound)
 	}
 }
 
+// NoContent an output function that writes NoContent http response
 func NoContent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func PlainText(text string) http.HandlerFunc {
+// PlainText returns an output function that writes text to response writer
+func PlainText(text string) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(text))
 	}
 }
 
+// ROUTE Adds a new HTTP handler function to the list of routes with a list of checks functions.
+// the list of checks are executed when a request comes in if all of them returned true the handler function gets executed.
 func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
 	router.routes = append(router.routes, Route{
 		checks: checks,
@@ -225,6 +223,8 @@ func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
 	})
 }
 
+// GET defines a new route that gets executed when the request matches path and
+// method is http GET. the list of middlewares are executed in order
 func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
@@ -232,6 +232,8 @@ func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc)
 	)
 }
 
+// POST defines a new route that gets executed when the request matches path and
+// method is http POST. the list of middlewares are executed in order
 func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
@@ -239,6 +241,8 @@ func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc
 	)
 }
 
+// DELETE defines a new route that gets executed when the request matches path and
+// method is http DELETE. the list of middlewares are executed in order
 func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
@@ -246,15 +250,16 @@ func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFu
 	)
 }
 
-// VIEWS ====================
-
 //go:embed views
 var defaultViews embed.FS
 var templates *template.Template
 var helpers = template.FuncMap{}
-
 var views []fs.FS
 
+// VIEW registers a filesystem as a view, views are registered such that the
+// latest view directory override older ones. views file extensions are
+// signified by VIEWS_EXTENSION constant and the file path can be used as
+// template name without this extension
 func VIEW(view fs.FS) {
 	views = append(views, view)
 }
@@ -313,13 +318,12 @@ func Partial(path string, data Locals) string {
 	return w.String()
 }
 
-func Render(path string, data Locals) http.HandlerFunc {
+// Render returns an output function that renders partial with data and writes it as response
+func Render(path string, data Locals) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, Partial(path, data))
 	}
 }
-
-// SERVER MIDDLEWARES ==============================
 
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	for i := len(middlewares) - 1; i >= 0; i-- {
@@ -348,11 +352,12 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 	})
 }
 
-// HELPERS FUNCTIONS ======================
-
+// HELPER registers a new helper function. all helpers are used when compiling
+// view/templates so registering helpers function must happen before the server
+// starts as compiling views happend right before starting the http server.
 func HELPER(name string, f interface{}) {
 	if _, ok := helpers[name]; ok {
-		log.Fatalf("Helper: %s has been defined already", name)
+		log.Fatalf("Helper: %s already registered", name)
 	}
 
 	helpers[name] = f

@@ -18,7 +18,8 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-const MAX_FILE_UPLOAD = 1 * GB
+const gb = 1 << (10 * 3)
+const MAX_FILE_UPLOAD = 1 * gb
 
 //go:embed views
 var views embed.FS
