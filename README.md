@@ -1,6 +1,11 @@
 XLog
 =========
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/emad-elsaid/xlog)](https://goreportcard.com/report/github.com/emad-elsaid/xlog)
+[![GoDoc](https://godoc.org/github.com/emad-elsaid/xlog?status.svg)](https://godoc.org/github.com/emad-elsaid/xlog)
+
+
+
 <p align="center"><img width="256" src="assets/logo.png" /></p>
 
 Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages.
