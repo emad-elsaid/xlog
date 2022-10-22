@@ -31,7 +31,7 @@ var assets embed.FS
 
 var (
 	bind_address string
-	router       = &Handler{}
+	router       = &mux{}
 	// a function that renders CSRF hidden input field
 	CSRF = csrf.TemplateField
 
@@ -89,12 +89,12 @@ type (
 		route  http.HandlerFunc
 	}
 
-	Handler struct {
+	mux struct {
 		routes []Route
 	}
 )
 
-func (h *Handler) ServeHTTP(w Response, r Request) {
+func (h *mux) ServeHTTP(w Response, r Request) {
 ROUTES:
 	for _, route := range h.routes {
 		rn := r
