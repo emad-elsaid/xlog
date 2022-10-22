@@ -19,9 +19,9 @@ func Start() {
 	GET("/", RootHandler)
 	GET("/"+ASSETS_DIR_PATH+"/.+", assetsHandler)
 	GET("/"+STATIC_DIR_PATH+"/.+", staticHandler)
-	GET("/edit/{page:.+}", GetPageEditHandler)
-	GET("/{page:.+}", GetPageHandler)
-	POST("/{page:.+}", PostPageHandler)
+	GET("/edit/{page:.+}", getPageEditHandler)
+	GET("/{page:.+}", getPageHandler)
+	POST("/{page:.+}", postPageHandler)
 
 	flag.Parse()
 
@@ -48,7 +48,7 @@ func RootHandler(w Response, r Request) Output {
 
 // Shows a page. the page name is the path itself. if the page doesn't exist it
 // redirect to edit page otherwise will render it to HTML
-func GetPageHandler(w Response, r Request) Output {
+func getPageHandler(w Response, r Request) Output {
 	vars := Vars(r)
 	page := NewPage(vars["page"])
 
@@ -75,7 +75,7 @@ func GetPageHandler(w Response, r Request) Output {
 
 // Edit page, gets the page from path, if it doesn't exist it'll use the
 // template.md content as default value
-func GetPageEditHandler(w Response, r Request) Output {
+func getPageEditHandler(w Response, r Request) Output {
 	if READONLY {
 		return NotFound
 	}
@@ -108,7 +108,7 @@ func GetPageEditHandler(w Response, r Request) Output {
 }
 
 // Save new content of the page
-func PostPageHandler(w Response, r Request) Output {
+func postPageHandler(w Response, r Request) Output {
 	if READONLY {
 		return NotFound
 	}
