@@ -13,7 +13,7 @@ import (
 )
 
 var extension_page = map[string]bool{}
-var BUILD_PERMS fs.FileMode = 0744
+var build_perms fs.FileMode = 0744
 
 // EXTENSION_PAGE announces a path of a page as an extension page, enables the
 // page to be exported when building static version of the knowledgebase
@@ -60,7 +60,7 @@ func buildStaticSite(dest string) error {
 		destPath := path.Join(dest, p)
 
 		if entry.IsDir() {
-			if err := os.MkdirAll(destPath, BUILD_PERMS); err != nil {
+			if err := os.MkdirAll(destPath, build_perms); err != nil {
 				return err
 			}
 		} else if _, err := os.Stat(destPath); err == nil {
@@ -71,7 +71,7 @@ func buildStaticSite(dest string) error {
 				return err
 			}
 
-			if err := os.WriteFile(destPath, content, BUILD_PERMS); err != nil {
+			if err := os.WriteFile(destPath, content, build_perms); err != nil {
 				return err
 			}
 		}
@@ -91,7 +91,7 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	rec := httptest.NewRecorder()
 	srv.Handler.ServeHTTP(rec, req)
 
-	if err := os.MkdirAll(dir, BUILD_PERMS); err != nil {
+	if err := os.MkdirAll(dir, build_perms); err != nil {
 		return err
 	}
 
@@ -105,5 +105,5 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	}
 	defer rec.Result().Body.Close()
 
-	return os.WriteFile(file, body, BUILD_PERMS)
+	return os.WriteFile(file, body, build_perms)
 }

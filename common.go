@@ -59,7 +59,6 @@ type (
 
 func init() {
 	flag.StringVar(&bind_address, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
-	log.SetFlags(log.Ltime)
 }
 
 func server() *http.Server {

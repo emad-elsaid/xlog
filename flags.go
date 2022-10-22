@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	SOURCE   string
-	BUILD    string
-	READONLY bool
-	SITENAME string
-	SIDEBAR  bool
-	INDEX    string
-	TEMPLATE string
+	SOURCE   string // path to markdown files directory
+	BUILD    string // path to write built files
+	READONLY bool   // is xlog in readonly mode
+	SITENAME string // name of knowledgebase
+	SIDEBAR  bool   // is sidebar displayed
+	INDEX    string // name of the index page markdown file
+	TEMPLATE string // name of the template file used as default value for editor
 )
 
 func init() {

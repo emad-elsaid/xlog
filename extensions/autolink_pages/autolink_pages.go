@@ -36,8 +36,8 @@ func init() {
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&AutolinkPages{}, 999),
 	))
-	PageEvents.Listen(AfterWrite, UpdatePagesList)
-	PageEvents.Listen(AfterDelete, UpdatePagesList)
+	Listen(AfterWrite, UpdatePagesList)
+	Listen(AfterDelete, UpdatePagesList)
 
 	WIDGET(AFTER_VIEW_WIDGET, backlinksSection)
 	AUTOCOMPLETE(autolinkPagesAutocomplete)

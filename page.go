@@ -2,18 +2,11 @@ package xlog
 
 import (
 	"bytes"
-	"context"
-	"errors"
 	"fmt"
-	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
-	"path"
 	"path/filepath"
-	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/yuin/goldmark"
@@ -26,51 +19,11 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-func init() {
-	PageEvents.Listen(AfterWrite, clearWalkPagesCache)
-	PageEvents.Listen(AfterDelete, clearWalkPagesCache)
+// a Type that represent a page.
+type Page struct {
+	Name string // page name without '.md' extension
+	ast  ast.Node
 }
-
-type (
-	// a Type that represent a page.
-	Page struct {
-		Name string // page name without '.md' extension
-		ast  ast.Node
-	}
-
-	// a type used to define events to be used when the page is manipulated for
-	// example modified, renamed, deleted...etc.
-	PageEvent int
-	// a function that handles a page event. this should be implemented by an
-	// extension and then registered. it will get executed when the event is
-	// triggered
-	PageEventHandler func(*Page) error
-	// a map of all handlers functions registered for each page event.
-	PageEventsMap map[PageEvent][]PageEventHandler
-)
-
-// List of page events. extensions can use these events to register a function
-// to be executed when this event is triggered. extensions that require to be
-// notified when the page is created or overwritten or deleted should register
-// an event handler for the interesting events.
-const (
-	BeforeWrite PageEvent = iota
-	AfterWrite
-	AfterDelete
-)
-
-// a List of directories that should be ignored by directory walking function.
-// for example the versioning extension can register `.versions` directory to be
-// ignored
-var ignoredDirs = []*regexp.Regexp{}
-
-// Register a pattern to be ignored when walking directories.
-func IGNORE_DIR(r *regexp.Regexp) {
-	ignoredDirs = append(ignoredDirs, r)
-}
-
-// a map to keep all page events and respective list of event handlers
-var PageEvents = PageEventsMap{}
 
 // The instance of markdown renderer. this is what takes the page content and
 // converts it to HTML. it defines what features to use from goldmark and what
@@ -138,7 +91,7 @@ func (p *Page) Content() string {
 
 // Deletes the file and makes sure it triggers the AfterDelete event
 func (p *Page) Delete() bool {
-	defer PageEvents.Trigger(AfterDelete, p)
+	defer Trigger(AfterDelete, p)
 
 	if p.Exists() {
 		err := os.Remove(p.FileName())
@@ -153,8 +106,8 @@ func (p *Page) Delete() bool {
 // Overwrite page content with new content. making sure to trigger before and
 // after write events.
 func (p *Page) Write(content string) bool {
-	PageEvents.Trigger(BeforeWrite, p)
-	defer PageEvents.Trigger(AfterWrite, p)
+	Trigger(BeforeWrite, p)
+	defer Trigger(AfterWrite, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)
@@ -229,130 +182,4 @@ func ExtractAllFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
 	}
 
 	return a
-}
-
-var walkPagesCache []*Page
-var walkPagesCacheMutex sync.RWMutex
-
-// this function is useful to iterate on all available pages. many extensions
-// uses it to get all pages and maybe parse them and extract needed information
-func WalkPages(ctx context.Context, f func(*Page)) {
-	if walkPagesCache == nil {
-		populateWalkPagesCache(ctx)
-	}
-
-	walkPagesCacheMutex.RLock()
-	defer walkPagesCacheMutex.RUnlock()
-
-	for _, p := range walkPagesCache {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			f(p)
-		}
-	}
-}
-
-func clearWalkPagesCache(_ *Page) (err error) {
-	walkPagesCacheMutex.Lock()
-	defer walkPagesCacheMutex.Unlock()
-
-	walkPagesCache = nil
-	return nil
-}
-
-func populateWalkPagesCache(ctx context.Context) {
-	walkPagesCacheMutex.Lock()
-	defer walkPagesCacheMutex.Unlock()
-
-	walkPagesCache = []*Page{}
-
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
-		if d.IsDir() && name == STATIC_DIR_PATH {
-			return fs.SkipDir
-		}
-
-		if d.IsDir() {
-			for _, v := range ignoredDirs {
-				if v.MatchString(name) {
-					return fs.SkipDir
-				}
-			}
-
-			return nil
-		}
-
-		select {
-
-		case <-ctx.Done():
-			return errors.New("Context stopped")
-
-		default:
-			ext := path.Ext(name)
-			basename := name[:len(name)-len(ext)]
-
-			if ext == ".md" {
-				walkPagesCache = append(walkPagesCache, &Page{Name: basename})
-			}
-
-		}
-
-		return nil
-	})
-}
-
-// Register an event handler to be executed when PageEvent is triggered.
-// extensions can use this to register hooks under specific page events.
-// extensions that keeps a cached version of the pages list for example needs to
-// register handlers to update its cache
-func (c PageEventsMap) Listen(e PageEvent, h PageEventHandler) {
-	if _, ok := c[e]; !ok {
-		c[e] = []PageEventHandler{}
-	}
-
-	c[e] = append(c[e], h)
-}
-
-// Trigger event handlers for a specific page event. page methods use this function to trigger all registered handlers when the page is edited or deleted for example.
-func (c PageEventsMap) Trigger(e PageEvent, p *Page) {
-	if _, ok := c[e]; !ok {
-		return
-	}
-
-	for _, h := range c[e] {
-		if err := h(p); err != nil {
-			log.Printf("Executing Event %#v handler %#v failed with error: %s\n", e, h, err)
-		}
-	}
-}
-
-// PREPROCESSORS =======================
-
-// A PreProcessor is a function that takes the whole page content and returns a
-// modified version of the content. extensions should define this type and
-// register is so that when page is rendered it will execute all of them in
-// order like a pipeline each function output is passed as an input to the next.
-// at the end the last preprocessor output is then rendered to HTML
-type (
-	PreProcessor func(string) string
-)
-
-// List of registered preprocessor functions
-var (
-	preProcessors = []PreProcessor{}
-)
-
-// Register a PREPROCESSOR function. extensions should use this function to
-// register a preprocessor.
-func PREPROCESSOR(f PreProcessor) { preProcessors = append(preProcessors, f) }
-
-// This function take the page content and pass it through all registered
-// preprocessors and return the last preprocessor output to the caller
-func preProcess(content string) string {
-	for _, v := range preProcessors {
-		content = v(content)
-	}
-
-	return content
 }
