@@ -18,14 +18,14 @@ const MIN_SEARCH_KEYWORD = 3
 var views embed.FS
 
 func init() {
-	PREPEND_WIDGET(SIDEBAR_WIDGET, searchWidget)
+	PREPEND_WIDGET(SIDEBAR_WIDGET, sidebar)
 	GET(`/\+/search`, searchHandler)
 
 	fs, _ := fs.Sub(views, "views")
 	VIEW(fs)
 }
 
-func searchWidget(_ *Page, _ Request) template.HTML {
+func sidebar(_ *Page, _ Request) template.HTML {
 	if READONLY {
 		return ""
 	}

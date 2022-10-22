@@ -23,15 +23,15 @@ import (
 var views embed.FS
 
 func init() {
-	WIDGET(SIDEBAR_WIDGET, hashtagsSidebar)
-	WIDGET(AFTER_VIEW_WIDGET, relatedHashtagsPages)
+	WIDGET(SIDEBAR_WIDGET, sidebar)
+	WIDGET(AFTER_VIEW_WIDGET, relatedPages)
 
 	GET(`/\+/tags`, tagsHandler)
 	GET(`/\+/tag/{tag}`, tagHandler)
 
 	EXTENSION_PAGE("/+/tags")
 
-	AUTOCOMPLETE(hashtagAutocomplete)
+	AUTOCOMPLETE(autocompleter)
 
 	fs, _ := fs.Sub(views, "views")
 	VIEW(fs)
@@ -157,11 +157,11 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 	return results
 }
 
-func hashtagsSidebar(p *Page, r Request) template.HTML {
+func sidebar(p *Page, r Request) template.HTML {
 	return template.HTML(Partial("tags-sidebar", nil))
 }
 
-func relatedHashtagsPages(p *Page, r Request) template.HTML {
+func relatedPages(p *Page, r Request) template.HTML {
 	if p.Name == INDEX {
 		return ""
 	}
@@ -193,7 +193,7 @@ func relatedHashtagsPages(p *Page, r Request) template.HTML {
 	}))
 }
 
-func hashtagAutocomplete() *Autocomplete {
+func autocompleter() *Autocomplete {
 	a := &Autocomplete{
 		StartChar:   "#",
 		Suggestions: []*Suggestion{},

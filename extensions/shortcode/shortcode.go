@@ -56,10 +56,10 @@ func init() {
 		PREPROCESSOR(multilinePreprocessor)
 	}
 
-	AUTOCOMPLETE(shortcodeAutocomplete)
+	AUTOCOMPLETE(autocompleter)
 }
 
-func shortcodeAutocomplete() *Autocomplete {
+func autocompleter() *Autocomplete {
 	a := &Autocomplete{
 		StartChar:   "/",
 		Suggestions: []*Suggestion{},
