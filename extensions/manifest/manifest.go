@@ -15,6 +15,7 @@ func init() {
 	f, _ := fs.Sub(views, "views")
 	VIEW(f)
 	GET("/manifest.json", manifest)
+	EXTENSION_PAGE("/manifest.json")
 	WIDGET(HEAD_WIDGET, head)
 }
 
