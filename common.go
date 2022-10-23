@@ -188,7 +188,7 @@ func Unauthorized(w http.ResponseWriter, r *http.Request) {
 }
 
 // InternalServerError an output function that writes InternalServerError http response
-func InternalServerError(err error) http.HandlerFunc {
+func InternalServerError(err error) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
