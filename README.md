@@ -66,6 +66,8 @@ Extensions are defined under `/extensions` sub package. each extension is a subp
   - Record Audio only
 * versions
   - Keeps list of pages older versions
+* manifest
+  - adds manifest.json to head tag and output proper JSON value.
 
 
 ## Installation
