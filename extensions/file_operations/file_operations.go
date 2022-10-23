@@ -54,6 +54,10 @@ func fileOperationsRenameWidget(p *Page, r Request) template.HTML {
 }
 
 func fileOperationsDeleteHandler(w Response, r Request) Output {
+	if READONLY {
+		return Unauthorized("Readonly mode is active")
+	}
+
 	if page := NewPage(r.FormValue("page")); page.Exists() {
 		page.Delete()
 	}
@@ -62,9 +66,13 @@ func fileOperationsDeleteHandler(w Response, r Request) Output {
 }
 
 func fileOperationsRenameHandler(w Response, r Request) Output {
+	if READONLY {
+		return Unauthorized("Readonly mode is active")
+	}
+
 	old := NewPage(r.FormValue("old"))
 	if !old.Exists() {
-		return BadRequest
+		return BadRequest("file doesn't exist")
 	}
 
 	new := NewPage(r.FormValue("new"))

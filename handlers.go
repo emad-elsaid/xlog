@@ -54,7 +54,7 @@ func getPageHandler(w Response, r Request) Output {
 
 	if !page.Exists() {
 		if READONLY {
-			return NotFound
+			return NotFound("can't find page")
 		} else {
 			return Redirect("/edit/" + page.Name)
 		}
@@ -77,7 +77,7 @@ func getPageHandler(w Response, r Request) Output {
 // template.md content as default value
 func getPageEditHandler(w Response, r Request) Output {
 	if READONLY {
-		return NotFound
+		return Unauthorized("Readonly mode is active")
 	}
 
 	vars := Vars(r)
@@ -110,7 +110,7 @@ func getPageEditHandler(w Response, r Request) Output {
 // Save new content of the page
 func postPageHandler(w Response, r Request) Output {
 	if READONLY {
-		return NotFound
+		return Unauthorized("Readonly mode is active")
 	}
 
 	vars := Vars(r)
@@ -139,7 +139,7 @@ func staticHandler(w Response, r Request) Output {
 	staticHandler := http.StripPrefix("/"+STATIC_DIR_PATH, server)
 
 	if strings.HasSuffix(r.URL.Path, "/") {
-		return NotFound
+		return NotFound("can't find file")
 	}
 
 	w.Header().Add("Cache-Control", "max-age=31536000")

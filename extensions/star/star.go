@@ -61,7 +61,7 @@ func starMeta(p *Page, r Request) template.HTML {
 
 func starHandler(w Response, r Request) Output {
 	if READONLY {
-		return Unauthorized
+		return Unauthorized("Readonly mode is active")
 	}
 
 	vars := Vars(r)
@@ -77,7 +77,7 @@ func starHandler(w Response, r Request) Output {
 
 func unstarHandler(w Response, r Request) Output {
 	if READONLY {
-		return Unauthorized
+		return Unauthorized("Readonly mode is active")
 	}
 
 	vars := Vars(r)

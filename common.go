@@ -172,22 +172,28 @@ func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// NotFound an output function that writes 404 NotFound to http response
-func NotFound(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "", http.StatusNotFound)
+// NotFound returns an output function that writes 404 NotFound to http response
+func NotFound(msg string) Output {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "", http.StatusNotFound)
+	}
 }
 
-// BadRequest an output function that writes BadRequest http response
-func BadRequest(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "", http.StatusBadRequest)
+// BadRequest returns an output function that writes BadRequest http response
+func BadRequest(msg string) Output {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, msg, http.StatusBadRequest)
+	}
 }
 
-// Unauthorized an output function that writes Unauthorized http response
-func Unauthorized(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "", http.StatusUnauthorized)
+// Unauthorized returns an output function that writes Unauthorized http response
+func Unauthorized(msg string) Output {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "", http.StatusUnauthorized)
+	}
 }
 
-// InternalServerError an output function that writes InternalServerError http response
+// InternalServerError returns an output function that writes InternalServerError http response
 func InternalServerError(err error) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
