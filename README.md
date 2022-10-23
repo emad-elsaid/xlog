@@ -28,47 +28,22 @@ Local-first personal knowledge management application with focus on enriching ma
 
 Extensions are defined under `/extensions` sub package. each extension is a subpackage. importing the package in `cmd/xlog/xlog.go` has the side effect of registering the extension hooks. removing the extension from the list of imports will removing the features it provides.
 
-* autolink:
-  -Shorten a link string so it wouldn't take unnecessary space
-* autolink_pages:
-  - Convert a page name mentions in the middle of text to a link
-  - List pages that links to the current one in a section at the end of the page.
-* emoji:
-  - Emoji autocomplete while editing
-* file_operations
-  - Add a tool item to delete current page
-  - Add a tool item to rename current page
-* hashtags
-  - Support Hashtags `#hashtag`.
-  - Convert any `#hashtag` to a link to list all pages the uses the hashtag
-  - Adds an item in the sidebar to list all hashtags
-  - Adds a section after the page to list all pages that used the same hashtags
-* link_preview
-  - Preview tweets, Facebook posts, youtube videos, Giphy links
-* opengraph
-  - Adds Opengraph meta tags for title, type, image
-* recent
-  - Adds an item to sidebar to list all pages ordered by last modified page file.
-* search
-  - Full text search
-  - Adds a searchbox to the top of the sidebar to search pages and make it easier to create a page from selected text.
-* shortcode
-  - adds a way for short codes (one line and block)
-  - Defines functions that can be used to add more shortcodes
-  - '/' in editor autocompletes from the list of defined shortcodes
-* star
-  - Star pages to pin them to sidebar
-* upload_file
-  - Drop a file or use the tool to upload the file and include/append it to the current page
-  - Record screen/window/tab
-  - Screenshot
-  - Record Camera + Audio
-  - Record Audio only
-* versions
-  - Keeps list of pages older versions
-* manifest
-  - adds manifest.json to head tag and output proper JSON value.
-
+| Extension       | Description                                                                   |
+|-----------------|-------------------------------------------------------------------------------|
+| Autolink        | Shorten a link string so it wouldn't take unnecessary space                   |
+| Autolink pages  | Convert a page name mentions in the middle of text to a link                  |
+| Emoji           | Emoji autocomplete while editing                                              |
+| File operations | Add a tool item to delete and rename current page                             |
+| Hashtags        | Add support for hashtags #hashtag syntax                                      |
+| Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                   |
+| Opengraph       | Adds Opengraph meta tags for title, type, image                               |
+| Recent          | Adds an item to sidebar to list all pages ordered by last modified page file. |
+| Search          | Full text search                                                              |
+| Shortcode       | adds a way for short codes (one line and block)                               |
+| Star            | Star pages to pin them to sidebar                                             |
+| Upload file     | Add support for upload files, screenshots, audio and camera recording         |
+| Versions        | Keeps list of pages older versions                                            |
+| Manifest        | adds manifest.json to head tag and output proper JSON value.                  |
 
 ## Installation
 
