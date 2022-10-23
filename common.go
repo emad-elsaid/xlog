@@ -215,17 +215,20 @@ func PlainText(text string) Output {
 
 // ROUTE Adds a new HTTP handler function to the list of routes with a list of checks functions.
 // the list of checks are executed when a request comes in if all of them returned true the handler function gets executed.
-func ROUTE(route http.HandlerFunc, checks ...RouteCheck) {
-	router.routes = append(router.routes, Route{
+func ROUTE(route http.HandlerFunc, checks ...RouteCheck) Route {
+	r := Route{
 		checks: checks,
 		route:  route,
-	})
+	}
+	router.routes = append(router.routes, r)
+
+	return r
 }
 
 // GET defines a new route that gets executed when the request matches path and
 // method is http GET. the list of middlewares are executed in order
-func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	ROUTE(
+func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodGet), checkPath(path),
 	)
@@ -233,8 +236,8 @@ func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc)
 
 // POST defines a new route that gets executed when the request matches path and
 // method is http POST. the list of middlewares are executed in order
-func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	ROUTE(
+func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodPost), checkPath(path),
 	)
@@ -242,8 +245,8 @@ func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc
 
 // DELETE defines a new route that gets executed when the request matches path and
 // method is http DELETE. the list of middlewares are executed in order
-func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	ROUTE(
+func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return ROUTE(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodDelete), checkPath(path),
 	)
