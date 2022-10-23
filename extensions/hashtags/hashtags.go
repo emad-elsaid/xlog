@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog/extensions/shortcode"
 
 	_ "embed"
 
@@ -32,6 +33,7 @@ func init() {
 	EXTENSION_PAGE("/+/tags")
 
 	AUTOCOMPLETE(autocompleter)
+	shortcode.SHORTCODE("hashtag-pages", hashtagPages)
 
 	fs, _ := fs.Sub(views, "views")
 	VIEW(fs)
@@ -145,6 +147,10 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 	results := []*Page{}
 
 	WalkPages(ctx, func(p *Page) {
+		if p.Name == INDEX {
+			return
+		}
+
 		tags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
@@ -215,4 +221,14 @@ func autocompleter() *Autocomplete {
 	}
 
 	return a
+}
+
+func hashtagPages(hashtag string) string {
+	hashtag = strings.Trim(hashtag, "# ")
+	pages := tagPages(context.Background(), hashtag)
+
+	output := Partial("hashtag-pages", Locals{"pages": pages})
+	output = strings.ReplaceAll(output, "\n", "")
+	output = strings.TrimSpace(output)
+	return output + "\n"
 }

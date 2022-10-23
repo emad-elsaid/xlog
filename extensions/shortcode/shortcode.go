@@ -28,35 +28,41 @@ var shortcodes = map[string]PreProcessor{
 
 func init() {
 	for k, v := range shortcodes {
-		// single line
-		reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(k) + `\s+(.*)$`)
-		skip := len("/" + k + " ")
-
-		preprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
-			return func(c string) string {
-				return reg.ReplaceAllStringFunc(c, func(i string) string {
-					return v(i[skip:])
-				})
-			}
-		}(reg, skip, v)
-
-		PREPROCESSOR(preprocessor)
-		headerSkip := len("```" + k + "\n")
-
-		// multi line
-		multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(k) + "$(.*)^```$")
-		multilinePreprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
-			return func(c string) string {
-				return multireg.ReplaceAllStringFunc(c, func(i string) string {
-					return v(i[skip : len(i)-4])
-				})
-			}
-		}(reg, headerSkip, v)
-
-		PREPROCESSOR(multilinePreprocessor)
+		SHORTCODE(k, v)
 	}
 
 	AUTOCOMPLETE(autocompleter)
+}
+
+func SHORTCODE(name string, shortcode func(string) string) {
+	shortcodes[name] = shortcode
+
+	// single line
+	reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(name) + `\s+(.*)$`)
+	skip := len("/" + name + " ")
+
+	preprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
+		return func(c string) string {
+			return reg.ReplaceAllStringFunc(c, func(i string) string {
+				return v(i[skip:])
+			})
+		}
+	}(reg, skip, shortcode)
+
+	PREPROCESSOR(preprocessor)
+
+	// multi line
+	headerSkip := len("```" + name + "\n")
+	multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(name) + "$(.*)^```$")
+	multilinePreprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
+		return func(c string) string {
+			return multireg.ReplaceAllStringFunc(c, func(i string) string {
+				return v(i[skip : len(i)-4])
+			})
+		}
+	}(reg, headerSkip, shortcode)
+
+	PREPROCESSOR(multilinePreprocessor)
 }
 
 func autocompleter() *Autocomplete {
