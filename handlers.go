@@ -14,10 +14,10 @@ import (
 func Start() {
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
-	GET("/", rootHandler)
-	GET("/edit/{page:.+}", getPageEditHandler)
-	GET("/{page:.+}", getPageHandler)
-	POST("/{page:.+}", postPageHandler)
+	Get("/", rootHandler)
+	Get("/edit/{page:.+}", getPageEditHandler)
+	Get("/{page:.+}", getPageHandler)
+	Post("/{page:.+}", postPageHandler)
 
 	flag.Parse()
 
@@ -92,7 +92,7 @@ func getPageEditHandler(w Response, r Request) Output {
 
 	// Execute all Autocomplete functions and add them to a slice and pass it
 	// down to the view
-	acs := []*Autocomplete{}
+	acs := []*Autocompletion{}
 	for _, v := range autocompletes {
 		acs = append(acs, v())
 	}

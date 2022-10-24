@@ -16,12 +16,12 @@ import (
 var views embed.FS
 
 func init() {
-	WIDGET(SIDEBAR_WIDGET, recent)
-	GET(`/\+/recent`, recentHandler)
-	EXTENSION_PAGE("/+/recent")
+	Widget(SIDEBAR_WIDGET, recent)
+	Get(`/\+/recent`, recentHandler)
+	ExtensionPage("/+/recent")
 
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 }
 
 func recentHandler(_ Response, r Request) Output {

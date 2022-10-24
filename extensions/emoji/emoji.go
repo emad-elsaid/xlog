@@ -9,13 +9,13 @@ import (
 
 //go:embed emoji.json
 var emojiFile []byte
-var autocomplete = Autocomplete{
+var autocomplete = Autocompletion{
 	StartChar:   ":",
 	Suggestions: []*Suggestion{},
 }
 
 func init() {
-	AUTOCOMPLETE(autocompleter)
+	Autocomplete(autocompleter)
 
 	emojis := []struct {
 		Emoji   string   `json:"emoji"`
@@ -34,6 +34,6 @@ func init() {
 	}
 }
 
-func autocompleter() *Autocomplete {
+func autocompleter() *Autocompletion {
 	return &autocomplete
 }

@@ -218,9 +218,9 @@ func PlainText(text string) Output {
 	}
 }
 
-// ROUTE Adds a new HTTP handler function to the list of routes with a list of checks functions.
+// Match Adds a new HTTP handler function to the list of routes with a list of checks functions.
 // the list of checks are executed when a request comes in if all of them returned true the handler function gets executed.
-func ROUTE(route http.HandlerFunc, checks ...RouteCheck) Route {
+func Match(route http.HandlerFunc, checks ...RouteCheck) Route {
 	r := Route{
 		checks: checks,
 		route:  route,
@@ -230,28 +230,28 @@ func ROUTE(route http.HandlerFunc, checks ...RouteCheck) Route {
 	return r
 }
 
-// GET defines a new route that gets executed when the request matches path and
-// method is http GET. the list of middlewares are executed in order
-func GET(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
-	return ROUTE(
+// Get defines a new route that gets executed when the request matches path and
+// method is http Get. the list of middlewares are executed in order
+func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return Match(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodGet), checkPath(path),
 	)
 }
 
-// POST defines a new route that gets executed when the request matches path and
-// method is http POST. the list of middlewares are executed in order
-func POST(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
-	return ROUTE(
+// Post defines a new route that gets executed when the request matches path and
+// method is http Post. the list of middlewares are executed in order
+func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return Match(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodPost), checkPath(path),
 	)
 }
 
-// DELETE defines a new route that gets executed when the request matches path and
-// method is http DELETE. the list of middlewares are executed in order
-func DELETE(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
-	return ROUTE(
+// Delete defines a new route that gets executed when the request matches path and
+// method is http Delete. the list of middlewares are executed in order
+func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+	return Match(
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 		checkMethod(http.MethodDelete), checkPath(path),
 	)
@@ -263,11 +263,11 @@ var templates *template.Template
 var helpers = template.FuncMap{}
 var views []fs.FS
 
-// VIEW registers a filesystem as a view, views are registered such that the
+// View registers a filesystem as a view, views are registered such that the
 // latest view directory override older ones. views file extensions are
 // signified by VIEWS_EXTENSION constant and the file path can be used as
 // template name without this extension
-func VIEW(view fs.FS) {
+func View(view fs.FS) {
 	views = append(views, view)
 }
 
@@ -359,10 +359,10 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 	})
 }
 
-// HELPER registers a new helper function. all helpers are used when compiling
+// Helper registers a new helper function. all helpers are used when compiling
 // view/templates so registering helpers function must happen before the server
 // starts as compiling views happend right before starting the http server.
-func HELPER(name string, f interface{}) {
+func Helper(name string, f interface{}) {
 	if _, ok := helpers[name]; ok {
 		log.Fatalf("Helper: %s already registered", name)
 	}

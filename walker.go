@@ -24,7 +24,7 @@ var ignoredDirs = []*regexp.Regexp{
 }
 
 // Register a pattern to be ignored when walking directories.
-func IGNORE_DIR(r *regexp.Regexp) {
+func IgnoreDir(r *regexp.Regexp) {
 	ignoredDirs = append(ignoredDirs, r)
 }
 

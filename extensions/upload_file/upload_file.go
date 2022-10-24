@@ -31,11 +31,11 @@ var (
 )
 
 func init() {
-	WIDGET(TOOLS_WIDGET, uploadFileWidget)
-	POST(`/\+/upload-file`, uploadFileHandler)
+	Widget(TOOLS_WIDGET, uploadFileWidget)
+	Post(`/\+/upload-file`, uploadFileHandler)
 
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 }
 
 func uploadFileWidget(p *Page, r Request) template.HTML {

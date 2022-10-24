@@ -19,12 +19,12 @@ const STARRED_PAGES = "starred"
 var views embed.FS
 
 func init() {
-	WIDGET(ACTION_WIDGET, starMeta)
-	WIDGET(SIDEBAR_WIDGET, starredPages)
-	POST(`/\+/star/{page:.*}`, starHandler)
-	DELETE(`/\+/star/{page:.*}`, unstarHandler)
+	Widget(ACTION_WIDGET, starMeta)
+	Widget(SIDEBAR_WIDGET, starredPages)
+	Post(`/\+/star/{page:.*}`, starHandler)
+	Delete(`/\+/star/{page:.*}`, unstarHandler)
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 }
 
 func starredPages(p *Page, r Request) template.HTML {

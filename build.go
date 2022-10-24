@@ -15,9 +15,9 @@ import (
 var extension_page = map[string]bool{}
 var build_perms fs.FileMode = 0744
 
-// EXTENSION_PAGE announces a path of a page as an extension page, enables the
+// ExtensionPage announces a path of a page as an extension page, enables the
 // page to be exported when building static version of the knowledgebase
-func EXTENSION_PAGE(p string) {
+func ExtensionPage(p string) {
 	extension_page[p] = true
 }
 

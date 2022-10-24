@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	HELPER("ago", func(t time.Time) string {
+	Helper("ago", func(t time.Time) string {
 		if READONLY {
 			return t.Format("Monday 2 January 2006")
 		} else {

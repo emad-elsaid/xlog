@@ -31,7 +31,7 @@ var widgets = map[widgetSpace][]widgetFunc{}
 // widget. functions registered by this function will have higher priority than
 // the rest. this function is needed for example to register the search input
 // before any other links in the sidebar
-func PREPEND_WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
+func PrependWidget(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}
 	}
@@ -41,7 +41,7 @@ func PREPEND_WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
 // Register a function to a widget space. functions registered will be executed
 // in order when rendering view or edit page. the return values of these
 // widgetfuncs will pass down to the template and injected in reserved places.
-func WIDGET(s widgetSpace, f func(*Page, Request) template.HTML) {
+func Widget(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}
 	}

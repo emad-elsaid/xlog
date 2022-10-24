@@ -23,15 +23,15 @@ import (
 var views embed.FS
 
 func init() {
-	PREPROCESSOR(imgUrlPreprocessor)
-	PREPROCESSOR(tweetUrlPreprocessor)
-	PREPROCESSOR(youtubeUrlPreprocessor)
-	PREPROCESSOR(fbUrlPreprocessor)
-	PREPROCESSOR(giphyUrlPreprocessor)
-	PREPROCESSOR(fallbackURLPreprocessor)
+	Preprocessor(imgUrlPreprocessor)
+	Preprocessor(tweetUrlPreprocessor)
+	Preprocessor(youtubeUrlPreprocessor)
+	Preprocessor(fbUrlPreprocessor)
+	Preprocessor(giphyUrlPreprocessor)
+	Preprocessor(fallbackURLPreprocessor)
 
 	f, _ := fs.Sub(views, "views")
-	VIEW(f)
+	View(f)
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)

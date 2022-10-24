@@ -13,10 +13,10 @@ var views embed.FS
 
 func init() {
 	f, _ := fs.Sub(views, "views")
-	VIEW(f)
-	GET("/manifest.json", manifest)
-	EXTENSION_PAGE("/manifest.json")
-	WIDGET(HEAD_WIDGET, head)
+	View(f)
+	Get("/manifest.json", manifest)
+	ExtensionPage("/manifest.json")
+	Widget(HEAD_WIDGET, head)
 }
 
 func manifest(w Response, r Request) Output {

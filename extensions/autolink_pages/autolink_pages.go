@@ -39,11 +39,11 @@ func init() {
 	Listen(AfterWrite, UpdatePagesList)
 	Listen(AfterDelete, UpdatePagesList)
 
-	WIDGET(AFTER_VIEW_WIDGET, backlinksSection)
-	AUTOCOMPLETE(autocompleter)
+	Widget(AFTER_VIEW_WIDGET, backlinksSection)
+	Autocomplete(autocompleter)
 
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 }
 
 type extension struct{}
@@ -228,8 +228,8 @@ func containLinkTo(n ast.Node, p *Page) bool {
 	return false
 }
 
-func autocompleter() *Autocomplete {
-	a := &Autocomplete{
+func autocompleter() *Autocompletion {
+	a := &Autocompletion{
 		StartChar:   "@",
 		Suggestions: []*Suggestion{},
 	}

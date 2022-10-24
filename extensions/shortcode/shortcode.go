@@ -8,7 +8,7 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-var shortcodes = map[string]PreProcessor{
+var shortcodes = map[string]PreprocessorFunc{
 	"info": func(c string) string {
 		return fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(c, "\n", "<br/>"))
 	},
@@ -31,7 +31,7 @@ func init() {
 		SHORTCODE(k, v)
 	}
 
-	AUTOCOMPLETE(autocompleter)
+	Autocomplete(autocompleter)
 }
 
 func SHORTCODE(name string, shortcode func(string) string) {
@@ -41,7 +41,7 @@ func SHORTCODE(name string, shortcode func(string) string) {
 	reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(name) + `\s+(.*)$`)
 	skip := len("/" + name + " ")
 
-	preprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
+	preprocessor := func(r *regexp.Regexp, skip int, v PreprocessorFunc) PreprocessorFunc {
 		return func(c string) string {
 			return reg.ReplaceAllStringFunc(c, func(i string) string {
 				return v(i[skip:])
@@ -49,12 +49,12 @@ func SHORTCODE(name string, shortcode func(string) string) {
 		}
 	}(reg, skip, shortcode)
 
-	PREPROCESSOR(preprocessor)
+	Preprocessor(preprocessor)
 
 	// multi line
 	headerSkip := len("```" + name + "\n")
 	multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(name) + "$(.*)^```$")
-	multilinePreprocessor := func(r *regexp.Regexp, skip int, v PreProcessor) PreProcessor {
+	multilinePreprocessor := func(r *regexp.Regexp, skip int, v PreprocessorFunc) PreprocessorFunc {
 		return func(c string) string {
 			return multireg.ReplaceAllStringFunc(c, func(i string) string {
 				return v(i[skip : len(i)-4])
@@ -62,11 +62,11 @@ func SHORTCODE(name string, shortcode func(string) string) {
 		}
 	}(reg, headerSkip, shortcode)
 
-	PREPROCESSOR(multilinePreprocessor)
+	Preprocessor(multilinePreprocessor)
 }
 
-func autocompleter() *Autocomplete {
-	a := &Autocomplete{
+func autocompleter() *Autocompletion {
+	a := &Autocompletion{
 		StartChar:   "/",
 		Suggestions: []*Suggestion{},
 	}

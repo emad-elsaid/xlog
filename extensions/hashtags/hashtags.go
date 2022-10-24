@@ -24,19 +24,19 @@ import (
 var views embed.FS
 
 func init() {
-	WIDGET(SIDEBAR_WIDGET, sidebar)
-	WIDGET(AFTER_VIEW_WIDGET, relatedPages)
+	Widget(SIDEBAR_WIDGET, sidebar)
+	Widget(AFTER_VIEW_WIDGET, relatedPages)
 
-	GET(`/\+/tags`, tagsHandler)
-	GET(`/\+/tag/{tag}`, tagHandler)
+	Get(`/\+/tags`, tagsHandler)
+	Get(`/\+/tag/{tag}`, tagHandler)
 
-	EXTENSION_PAGE("/+/tags")
+	ExtensionPage("/+/tags")
 
-	AUTOCOMPLETE(autocompleter)
+	Autocomplete(autocompleter)
 	shortcode.SHORTCODE("hashtag-pages", hashtagPages)
 
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -99,7 +99,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 	tag := n.(*HashTag)
 	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">#%s</a>`, tag.value, tag.value)
-	EXTENSION_PAGE(fmt.Sprintf("/+/tag/%s", tag.value))
+	ExtensionPage(fmt.Sprintf("/+/tag/%s", tag.value))
 	return ast.WalkContinue, nil
 }
 
@@ -199,8 +199,8 @@ func relatedPages(p *Page, r Request) template.HTML {
 	}))
 }
 
-func autocompleter() *Autocomplete {
-	a := &Autocomplete{
+func autocompleter() *Autocompletion {
+	a := &Autocompletion{
 		StartChar:   "#",
 		Suggestions: []*Suggestion{},
 	}

@@ -16,13 +16,13 @@ import (
 var views embed.FS
 
 func init() {
-	WIDGET(TOOLS_WIDGET, fileOperationsDeleteWidget)
-	WIDGET(TOOLS_WIDGET, fileOperationsRenameWidget)
-	DELETE(`/\+/file/delete`, fileOperationsDeleteHandler)
-	POST(`/\+/file/rename`, fileOperationsRenameHandler)
+	Widget(TOOLS_WIDGET, fileOperationsDeleteWidget)
+	Widget(TOOLS_WIDGET, fileOperationsRenameWidget)
+	Delete(`/\+/file/delete`, fileOperationsDeleteHandler)
+	Post(`/\+/file/rename`, fileOperationsRenameHandler)
 
 	fs, _ := fs.Sub(views, "views")
-	VIEW(fs)
+	View(fs)
 }
 
 func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
