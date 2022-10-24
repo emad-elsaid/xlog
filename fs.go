@@ -2,7 +2,6 @@ package xlog
 
 import (
 	"io/fs"
-	"log"
 )
 
 // return file that exists in one of the FS structs.
@@ -10,8 +9,6 @@ import (
 type priorityFS []fs.FS
 
 func (df priorityFS) Open(name string) (fs.File, error) {
-	log.Println(name, "fs:", df)
-
 	for i := len(df) - 1; i >= 0; i-- {
 		cf := df[i]
 		f, err := cf.Open(name)

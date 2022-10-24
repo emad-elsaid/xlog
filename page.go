@@ -3,7 +3,6 @@ package xlog
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -82,7 +81,7 @@ func (p *Page) Render() string {
 
 // Reads the underlying file and returns the content
 func (p *Page) Content() string {
-	dat, err := ioutil.ReadFile(p.FileName())
+	dat, err := os.ReadFile(p.FileName())
 	if err != nil {
 		return ""
 	}
@@ -113,7 +112,7 @@ func (p *Page) Write(content string) bool {
 	os.MkdirAll(filepath.Dir(name), 0700)
 
 	content = strings.ReplaceAll(content, "\r\n", "\n")
-	if err := ioutil.WriteFile(name, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(name, []byte(content), 0644); err != nil {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.Name, err)
 		return false
 	}

@@ -11,7 +11,7 @@ func init() {
 		if READONLY {
 			return t.Format("Monday 2 January 2006")
 		} else {
-			return ago(time.Now().Sub(t))
+			return ago(time.Since(t))
 		}
 	})
 }

@@ -113,7 +113,9 @@ func checkMethod(method string) RouteCheck {
 	return func(r Request) (Request, bool) { return r, r.Method == method }
 }
 
-const varsIndex int = iota + 1
+type contextIndex int
+
+const varsIndex contextIndex = iota + 1
 
 func checkPath(path string) RouteCheck {
 	path = dynamicSegmentWithPatternRegexp.ReplaceAllString(path, "(?P<$1>$2)")
@@ -154,9 +156,9 @@ func Log(level, label, text string, args ...interface{}) func() {
 	start := time.Now()
 	return func() {
 		if len(args) > 0 {
-			log.Printf("%s %s \033[0m (%s) %s %v", level, label, time.Now().Sub(start), text, args)
+			log.Printf("%s %s \033[0m (%s) %s %v", level, label, time.Since(start), text, args)
 		} else {
-			log.Printf("%s %s \033[0m (%s) %s", level, label, time.Now().Sub(start), text)
+			log.Printf("%s %s \033[0m (%s) %s", level, label, time.Since(start), text)
 		}
 	}
 }

@@ -79,7 +79,7 @@ func populateWalkPagesCache(ctx context.Context) {
 		select {
 
 		case <-ctx.Done():
-			return errors.New("Context stopped")
+			return errors.New("context stopped")
 
 		default:
 			ext := path.Ext(name)
