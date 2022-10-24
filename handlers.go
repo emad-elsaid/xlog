@@ -3,12 +3,10 @@ package xlog
 import (
 	"flag"
 	"html/template"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"path"
-	"strings"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -17,8 +15,6 @@ func Start() {
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
 	GET("/", rootHandler)
-	GET("/"+ASSETS_DIR_PATH+"/.+", assetsHandler)
-	GET("/"+STATIC_DIR_PATH+"/.+", staticHandler)
 	GET("/edit/{page:.+}", getPageEditHandler)
 	GET("/{page:.+}", getPageHandler)
 	POST("/{page:.+}", postPageHandler)
@@ -53,11 +49,15 @@ func getPageHandler(w Response, r Request) Output {
 	page := NewPage(vars["page"])
 
 	if !page.Exists() {
+		if output, err := staticHandler(r); err == nil {
+			return output
+		}
+
 		if READONLY {
 			return NotFound("can't find page")
-		} else {
-			return Redirect("/edit/" + page.Name)
 		}
+
+		return Redirect("/edit/" + page.Name)
 	}
 
 	return Render("view", Locals{
@@ -121,27 +121,20 @@ func postPageHandler(w Response, r Request) Output {
 	return Redirect("/" + page.Name)
 }
 
-func assetsHandler(w Response, _ Request) Output {
-	defaultAssets, _ := fs.Sub(assets, "assets")
-	assetWithFallback := defaultedFS{
-		fs:       os.DirFS(path.Join(SOURCE, "assets")),
-		fallback: defaultAssets,
+func staticHandler(r Request) (Output, error) {
+	staticFSs := http.FS(priorityFS{
+		assets,
+		os.DirFS(SOURCE),
+	})
+
+	server := http.FileServer(staticFSs)
+
+	cleanPath := path.Clean(r.URL.Path)
+
+	if f, err := staticFSs.Open(cleanPath); err != nil {
+		return nil, err
+	} else {
+		f.Close()
+		return server.ServeHTTP, nil
 	}
-
-	assetsServer := http.StripPrefix("/assets", http.FileServer(http.FS(assetWithFallback)))
-	w.Header().Add("Cache-Control", "max-age=31536000")
-	return assetsServer.ServeHTTP
-}
-
-func staticHandler(w Response, r Request) Output {
-	dir := http.Dir(STATIC_DIR_PATH)
-	server := http.FileServer(dir)
-	staticHandler := http.StripPrefix("/"+STATIC_DIR_PATH, server)
-
-	if strings.HasSuffix(r.URL.Path, "/") {
-		return NotFound("can't find file")
-	}
-
-	w.Header().Add("Cache-Control", "max-age=31536000")
-	return staticHandler.ServeHTTP
 }

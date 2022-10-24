@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const DEST = "assets"
+const DEST = "public"
 
 var CSS_DEST = path.Join(DEST, "style.css")
 var JS_DEST = path.Join(DEST, "script.js")

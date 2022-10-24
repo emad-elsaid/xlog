@@ -20,13 +20,12 @@ import (
 )
 
 const (
-	STATIC_DIR_PATH  = "public"
-	ASSETS_DIR_PATH  = "assets"
+	PUBLIC_PATH      = "public"
 	VIEWS_EXTENSION  = ".html"
 	CSRF_COOKIE_NAME = "xlog_csrf"
 )
 
-//go:embed assets
+//go:embed public
 var assets embed.FS
 
 var (

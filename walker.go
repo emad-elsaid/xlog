@@ -18,7 +18,10 @@ func init() {
 // a List of directories that should be ignored by directory walking function.
 // for example the versioning extension can register `.versions` directory to be
 // ignored
-var ignoredDirs = []*regexp.Regexp{}
+var ignoredDirs = []*regexp.Regexp{
+	regexp.MustCompile(`\..+`),
+	regexp.MustCompile(PUBLIC_PATH),
+}
 
 // Register a pattern to be ignored when walking directories.
 func IGNORE_DIR(r *regexp.Regexp) {
@@ -63,10 +66,6 @@ func populateWalkPagesCache(ctx context.Context) {
 	walkPagesCache = []*Page{}
 
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
-		if d.IsDir() && name == STATIC_DIR_PATH {
-			return fs.SkipDir
-		}
-
 		if d.IsDir() {
 			for _, v := range ignoredDirs {
 				if v.MatchString(name) {

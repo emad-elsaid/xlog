@@ -66,10 +66,10 @@ func uploadFileHandler(w Response, r Request) Output {
 		c, _ := io.ReadAll(f)
 		ext := strings.ToLower(path.Ext(h.Filename))
 		name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
-		p := path.Join(STATIC_DIR_PATH, name)
+		p := path.Join(PUBLIC_PATH, name)
 		mdName := filterChars(h.Filename, "[]")
 
-		os.Mkdir(STATIC_DIR_PATH, 0700)
+		os.Mkdir(PUBLIC_PATH, 0700)
 		out, err := os.Create(p)
 		if err != nil {
 			return InternalServerError(err)

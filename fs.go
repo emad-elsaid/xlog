@@ -2,18 +2,23 @@ package xlog
 
 import (
 	"io/fs"
+	"log"
 )
 
-type defaultedFS struct {
-	fs       fs.FS
-	fallback fs.FS
-}
+// return file that exists in one of the FS structs.
+// Prioritizing the end of the slice over earlier FSs.
+type priorityFS []fs.FS
 
-func (df defaultedFS) Open(name string) (fs.File, error) {
-	f, err := df.fs.Open(name)
-	if err == nil {
-		return f, err
+func (df priorityFS) Open(name string) (fs.File, error) {
+	log.Println(name, "fs:", df)
+
+	for i := len(df) - 1; i >= 0; i-- {
+		cf := df[i]
+		f, err := cf.Open(name)
+		if err == nil {
+			return f, err
+		}
 	}
 
-	return df.fallback.Open(name)
+	return nil, fs.ErrNotExist
 }

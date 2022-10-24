@@ -114,7 +114,7 @@ type Meta struct {
 }
 
 func getUrlMeta(url string) (*Meta, error) {
-	cacheDir := path.Join(STATIC_DIR_PATH, ".cache")
+	cacheDir := path.Join(PUBLIC_PATH, ".cache")
 	os.Mkdir(cacheDir, 0700)
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))
