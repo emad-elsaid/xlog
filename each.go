@@ -7,20 +7,18 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
-	"sync"
 )
 
 func init() {
-	Listen(AfterWrite, clearWalkPagesCache)
-	Listen(AfterDelete, clearWalkPagesCache)
+	Listen(AfterWrite, clearPagesCache)
+	Listen(AfterDelete, clearPagesCache)
 }
 
 // a List of directories that should be ignored by directory walking function.
 // for example the versioning extension can register `.versions` directory to be
 // ignored
 var ignoredDirs = []*regexp.Regexp{
-	regexp.MustCompile(`\..+`),
-	regexp.MustCompile(PUBLIC_PATH),
+	regexp.MustCompile(`\..+`), // Ignore any hidden directory
 }
 
 // Register a pattern to be ignored when walking directories.
@@ -28,20 +26,17 @@ func IgnoreDir(r *regexp.Regexp) {
 	ignoredDirs = append(ignoredDirs, r)
 }
 
-var walkPagesCache []*Page
-var walkPagesCacheMutex sync.RWMutex
+var pages []*Page
 
-// WalkPages iterates on all available pages. many extensions
+// EachPage iterates on all available pages. many extensions
 // uses it to get all pages and maybe parse them and extract needed information
-func WalkPages(ctx context.Context, f func(*Page)) {
-	if walkPagesCache == nil {
-		populateWalkPagesCache(ctx)
+func EachPage(ctx context.Context, f func(*Page)) {
+	if pages == nil {
+		pages = populatePagesCache(ctx)
 	}
 
-	walkPagesCacheMutex.RLock()
-	defer walkPagesCacheMutex.RUnlock()
-
-	for _, p := range walkPagesCache {
+	currentPages := pages
+	for _, p := range currentPages {
 		select {
 		case <-ctx.Done():
 			return
@@ -51,19 +46,13 @@ func WalkPages(ctx context.Context, f func(*Page)) {
 	}
 }
 
-func clearWalkPagesCache(_ *Page) (err error) {
-	walkPagesCacheMutex.Lock()
-	defer walkPagesCacheMutex.Unlock()
-
-	walkPagesCache = nil
+func clearPagesCache(_ *Page) (err error) {
+	pages = nil
 	return nil
 }
 
-func populateWalkPagesCache(ctx context.Context) {
-	walkPagesCacheMutex.Lock()
-	defer walkPagesCacheMutex.Unlock()
-
-	walkPagesCache = []*Page{}
+func populatePagesCache(ctx context.Context) []*Page {
+	pages := []*Page{}
 
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -86,11 +75,13 @@ func populateWalkPagesCache(ctx context.Context) {
 			basename := name[:len(name)-len(ext)]
 
 			if ext == ".md" {
-				walkPagesCache = append(walkPagesCache, &Page{Name: basename})
+				pages = append(pages, &Page{Name: basename})
 			}
 
 		}
 
 		return nil
 	})
+
+	return pages
 }

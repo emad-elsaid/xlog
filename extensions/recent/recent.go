@@ -21,12 +21,12 @@ func init() {
 	ExtensionPage("/+/recent")
 
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 }
 
 func recentHandler(_ Response, r Request) Output {
 	rp := recentPages{}
-	WalkPages(context.Background(), func(i *Page) {
+	EachPage(context.Background(), func(i *Page) {
 		rp = append(rp, i)
 	})
 

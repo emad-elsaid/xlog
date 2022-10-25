@@ -24,7 +24,7 @@ func init() {
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 }
 
 func starredPages(p *Page, r Request) template.HTML {

@@ -13,7 +13,7 @@ var views embed.FS
 
 func init() {
 	f, _ := fs.Sub(views, "views")
-	View(f)
+	Template(f)
 	Get("/manifest.json", manifest)
 	ExtensionPage("/manifest.json")
 	Widget(HEAD_WIDGET, head)

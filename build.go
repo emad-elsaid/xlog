@@ -30,7 +30,7 @@ func buildStaticSite(dest string) error {
 		log.Printf("error while processing root path, err: %s", err.Error())
 	}
 
-	WalkPages(context.Background(), func(p *Page) {
+	EachPage(context.Background(), func(p *Page) {
 		route := "/" + p.Name
 		dir := path.Join(dest, p.Name)
 		file := path.Join(dest, p.Name, "index.html")

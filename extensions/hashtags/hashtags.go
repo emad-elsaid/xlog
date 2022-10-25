@@ -36,7 +36,7 @@ func init() {
 	shortcode.SHORTCODE("hashtag-pages", hashtagPages)
 
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -105,7 +105,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 func tagsHandler(_ Response, r Request) Output {
 	tags := map[string][]*Page{}
-	WalkPages(context.Background(), func(a *Page) {
+	EachPage(context.Background(), func(a *Page) {
 		set := map[string]bool{}
 		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
@@ -146,7 +146,7 @@ func tagHandler(w Response, r Request) Output {
 func tagPages(ctx context.Context, keyword string) []*Page {
 	results := []*Page{}
 
-	WalkPages(ctx, func(p *Page) {
+	EachPage(ctx, func(p *Page) {
 		if p.Name == INDEX {
 			return
 		}
@@ -180,7 +180,7 @@ func relatedPages(p *Page, r Request) template.HTML {
 
 	pages := []*Page{}
 
-	WalkPages(context.Background(), func(rp *Page) {
+	EachPage(context.Background(), func(rp *Page) {
 		if rp.Name == p.Name {
 			return
 		}
@@ -206,7 +206,7 @@ func autocompleter() *Autocompletion {
 	}
 
 	set := map[string]bool{}
-	WalkPages(context.Background(), func(a *Page) {
+	EachPage(context.Background(), func(a *Page) {
 		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			set[strings.ToLower(string(v.value))] = true

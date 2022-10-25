@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 )
@@ -14,6 +15,17 @@ func init() {
 			return ago(time.Since(t))
 		}
 	})
+}
+
+// Helper registers a new helper function. all helpers are used when compiling
+// templates. so registering helpers function must happen before the server
+// starts as compiling templates happend right before starting the http server.
+func Helper(name string, f interface{}) {
+	if _, ok := helpers[name]; ok {
+		log.Fatalf("Helper: %s already registered", name)
+	}
+
+	helpers[name] = f
 }
 
 // A function that takes time.duration and return a string representation of the

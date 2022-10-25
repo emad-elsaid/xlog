@@ -22,7 +22,7 @@ func init() {
 	Post(`/\+/file/rename`, fileOperationsRenameHandler)
 
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 }
 
 func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
@@ -79,5 +79,5 @@ func fileOperationsRenameHandler(w Response, r Request) Output {
 	new.Write(old.Content())
 
 	old.Write(fmt.Sprintf("Renamed to: %s", new.Name))
-	return NoContent
+	return NoContent()
 }

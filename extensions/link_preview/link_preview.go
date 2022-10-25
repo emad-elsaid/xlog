@@ -31,7 +31,7 @@ func init() {
 	Preprocessor(fallbackURLPreprocessor)
 
 	f, _ := fs.Sub(views, "views")
-	View(f)
+	Template(f)
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)
@@ -114,7 +114,7 @@ type Meta struct {
 }
 
 func getUrlMeta(url string) (*Meta, error) {
-	cacheDir := path.Join(PUBLIC_PATH, ".cache")
+	const cacheDir = ".cache"
 	os.Mkdir(cacheDir, 0700)
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))

@@ -1,32 +1,19 @@
 package xlog
 
 import (
-	"bytes"
 	"context"
-	"embed"
 	"flag"
 	"fmt"
-	"html/template"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/gorilla/csrf"
 )
 
-const (
-	PUBLIC_PATH      = "public"
-	VIEWS_EXTENSION  = ".html"
-	CSRF_COOKIE_NAME = "xlog_csrf"
-)
-
-//go:embed public
-var assets embed.FS
+const CSRF_COOKIE_NAME = "xlog_csrf"
 
 var (
 	bind_address string
@@ -53,15 +40,21 @@ type (
 	Response = http.ResponseWriter
 	Request  = *http.Request
 	Output   = http.HandlerFunc
-	Locals   map[string]interface{} // passed to views/templates
+	Locals   map[string]interface{} // passed to templates
 )
 
 func init() {
 	flag.StringVar(&bind_address, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 }
 
+func serve() {
+	srv := server()
+	log.Printf("Starting server: %s", bind_address)
+	log.Fatal(srv.ListenAndServe())
+}
+
 func server() *http.Server {
-	compileViews()
+	compileTemplates()
 	var handler http.Handler = router
 	for _, v := range middlewares {
 		handler = v(handler)
@@ -75,15 +68,16 @@ func server() *http.Server {
 	}
 }
 
-func serve() {
-	srv := server()
-	log.Printf("Starting server: %s", bind_address)
-	log.Fatal(srv.ListenAndServe())
-}
-
 type (
+	// Checks a request for conditions, may modify request returning the new
+	// request and if conditions are met.
+	//
+	// Can be used to check request method, path or other attributes against
+	// expected values.
 	RouteCheck func(Request) (Request, bool)
-	Route      struct {
+	// A route has handler function and set of RouteChecks if all checks are
+	// true, the last request will be passed to the handler function
+	Route struct {
 		checks []RouteCheck
 		route  http.HandlerFunc
 	}
@@ -147,22 +141,6 @@ func Vars(r Request) map[string]string {
 	return map[string]string{}
 }
 
-const (
-	DEBUG = "\033[97;42m"
-	INFO  = "\033[97;42m"
-)
-
-func Log(level, label, text string, args ...interface{}) func() {
-	start := time.Now()
-	return func() {
-		if len(args) > 0 {
-			log.Printf("%s %s \033[0m (%s) %s %v", level, label, time.Since(start), text, args)
-		} else {
-			log.Printf("%s %s \033[0m (%s) %s", level, label, time.Since(start), text)
-		}
-	}
-}
-
 // HandlerFunc is the type of an HTTP handler function + returns output function.
 // it makes it easier to return the output directly instead of writing the output to w then return.
 type HandlerFunc func(http.ResponseWriter, *http.Request) Output
@@ -208,8 +186,12 @@ func Redirect(url string) Output {
 	}
 }
 
-// NoContent an output function that writes NoContent http response
-func NoContent(w http.ResponseWriter, r *http.Request) {
+// NoContent returns an output function that writes NoContent http status
+func NoContent() Output {
+	return noContent
+}
+
+func noContent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -259,74 +241,6 @@ func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFu
 	)
 }
 
-//go:embed views
-var defaultViews embed.FS
-var templates *template.Template
-var helpers = template.FuncMap{}
-var views []fs.FS
-
-// View registers a filesystem as a view, views are registered such that the
-// latest view directory override older ones. views file extensions are
-// signified by VIEWS_EXTENSION constant and the file path can be used as
-// template name without this extension
-func View(view fs.FS) {
-	views = append(views, view)
-}
-
-func compileViews() {
-	// add default views before everything else
-	sub, _ := fs.Sub(defaultViews, "views")
-	views = append([]fs.FS{sub}, views...)
-
-	templates = template.New("")
-	for _, view := range views {
-		fs.WalkDir(view, ".", func(p string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if strings.HasSuffix(p, VIEWS_EXTENSION) && d.Type().IsRegular() {
-				ext := path.Ext(p)
-				name := strings.TrimSuffix(p, ext)
-				defer Log(DEBUG, "View", name)()
-
-				c, err := fs.ReadFile(view, p)
-				if err != nil {
-					return err
-				}
-
-				template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
-			}
-
-			return nil
-		})
-	}
-}
-
-func Partial(path string, data Locals) string {
-	v := templates.Lookup(path)
-	if v == nil {
-		return fmt.Sprintf("view %s not found", path)
-	}
-
-	// set extra locals here
-	if data == nil {
-		data = Locals{}
-	}
-
-	data["SITENAME"] = SITENAME
-	data["READONLY"] = READONLY
-	data["SIDEBAR"] = SIDEBAR
-
-	w := bytes.NewBufferString("")
-	err := v.Execute(w, data)
-	if err != nil {
-		return "rendering error " + path + " " + err.Error()
-	}
-
-	return w.String()
-}
-
 // Render returns an output function that renders partial with data and writes it as response
 func Render(path string, data Locals) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -359,15 +273,4 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 		defer Log(INFO, r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
-}
-
-// Helper registers a new helper function. all helpers are used when compiling
-// view/templates so registering helpers function must happen before the server
-// starts as compiling views happend right before starting the http server.
-func Helper(name string, f interface{}) {
-	if _, ok := helpers[name]; ok {
-		log.Fatalf("Helper: %s already registered", name)
-	}
-
-	helpers[name] = f
 }

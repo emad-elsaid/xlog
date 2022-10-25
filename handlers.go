@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"embed"
 	"flag"
 	"html/template"
 	"log"
@@ -91,7 +92,7 @@ func getPageEditHandler(w Response, r Request) Output {
 	}
 
 	// Execute all Autocomplete functions and add them to a slice and pass it
-	// down to the view
+	// down to the template
 	acs := []*Autocompletion{}
 	for _, v := range autocompletes {
 		acs = append(acs, v())
@@ -120,6 +121,9 @@ func postPageHandler(w Response, r Request) Output {
 
 	return Redirect("/" + page.Name)
 }
+
+//go:embed public
+var assets embed.FS
 
 func staticHandler(r Request) (Output, error) {
 	staticFSs := http.FS(priorityFS{

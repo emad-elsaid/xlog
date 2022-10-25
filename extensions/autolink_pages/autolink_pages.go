@@ -43,7 +43,7 @@ func init() {
 	Autocomplete(autocompleter)
 
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 }
 
 type extension struct{}
@@ -120,7 +120,7 @@ var autolinkPages []*Page
 
 func UpdatePagesList(_ *Page) (err error) {
 	ps := []*Page{}
-	WalkPages(context.Background(), func(p *Page) {
+	EachPage(context.Background(), func(p *Page) {
 		ps = append(ps, p)
 	})
 	sort.Sort(fileInfoByNameLength(ps))
@@ -193,7 +193,7 @@ func backlinksSection(p *Page, r Request) template.HTML {
 
 	pages := []*Page{}
 
-	WalkPages(context.Background(), func(a *Page) {
+	EachPage(context.Background(), func(a *Page) {
 		// a page shouldn't mention itself
 		if a.Name == p.Name {
 			return
@@ -234,7 +234,7 @@ func autocompleter() *Autocompletion {
 		Suggestions: []*Suggestion{},
 	}
 
-	WalkPages(context.Background(), func(p *Page) {
+	EachPage(context.Background(), func(p *Page) {
 		a.Suggestions = append(a.Suggestions, &Suggestion{
 			Text:        p.Name,
 			DisplayText: p.Name,

@@ -22,7 +22,7 @@ func init() {
 	Get(`/\+/search`, searchHandler)
 
 	fs, _ := fs.Sub(views, "views")
-	View(fs)
+	Template(fs)
 }
 
 func sidebar(_ *Page, _ Request) template.HTML {
@@ -52,7 +52,7 @@ func search(ctx context.Context, keyword string) []searchResult {
 
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
-	WalkPages(ctx, func(p *Page) {
+	EachPage(ctx, func(p *Page) {
 		match := reg.FindString(p.Name)
 		if len(match) > 0 {
 			results = append(results, searchResult{
