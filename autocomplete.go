@@ -9,7 +9,7 @@ type Autocompletion struct {
 
 // Suggestions represent an item in the list of autocomplete menu in the edit page
 type Suggestion struct {
-	Text        string // The text that gets injected in the editor if this option is choosen
+	Text        string // The text that gets injected in the editor if this option is chosen
 	DisplayText string // The display text for this item in the menu. this can be more cosmetic.
 }
 
