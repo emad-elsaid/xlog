@@ -15,9 +15,9 @@ import (
 var extension_page = map[string]bool{}
 var build_perms fs.FileMode = 0744
 
-// ExtensionPage announces a path of a page as an extension page, enables the
-// page to be exported when building static version of the knowledgebase
-func ExtensionPage(p string) {
+// BuildPage registers a path of a page to export when building static version
+// of the knowledgebase
+func BuildPage(p string) {
 	extension_page[p] = true
 }
 
@@ -42,8 +42,18 @@ func buildStaticSite(dest string) error {
 	})
 
 	for route := range extension_page {
-		dir := path.Join(dest, route)
-		file := path.Join(dest, route, "index.html")
+		route_dir := path.Dir(route)
+		base := path.Base(route)
+
+		var dir, file string
+
+		if path.Ext(base) == "" {
+			dir = path.Join(dest, route)
+			file = path.Join(dest, route, "index.html")
+		} else {
+			dir = path.Join(dest, route_dir)
+			file = path.Join(dest, route_dir, base)
+		}
 
 		err := buildRoute(srv, route, dir, file)
 		if err != nil {

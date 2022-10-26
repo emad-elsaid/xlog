@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"html/template"
-	"io/fs"
 	"regexp"
 
 	_ "embed"
@@ -14,15 +13,13 @@ import (
 
 const MIN_SEARCH_KEYWORD = 3
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
-	PrependWidget(SIDEBAR_WIDGET, sidebar)
 	Get(`/\+/search`, searchHandler)
-
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	PrependWidget(SIDEBAR_WIDGET, sidebar)
+	Template(templates, "templates")
 }
 
 func sidebar(_ *Page, _ Request) template.HTML {

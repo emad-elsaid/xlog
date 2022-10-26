@@ -12,7 +12,6 @@ var (
 	SITENAME string // name of knowledgebase
 	SIDEBAR  bool   // is sidebar displayed
 	INDEX    string // name of the index page markdown file
-	TEMPLATE string // name of the template file used as default value for editor
 )
 
 func init() {
@@ -24,7 +23,6 @@ func init() {
 	flag.StringVar(&BUILD, "build", "", "Build all pages as static site in this directory")
 	flag.StringVar(&SITENAME, "sitename", "XLOG", "Site name is the name that appears on the header beside the logo and in the title tag")
 	flag.StringVar(&INDEX, "index", "index", "Index file name used as home page")
-	flag.StringVar(&TEMPLATE, "template", "template", "Template file name, to use as default content when creating a new page")
 	flag.BoolVar(&READONLY, "readonly", false, "Should xlog hide write operations, read-only means all write operations will be disabled")
 	flag.BoolVar(&SIDEBAR, "sidebar", true, "Should render sidebar.")
 }

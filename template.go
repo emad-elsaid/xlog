@@ -10,23 +10,25 @@ import (
 	"strings"
 )
 
-const TEMPLATE_EXTENSION = ".html"
-
 //go:embed templates
 var defaultTemplates embed.FS
 var templates *template.Template
 var helpers = template.FuncMap{}
 var templatesFSs []fs.FS
 
-// Template registers a filesystem that contains templates, templates are
-// registered such that the latest directory override older ones. template file
+// Template registers a filesystem that contains templates, specifying subDir as
+// the subdirectory name that contains the templates. templates are registered
+// such that the latest registered directory override older ones. template file
 // extensions are signified by TEMPLATE_EXTENSION constant and the file path can
 // be used as template name without this extension
-func Template(t fs.FS) {
-	templatesFSs = append(templatesFSs, t)
+func Template(t fs.FS, subDir string) {
+	ts, _ := fs.Sub(t, subDir)
+	templatesFSs = append(templatesFSs, ts)
 }
 
 func compileTemplates() {
+	const ext = ".html"
+
 	// add default templates before everything else
 	sub, _ := fs.Sub(defaultTemplates, "templates")
 	templatesFSs = append([]fs.FS{sub}, templatesFSs...)
@@ -38,10 +40,10 @@ func compileTemplates() {
 				return err
 			}
 
-			if strings.HasSuffix(p, TEMPLATE_EXTENSION) && d.Type().IsRegular() {
+			if strings.HasSuffix(p, ext) && d.Type().IsRegular() {
 				ext := path.Ext(p)
 				name := strings.TrimSuffix(p, ext)
-				defer Log(DEBUG, "View", name)()
+				defer echo(xDEBUG, "Template", name)()
 
 				c, err := fs.ReadFile(tfs, p)
 				if err != nil {

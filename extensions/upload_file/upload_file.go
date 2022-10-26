@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/fs"
 	"net/url"
 	"os"
 	"path"
@@ -22,8 +21,8 @@ const gb = 1 << (10 * 3)
 const MAX_FILE_UPLOAD = 1 * gb
 const PUBLIC_PATH = "public"
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 var (
 	IMAGES_EXTENSIONS = []string{".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
@@ -34,9 +33,7 @@ var (
 func init() {
 	Widget(TOOLS_WIDGET, uploadFileWidget)
 	Post(`/\+/upload-file`, uploadFileHandler)
-
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	Template(templates, "templates")
 }
 
 func uploadFileWidget(p *Page, r Request) template.HTML {

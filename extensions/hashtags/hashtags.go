@@ -5,7 +5,6 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
@@ -20,8 +19,8 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
 	Widget(SIDEBAR_WIDGET, sidebar)
@@ -30,13 +29,12 @@ func init() {
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
 
-	ExtensionPage("/+/tags")
+	BuildPage("/+/tags")
 
 	Autocomplete(autocompleter)
 	shortcode.SHORTCODE("hashtag-pages", hashtagPages)
 
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	Template(templates, "templates")
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -99,7 +97,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 	tag := n.(*HashTag)
 	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">#%s</a>`, tag.value, tag.value)
-	ExtensionPage(fmt.Sprintf("/+/tag/%s", tag.value))
+	BuildPage(fmt.Sprintf("/+/tag/%s", tag.value))
 	return ast.WalkContinue, nil
 }
 
@@ -107,7 +105,7 @@ func tagsHandler(_ Response, r Request) Output {
 	tags := map[string][]*Page{}
 	EachPage(context.Background(), func(a *Page) {
 		set := map[string]bool{}
-		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
+		hashes := FindAllInAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
 
@@ -151,7 +149,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 			return
 		}
 
-		tags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
+		tags := FindAllInAST[*HashTag](p.AST(), KindHashTag)
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
 				results = append(results, p)
@@ -172,7 +170,7 @@ func relatedPages(p *Page, r Request) template.HTML {
 		return ""
 	}
 
-	found_hashtags := ExtractAllFromAST[*HashTag](p.AST(), KindHashTag)
+	found_hashtags := FindAllInAST[*HashTag](p.AST(), KindHashTag)
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {
 		hashtags[strings.ToLower(string(v.value))] = true
@@ -185,7 +183,7 @@ func relatedPages(p *Page, r Request) template.HTML {
 			return
 		}
 
-		page_hashtags := ExtractAllFromAST[*HashTag](rp.AST(), KindHashTag)
+		page_hashtags := FindAllInAST[*HashTag](rp.AST(), KindHashTag)
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
 				pages = append(pages, rp)
@@ -207,7 +205,7 @@ func autocompleter() *Autocompletion {
 
 	set := map[string]bool{}
 	EachPage(context.Background(), func(a *Page) {
-		hashes := ExtractAllFromAST[*HashTag](a.AST(), KindHashTag)
+		hashes := FindAllInAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			set[strings.ToLower(string(v.value))] = true
 		}

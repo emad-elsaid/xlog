@@ -25,7 +25,7 @@ func opengraphTags(p *Page, r Request) template.HTML {
 
 	tags += fmt.Sprintf(`<meta property="og:title" content="%s %s" />`, p.Emoji(), template.JSEscapeString(name))
 
-	if image, ok := ExtractFirstFromAST[*ast.Image](p.AST(), ast.KindImage); ok {
+	if image, ok := FindInAST[*ast.Image](p.AST(), ast.KindImage); ok {
 		tags += fmt.Sprintf(`<meta property="og:image" content="%s" />`, template.JSEscapeString(string(image.Destination)))
 	}
 

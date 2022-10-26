@@ -6,11 +6,11 @@ import (
 )
 
 const (
-	DEBUG = "\033[97;42m"
-	INFO  = "\033[97;42m"
+	xDEBUG = "\033[97;42m"
+	xINFO  = "\033[97;42m"
 )
 
-func Log(level, label, text string, args ...interface{}) func() {
+func echo(level, label, text string, args ...interface{}) func() {
 	start := time.Now()
 	return func() {
 		if len(args) > 0 {

@@ -87,8 +87,6 @@ func getPageEditHandler(w Response, r Request) Output {
 	var content string
 	if page.Exists() {
 		content = page.Content()
-	} else if template := NewPage(TEMPLATE); template.Exists() {
-		content = template.Content()
 	}
 
 	// Execute all Autocomplete functions and add them to a slice and pass it

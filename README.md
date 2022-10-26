@@ -15,7 +15,6 @@ Local-first personal knowledge management application with focus on enriching ma
 - Serve any file from current directory. rendering any Markdown file to HTML format.
 - Supports Github flavor markdown (GFM)
 - One statically compiled binary
-- `template.md` content will be used as template when creating new pages.
 - Has a list of tools defined by extensions. triggered with `Ctrl+K`
 - Special style if there is an image at the start of a page to make it look like a cover photo.
 - Minimal third-party dependencies.

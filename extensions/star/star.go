@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"net/url"
 	"strings"
 
@@ -15,16 +14,15 @@ import (
 
 const STARRED_PAGES = "starred"
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
 	Widget(ACTION_WIDGET, starMeta)
 	Widget(SIDEBAR_WIDGET, starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	Template(templates, "templates")
 }
 
 func starredPages(p *Page, r Request) template.HTML {

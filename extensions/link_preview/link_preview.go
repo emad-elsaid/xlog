@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
@@ -19,8 +18,8 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
 	Preprocessor(imgUrlPreprocessor)
@@ -29,9 +28,7 @@ func init() {
 	Preprocessor(fbUrlPreprocessor)
 	Preprocessor(giphyUrlPreprocessor)
 	Preprocessor(fallbackURLPreprocessor)
-
-	f, _ := fs.Sub(views, "views")
-	Template(f)
+	Template(templates, "templates")
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)

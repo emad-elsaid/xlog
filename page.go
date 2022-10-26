@@ -143,7 +143,7 @@ func (p *Page) AST() ast.Node {
 
 // Returns the first emoji of the page.
 func (p *Page) Emoji() string {
-	if e, ok := ExtractFirstFromAST[*emojiAst.Emoji](p.AST(), emojiAst.KindEmoji); ok {
+	if e, ok := FindInAST[*emojiAst.Emoji](p.AST(), emojiAst.KindEmoji); ok {
 		return string(e.Value.Unicode)
 	}
 
@@ -153,7 +153,7 @@ func (p *Page) Emoji() string {
 // This is a function that takes an AST node and walks the tree depth first
 // recursively calling itself in search for a node of a specific kind
 // can be used to find first image, link, paragraph...etc
-func ExtractFirstFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (found t, ok bool) {
+func FindInAST[t ast.Node](n ast.Node, kind ast.NodeKind) (found t, ok bool) {
 	if n.Kind() == kind {
 		if found, ok := n.(t); ok {
 			return found, true
@@ -161,7 +161,7 @@ func ExtractFirstFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (found t, ok
 	}
 
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		if a, ok := ExtractFirstFromAST[t](c, kind); ok {
+		if a, ok := FindInAST[t](c, kind); ok {
 			return a, true
 		}
 	}
@@ -170,14 +170,14 @@ func ExtractFirstFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (found t, ok
 }
 
 // Extract all nodes of a specific type from the AST
-func ExtractAllFromAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
+func FindAllInAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
 	if n.Kind() == kind {
 		typed, _ := n.(t)
 		a = []t{typed}
 	}
 
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		a = append(a, ExtractAllFromAST[t](c, kind)...)
+		a = append(a, FindAllInAST[t](c, kind)...)
 	}
 
 	return a

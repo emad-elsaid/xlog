@@ -3,20 +3,18 @@ package manifest
 import (
 	"embed"
 	"html/template"
-	"io/fs"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
-	f, _ := fs.Sub(views, "views")
-	Template(f)
 	Get("/manifest.json", manifest)
-	ExtensionPage("/manifest.json")
+	BuildPage("/manifest.json")
 	Widget(HEAD_WIDGET, head)
+	Template(templates, "templates")
 }
 
 func manifest(w Response, r Request) Output {

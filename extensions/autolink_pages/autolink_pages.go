@@ -5,7 +5,6 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"sort"
 	"strings"
 
@@ -20,8 +19,8 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 type fileInfoByNameLength []*Page
 
@@ -42,8 +41,7 @@ func init() {
 	Widget(AFTER_VIEW_WIDGET, backlinksSection)
 	Autocomplete(autocompleter)
 
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	Template(templates, "templates")
 }
 
 type extension struct{}
@@ -175,7 +173,7 @@ func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.
 }
 
 func countTodos(p *Page) (total int, done int) {
-	tasks := ExtractAllFromAST[*east.TaskCheckBox](p.AST(), east.KindTaskCheckBox)
+	tasks := FindAllInAST[*east.TaskCheckBox](p.AST(), east.KindTaskCheckBox)
 	for _, v := range tasks {
 		total++
 		if v.IsChecked {

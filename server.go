@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/csrf"
 )
 
-const CSRF_COOKIE_NAME = "xlog_csrf"
+const xCSRF_COOKIE_NAME = "xlog_csrf"
 
 var (
 	bind_address string
@@ -29,7 +29,7 @@ var (
 			[]byte(os.Getenv("SESSION_SECRET")),
 			csrf.Path("/"),
 			csrf.FieldName("csrf"),
-			csrf.CookieName(CSRF_COOKIE_NAME),
+			csrf.CookieName(xCSRF_COOKIE_NAME),
 		),
 		requestLoggerHandler,
 	}
@@ -270,7 +270,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer Log(INFO, r.Method, r.URL.Path)()
+		defer echo(xINFO, r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
 }

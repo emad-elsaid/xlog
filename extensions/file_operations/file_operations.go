@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
-	"io/fs"
 	"net/url"
 
 	_ "embed"
@@ -12,17 +11,15 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
 	Widget(TOOLS_WIDGET, fileOperationsDeleteWidget)
 	Widget(TOOLS_WIDGET, fileOperationsRenameWidget)
 	Delete(`/\+/file/delete`, fileOperationsDeleteHandler)
 	Post(`/\+/file/rename`, fileOperationsRenameHandler)
-
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	Template(templates, "templates")
 }
 
 func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"html/template"
-	"io/fs"
 	"sort"
 
 	_ "embed"
@@ -12,16 +11,14 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-//go:embed views
-var views embed.FS
+//go:embed templates
+var templates embed.FS
 
 func init() {
 	Widget(SIDEBAR_WIDGET, recent)
 	Get(`/\+/recent`, recentHandler)
-	ExtensionPage("/+/recent")
-
-	fs, _ := fs.Sub(views, "views")
-	Template(fs)
+	BuildPage("/+/recent")
+	Template(templates, "templates")
 }
 
 func recentHandler(_ Response, r Request) Output {
