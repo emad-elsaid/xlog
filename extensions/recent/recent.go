@@ -17,7 +17,7 @@ var templates embed.FS
 func init() {
 	Widget(SIDEBAR_WIDGET, recent)
 	Get(`/\+/recent`, recentHandler)
-	BuildPage("/+/recent")
+	BuildPage("/+/recent", true)
 	Template(templates, "templates")
 }
 

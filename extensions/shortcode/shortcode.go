@@ -28,13 +28,13 @@ var shortcodes = map[string]PreprocessorFunc{
 
 func init() {
 	for k, v := range shortcodes {
-		SHORTCODE(k, v)
+		ShortCode(k, v)
 	}
 
 	Autocomplete(autocompleter)
 }
 
-func SHORTCODE(name string, shortcode func(string) string) {
+func ShortCode(name string, shortcode func(string) string) {
 	shortcodes[name] = shortcode
 
 	// single line

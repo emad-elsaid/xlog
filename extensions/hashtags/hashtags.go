@@ -25,16 +25,12 @@ var templates embed.FS
 func init() {
 	Widget(SIDEBAR_WIDGET, sidebar)
 	Widget(AFTER_VIEW_WIDGET, relatedPages)
-
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
-
-	BuildPage("/+/tags")
-
+	BuildPage("/+/tags", true)
 	Autocomplete(autocompleter)
-	shortcode.SHORTCODE("hashtag-pages", hashtagPages)
-
 	Template(templates, "templates")
+	shortcode.ShortCode("hashtag-pages", hashtagPages)
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -97,7 +93,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 	tag := n.(*HashTag)
 	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">#%s</a>`, tag.value, tag.value)
-	BuildPage(fmt.Sprintf("/+/tag/%s", tag.value))
+	BuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
 	return ast.WalkContinue, nil
 }
 
