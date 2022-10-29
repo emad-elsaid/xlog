@@ -31,7 +31,7 @@ func init() {
 		ShortCode(k, v)
 	}
 
-	Autocomplete(autocompleter)
+	Autocomplete(autocompleteFunc)
 }
 
 func ShortCode(name string, shortcode func(string) string) {
@@ -65,7 +65,7 @@ func ShortCode(name string, shortcode func(string) string) {
 	Preprocessor(multilinePreprocessor)
 }
 
-func autocompleter() *Autocompletion {
+func autocompleteFunc() *Autocompletion {
 	a := &Autocompletion{
 		StartChar:   "/",
 		Suggestions: []*Suggestion{},

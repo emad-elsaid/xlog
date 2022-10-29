@@ -3,7 +3,6 @@ package xlog
 import (
 	"embed"
 	"flag"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -62,11 +61,13 @@ func getPageHandler(w Response, r Request) Output {
 	}
 
 	return Render("view", Locals{
+		"page":      &page,
 		"edit":      "/edit/" + page.Name,
 		"title":     page.Emoji() + " " + page.Name,
 		"updated":   page.ModTime(),
-		"content":   template.HTML(page.Render()),
-		"tools":     RenderWidget(TOOLS_WIDGET, &page, r),      // all tools registered widgets
+		"content":   page.Render(),
+		"commands":  commands,
+		"csrf":      CSRF(r),
 		"sidebar":   RenderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar
 		"action":    RenderWidget(ACTION_WIDGET, &page, r),     // widgets registered to be displayed under the page title
 		"head":      RenderWidget(HEAD_WIDGET, &page, r),       // widgets registered to be displayed under the page title
@@ -74,8 +75,7 @@ func getPageHandler(w Response, r Request) Output {
 	})
 }
 
-// Edit page, gets the page from path, if it doesn't exist it'll use the
-// template.md content as default value
+// Edit page, gets the page from path
 func getPageEditHandler(w Response, r Request) Output {
 	if READONLY {
 		return Unauthorized("Readonly mode is active")
@@ -97,9 +97,10 @@ func getPageEditHandler(w Response, r Request) Output {
 	}
 
 	return Render("edit", Locals{
+		"page":         &page,
 		"title":        page.Name,
 		"action":       page.Name,
-		"tools":        RenderWidget(TOOLS_WIDGET, &page, r), // render all tools widgets
+		"commands":     commands,
 		"content":      content,
 		"autocomplete": acs,
 		"csrf":         CSRF(r),

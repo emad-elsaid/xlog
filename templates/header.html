@@ -9,9 +9,7 @@
   </head>
   <body>
 
-    {{ if not .READONLY }}
-    {{ template "tools" . }}
-    {{ end }}
+    {{ if not .READONLY }}{{ template "commands" . }}{{ end }}
 
     <div class="columns">
       {{ if .SIDEBAR }}

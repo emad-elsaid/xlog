@@ -17,11 +17,10 @@ type (
 // List of widgets spaces that extensions can use to register a widgetFunc to
 // inject content into.
 const (
-	TOOLS_WIDGET widgetSpace = iota
-	SIDEBAR_WIDGET
-	AFTER_VIEW_WIDGET
-	ACTION_WIDGET
-	HEAD_WIDGET
+	SIDEBAR_WIDGET    widgetSpace = iota // widgets rengered in the sidebar
+	AFTER_VIEW_WIDGET                    // widgets rendered after the content of the view page
+	ACTION_WIDGET                        // widgets rendered in the actions row of the view page
+	HEAD_WIDGET                          // widgets rendered in page <head> tag
 )
 
 // A map to keep track of list of widget functions registered in each widget space
@@ -38,9 +37,10 @@ func PrependWidget(s widgetSpace, f func(*Page, Request) template.HTML) {
 	widgets[s] = append([]widgetFunc{f}, widgets[s]...)
 }
 
-// Register a function to a widget space. functions registered will be executed
-// in order when rendering view or edit page. the return values of these
-// widgetfuncs will pass down to the template and injected in reserved places.
+// Widget Register a function to a widget space. functions registered will be
+// executed in order when rendering view or edit page. the return values of
+// these widgetfuncs will pass down to the template and injected in reserved
+// places.
 func Widget(s widgetSpace, f func(*Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}

@@ -16,14 +16,14 @@ type Suggestion struct {
 // This is a function that returns an auto completer instance. this function
 // should be defined by extensions and registered to be executed when rendering
 // the edit page
-type Autocompleter func() *Autocompletion
+type AutocompleteFunc func() *Autocompletion
 
-// Holds a list of registered autocompleter functions
-var autocompletes = []Autocompleter{}
+// Holds a list of registered autocomplete functions
+var autocompletes = []AutocompleteFunc{}
 
-// this function registers an autocompleter function. it should be used by an
-// extension to register a new autocompleter function. these functions are going
+// Autocomplete registers an autocomplete function. it should be used by an
+// extension to register a new autocomplete function. these functions are going
 // to be executed when rendering the edit page.
-func Autocomplete(a Autocompleter) {
+func Autocomplete(a AutocompleteFunc) {
 	autocompletes = append(autocompletes, a)
 }

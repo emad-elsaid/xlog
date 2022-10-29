@@ -31,20 +31,55 @@ var (
 )
 
 func init() {
-	Widget(TOOLS_WIDGET, uploadFileWidget)
+	RegisterCommand(command{
+		name:    "Upload File",
+		onClick: "upload()",
+		main:    true,
+	})
+	RegisterCommand(command{
+		name:    "Screenshot",
+		onClick: "screenshot()",
+	})
+	RegisterCommand(command{
+		name:    "Record Screen",
+		onClick: "record()",
+	})
+	RegisterCommand(command{
+		name:    "Record Camera",
+		onClick: "recordCamera()",
+	})
+	RegisterCommand(command{
+		name:    "Record Audio",
+		onClick: "recordAudio()",
+	})
 	Post(`/\+/upload-file`, uploadFileHandler)
 	Template(templates, "templates")
 }
 
-func uploadFileWidget(p *Page, r Request) template.HTML {
-	return template.HTML(
-		Partial("upload-file", Locals{
-			"page":           p,
-			"csrf":           CSRF(r),
-			"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),
-			"editModeAction": "/+/upload-file",
-		}),
-	)
+type command struct {
+	name    string
+	onClick template.JS
+	main    bool
+}
+
+func (u command) Name() string {
+	return u.name
+}
+
+func (u command) OnClick() template.JS {
+	return u.onClick
+}
+
+func (u command) Widget(p *Page) template.HTML {
+	if !u.main {
+		return ""
+	}
+
+	return Partial("upload-file", Locals{
+		"page":           p,
+		"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),
+		"editModeAction": "/+/upload-file",
+	})
 }
 
 func uploadFileHandler(w Response, r Request) Output {

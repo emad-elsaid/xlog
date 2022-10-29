@@ -3,6 +3,7 @@ package xlog
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,16 +68,16 @@ func (p *Page) Exists() bool {
 }
 
 // Renders the page content to HTML. it makes sure all preprocessors are called
-func (p *Page) Render() string {
+func (p *Page) Render() template.HTML {
 	content := p.Content()
 	content = preProcess(content)
 
 	var buf bytes.Buffer
 	if err := MarkDownRenderer.Convert([]byte(content), &buf); err != nil {
-		return err.Error()
+		return template.HTML(err.Error())
 	}
 
-	return buf.String()
+	return template.HTML(buf.String())
 }
 
 // Reads the underlying file and returns the content
@@ -119,7 +120,7 @@ func (p *Page) Write(content string) bool {
 	return true
 }
 
-// Return the last modification time of the underlying file
+// ModTime Return the last modification time of the underlying file
 func (p *Page) ModTime() time.Time {
 	s, err := os.Stat(p.FileName())
 	if err != nil {

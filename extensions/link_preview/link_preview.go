@@ -92,12 +92,14 @@ func fallbackURLPreprocessor(c string) string {
 			title = m
 		}
 
-		var view string = Partial("link-preview", Locals{
-			"url":         m,
-			"title":       title,
-			"description": meta.Description,
-			"image":       meta.Image,
-		})
+		var view string = string(
+			Partial("link-preview", Locals{
+				"url":         m,
+				"title":       title,
+				"description": meta.Description,
+				"image":       meta.Image,
+			}),
+		)
 
 		return strings.ReplaceAll(view, "\n", "")
 	})

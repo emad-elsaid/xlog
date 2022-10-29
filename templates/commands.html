@@ -1,0 +1,59 @@
+{{ if .commands }}
+{{.csrf}}
+<dialog id="commands-modal" style="border: none;" class="mt-0">
+  <div class="modal-content">
+    <div class="box">
+      <div class="field">
+        <div class="control">
+          <input class="input" type="search" placeholder="Search..." autofocus/>
+        </div>
+      </div>
+      <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
+        <ul class="menu-list">
+          {{ range .commands }}<li><a href="#" onclick="{{.OnClick}}">{{.Name}}</a></li>{{ end }}
+        </ul>
+      </aside>
+    </div>
+  </div>
+
+  <form method="dialog"><button class="modal-close is-large" aria-label="close"></button></form>
+</dialog>
+
+{{ range .commands }}{{.Widget $.page}}{{ end }}
+
+<script type="application/javascript">
+ const commands = document.getElementById('commands-modal');
+
+ // clicking any link in the commands list executes the command
+ commands.querySelectorAll('a').forEach( ele => {
+     ele.addEventListener('click', evt => {
+         evt.preventDefault();
+         commands.close();
+     });
+ });
+
+ // Pressing Ctrl+K shows the commands list
+ document.addEventListener('keydown', e => {
+     if ( e.key === 'k' && ( e.metaKey || e.ctrlKey ) ) {
+         e.preventDefault();
+         commands.showModal();
+     }
+ });
+
+ // Typing in the search field filter the commands
+ commands.querySelector('input[type=search]').addEventListener('keyup', e => {
+     const keyword = e.target.value.toLowerCase();
+     const lis = document.querySelectorAll("#commands-modal li");
+
+     for(var i=0; i < lis.length; i++){
+         const li = lis[i];
+         if( li.textContent.toLowerCase().includes(keyword) ) {
+             li.classList.remove("is-hidden");
+         } else {
+             li.classList.add("is-hidden");
+         }
+     }
+ });
+</script>
+
+{{ end }}

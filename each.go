@@ -21,8 +21,8 @@ var ignoredDirs = []*regexp.Regexp{
 	regexp.MustCompile(`\..+`), // Ignore any hidden directory
 }
 
-// Register a pattern to be ignored when walking directories.
-func IgnoreDir(r *regexp.Regexp) {
+// IgnoreDirectory Register a pattern to be ignored when walking directories.
+func IgnoreDirectory(r *regexp.Regexp) {
 	ignoredDirs = append(ignoredDirs, r)
 }
 

@@ -15,7 +15,7 @@ var autocomplete = Autocompletion{
 }
 
 func init() {
-	Autocomplete(autocompleter)
+	Autocomplete(autocompleteFunc)
 
 	emojis := []struct {
 		Emoji   string   `json:"emoji"`
@@ -34,6 +34,6 @@ func init() {
 	}
 }
 
-func autocompleter() *Autocompletion {
+func autocompleteFunc() *Autocompletion {
 	return &autocomplete
 }

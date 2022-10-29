@@ -15,7 +15,7 @@ import (
 func init() {
 	Listen(BeforeWrite, WriteVersion)
 	Widget(ACTION_WIDGET, VersionMeta)
-	IgnoreDir(regexp.MustCompile(`\.versions$`))
+	IgnoreDirectory(regexp.MustCompile(`\.versions$`))
 }
 
 func WriteVersion(p *Page) error {

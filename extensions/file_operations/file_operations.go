@@ -15,54 +15,38 @@ import (
 var templates embed.FS
 
 func init() {
-	Widget(TOOLS_WIDGET, fileOperationsDeleteWidget)
-	Widget(TOOLS_WIDGET, fileOperationsRenameWidget)
-	Delete(`/\+/file/delete`, fileOperationsDeleteHandler)
-	Post(`/\+/file/rename`, fileOperationsRenameHandler)
+	var rename PageRename
+	var delete PageDelete
+
+	RegisterCommand(rename)
+	RegisterCommand(delete)
+	Post(`/\+/file/rename`, rename.Handler)
+	Delete(`/\+/file/delete`, delete.Handler)
 	Template(templates, "templates")
 }
 
-func fileOperationsDeleteWidget(p *Page, r Request) template.HTML {
+type PageRename int
+
+func (f PageRename) Name() string {
+	return "Rename Page"
+}
+
+func (f PageRename) OnClick() template.JS {
+	return "renamePage()"
+}
+
+func (f PageRename) Widget(p *Page) template.HTML {
 	if !p.Exists() {
-		return template.HTML("")
+		return ""
 	}
 
-	return template.HTML(
-		Partial("file-operations-delete", Locals{
-			"csrf":   CSRF(r),
-			"page":   p.Name,
-			"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
-		}),
-	)
+	return Partial("file-operations-rename", Locals{
+		"page":   p.Name,
+		"action": "/+/file/rename",
+	})
 }
 
-func fileOperationsRenameWidget(p *Page, r Request) template.HTML {
-	if !p.Exists() {
-		return template.HTML("")
-	}
-
-	return template.HTML(
-		Partial("file-operations-rename", Locals{
-			"csrf":   CSRF(r),
-			"page":   p.Name,
-			"action": "/+/file/rename",
-		}),
-	)
-}
-
-func fileOperationsDeleteHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
-	if page := NewPage(r.FormValue("page")); page.Exists() {
-		page.Delete()
-	}
-
-	return Redirect("/")
-}
-
-func fileOperationsRenameHandler(w Response, r Request) Output {
+func (f PageRename) Handler(w Response, r Request) Output {
 	if READONLY {
 		return Unauthorized("Readonly mode is active")
 	}
@@ -76,5 +60,37 @@ func fileOperationsRenameHandler(w Response, r Request) Output {
 	new.Write(old.Content())
 
 	old.Write(fmt.Sprintf("Renamed to: %s", new.Name))
+	return NoContent()
+}
+
+type PageDelete int
+
+func (f PageDelete) Name() string {
+	return "Delete Page"
+}
+
+func (f PageDelete) OnClick() template.JS {
+	return "deletePage()"
+}
+
+func (f PageDelete) Widget(p *Page) template.HTML {
+	if !p.Exists() {
+		return template.HTML("")
+	}
+
+	return Partial("file-operations-delete", Locals{
+		"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
+	})
+}
+
+func (f PageDelete) Handler(w Response, r Request) Output {
+	if READONLY {
+		return Unauthorized("Readonly mode is active")
+	}
+
+	if page := NewPage(r.FormValue("page")); page.Exists() {
+		page.Delete()
+	}
+
 	return NoContent()
 }

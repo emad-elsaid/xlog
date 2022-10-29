@@ -27,7 +27,7 @@ func sidebar(_ *Page, _ Request) template.HTML {
 		return ""
 	}
 
-	return template.HTML(Partial("search-widget", nil))
+	return Partial("search-widget", nil)
 }
 
 func searchHandler(w Response, r Request) Output {

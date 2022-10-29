@@ -1,13 +1,3 @@
-<ul class="menu-list">
-  <li>
-    <a href="#" onclick="renamePage()">
-      <span class="icon "><i class="fa-solid fa-i-cursor"></i></span>
-      <span> Rename </span>
-    </a>
-  </li>
-  {{ .csrf }}
-</ul>
-
 <script>
  async function renamePage() {
      const newName = prompt('Page new name:', "{{.page}}");

@@ -58,10 +58,10 @@ func compileTemplates() {
 	}
 }
 
-func Partial(path string, data Locals) string {
+func Partial(path string, data Locals) template.HTML {
 	v := templates.Lookup(path)
 	if v == nil {
-		return fmt.Sprintf("template %s not found", path)
+		return template.HTML(fmt.Sprintf("template %s not found", path))
 	}
 
 	// set extra locals here
@@ -76,8 +76,8 @@ func Partial(path string, data Locals) string {
 	w := bytes.NewBufferString("")
 	err := v.Execute(w, data)
 	if err != nil {
-		return "rendering error " + path + " " + err.Error()
+		return template.HTML("rendering error " + path + " " + err.Error())
 	}
 
-	return w.String()
+	return template.HTML(w.String())
 }

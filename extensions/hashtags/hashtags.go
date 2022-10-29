@@ -28,7 +28,7 @@ func init() {
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
 	BuildPage("/+/tags", true)
-	Autocomplete(autocompleter)
+	Autocomplete(autocompleteFunc)
 	Template(templates, "templates")
 	shortcode.ShortCode("hashtag-pages", hashtagPages)
 
@@ -158,7 +158,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 }
 
 func sidebar(p *Page, r Request) template.HTML {
-	return template.HTML(Partial("tags-sidebar", nil))
+	return Partial("tags-sidebar", nil)
 }
 
 func relatedPages(p *Page, r Request) template.HTML {
@@ -188,12 +188,12 @@ func relatedPages(p *Page, r Request) template.HTML {
 		}
 	})
 
-	return template.HTML(Partial("related-hashtags-pages", Locals{
+	return Partial("related-hashtags-pages", Locals{
 		"pages": pages,
-	}))
+	})
 }
 
-func autocompleter() *Autocompletion {
+func autocompleteFunc() *Autocompletion {
 	a := &Autocompletion{
 		StartChar:   "#",
 		Suggestions: []*Suggestion{},
@@ -221,8 +221,10 @@ func hashtagPages(hashtag string) string {
 	hashtag = strings.Trim(hashtag, "# ")
 	pages := tagPages(context.Background(), hashtag)
 
-	output := Partial("hashtag-pages", Locals{"pages": pages})
+	output := string(Partial("hashtag-pages", Locals{"pages": pages}))
 	output = strings.ReplaceAll(output, "\n", "")
 	output = strings.TrimSpace(output)
-	return output + "\n"
+	output += "\n"
+
+	return output
 }

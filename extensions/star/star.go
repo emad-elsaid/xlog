@@ -38,9 +38,9 @@ func starredPages(p *Page, r Request) template.HTML {
 		p := NewPage(v)
 		ps = append(ps, &p)
 	}
-	return template.HTML(Partial("starred", Locals{
+	return Partial("starred", Locals{
 		"pages": ps,
-	}))
+	})
 }
 
 func starMeta(p *Page, r Request) template.HTML {
@@ -50,11 +50,11 @@ func starMeta(p *Page, r Request) template.HTML {
 
 	starred := isStarred(p)
 
-	return template.HTML(Partial("star-meta", Locals{
+	return Partial("star-meta", Locals{
 		"csrf":    CSRF(r),
 		"starred": starred,
 		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(p.Name)),
-	}))
+	})
 }
 
 func starHandler(w Response, r Request) Output {
