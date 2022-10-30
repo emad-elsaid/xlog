@@ -22,12 +22,12 @@ import (
 var templates embed.FS
 
 func init() {
-	Preprocessor(imgUrlPreprocessor)
-	Preprocessor(tweetUrlPreprocessor)
-	Preprocessor(youtubeUrlPreprocessor)
-	Preprocessor(fbUrlPreprocessor)
-	Preprocessor(giphyUrlPreprocessor)
-	Preprocessor(fallbackURLPreprocessor)
+	RegisterPreprocessor(imgUrlPreprocessor)
+	RegisterPreprocessor(tweetUrlPreprocessor)
+	RegisterPreprocessor(youtubeUrlPreprocessor)
+	RegisterPreprocessor(fbUrlPreprocessor)
+	RegisterPreprocessor(giphyUrlPreprocessor)
+	RegisterPreprocessor(fallbackURLPreprocessor)
 	Template(templates, "templates")
 }
 
