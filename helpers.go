@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	Helper("ago", func(t time.Time) string {
+	RegisterHelper("ago", func(t time.Time) string {
 		if READONLY {
 			return t.Format("Monday 2 January 2006")
 		} else {
@@ -17,10 +17,10 @@ func init() {
 	})
 }
 
-// Helper registers a new helper function. all helpers are used when compiling
+// RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
 // starts as compiling templates happened right before starting the http server.
-func Helper(name string, f interface{}) {
+func RegisterHelper(name string, f interface{}) {
 	if _, ok := helpers[name]; ok {
 		log.Fatalf("Helper: %s already registered", name)
 	}
