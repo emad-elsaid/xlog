@@ -57,21 +57,21 @@ func getPageHandler(w Response, r Request) Output {
 			return NotFound("can't find page")
 		}
 
-		return Redirect("/edit/" + page.Name)
+		return Redirect("/edit/" + page.Name())
 	}
 
 	return Render("view", Locals{
 		"page":      &page,
-		"edit":      "/edit/" + page.Name,
-		"title":     page.Emoji() + " " + page.Name,
+		"edit":      "/edit/" + page.Name(),
+		"title":     page.Emoji() + " " + page.Name(),
 		"updated":   page.ModTime(),
 		"content":   page.Render(),
 		"commands":  commands,
 		"csrf":      CSRF(r),
-		"sidebar":   RenderWidget(SIDEBAR_WIDGET, &page, r),    // widgets registered for sidebar
-		"action":    RenderWidget(ACTION_WIDGET, &page, r),     // widgets registered to be displayed under the page title
-		"head":      RenderWidget(HEAD_WIDGET, &page, r),       // widgets registered to be displayed under the page title
-		"afterView": RenderWidget(AFTER_VIEW_WIDGET, &page, r), // widgets registered to be displayed under the page content in the view page
+		"sidebar":   RenderWidget(SIDEBAR_WIDGET, page, r),    // widgets registered for sidebar
+		"action":    RenderWidget(ACTION_WIDGET, page, r),     // widgets registered to be displayed under the page title
+		"head":      RenderWidget(HEAD_WIDGET, page, r),       // widgets registered to be displayed under the page title
+		"afterView": RenderWidget(AFTER_VIEW_WIDGET, page, r), // widgets registered to be displayed under the page content in the view page
 	})
 }
 
@@ -98,8 +98,8 @@ func getPageEditHandler(w Response, r Request) Output {
 
 	return Render("edit", Locals{
 		"page":         &page,
-		"title":        page.Name,
-		"action":       page.Name,
+		"title":        page.Name(),
+		"action":       page.Name(),
 		"commands":     commands,
 		"content":      content,
 		"autocomplete": acs,
@@ -118,7 +118,7 @@ func postPageHandler(w Response, r Request) Output {
 	content := r.FormValue("content")
 	page.Write(content)
 
-	return Redirect("/" + page.Name)
+	return Redirect("/" + page.Name())
 }
 
 //go:embed public

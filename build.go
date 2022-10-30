@@ -43,16 +43,16 @@ func buildStaticSite(dest string) error {
 		log.Printf("error while processing root path, err: %s", err.Error())
 	}
 
-	EachPage(context.Background(), func(p *Page) {
+	EachPage(context.Background(), func(p Page) {
 		err := buildRoute(
 			srv,
-			"/"+p.Name,
-			path.Join(dest, p.Name),
-			path.Join(dest, p.Name, "index.html"),
+			"/"+p.Name(),
+			path.Join(dest, p.Name()),
+			path.Join(dest, p.Name(), "index.html"),
 		)
 
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name, err.Error())
+			log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
 		}
 	})
 

@@ -22,11 +22,11 @@ import (
 //go:embed templates
 var templates embed.FS
 
-type fileInfoByNameLength []*Page
+type fileInfoByNameLength []Page
 
 func (a fileInfoByNameLength) Len() int           { return len(a) }
 func (a fileInfoByNameLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name) > len(a[j].Name) }
+func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > len(a[j].Name()) }
 
 func init() {
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
@@ -75,20 +75,20 @@ func (s *extension) Parse(parent ast.Node, block text.Reader, pc parser.Context)
 		line = line[1:]
 	}
 
-	var found *Page
+	var found Page
 	var m int
 	var url string
 
 	for _, p := range autolinkPages {
-		if len(line) < len(p.Name) {
+		if len(line) < len(p.Name()) {
 			continue
 		}
 
 		// Found a page
-		if strings.EqualFold(string(line[0:len(p.Name)]), p.Name) {
+		if strings.EqualFold(string(line[0:len(p.Name())]), p.Name()) {
 			found = p
-			url = p.Name
-			m = len(p.Name)
+			url = p.Name()
+			m = len(p.Name())
 			break
 		}
 	}
@@ -114,11 +114,11 @@ func (s *extension) Parse(parent ast.Node, block text.Reader, pc parser.Context)
 	return link
 }
 
-var autolinkPages []*Page
+var autolinkPages []Page
 
-func UpdatePagesList(_ *Page) (err error) {
-	ps := []*Page{}
-	EachPage(context.Background(), func(p *Page) {
+func UpdatePagesList(_ Page) (err error) {
+	ps := []Page{}
+	EachPage(context.Background(), func(p Page) {
 		ps = append(ps, p)
 	})
 	sort.Sort(fileInfoByNameLength(ps))
@@ -130,7 +130,7 @@ var KindPageLink = ast.NewNodeKind("PageLink")
 
 type PageLink struct {
 	ast.BaseInline
-	page  *Page
+	page  Page
 	url   string
 	value *ast.Text
 }
@@ -172,7 +172,7 @@ func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.
 	return ast.WalkContinue, nil
 }
 
-func countTodos(p *Page) (total int, done int) {
+func countTodos(p Page) (total int, done int) {
 	tasks := FindAllInAST[*east.TaskCheckBox](p.AST(), east.KindTaskCheckBox)
 	for _, v := range tasks {
 		total++
@@ -184,16 +184,16 @@ func countTodos(p *Page) (total int, done int) {
 	return
 }
 
-func backlinksSection(p *Page, r Request) template.HTML {
-	if p.Name == INDEX {
+func backlinksSection(p Page, r Request) template.HTML {
+	if p.Name() == INDEX {
 		return ""
 	}
 
-	pages := []*Page{}
+	pages := []Page{}
 
-	EachPage(context.Background(), func(a *Page) {
+	EachPage(context.Background(), func(a Page) {
 		// a page shouldn't mention itself
-		if a.Name == p.Name {
+		if a.Name() == p.Name() {
 			return
 		}
 
@@ -205,7 +205,7 @@ func backlinksSection(p *Page, r Request) template.HTML {
 	return Partial("backlinks", Locals{"pages": pages})
 }
 
-func containLinkTo(n ast.Node, p *Page) bool {
+func containLinkTo(n ast.Node, p Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
 		if t.page.FileName() == p.FileName() {
@@ -232,10 +232,10 @@ func autocompleteFunc() *Autocompletion {
 		Suggestions: []*Suggestion{},
 	}
 
-	EachPage(context.Background(), func(p *Page) {
+	EachPage(context.Background(), func(p Page) {
 		a.Suggestions = append(a.Suggestions, &Suggestion{
-			Text:        p.Name,
-			DisplayText: p.Name,
+			Text:        p.Name(),
+			DisplayText: p.Name(),
 		})
 	})
 

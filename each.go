@@ -26,11 +26,11 @@ func IgnoreDirectory(r *regexp.Regexp) {
 	ignoredDirs = append(ignoredDirs, r)
 }
 
-var pages []*Page
+var pages []Page
 
 // EachPage iterates on all available pages. many extensions
 // uses it to get all pages and maybe parse them and extract needed information
-func EachPage(ctx context.Context, f func(*Page)) {
+func EachPage(ctx context.Context, f func(Page)) {
 	if pages == nil {
 		pages = populatePagesCache(ctx)
 	}
@@ -46,13 +46,13 @@ func EachPage(ctx context.Context, f func(*Page)) {
 	}
 }
 
-func clearPagesCache(_ *Page) (err error) {
+func clearPagesCache(_ Page) (err error) {
 	pages = nil
 	return nil
 }
 
-func populatePagesCache(ctx context.Context) []*Page {
-	pages := []*Page{}
+func populatePagesCache(ctx context.Context) []Page {
+	pages := []Page{}
 
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -75,7 +75,7 @@ func populatePagesCache(ctx context.Context) []*Page {
 			basename := name[:len(name)-len(ext)]
 
 			if ext == ".md" {
-				pages = append(pages, &Page{Name: basename})
+				pages = append(pages, NewPage(basename))
 			}
 
 		}

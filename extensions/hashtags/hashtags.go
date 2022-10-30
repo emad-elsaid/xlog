@@ -98,8 +98,8 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 }
 
 func tagsHandler(_ Response, r Request) Output {
-	tags := map[string][]*Page{}
-	EachPage(context.Background(), func(a *Page) {
+	tags := map[string][]Page{}
+	EachPage(context.Background(), func(a Page) {
 		set := map[string]bool{}
 		hashes := FindAllInAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
@@ -114,7 +114,7 @@ func tagsHandler(_ Response, r Request) Output {
 			if ps, ok := tags[val]; ok {
 				tags[val] = append(ps, a)
 			} else {
-				tags[val] = []*Page{a}
+				tags[val] = []Page{a}
 			}
 		}
 	})
@@ -137,11 +137,11 @@ func tagHandler(w Response, r Request) Output {
 	})
 }
 
-func tagPages(ctx context.Context, keyword string) []*Page {
-	results := []*Page{}
+func tagPages(ctx context.Context, keyword string) []Page {
+	results := []Page{}
 
-	EachPage(ctx, func(p *Page) {
-		if p.Name == INDEX {
+	EachPage(ctx, func(p Page) {
+		if p.Name() == INDEX {
 			return
 		}
 
@@ -157,12 +157,12 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 	return results
 }
 
-func sidebar(p *Page, r Request) template.HTML {
+func sidebar(p Page, r Request) template.HTML {
 	return Partial("tags-sidebar", nil)
 }
 
-func relatedPages(p *Page, r Request) template.HTML {
-	if p.Name == INDEX {
+func relatedPages(p Page, r Request) template.HTML {
+	if p.Name() == INDEX {
 		return ""
 	}
 
@@ -172,10 +172,10 @@ func relatedPages(p *Page, r Request) template.HTML {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
 
-	pages := []*Page{}
+	pages := []Page{}
 
-	EachPage(context.Background(), func(rp *Page) {
-		if rp.Name == p.Name {
+	EachPage(context.Background(), func(rp Page) {
+		if rp.Name() == p.Name() {
 			return
 		}
 
@@ -200,7 +200,7 @@ func autocompleteFunc() *Autocompletion {
 	}
 
 	set := map[string]bool{}
-	EachPage(context.Background(), func(a *Page) {
+	EachPage(context.Background(), func(a Page) {
 		hashes := FindAllInAST[*HashTag](a.AST(), KindHashTag)
 		for _, v := range hashes {
 			set[strings.ToLower(string(v.value))] = true

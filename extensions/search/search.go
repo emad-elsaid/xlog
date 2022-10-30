@@ -22,7 +22,7 @@ func init() {
 	Template(templates, "templates")
 }
 
-func sidebar(_ *Page, _ Request) template.HTML {
+func sidebar(_ Page, _ Request) template.HTML {
 	if READONLY {
 		return ""
 	}
@@ -49,11 +49,11 @@ func search(ctx context.Context, keyword string) []searchResult {
 
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
-	EachPage(ctx, func(p *Page) {
-		match := reg.FindString(p.Name)
+	EachPage(ctx, func(p Page) {
+		match := reg.FindString(p.Name())
 		if len(match) > 0 {
 			results = append(results, searchResult{
-				Page: p.Name,
+				Page: p.Name(),
 				Line: "Matches the file name",
 			})
 			return
@@ -62,7 +62,7 @@ func search(ctx context.Context, keyword string) []searchResult {
 		match = reg.FindString(p.Content())
 		if len(match) > 0 {
 			results = append(results, searchResult{
-				Page: p.Name,
+				Page: p.Name(),
 				Line: match,
 			})
 		}

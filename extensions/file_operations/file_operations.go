@@ -35,13 +35,13 @@ func (f PageRename) OnClick() template.JS {
 	return "renamePage()"
 }
 
-func (f PageRename) Widget(p *Page) template.HTML {
+func (f PageRename) Widget(p Page) template.HTML {
 	if !p.Exists() {
 		return ""
 	}
 
 	return Partial("file-operations-rename", Locals{
-		"page":   p.Name,
+		"page":   p.Name(),
 		"action": "/+/file/rename",
 	})
 }
@@ -59,7 +59,7 @@ func (f PageRename) Handler(w Response, r Request) Output {
 	new := NewPage(r.FormValue("new"))
 	new.Write(old.Content())
 
-	old.Write(fmt.Sprintf("Renamed to: %s", new.Name))
+	old.Write(fmt.Sprintf("Renamed to: %s", new.Name()))
 	return NoContent()
 }
 
@@ -73,13 +73,13 @@ func (f PageDelete) OnClick() template.JS {
 	return "deletePage()"
 }
 
-func (f PageDelete) Widget(p *Page) template.HTML {
+func (f PageDelete) Widget(p Page) template.HTML {
 	if !p.Exists() {
 		return template.HTML("")
 	}
 
 	return Partial("file-operations-delete", Locals{
-		"action": "/+/file/delete?page=" + url.QueryEscape(p.Name),
+		"action": "/+/file/delete?page=" + url.QueryEscape(p.Name()),
 	})
 }
 

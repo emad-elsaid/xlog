@@ -9,7 +9,7 @@ type (
 	// a function that handles a page event. this should be implemented by an
 	// extension and then registered. it will get executed when the event is
 	// triggered
-	PageEventHandler func(*Page) error
+	PageEventHandler func(Page) error
 )
 
 // List of page events. extensions can use these events to register a function
@@ -40,7 +40,7 @@ func Listen(e PageEvent, h PageEventHandler) {
 // Trigger event handlers for a specific page event. page methods use this
 // function to trigger all registered handlers when the page is edited or
 // deleted for example.
-func Trigger(e PageEvent, p *Page) {
+func Trigger(e PageEvent, p Page) {
 	if _, ok := pageEvents[e]; !ok {
 		return
 	}

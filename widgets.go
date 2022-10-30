@@ -11,7 +11,7 @@ type (
 	// rendered in view or edit pages. the extension should define this func
 	// type and register it to be rendered in a specific widgetSpace such as
 	// before or after the page.
-	widgetFunc func(*Page, Request) template.HTML
+	widgetFunc func(Page, Request) template.HTML
 )
 
 // List of widgets spaces that extensions can use to register a widgetFunc to
@@ -30,7 +30,7 @@ var widgets = map[widgetSpace][]widgetFunc{}
 // widget. functions registered by this function will have higher priority than
 // the rest. this function is needed for example to register the search input
 // before any other links in the sidebar
-func PrependWidget(s widgetSpace, f func(*Page, Request) template.HTML) {
+func PrependWidget(s widgetSpace, f func(Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}
 	}
@@ -41,7 +41,7 @@ func PrependWidget(s widgetSpace, f func(*Page, Request) template.HTML) {
 // executed in order when rendering view or edit page. the return values of
 // these widgetfuncs will pass down to the template and injected in reserved
 // places.
-func Widget(s widgetSpace, f func(*Page, Request) template.HTML) {
+func Widget(s widgetSpace, f func(Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}
 	}
@@ -50,7 +50,7 @@ func Widget(s widgetSpace, f func(*Page, Request) template.HTML) {
 
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
-func RenderWidget(s widgetSpace, p *Page, r Request) (o template.HTML) {
+func RenderWidget(s widgetSpace, p Page, r Request) (o template.HTML) {
 	for _, v := range widgets[s] {
 		o += v(p, r)
 	}

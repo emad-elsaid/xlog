@@ -23,7 +23,7 @@ func init() {
 
 func recentHandler(_ Response, r Request) Output {
 	rp := recentPages{}
-	EachPage(context.Background(), func(i *Page) {
+	EachPage(context.Background(), func(i Page) {
 		rp = append(rp, i)
 	})
 
@@ -40,11 +40,11 @@ func recentHandler(_ Response, r Request) Output {
 	})
 }
 
-func recent(p *Page, r Request) template.HTML {
+func recent(p Page, r Request) template.HTML {
 	return Partial("recent-sidebar", nil)
 }
 
-type recentPages []*Page
+type recentPages []Page
 
 func (a recentPages) Len() int           { return len(a) }
 func (a recentPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }

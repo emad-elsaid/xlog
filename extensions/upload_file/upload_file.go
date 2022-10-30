@@ -70,14 +70,14 @@ func (u command) OnClick() template.JS {
 	return u.onClick
 }
 
-func (u command) Widget(p *Page) template.HTML {
+func (u command) Widget(p Page) template.HTML {
 	if !u.main {
 		return ""
 	}
 
 	return Partial("upload-file", Locals{
 		"page":           p,
-		"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name),
+		"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name()),
 		"editModeAction": "/+/upload-file",
 	})
 }
@@ -89,7 +89,7 @@ func uploadFileHandler(w Response, r Request) Output {
 
 	page := NewPage(fileName)
 	if fileName != "" && !page.Exists() {
-		return Redirect("/" + page.Name + "/edit")
+		return Redirect("/" + page.Name() + "/edit")
 	}
 
 	var output string
@@ -128,7 +128,7 @@ func uploadFileHandler(w Response, r Request) Output {
 	if fileName != "" && page.Exists() {
 		content := strings.TrimSpace(page.Content()) + "\n\n" + output + "\n"
 		page.Write(content)
-		return Redirect("/" + page.Name)
+		return Redirect("/" + page.Name())
 	}
 
 	return PlainText(output)

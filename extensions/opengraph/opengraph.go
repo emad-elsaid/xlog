@@ -13,13 +13,13 @@ func init() {
 	Widget(HEAD_WIDGET, opengraphTags)
 }
 
-func opengraphTags(p *Page, r Request) template.HTML {
+func opengraphTags(p Page, r Request) template.HTML {
 	tags := `
 <meta property="og:type" content="article" />
 <meta name="twitter:card" content="summary" />
 `
-	name := p.Name
-	if p.Name == INDEX {
+	name := p.Name()
+	if p.Name() == INDEX {
 		name = SITENAME
 	}
 

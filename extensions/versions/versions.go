@@ -18,7 +18,7 @@ func init() {
 	IgnoreDirectory(regexp.MustCompile(`\.versions$`))
 }
 
-func WriteVersion(p *Page) error {
+func WriteVersion(p Page) error {
 	if !p.Exists() {
 		return nil
 	}
@@ -31,7 +31,7 @@ func WriteVersion(p *Page) error {
 	return ioutil.WriteFile(path.Join(dir, sum), content, 0644)
 }
 
-func VersionMeta(p *Page, _ Request) (t template.HTML) {
+func VersionMeta(p Page, _ Request) (t template.HTML) {
 	dir := p.FileName() + ".versions"
 	files, err := os.ReadDir(dir)
 	if err != nil {
