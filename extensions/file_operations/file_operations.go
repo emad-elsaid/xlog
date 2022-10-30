@@ -22,7 +22,7 @@ func init() {
 	RegisterCommand(delete)
 	Post(`/\+/file/rename`, rename.Handler)
 	Delete(`/\+/file/delete`, delete.Handler)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 type PageRename int

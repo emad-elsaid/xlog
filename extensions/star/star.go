@@ -22,7 +22,7 @@ func init() {
 	RegisterWidget(SIDEBAR_WIDGET, starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 func starredPages(p Page, r Request) template.HTML {

@@ -53,7 +53,7 @@ func init() {
 		onClick: "recordAudio()",
 	})
 	Post(`/\+/upload-file`, uploadFileHandler)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 type command struct {

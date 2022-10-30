@@ -12,9 +12,9 @@ var templates embed.FS
 
 func init() {
 	Get("/manifest.json", manifest)
-	BuildPage("/manifest.json", false)
+	RegisterBuildPage("/manifest.json", false)
 	RegisterWidget(HEAD_WIDGET, head)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 func manifest(w Response, r Request) Output {

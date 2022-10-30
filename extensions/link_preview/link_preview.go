@@ -28,7 +28,7 @@ func init() {
 	RegisterPreprocessor(fbUrlPreprocessor)
 	RegisterPreprocessor(giphyUrlPreprocessor)
 	RegisterPreprocessor(fallbackURLPreprocessor)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)

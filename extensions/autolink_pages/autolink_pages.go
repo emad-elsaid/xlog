@@ -41,7 +41,7 @@ func init() {
 	RegisterWidget(AFTER_VIEW_WIDGET, backlinksSection)
 	RegisterAutocomplete(autocomplete(0))
 
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 type extension struct{}

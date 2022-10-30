@@ -19,7 +19,7 @@ var templates embed.FS
 func init() {
 	Get(`/\+/search`, searchHandler)
 	PrependWidget(SIDEBAR_WIDGET, sidebar)
-	Template(templates, "templates")
+	RegisterTemplate(templates, "templates")
 }
 
 func sidebar(_ Page, _ Request) template.HTML {

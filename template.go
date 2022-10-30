@@ -16,12 +16,12 @@ var templates *template.Template
 var helpers = template.FuncMap{}
 var templatesFSs []fs.FS
 
-// Template registers a filesystem that contains templates, specifying subDir as
+// RegisterTemplate registers a filesystem that contains templates, specifying subDir as
 // the subdirectory name that contains the templates. templates are registered
 // such that the latest registered directory override older ones. template file
 // extensions are signified by TEMPLATE_EXTENSION constant and the file path can
 // be used as template name without this extension
-func Template(t fs.FS, subDir string) {
+func RegisterTemplate(t fs.FS, subDir string) {
 	ts, _ := fs.Sub(t, subDir)
 	templatesFSs = append(templatesFSs, ts)
 }
