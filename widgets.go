@@ -37,11 +37,11 @@ func PrependWidget(s widgetSpace, f func(Page, Request) template.HTML) {
 	widgets[s] = append([]widgetFunc{f}, widgets[s]...)
 }
 
-// Widget Register a function to a widget space. functions registered will be
+// RegisterWidget Register a function to a widget space. functions registered will be
 // executed in order when rendering view or edit page. the return values of
 // these widgetfuncs will pass down to the template and injected in reserved
 // places.
-func Widget(s widgetSpace, f func(Page, Request) template.HTML) {
+func RegisterWidget(s widgetSpace, f func(Page, Request) template.HTML) {
 	if _, ok := widgets[s]; !ok {
 		widgets[s] = []widgetFunc{}
 	}
