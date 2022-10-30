@@ -28,7 +28,7 @@ func init() {
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
 	BuildPage("/+/tags", true)
-	Autocomplete(autocompleteFunc)
+	RegisterAutocomplete(autocomplete(0))
 	Template(templates, "templates")
 	shortcode.ShortCode("hashtag-pages", hashtagPages)
 
@@ -193,11 +193,14 @@ func relatedPages(p Page, r Request) template.HTML {
 	})
 }
 
-func autocompleteFunc() *Autocompletion {
-	a := &Autocompletion{
-		StartChar:   "#",
-		Suggestions: []*Suggestion{},
-	}
+type autocomplete int
+
+func (a autocomplete) StartChar() string {
+	return "#"
+}
+
+func (a autocomplete) Suggestions() []*Suggestion {
+	suggestions := []*Suggestion{}
 
 	set := map[string]bool{}
 	EachPage(context.Background(), func(a Page) {
@@ -208,13 +211,13 @@ func autocompleteFunc() *Autocompletion {
 	})
 
 	for t := range set {
-		a.Suggestions = append(a.Suggestions, &Suggestion{
+		suggestions = append(suggestions, &Suggestion{
 			Text:        "#" + t,
 			DisplayText: t,
 		})
 	}
 
-	return a
+	return suggestions
 }
 
 func hashtagPages(hashtag string) string {

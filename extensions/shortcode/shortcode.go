@@ -31,7 +31,7 @@ func init() {
 		ShortCode(k, v)
 	}
 
-	Autocomplete(autocompleteFunc)
+	RegisterAutocomplete(autocomplete(0))
 }
 
 func ShortCode(name string, shortcode func(string) string) {
@@ -65,18 +65,21 @@ func ShortCode(name string, shortcode func(string) string) {
 	Preprocessor(multilinePreprocessor)
 }
 
-func autocompleteFunc() *Autocompletion {
-	a := &Autocompletion{
-		StartChar:   "/",
-		Suggestions: []*Suggestion{},
-	}
+type autocomplete int
+
+func (a autocomplete) StartChar() string {
+	return "/"
+}
+
+func (a autocomplete) Suggestions() []*Suggestion {
+	suggestions := []*Suggestion{}
 
 	for k := range shortcodes {
-		a.Suggestions = append(a.Suggestions, &Suggestion{
+		suggestions = append(suggestions, &Suggestion{
 			Text:        "/" + k,
 			DisplayText: k,
 		})
 	}
 
-	return a
+	return suggestions
 }

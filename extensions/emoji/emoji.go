@@ -9,14 +9,19 @@ import (
 
 //go:embed emoji.json
 var emojiFile []byte
-var autocomplete = Autocompletion{
-	StartChar:   ":",
-	Suggestions: []*Suggestion{},
-}
 
 func init() {
-	Autocomplete(autocompleteFunc)
+	RegisterAutocomplete(autocomplete(0))
+}
 
+type autocomplete int
+
+func (a autocomplete) StartChar() string {
+	return ":"
+}
+
+// TODO this is a bit inefficient as it parses the emoji json everytime
+func (a autocomplete) Suggestions() []*Suggestion {
 	emojis := []struct {
 		Emoji   string   `json:"emoji"`
 		Aliases []string `json:"aliases"`
@@ -24,16 +29,16 @@ func init() {
 
 	json.Unmarshal(emojiFile, &emojis)
 
+	suggestions := []*Suggestion{}
+
 	for _, v := range emojis {
 		for _, alias := range v.Aliases {
-			autocomplete.Suggestions = append(autocomplete.Suggestions, &Suggestion{
+			suggestions = append(suggestions, &Suggestion{
 				Text:        ":" + alias + ":",
 				DisplayText: v.Emoji + " " + alias,
 			})
 		}
 	}
-}
 
-func autocompleteFunc() *Autocompletion {
-	return &autocomplete
+	return suggestions
 }

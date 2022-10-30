@@ -39,7 +39,7 @@ func init() {
 	Listen(AfterDelete, UpdatePagesList)
 
 	Widget(AFTER_VIEW_WIDGET, backlinksSection)
-	Autocomplete(autocompleteFunc)
+	RegisterAutocomplete(autocomplete(0))
 
 	Template(templates, "templates")
 }
@@ -226,18 +226,21 @@ func containLinkTo(n ast.Node, p Page) bool {
 	return false
 }
 
-func autocompleteFunc() *Autocompletion {
-	a := &Autocompletion{
-		StartChar:   "@",
-		Suggestions: []*Suggestion{},
-	}
+type autocomplete int
+
+func (a autocomplete) StartChar() string {
+	return "@"
+}
+
+func (a autocomplete) Suggestions() []*Suggestion {
+	suggestions := []*Suggestion{}
 
 	EachPage(context.Background(), func(p Page) {
-		a.Suggestions = append(a.Suggestions, &Suggestion{
+		suggestions = append(suggestions, &Suggestion{
 			Text:        p.Name(),
 			DisplayText: p.Name(),
 		})
 	})
 
-	return a
+	return suggestions
 }

@@ -89,20 +89,13 @@ func getPageEditHandler(w Response, r Request) Output {
 		content = page.Content()
 	}
 
-	// Execute all Autocomplete functions and add them to a slice and pass it
-	// down to the template
-	acs := []*Autocompletion{}
-	for _, v := range autocompletes {
-		acs = append(acs, v())
-	}
-
 	return Render("edit", Locals{
 		"page":         &page,
 		"title":        page.Name(),
 		"action":       page.Name(),
 		"commands":     commands,
 		"content":      content,
-		"autocomplete": acs,
+		"autocomplete": autocompletes,
 		"csrf":         CSRF(r),
 	})
 }
