@@ -13,7 +13,7 @@ var templates embed.FS
 func init() {
 	Get("/manifest.json", manifest)
 	RegisterBuildPage("/manifest.json", false)
-	RegisterWidget(HEAD_WIDGET, head)
+	RegisterWidget(HEAD_WIDGET, 1, head)
 	RegisterTemplate(templates, "templates")
 }
 

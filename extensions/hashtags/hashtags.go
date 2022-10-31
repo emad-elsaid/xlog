@@ -23,8 +23,8 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterWidget(SIDEBAR_WIDGET, sidebar)
-	RegisterWidget(AFTER_VIEW_WIDGET, relatedPages)
+	RegisterWidget(SIDEBAR_WIDGET, 1, sidebar)
+	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
 	RegisterBuildPage("/+/tags", true)

@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	RegisterWidget(HEAD_WIDGET, opengraphTags)
+	RegisterWidget(HEAD_WIDGET, 1, opengraphTags)
 }
 
 func opengraphTags(p Page, r Request) template.HTML {

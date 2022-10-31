@@ -35,12 +35,15 @@ var (
 	}
 )
 
-// Some aliases to make it easier
 type (
+	// alias http.ResponseWriter for shorter handler declaration
 	Response = http.ResponseWriter
-	Request  = *http.Request
-	Output   = http.HandlerFunc
-	Locals   map[string]interface{} // passed to templates
+	// alias *http.Request for shorter handler declaration
+	Request = *http.Request
+	// alias of http.HandlerFunc as output is expected from defined http handlers
+	Output = http.HandlerFunc
+	// map of string to any value used for template rendering
+	Locals map[string]interface{} // passed to templates
 )
 
 func init() {
@@ -134,6 +137,10 @@ func checkPath(path string) RouteCheck {
 	}
 }
 
+// Vars returns a map of key = dynamic segment in the path, value = the value of
+// the segment registering a path like `"/edit/{page:.+}"` calling `Vars in the
+// handler will return a map with one key `page` and the value is that part of
+// the path in r
 func Vars(r Request) map[string]string {
 	if rv := r.Context().Value(varsIndex); rv != nil {
 		return rv.(map[string]string)

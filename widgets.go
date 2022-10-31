@@ -24,35 +24,21 @@ const (
 )
 
 // A map to keep track of list of widget functions registered in each widget space
-var widgets = map[widgetSpace][]widgetFunc{}
+var widgets = map[widgetSpace]*plist[widgetFunc]{}
 
-// Register widget function to be rendered in a specific space before any other
-// widget. functions registered by this function will have higher priority than
-// the rest. this function is needed for example to register the search input
-// before any other links in the sidebar
-func PrependWidget(s widgetSpace, f func(Page, Request) template.HTML) {
-	if _, ok := widgets[s]; !ok {
-		widgets[s] = []widgetFunc{}
-	}
-	widgets[s] = append([]widgetFunc{f}, widgets[s]...)
-}
-
-// RegisterWidget Register a function to a widget space. functions registered will be
-// executed in order when rendering view or edit page. the return values of
-// these widgetfuncs will pass down to the template and injected in reserved
-// places.
-func RegisterWidget(s widgetSpace, f func(Page, Request) template.HTML) {
-	if _, ok := widgets[s]; !ok {
-		widgets[s] = []widgetFunc{}
-	}
-	widgets[s] = append(widgets[s], f)
+// RegisterWidget Register a function to a widget space. functions registered
+// will be executed in order of priority lower to higher when rendering view or
+// edit page. the return values of these widgetfuncs will pass down to the
+// template and injected in reserved places.
+func RegisterWidget(s widgetSpace, priority float32, f widgetFunc) {
+	widgets[s] = widgets[s].insert(priority, f)
 }
 
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
 func RenderWidget(s widgetSpace, p Page, r Request) (o template.HTML) {
-	for _, v := range widgets[s] {
-		o += v(p, r)
-	}
+	widgets[s].each(func(f widgetFunc) {
+		o += f(p, r)
+	})
 	return
 }

@@ -15,7 +15,7 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterWidget(SIDEBAR_WIDGET, recent)
+	RegisterWidget(SIDEBAR_WIDGET, 1, recent)
 	Get(`/\+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")

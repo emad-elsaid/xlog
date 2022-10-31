@@ -38,7 +38,7 @@ func init() {
 	Listen(AfterWrite, UpdatePagesList)
 	Listen(AfterDelete, UpdatePagesList)
 
-	RegisterWidget(AFTER_VIEW_WIDGET, backlinksSection)
+	RegisterWidget(AFTER_VIEW_WIDGET, 1, backlinksSection)
 	RegisterAutocomplete(autocomplete(0))
 
 	RegisterTemplate(templates, "templates")

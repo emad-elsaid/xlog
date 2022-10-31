@@ -14,7 +14,7 @@ import (
 
 func init() {
 	Listen(BeforeWrite, WriteVersion)
-	RegisterWidget(ACTION_WIDGET, VersionMeta)
+	RegisterWidget(ACTION_WIDGET, 1, VersionMeta)
 	IgnoreDirectory(regexp.MustCompile(`\.versions$`))
 }
 

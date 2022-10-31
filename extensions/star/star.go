@@ -18,8 +18,8 @@ const STARRED_PAGES = "starred"
 var templates embed.FS
 
 func init() {
-	RegisterWidget(ACTION_WIDGET, starMeta)
-	RegisterWidget(SIDEBAR_WIDGET, starredPages)
+	RegisterWidget(ACTION_WIDGET, 1, starMeta)
+	RegisterWidget(SIDEBAR_WIDGET, 1, starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
 	RegisterTemplate(templates, "templates")
