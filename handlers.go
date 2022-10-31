@@ -63,8 +63,6 @@ func getPageHandler(w Response, r Request) Output {
 	return Render("view", Locals{
 		"page":      &page,
 		"edit":      "/edit/" + page.Name(),
-		"title":     page.Emoji() + " " + page.Name(),
-		"updated":   page.ModTime(),
 		"content":   page.Render(),
 		"commands":  commands,
 		"csrf":      CSRF(r),
@@ -91,8 +89,6 @@ func getPageEditHandler(w Response, r Request) Output {
 
 	return Render("edit", Locals{
 		"page":         &page,
-		"title":        page.Name(),
-		"action":       page.Name(),
 		"commands":     commands,
 		"content":      content,
 		"autocomplete": autocompletes,

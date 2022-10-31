@@ -1,7 +1,7 @@
 {{ template "header" . }}
 <script src="/public/script.js"></script>
 
-<form method="POST" action="/{{ .action }}" class="form" id="editor">
+<form method="POST" action="/{{ .page.Name }}" class="form" id="editor">
   {{ .csrf }}
 	<textarea id="content" name="content">{{ .content }}</textarea>
   <div class="editor-controls">

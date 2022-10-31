@@ -1,7 +1,7 @@
 {{ template "header" . }}
 
 <div class="is-size-7 has-text-grey my-5">
-  <span> Updated: {{ ago .updated}} </span>
+  <span> Updated: {{ ago .page.ModTime }} </span>
 
   {{ .action }}
 

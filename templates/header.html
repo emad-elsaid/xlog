@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <link rel="icon" href="/public/logo.png">
     <link rel="stylesheet" href="/public/style.css">
-    <title>{{.title}} | {{.SITENAME}}</title>
+    <title>{{.page.Emoji}} {{.page.Name}} | {{.SITENAME}}</title>
     {{ .head }}
   </head>
   <body>
@@ -22,7 +22,7 @@
             <span class="icon"><img src="/public/logo.png"/></span>
             <span>{{.SITENAME}}</span>
             <span class="icon"><i class="fas fa-arrow-right"></i></span>
-            <span>{{ .title }}</span>
+            <span>{{ .page.Emoji }} {{ .page.Name }}</span>
           </a>
         </p>
 
