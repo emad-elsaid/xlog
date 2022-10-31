@@ -1,33 +1,29 @@
 package sitemap
 
 import (
-	"embed"
 	"flag"
+	"fmt"
 	"net/url"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
-//go:embed templates
-var templates embed.FS
 var SITEMAP_DOMAIN string
 
 func init() {
 	flag.StringVar(&SITEMAP_DOMAIN, "sitemap.domain", "", "domain name without protocol or trailing / to use for sitemap loc")
-	RegisterTemplate(templates, "templates")
 	Get(`/sitemap\.xml`, handler)
 	RegisterBuildPage("/sitemap.xml", false)
-	RegisterHelper("urlescaper", url.PathEscape)
 }
 
 func handler(w Response, r Request) Output {
-	pages := []Page{}
+	output := `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
+
 	EachPage(r.Context(), func(p Page) {
-		pages = append(pages, p)
+		output += fmt.Sprintf("<url><loc>https://%s/%s</loc></url>", SITEMAP_DOMAIN, url.PathEscape(p.Name()))
 	})
 
-	return Render("sitemap", Locals{
-		"pages":  pages,
-		"domain": SITEMAP_DOMAIN,
-	})
+	output += `</urlset>`
+
+	return PlainText(output)
 }
