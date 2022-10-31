@@ -12,9 +12,9 @@
     {{ if not .READONLY }}{{ template "commands" . }}{{ end }}
 
     <div class="columns">
-      {{ if .SIDEBAR }}
-      {{ template "sidebar" . }}
-      {{ end }}
+
+      {{ if .SIDEBAR }} {{ template "sidebar" . }} {{ end }}
+
       <div class="column">
 
         <p class="p-3">
