@@ -77,6 +77,7 @@ Extensions are defined under `/extensions` sub package. each extension is a subp
 | Upload file     | Add support for upload files, screenshots, audio and camera recording         |
 | Versions        | Keeps list of pages older versions                                            |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                  |
+| Sitemap         | adds support for sitemap.xml for search engine crawling                       |
 
 # Writing Your Own Extension
 
