@@ -32,23 +32,28 @@ var (
 
 func init() {
 	RegisterCommand(command{
+		icon:    "fa-solid fa-file-arrow-up",
 		name:    "Upload File",
 		onClick: "upload()",
 		main:    true,
 	})
 	RegisterCommand(command{
+		icon:    "fa-solid fa-camera",
 		name:    "Screenshot",
 		onClick: "screenshot()",
 	})
 	RegisterCommand(command{
+		icon:    "fa-solid fa-desktop",
 		name:    "Record Screen",
 		onClick: "record()",
 	})
 	RegisterCommand(command{
+		icon:    "fa-solid fa-video",
 		name:    "Record Camera",
 		onClick: "recordCamera()",
 	})
 	RegisterCommand(command{
+		icon:    "fa-solid fa-microphone",
 		name:    "Record Audio",
 		onClick: "recordAudio()",
 	})
@@ -57,9 +62,14 @@ func init() {
 }
 
 type command struct {
+	icon    string
 	name    string
 	onClick template.JS
 	main    bool
+}
+
+func (u command) Icon() string {
+	return u.icon
 }
 
 func (u command) Name() string {

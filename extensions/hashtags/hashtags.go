@@ -23,11 +23,11 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterWidget(SIDEBAR_WIDGET, 1, sidebar)
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
 	Get(`/\+/tags`, tagsHandler)
 	Get(`/\+/tag/{tag}`, tagHandler)
+	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
 	RegisterBuildPage("/+/tags", true)
+	RegisterLink(func(_ Page) []Link { return []Link{link(0)} })
 	RegisterAutocomplete(autocomplete(0))
 	RegisterTemplate(templates, "templates")
 	shortcode.ShortCode("hashtag-pages", hashtagPages)
@@ -39,6 +39,12 @@ func init() {
 		util.Prioritized(&HashTag{}, 999),
 	))
 }
+
+type link int
+
+func (l link) Icon() string { return "fa-solid fa-tags" }
+func (l link) Name() string { return "Hashtags" }
+func (l link) Link() string { return "/+/tags" }
 
 type HashTag struct {
 	ast.BaseInline
@@ -120,9 +126,8 @@ func tagsHandler(_ Response, r Request) Output {
 	})
 
 	return Render("tags", Locals{
-		"title":   "Hashtags",
-		"tags":    tags,
-		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
+		"title": "Hashtags",
+		"tags":  tags,
 	})
 }
 
@@ -131,9 +136,8 @@ func tagHandler(w Response, r Request) Output {
 	tag := vars["tag"]
 
 	return Render("tag", Locals{
-		"title":   "#" + tag,
-		"pages":   tagPages(r.Context(), tag),
-		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
+		"title": "#" + tag,
+		"pages": tagPages(r.Context(), tag),
 	})
 }
 
@@ -155,10 +159,6 @@ func tagPages(ctx context.Context, keyword string) []Page {
 	})
 
 	return results
-}
-
-func sidebar(p Page, r Request) template.HTML {
-	return Partial("tags-sidebar", nil)
 }
 
 func relatedPages(p Page, r Request) template.HTML {

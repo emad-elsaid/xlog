@@ -19,28 +19,43 @@ var templates embed.FS
 
 func init() {
 	RegisterWidget(ACTION_WIDGET, 1, starMeta)
-	RegisterWidget(SIDEBAR_WIDGET, 1, starredPages)
+	RegisterLink(starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
 	RegisterTemplate(templates, "templates")
 }
 
-func starredPages(p Page, r Request) template.HTML {
+type starredPage struct {
+	Page
+}
+
+func (s starredPage) Icon() string {
+	if s.Emoji() == "" {
+		return "fa-solid fa-star"
+	} else {
+		return s.Emoji()
+	}
+}
+
+func (s starredPage) Link() string {
+	return "/" + s.Name()
+}
+
+func starredPages(p Page) []Link {
 	pages := NewPage(STARRED_PAGES)
 	content := strings.TrimSpace(pages.Content())
 	if content == "" {
-		return template.HTML("")
+		return nil
 	}
 
 	list := strings.Split(content, "\n")
-	ps := make([]Page, 0, len(list))
+	ps := make([]Link, 0, len(list))
 	for _, v := range list {
-		p := NewPage(v)
+		p := starredPage{NewPage(v)}
 		ps = append(ps, p)
 	}
-	return Partial("starred", Locals{
-		"pages": ps,
-	})
+
+	return ps
 }
 
 func starMeta(p Page, r Request) template.HTML {

@@ -5,6 +5,8 @@ import "html/template"
 // Command define a command that a user can invoke in view or edit page on a
 // Page.
 type Command interface {
+	// Icon returns the Fontawesome icon class name for the Command
+	Icon() string
 	// Name of the command. to be displayed in the list
 	Name() string
 	// OnClick action. a Javascript code to invoke when the command is executed

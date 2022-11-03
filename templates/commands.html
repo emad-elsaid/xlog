@@ -10,7 +10,13 @@
       </div>
       <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
         <ul class="menu-list">
-          {{ range .commands }}<li><a href="#" onclick="{{.OnClick}}">{{.Name}}</a></li>{{ end }}
+          {{- range .commands -}}
+          <li>
+            <a href="#" onclick="{{.OnClick}}" class="icon-text">
+              <span class="icon"><i class="{{.Icon}}"></i></span>
+              <span>{{.Name}}</span></a>
+          </li>
+          {{- end -}}
         </ul>
       </aside>
     </div>

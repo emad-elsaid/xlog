@@ -9,6 +9,11 @@ require (
 )
 
 require (
+	github.com/wellington/go-libsass v0.9.2 // indirect
+	golang.org/x/net v0.1.0 // indirect
+)
+
+require (
 	github.com/alecthomas/chroma v0.7.0 // indirect
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/dlclark/regexp2 v1.1.6 // indirect
@@ -16,5 +21,5 @@ require (
 	github.com/mattn/go-isatty v0.0.9 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1
-	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
+	golang.org/x/sys v0.1.0 // indirect
 )

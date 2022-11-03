@@ -15,10 +15,10 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterWidget(SIDEBAR_WIDGET, 1, recent)
 	Get(`/\+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")
+	RegisterLink(func(_ Page) []Link { return []Link{links(0)} })
 }
 
 func recentHandler(_ Response, r Request) Output {
@@ -34,9 +34,8 @@ func recentHandler(_ Response, r Request) Output {
 	}
 
 	return Render("recent", Locals{
-		"title":   "Recent",
-		"pages":   rp,
-		"sidebar": RenderWidget(SIDEBAR_WIDGET, nil, r),
+		"title": "Recent",
+		"pages": rp,
 	})
 }
 
@@ -49,3 +48,9 @@ type recentPages []Page
 func (a recentPages) Len() int           { return len(a) }
 func (a recentPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a recentPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }
+
+type links int
+
+func (l links) Icon() string { return "fa-solid fa-clock-rotate-left" }
+func (l links) Name() string { return "Recent" }
+func (l links) Link() string { return "/+/recent" }

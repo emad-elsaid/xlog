@@ -27,6 +27,10 @@ func init() {
 
 type PageRename int
 
+func (f PageRename) Icon() string {
+	return "fa-solid fa-i-cursor"
+}
+
 func (f PageRename) Name() string {
 	return "Rename Page"
 }
@@ -64,6 +68,10 @@ func (f PageRename) Handler(w Response, r Request) Output {
 }
 
 type PageDelete int
+
+func (f PageDelete) Icon() string {
+	return "fa-solid fa-trash"
+}
 
 func (f PageDelete) Name() string {
 	return "Delete Page"

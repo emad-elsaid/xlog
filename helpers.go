@@ -15,6 +15,9 @@ func init() {
 			return ago(time.Since(t))
 		}
 	})
+	RegisterHelper("isFontAwesome", func(i string) bool {
+		return len(i) > 3 && i[0:3] == "fa-"
+	})
 }
 
 // RegisterHelper registers a new helper function. all helpers are used when compiling

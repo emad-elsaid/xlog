@@ -11,6 +11,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/wellington/go-libsass"
 )
 
 const DEST = "public"
@@ -18,8 +20,8 @@ const DEST = "public"
 var CSS_DEST = path.Join(DEST, "style.css")
 var JS_DEST = path.Join(DEST, "script.js")
 
-//go:embed custom.css
-var CUSTOM_CSS []byte
+//go:embed custom.scss
+var CUSTOM_SCSS []byte
 
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
@@ -142,7 +144,16 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		f.Write(CUSTOM_CSS)
+
+		comp, err := libsass.New(f, bytes.NewBuffer(CUSTOM_SCSS))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := comp.Run(); err != nil {
+			log.Fatal(err)
+		}
+
 		f.Close()
 
 		if err = mergeLines(CSS_DEST); err != nil {
