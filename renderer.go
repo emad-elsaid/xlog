@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"github.com/alecthomas/chroma/styles"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting"
@@ -17,7 +18,9 @@ var MarkDownRenderer = goldmark.New(
 		extension.GFM,
 		extension.DefinitionList,
 		extension.Footnote,
-		highlighting.Highlighting,
+		highlighting.NewHighlighting(
+			highlighting.WithCustomStyle(styles.Dracula),
+		),
 		emoji.Emoji,
 	),
 
