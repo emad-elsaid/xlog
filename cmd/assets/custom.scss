@@ -48,23 +48,23 @@
     }
     h2:before {
         counter-increment:h2;
-        content:counter(h1) "." counter(h2) " ";
+        content:counter(h1) "." counter(h2) ". ";
     }
     h3:before {
         counter-increment:h3;
-        content:counter(h1) "." counter(h2) "." counter(h3) " ";
+        content:counter(h1) "." counter(h2) "." counter(h3) ". ";
     }
     h4:before {
         counter-increment:h4;
-        content:counter(h1) "." counter(h2) "." counter(h3)  "." counter(h4) " ";
+        content:counter(h1) "." counter(h2) "." counter(h3)  "." counter(h4) ". ";
     }
     h5:before {
         counter-increment:h5;
-        content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
+        content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". ";
     }
     h6:before {
         counter-increment:h6;
-        content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5)  "." counter(h6) " ";
+        content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5)  "." counter(h6) ". ";
     }
 
     li:has(input[type="checkbox"]) {
@@ -116,11 +116,10 @@
 
 
 .sidebar {
-    height: 100vh;
-    overflow: auto;
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
+    height: 100vh;
+    padding: 0.5em;
     border-right: 1px solid #ddd;
 }
 

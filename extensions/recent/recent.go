@@ -39,9 +39,7 @@ func recentHandler(_ Response, r Request) Output {
 	})
 }
 
-func recent(p Page, r Request) template.HTML {
-	return Partial("recent-sidebar", nil)
-}
+func recent(p Page, r Request) template.HTML { return Partial("recent-sidebar", nil) }
 
 type recentPages []Page
 

@@ -16,14 +16,12 @@
       {{ if .SIDEBAR }} {{ template "sidebar" . }} {{ end }}
 
       <div class="column">
-
-        <p class="p-3">
-          <a href="/" class="title is-4 has-text-weight-bold icon-text">
-            <span class="icon"><img src="/public/logo.png"/></span>
-            <span>{{.SITENAME}}</span>
-            <span class="icon"><i class="fas fa-arrow-right"></i></span>
-            <span>{{ .title }}</span>
-          </a>
-        </p>
-
         <div class="container content is-max-desktop px-3" dir="auto" style="margin-bottom: 20em;">
+          <p class="py-5">
+            <a href="/" class="title is-4 has-text-weight-bold icon-text">
+              <span class="icon"><img src="/public/logo.png"/></span>
+              <span>{{.SITENAME}}</span>
+              <span class="icon"><i class="fas fa-arrow-right"></i></span>
+              <span>{{ .title }}</span>
+            </a>
+          </p>

@@ -150,6 +150,8 @@ func main() {
 			log.Fatal(err)
 		}
 
+		comp.Option(libsass.OutputStyle(libsass.COMPACT_STYLE))
+
 		if err := comp.Run(); err != nil {
 			log.Fatal(err)
 		}

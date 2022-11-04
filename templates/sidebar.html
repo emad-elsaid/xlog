@@ -1,20 +1,23 @@
 {{ with .sidebar }}
-<div class="column is-2"></div>
-<div class="column is-2 is-hidden-mobile sidebar"> {{.}}
-  <ul class="menu-list">
-    {{ range $.links }}
-    {{ range call . $.page }}
-    <li>
-      <a href="{{.Link}}" class="icon-text">
-        <span class="icon">
-          {{ $icon := .Icon }}
-          {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
-        </span>
-        <span>{{.Name}}</span>
-      </a>
-    </li>
-    {{ end }}
-    {{ end }}
-  </ul>
+<div class="column is-2 is-hidden-mobile">
+  <div class="sidebar">
+    {{.}}
+
+    <ul class="menu-list">
+      {{ range $.links }}
+      {{ range call . $.page }}
+      <li>
+        <a href="{{.Link}}" class="icon-text">
+          <span class="icon">
+            {{ $icon := .Icon }}
+            {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
+          </span>
+          <span>{{.Name}}</span>
+        </a>
+      </li>
+      {{ end }}
+      {{ end }}
+    </ul>
+  </div>
 </div>
 {{ end }}
