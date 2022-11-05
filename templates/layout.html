@@ -1,3 +1,4 @@
+{{- define "header" -}}
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -25,3 +26,13 @@
               <span>{{ .title }}</span>
             </a>
           </p>
+
+          {{ end }}
+          {{define "footer" }}
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+{{ end }}
