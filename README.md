@@ -41,6 +41,8 @@ Usage of xlog:
         Should xlog hide write operations, read-only means all write operations will be disabled
   -sidebar
         Should render sidebar. (default true)
+  -sitemap.domain string
+        domain name without protocol or trailing / to use for sitemap loc
   -sitename string
         Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
