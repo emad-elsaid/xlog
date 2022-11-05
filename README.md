@@ -100,6 +100,7 @@ Extensions are defined under `/extensions` sub package. each extension is a subp
 - Add widgets in selected areas of the view page such as before or after rendered HTML
 - Add a Tool to the list of tools triggered with `Ctrl+K` which can execute arbitrary Javascript.
 - Add a route to be exported in case of building static site
+- Add arbitrary link to pages or any URL
 
 Checkout [Go Doc](https://godoc.org/github.com/emad-elsaid/xlog) for the full list of Public API
 
