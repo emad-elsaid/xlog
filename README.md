@@ -86,7 +86,7 @@ Extensions are defined under `/extensions` sub package. each extension is a subp
 - Extensions are Go modules that imports `github.com/emad-elsaid/xlog` package
 - Extension defines `init()` function which calls `xlog` public functions to define new features
 - To use an extension it needs to be imported to your own copy of `cmd/xlog/xlog.go` with `. github.com/user/extension`
-- Extensions can define a new feature in View page or Edit page. checkout the public API[![GoDoc](https://godoc.org/github.com/emad-elsaid/xlog?status.svg)](https://godoc.org/github.com/emad-elsaid/xlog) for full list of available functions.
+- Extensions can define a new feature in View page or Edit page. checkout the [public API](https://godoc.org/github.com/emad-elsaid/xlog) for full list of available functions.
 
 # Core Extensible Features
 
@@ -101,7 +101,7 @@ Extensions are defined under `/extensions` sub package. each extension is a subp
 - Add a Tool to the list of tools triggered with `Ctrl+K` which can execute arbitrary Javascript.
 - Add a route to be exported in case of building static site
 
-Checkout Go Doc [![GoDoc](https://godoc.org/github.com/emad-elsaid/xlog?status.svg)](https://godoc.org/github.com/emad-elsaid/xlog) for the full list of Public API
+Checkout [Go Doc](https://godoc.org/github.com/emad-elsaid/xlog) for the full list of Public API
 
 # License
 
