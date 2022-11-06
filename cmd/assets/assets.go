@@ -18,7 +18,6 @@ import (
 const DEST = "public"
 
 var CSS_DEST = path.Join(DEST, "style.css")
-var JS_DEST = path.Join(DEST, "script.js")
 
 //go:embed custom.scss
 var CUSTOM_SCSS []byte
@@ -26,8 +25,6 @@ var CUSTOM_SCSS []byte
 var CSS_URLS = []string{
 	"https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.css",
 	"https://cdn.jsdelivr.net/npm/bulma-prefers-dark@0.1.0-beta.1/css/bulma-prefers-dark.css",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.css",
-	"https://codemirror.net/5/addon/hint/show-hint.css",
 }
 
 type zipURL = string
@@ -40,17 +37,6 @@ var CSS_ZIP = map[zipURL]map[zipPath]string{
 	},
 }
 
-var JS_URLS = []string{
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/lib/codemirror.min.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/addon/mode/overlay.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/markdown/markdown.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/xml/xml.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/gfm/gfm.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/javascript/javascript.js",
-	"https://cdn.jsdelivr.net/npm/codemirror@5.65.4/mode/go/go.js",
-	"https://codemirror.net/5/addon/hint/show-hint.js",
-}
-
 func main() {
 	// ensure DEST exists
 	if _, err := os.Stat(DEST); err != nil {
@@ -61,11 +47,6 @@ func main() {
 	}
 
 	err := urlsToFile(CSS_URLS, CSS_DEST)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = urlsToFile(JS_URLS, JS_DEST)
 	if err != nil {
 		log.Fatal(err)
 	}
