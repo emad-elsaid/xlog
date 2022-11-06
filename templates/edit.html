@@ -25,6 +25,7 @@
          "@codemirror/commands": "https://unpkg.com/@codemirror/commands@6.1.2/dist/index.js",
          "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
          "@codemirror/search": "https://unpkg.com/@codemirror/search@6.2.2/dist/index.js",
+         "@codemirror/language-data": "https://unpkg.com/@codemirror/language-data@6.1.0/dist/index.js",
          "@lezer/markdown": "https://unpkg.com/@lezer/markdown@1.0.2/dist/index.js",
          "@lezer/common": "https://unpkg.com/@lezer/common@1.0.1/dist/index.js",
          "@lezer/highlight": "https://unpkg.com/@lezer/highlight@1.1.2/dist/index.js",
@@ -41,6 +42,7 @@
 <script type="module">
  import {EditorState} from "@codemirror/state"
  import {
+     markdown,
      markdownLanguage,
      markdownKeymap
  } from "@codemirror/lang-markdown"
@@ -78,6 +80,7 @@
      closeBrackets,
      closeBracketsKeymap
  } from "@codemirror/autocomplete"
+ import {languages} from "@codemirror/language-data"
 
 
  const textarea = document.getElementById("content")
@@ -88,7 +91,7 @@
      },
  })
 
- function myCompletions(context) {
+ function Completions(context) {
      let word = context.matchBefore(/[^\s]+/)
      if ( word === null ) return null
      if ( word.from == word.to && !context.explicit) return null
@@ -108,9 +111,13 @@
  const startState = EditorState.create({
      doc: textarea.value,
      extensions: [
-         markdownLanguage,
+         markdown({
+             base: markdownLanguage,
+             addKeymap: true,
+             codeLanguages: languages,
+         }),
          markdownLanguage.data.of({
-             autocomplete: myCompletions
+             autocomplete: Completions
          }),
          theme,
          EditorState.allowMultipleSelections.of(true),
