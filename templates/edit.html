@@ -22,7 +22,6 @@
          "@codemirror/lang-javascript": "https://unpkg.com/@codemirror/lang-javascript@6.1.1/dist/index.js",
          "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
          "@codemirror/lang-markdown":  "https://unpkg.com/@codemirror/lang-markdown@6.0.4/dist/index.js",
-         "@codemirror/lint": "https://unpkg.com/@codemirror/lint@6.0.0/dist/index.js",
          "@codemirror/commands": "https://unpkg.com/@codemirror/commands@6.1.2/dist/index.js",
          "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
          "@codemirror/search": "https://unpkg.com/@codemirror/search@6.2.2/dist/index.js",
@@ -41,8 +40,10 @@
 </script>
 <script type="module">
  import {EditorState} from "@codemirror/state"
- import {markdownLanguage} from "@codemirror/lang-markdown"
- import {lintKeymap} from "@codemirror/lint"
+ import {
+     markdownLanguage,
+     markdownKeymap
+ } from "@codemirror/lang-markdown"
  import {
      EditorView,
      keymap,
@@ -71,6 +72,7 @@
      highlightSelectionMatches
  } from "@codemirror/search"
  import {
+     CompletionContext,
      autocompletion,
      completionKeymap,
      closeBrackets,
@@ -86,10 +88,30 @@
      },
  })
 
+ function myCompletions(context) {
+     let word = context.matchBefore(/[^\s]+/)
+     if ( word === null ) return null
+     if ( word.from == word.to && !context.explicit) return null
+
+     {{ range .autocomplete }}
+     if ( word.text.startsWith('{{.StartChar}}') ) {
+         return {
+             from: word.from,
+             options: [
+                 {{range .Suggestions }} {apply: '{{.Text}}', label: '{{.DisplayText}}'}, {{end}}
+             ]
+         }
+     }
+     {{ end }}
+ }
+
  const startState = EditorState.create({
      doc: textarea.value,
      extensions: [
          markdownLanguage,
+         markdownLanguage.data.of({
+             autocomplete: myCompletions
+         }),
          theme,
          EditorState.allowMultipleSelections.of(true),
          EditorView.lineWrapping,
@@ -107,12 +129,12 @@
          crosshairCursor(),
          highlightSelectionMatches(),
          keymap.of([
+             ...markdownKeymap,
              ...closeBracketsKeymap,
              ...defaultKeymap,
              ...searchKeymap,
              ...historyKeymap,
              ...completionKeymap,
-             ...lintKeymap,
              indentWithTab
          ])
      ],
@@ -125,9 +147,7 @@
 
  view.focus()
 
- const syncEditor = () => {
-     textarea.value = view.state.sliceDoc()
- };
+ const syncEditor = () => { textarea.value = view.state.sliceDoc() };
 
  form.addEventListener("submit", syncEditor)
 
@@ -140,93 +160,5 @@
          form.submit()
      }
  })
-</script>
-
-<script type="application/javascript">
- /* CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
-  *     cm.on('inputRead', function (cm, change) {
-  *         autoSuggest(cm, value, change);
-  *     });
-  * }); */
-
- function autoSuggest(cm, value, change) {
-     var mode = cm.getModeAt(cm.getCursor());
-
-     for (var i = 0, len = value.length; i < len; i++) {
-         if (mode.name === value[i].mode && change.text[0] === value[i].startChar) {
-             cm.showHint({
-                 completeSingle: false,
-                 hint: (function(iterator){
-                     return function (cm, options) {
-                         var cur = cm.getCursor(),
-                             token = cm.getTokenAt(cur);
-                         var start = token.start,
-                             end = token.end;
-                         for(
-                             start = token.end;
-                             start>0 && cm.getTokenAt({line: cur.line, ch: start}).string != value[iterator].startChar;
-                             start--
-                         ){}
-
-                         var filter = editor
-                             .getDoc()
-                             .getRange({line: cur.line, ch: start}, {line: cur.line, ch: end})
-                             .toLowerCase();
-                         var allList = value[iterator].listCallback();
-                         var filtered = allList.filter(e => e.text.toLowerCase().includes(filter));
-
-                         return {
-                             list: filtered,
-                             from: CodeMirror.Pos(cur.line, start-1),
-                             to: CodeMirror.Pos(cur.line, end)
-                         };
-                     }
-                 })(i)
-             });
-         }
-     }
- }
-
- /* var editor = CodeMirror.fromTextArea(textarea, {
-  *     mode: "gfm",
-  *     autofocus: true,
-  *     spellcheck: true,
-  *     lineWrapping: true,
-  *     viewportMargin: Infinity,
-  *     autoSuggest: [
-
-  *         {{ range .autocomplete }}
-  *         {
-  *             mode: 'markdown',
-  *             startChar: '{{.StartChar}}',
-  *             listCallback: function() {
-  *                 return [
-  *                     {{range .Suggestions }}
-  *                     {
-  *                         text: '{{.Text}} ',
-  *                         displayText: '{{.DisplayText}}'
-  *                     },
-  *                     {{end}}
-  *                 ]
-  *             }
-  *         },
-  *         {{ end }}
-
-  *     ]
-  * }); */
-
- /* function toggleRTL(char) {
-  *     if(char == "Backspace") return;
-
-  *     const punc = /[\s.,\/#!$%\^&\*;:{}=\-_`~()]/;
-  *     if(punc.test(char)) return;
-
-  *     const arabic = /[\u0600-\u06FF]/;
-  *     if(arabic.test(char)){
-  *         editor.setDirection('rtl');
-  *     }else{
-  *         editor.setDirection('ltr');
-  *     }
-  * } */
 </script>
 {{ template "footer" . }}

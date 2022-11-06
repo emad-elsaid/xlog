@@ -77,7 +77,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	for k := range shortcodes {
 		suggestions = append(suggestions, &Suggestion{
 			Text:        "/" + k,
-			DisplayText: k,
+			DisplayText: "/" + k,
 		})
 	}
 

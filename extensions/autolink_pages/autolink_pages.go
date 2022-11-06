@@ -238,7 +238,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	EachPage(context.Background(), func(p Page) {
 		suggestions = append(suggestions, &Suggestion{
 			Text:        p.Name(),
-			DisplayText: p.Name(),
+			DisplayText: "@" + p.Name(),
 		})
 	})
 

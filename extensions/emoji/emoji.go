@@ -35,7 +35,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 		for _, alias := range v.Aliases {
 			suggestions = append(suggestions, &Suggestion{
 				Text:        ":" + alias + ":",
-				DisplayText: v.Emoji + " " + alias,
+				DisplayText: ":" + v.Emoji + " " + alias,
 			})
 		}
 	}

@@ -213,7 +213,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	for t := range set {
 		suggestions = append(suggestions, &Suggestion{
 			Text:        "#" + t,
-			DisplayText: t,
+			DisplayText: "#" + t,
 		})
 	}
 

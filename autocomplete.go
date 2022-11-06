@@ -10,7 +10,7 @@ type Autocomplete interface {
 // Suggestions represent an item in the list of autocomplete menu in the edit page
 type Suggestion struct {
 	Text        string // The text that gets injected in the editor if this option is chosen
-	DisplayText string // The display text for this item in the menu. this can be more cosmetic.
+	DisplayText string // The display text for this item in the menu. this can be more cosmetic. it has to start with the StartChar as the editor filter the list using this field
 }
 
 // Holds a list of registered autocomplete functions
