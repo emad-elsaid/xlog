@@ -2,7 +2,7 @@
 
 <form method="POST" action="/{{ .page.Name }}" class="form" id="editor">
   {{ .csrf }}
-	<textarea id="content" name="content">{{ .content }}</textarea>
+	<textarea id="content" name="content" class="is-hidden">{{ .content }}</textarea>
   <div class="editor-controls">
     <button type="submit" class="button is-link">
       <span class="icon"><i class="fa-solid fa-floppy-disk"></i></span>
@@ -77,11 +77,9 @@
      closeBracketsKeymap
  } from "@codemirror/autocomplete"
 
+
  const textarea = document.getElementById("content")
- textarea.setAttribute("hidden", "true");
-
- const editor = document.getElementById("editor")
-
+ const form = document.getElementById("editor")
  const theme = EditorView.theme({
      ".cm-line": {
          fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif',
@@ -93,13 +91,13 @@
      extensions: [
          markdownLanguage,
          theme,
+         EditorState.allowMultipleSelections.of(true),
+         EditorView.lineWrapping,
+         EditorView.perLineTextDirection.of(true),
          highlightSpecialChars(),
          history(),
          drawSelection(),
          dropCursor(),
-         EditorState.allowMultipleSelections.of(true),
-         EditorView.lineWrapping,
-         EditorView.perLineTextDirection.of(true),
          indentOnInput(),
          syntaxHighlighting(defaultHighlightStyle, {fallback: true}),
          bracketMatching(),
@@ -122,11 +120,28 @@
 
  const view = new EditorView({
      state: startState,
-     parent: editor,
+     parent: form,
  })
 
  view.focus()
+
+ const syncEditor = () => {
+     textarea.value = view.state.sliceDoc()
+ };
+
+ form.addEventListener("submit", syncEditor)
+
+ document.addEventListener('keydown', function(event) {
+     const e = event || window.event
+
+     if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
+         e.preventDefault()
+         syncEditor()
+         form.submit()
+     }
+ })
 </script>
+
 <script type="application/javascript">
  /* CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
   *     cm.on('inputRead', function (cm, change) {
@@ -172,9 +187,7 @@
      }
  }
 
- var form = document.getElementById("editor");
- var content = document.getElementById("content");
- /* var editor = CodeMirror.fromTextArea(content, {
+ /* var editor = CodeMirror.fromTextArea(textarea, {
   *     mode: "gfm",
   *     autofocus: true,
   *     spellcheck: true,
@@ -202,28 +215,18 @@
   *     ]
   * }); */
 
- /* document.addEventListener('keydown', function(event) {
-  *     const e = event || window.event;
-  *     toggleRTL(e.key);
+ /* function toggleRTL(char) {
+  *     if(char == "Backspace") return;
 
-  *     if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
-  *         e.preventDefault();
-  *         document.getElementById("editor").submit();
+  *     const punc = /[\s.,\/#!$%\^&\*;:{}=\-_`~()]/;
+  *     if(punc.test(char)) return;
+
+  *     const arabic = /[\u0600-\u06FF]/;
+  *     if(arabic.test(char)){
+  *         editor.setDirection('rtl');
+  *     }else{
+  *         editor.setDirection('ltr');
   *     }
-  * }); */
-
- function toggleRTL(char) {
-     if(char == "Backspace") return;
-
-     const punc = /[\s.,\/#!$%\^&\*;:{}=\-_`~()]/;
-     if(punc.test(char)) return;
-
-     const arabic = /[\u0600-\u06FF]/;
-     if(arabic.test(char)){
-         editor.setDirection('rtl');
-     }else{
-         editor.setDirection('ltr');
-     }
- }
+  * } */
 </script>
 {{ template "footer" . }}
