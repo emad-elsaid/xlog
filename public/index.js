@@ -1,12 +1,40 @@
-import {EditorView} from "@codemirror/view"
 import {EditorState} from "@codemirror/state"
 import {markdownLanguage} from "@codemirror/lang-markdown"
 import {lintKeymap} from "@codemirror/lint"
-import {keymap, highlightSpecialChars, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLineGutter} from "@codemirror/view"
-import {defaultHighlightStyle, syntaxHighlighting, indentOnInput, bracketMatching, foldGutter, foldKeymap} from "@codemirror/language"
-import {defaultKeymap, history, historyKeymap, indentWithTab} from "@codemirror/commands"
-import {searchKeymap, highlightSelectionMatches} from "@codemirror/search"
-import {autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap} from "@codemirror/autocomplete"
+import {
+  EditorView,
+  keymap,
+  highlightSpecialChars,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  crosshairCursor,
+  highlightActiveLineGutter
+} from "@codemirror/view@6.4.0"
+import {
+  defaultHighlightStyle,
+  syntaxHighlighting,
+  indentOnInput,
+  bracketMatching,
+  foldGutter,
+  foldKeymap
+} from "@codemirror/language"
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  indentWithTab
+} from "@codemirror/commands"
+import {
+  searchKeymap,
+  highlightSelectionMatches
+} from "@codemirror/search"
+import {
+  autocompletion,
+  completionKeymap,
+  closeBrackets,
+  closeBracketsKeymap
+} from "@codemirror/autocomplete"
 
 const textarea = document.getElementById("content")
 textarea.setAttribute("hidden", "true");
@@ -41,7 +69,8 @@ const startState = EditorState.create({
       ...completionKeymap,
       ...lintKeymap,
       indentWithTab
-    ])  ],
+    ])
+  ],
 })
 
 const view = new EditorView({

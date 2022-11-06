@@ -14,34 +14,39 @@
 <script type="importmap">
 {
   "imports": {
-      "@codemirror/view": "/public/@codemirror/view/dist/index.js",
-      "@codemirror/state": "/public/@codemirror/state/dist/index.js",
-      "@codemirror/lang-markdown": "/public/@codemirror/lang-markdown/dist/index.js",
-      "@codemirror/lint": "/public/@codemirror/lint/dist/index.js",
-      "@codemirror/language": "/public/@codemirror/language/dist/index.js",
-      "@codemirror/commands": "/public/@codemirror/commands/dist/index.js",
-      "@codemirror/search": "/public/@codemirror/search/dist/index.js",
-      "@codemirror/autocomplete": "/public/@codemirror/autocomplete/dist/index.js",
-      "style-mod": "/public/style-mod/src/style-mod.js",
-      "w3c-keyname": "/public/w3c-keyname/index.es.js",
-      "@lezer/markdown": "/public/@lezer/markdown/dist/index.js",
-      "@codemirror/lang-html": "/public/@codemirror/lang-html/dist/index.js",
-      "@lezer/common": "/public/@lezer/common/dist/index.js",
-      "@lezer/highlight": "/public/@lezer/highlight/dist/index.js",
-      "@lezer/html": "/public/@lezer/html/dist/index.es.js",
-      "@lezer/lr": "/public/@lezer/lr/dist/index.js",
-      "@codemirror/lang-css": "/public/@codemirror/lang-css/dist/index.js",
-      "@codemirror/lang-javascript": "/public/@codemirror/lang-javascript/dist/index.js"
+      "@codemirror/view@6.4.0": "https://unpkg.com/@codemirror/view@6.4.0/dist/index.js",
+      "@codemirror/view": "https://unpkg.com/@codemirror/view@6.4.0/dist/index.js",
+      "@codemirror/state": "https://unpkg.com/@codemirror/state?module",
+      "@codemirror/language": "https://unpkg.com/@codemirror/language@6.3.0/dist/index.js",
+      "@codemirror/lang-html": "https://unpkg.com/@codemirror/lang-html@6.1.3/dist/index.js",
+      "@codemirror/lang-css": "https://unpkg.com/@codemirror/lang-css@6.0.1/dist/index.js",
+      "@codemirror/lang-javascript": "https://unpkg.com/@codemirror/lang-javascript@6.1.1/dist/index.js",
+      "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
+      "@codemirror/lang-markdown":  "https://unpkg.com/@codemirror/lang-markdown@6.0.4/dist/index.js",
+      "@codemirror/lint": "https://unpkg.com/@codemirror/lint@6.0.0/dist/index.js",
+      "@codemirror/commands": "https://unpkg.com/@codemirror/commands@6.1.2/dist/index.js",
+      "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
+      "@codemirror/search": "https://unpkg.com/@codemirror/search@6.2.2/dist/index.js",
+      "@lezer/markdown": "https://unpkg.com/@lezer/markdown@1.0.2/dist/index.js",
+      "@lezer/common": "https://unpkg.com/@lezer/common@1.0.1/dist/index.js",
+      "@lezer/highlight": "https://unpkg.com/@lezer/highlight@1.1.2/dist/index.js",
+      "@lezer/html": "https://unpkg.com/@lezer/html@1.0.1/dist/index.es.js",
+      "@lezer/lr": "https://unpkg.com/@lezer/lr@1.2.3/dist/index.js",
+      "@lezer/css": "https://unpkg.com/@lezer/css@1.0.1/dist/index.es.js",
+      "@lezer/javascript": "https://unpkg.com/@lezer/javascript@1.0.2/dist/index.es.js",
+      "crelt": "https://unpkg.com/crelt@1.0.5/index.es.js",
+      "style-mod": "https://unpkg.com/style-mod?module",
+      "w3c-keyname": "https://unpkg.com/w3c-keyname?module"
   }
-}
+ }
 </script>
 <script src="/public/index.js" type="module"></script>
 <script type="application/javascript">
- CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
-     cm.on('inputRead', function (cm, change) {
-         autoSuggest(cm, value, change);
-     });
- });
+ /* CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
+  *     cm.on('inputRead', function (cm, change) {
+  *         autoSuggest(cm, value, change);
+  *     });
+  * }); */
 
  function autoSuggest(cm, value, change) {
      var mode = cm.getModeAt(cm.getCursor());
@@ -83,43 +88,43 @@
 
  var form = document.getElementById("editor");
  var content = document.getElementById("content");
- var editor = CodeMirror.fromTextArea(content, {
-     mode: "gfm",
-     autofocus: true,
-     spellcheck: true,
-     lineWrapping: true,
-     viewportMargin: Infinity,
-     autoSuggest: [
+ /* var editor = CodeMirror.fromTextArea(content, {
+  *     mode: "gfm",
+  *     autofocus: true,
+  *     spellcheck: true,
+  *     lineWrapping: true,
+  *     viewportMargin: Infinity,
+  *     autoSuggest: [
 
-         {{ range .autocomplete }}
-         {
-             mode: 'markdown',
-             startChar: '{{.StartChar}}',
-             listCallback: function() {
-                 return [
-                     {{range .Suggestions }}
-                     {
-                         text: '{{.Text}} ',
-                         displayText: '{{.DisplayText}}'
-                     },
-                     {{end}}
-                 ]
-             }
-         },
-         {{ end }}
+  *         {{ range .autocomplete }}
+  *         {
+  *             mode: 'markdown',
+  *             startChar: '{{.StartChar}}',
+  *             listCallback: function() {
+  *                 return [
+  *                     {{range .Suggestions }}
+  *                     {
+  *                         text: '{{.Text}} ',
+  *                         displayText: '{{.DisplayText}}'
+  *                     },
+  *                     {{end}}
+  *                 ]
+  *             }
+  *         },
+  *         {{ end }}
 
-     ]
- });
+  *     ]
+  * }); */
 
- document.addEventListener('keydown', function(event) {
-     const e = event || window.event;
-     toggleRTL(e.key);
+ /* document.addEventListener('keydown', function(event) {
+  *     const e = event || window.event;
+  *     toggleRTL(e.key);
 
-     if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
-         e.preventDefault();
-         document.getElementById("editor").submit();
-     }
- });
+  *     if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {
+  *         e.preventDefault();
+  *         document.getElementById("editor").submit();
+  *     }
+  * }); */
 
  function toggleRTL(char) {
      if(char == "Backspace") return;
