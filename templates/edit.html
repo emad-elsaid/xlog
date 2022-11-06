@@ -12,35 +12,121 @@
 </form>
 
 <script type="importmap">
-{
-  "imports": {
-      "@codemirror/view@6.4.0": "https://unpkg.com/@codemirror/view@6.4.0/dist/index.js",
-      "@codemirror/view": "https://unpkg.com/@codemirror/view@6.4.0/dist/index.js",
-      "@codemirror/state": "https://unpkg.com/@codemirror/state?module",
-      "@codemirror/language": "https://unpkg.com/@codemirror/language@6.3.0/dist/index.js",
-      "@codemirror/lang-html": "https://unpkg.com/@codemirror/lang-html@6.1.3/dist/index.js",
-      "@codemirror/lang-css": "https://unpkg.com/@codemirror/lang-css@6.0.1/dist/index.js",
-      "@codemirror/lang-javascript": "https://unpkg.com/@codemirror/lang-javascript@6.1.1/dist/index.js",
-      "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
-      "@codemirror/lang-markdown":  "https://unpkg.com/@codemirror/lang-markdown@6.0.4/dist/index.js",
-      "@codemirror/lint": "https://unpkg.com/@codemirror/lint@6.0.0/dist/index.js",
-      "@codemirror/commands": "https://unpkg.com/@codemirror/commands@6.1.2/dist/index.js",
-      "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
-      "@codemirror/search": "https://unpkg.com/@codemirror/search@6.2.2/dist/index.js",
-      "@lezer/markdown": "https://unpkg.com/@lezer/markdown@1.0.2/dist/index.js",
-      "@lezer/common": "https://unpkg.com/@lezer/common@1.0.1/dist/index.js",
-      "@lezer/highlight": "https://unpkg.com/@lezer/highlight@1.1.2/dist/index.js",
-      "@lezer/html": "https://unpkg.com/@lezer/html@1.0.1/dist/index.es.js",
-      "@lezer/lr": "https://unpkg.com/@lezer/lr@1.2.3/dist/index.js",
-      "@lezer/css": "https://unpkg.com/@lezer/css@1.0.1/dist/index.es.js",
-      "@lezer/javascript": "https://unpkg.com/@lezer/javascript@1.0.2/dist/index.es.js",
-      "crelt": "https://unpkg.com/crelt@1.0.5/index.es.js",
-      "style-mod": "https://unpkg.com/style-mod?module",
-      "w3c-keyname": "https://unpkg.com/w3c-keyname?module"
-  }
+ {
+     "imports": {
+         "@codemirror/view": "https://unpkg.com/@codemirror/view@6.4.0/dist/index.js",
+         "@codemirror/state": "https://unpkg.com/@codemirror/state?module",
+         "@codemirror/language": "https://unpkg.com/@codemirror/language@6.3.0/dist/index.js",
+         "@codemirror/lang-html": "https://unpkg.com/@codemirror/lang-html@6.1.3/dist/index.js",
+         "@codemirror/lang-css": "https://unpkg.com/@codemirror/lang-css@6.0.1/dist/index.js",
+         "@codemirror/lang-javascript": "https://unpkg.com/@codemirror/lang-javascript@6.1.1/dist/index.js",
+         "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
+         "@codemirror/lang-markdown":  "https://unpkg.com/@codemirror/lang-markdown@6.0.4/dist/index.js",
+         "@codemirror/lint": "https://unpkg.com/@codemirror/lint@6.0.0/dist/index.js",
+         "@codemirror/commands": "https://unpkg.com/@codemirror/commands@6.1.2/dist/index.js",
+         "@codemirror/autocomplete": "https://unpkg.com/@codemirror/autocomplete@6.3.0/dist/index.js",
+         "@codemirror/search": "https://unpkg.com/@codemirror/search@6.2.2/dist/index.js",
+         "@lezer/markdown": "https://unpkg.com/@lezer/markdown@1.0.2/dist/index.js",
+         "@lezer/common": "https://unpkg.com/@lezer/common@1.0.1/dist/index.js",
+         "@lezer/highlight": "https://unpkg.com/@lezer/highlight@1.1.2/dist/index.js",
+         "@lezer/html": "https://unpkg.com/@lezer/html@1.0.1/dist/index.es.js",
+         "@lezer/lr": "https://unpkg.com/@lezer/lr@1.2.3/dist/index.js",
+         "@lezer/css": "https://unpkg.com/@lezer/css@1.0.1/dist/index.es.js",
+         "@lezer/javascript": "https://unpkg.com/@lezer/javascript@1.0.2/dist/index.es.js",
+         "crelt": "https://unpkg.com/crelt@1.0.5/index.es.js",
+         "style-mod": "https://unpkg.com/style-mod?module",
+         "w3c-keyname": "https://unpkg.com/w3c-keyname?module"
+     }
  }
 </script>
-<script src="/public/index.js" type="module"></script>
+<script type="module">
+ import {EditorState} from "@codemirror/state"
+ import {markdownLanguage} from "@codemirror/lang-markdown"
+ import {lintKeymap} from "@codemirror/lint"
+ import {
+     EditorView,
+     keymap,
+     highlightSpecialChars,
+     drawSelection,
+     dropCursor,
+     rectangularSelection,
+     crosshairCursor
+ } from "@codemirror/view"
+ import {
+     defaultHighlightStyle,
+     syntaxHighlighting,
+     indentOnInput,
+     bracketMatching,
+     foldGutter,
+     foldKeymap
+ } from "@codemirror/language"
+ import {
+     defaultKeymap,
+     history,
+     historyKeymap,
+     indentWithTab
+ } from "@codemirror/commands"
+ import {
+     searchKeymap,
+     highlightSelectionMatches
+ } from "@codemirror/search"
+ import {
+     autocompletion,
+     completionKeymap,
+     closeBrackets,
+     closeBracketsKeymap
+ } from "@codemirror/autocomplete"
+
+ const textarea = document.getElementById("content")
+ textarea.setAttribute("hidden", "true");
+
+ const editor = document.getElementById("editor")
+
+ const theme = EditorView.theme({
+     ".cm-line": {
+         fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif',
+     },
+ })
+
+ const startState = EditorState.create({
+     doc: textarea.value,
+     extensions: [
+         markdownLanguage,
+         theme,
+         highlightSpecialChars(),
+         history(),
+         drawSelection(),
+         dropCursor(),
+         EditorState.allowMultipleSelections.of(true),
+         EditorView.lineWrapping,
+         EditorView.perLineTextDirection.of(true),
+         indentOnInput(),
+         syntaxHighlighting(defaultHighlightStyle, {fallback: true}),
+         bracketMatching(),
+         closeBrackets(),
+         autocompletion(),
+         rectangularSelection(),
+         crosshairCursor(),
+         highlightSelectionMatches(),
+         keymap.of([
+             ...closeBracketsKeymap,
+             ...defaultKeymap,
+             ...searchKeymap,
+             ...historyKeymap,
+             ...completionKeymap,
+             ...lintKeymap,
+             indentWithTab
+         ])
+     ],
+ })
+
+ const view = new EditorView({
+     state: startState,
+     parent: editor,
+ })
+
+ view.focus()
+</script>
 <script type="application/javascript">
  /* CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
   *     cm.on('inputRead', function (cm, change) {
