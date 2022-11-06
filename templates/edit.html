@@ -1,5 +1,4 @@
 {{ template "header" . }}
-<script src="/public/script.js"></script>
 
 <form method="POST" action="/{{ .page.Name }}" class="form" id="editor">
   {{ .csrf }}
@@ -12,6 +11,31 @@
   </div>
 </form>
 
+<script type="importmap">
+{
+  "imports": {
+      "@codemirror/view": "/public/@codemirror/view/dist/index.js",
+      "@codemirror/state": "/public/@codemirror/state/dist/index.js",
+      "@codemirror/lang-markdown": "/public/@codemirror/lang-markdown/dist/index.js",
+      "@codemirror/lint": "/public/@codemirror/lint/dist/index.js",
+      "@codemirror/language": "/public/@codemirror/language/dist/index.js",
+      "@codemirror/commands": "/public/@codemirror/commands/dist/index.js",
+      "@codemirror/search": "/public/@codemirror/search/dist/index.js",
+      "@codemirror/autocomplete": "/public/@codemirror/autocomplete/dist/index.js",
+      "style-mod": "/public/style-mod/src/style-mod.js",
+      "w3c-keyname": "/public/w3c-keyname/index.es.js",
+      "@lezer/markdown": "/public/@lezer/markdown/dist/index.js",
+      "@codemirror/lang-html": "/public/@codemirror/lang-html/dist/index.js",
+      "@lezer/common": "/public/@lezer/common/dist/index.js",
+      "@lezer/highlight": "/public/@lezer/highlight/dist/index.js",
+      "@lezer/html": "/public/@lezer/html/dist/index.es.js",
+      "@lezer/lr": "/public/@lezer/lr/dist/index.js",
+      "@codemirror/lang-css": "/public/@codemirror/lang-css/dist/index.js",
+      "@codemirror/lang-javascript": "/public/@codemirror/lang-javascript/dist/index.js"
+  }
+}
+</script>
+<script src="/public/index.js" type="module"></script>
 <script type="application/javascript">
  CodeMirror.defineOption('autoSuggest', [], function (cm, value, old) {
      cm.on('inputRead', function (cm, change) {
