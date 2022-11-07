@@ -110,7 +110,7 @@
 
      function uploadFile(file) {
          var data = new FormData()
-         var editMode = (typeof editor !== 'undefined');
+         var editMode = (typeof EditorView !== 'undefined');
          var action = editMode ? '{{ .editModeAction }}' : '{{ .action }}';
 
          data.append('file', file)
@@ -120,7 +120,17 @@
 
          fetch(action, params).then(resp => resp.text()).then(text => {
              if ( editMode ) {
-                 editor.getDoc().replaceSelection(text);
+                 const state = EditorView.viewState.state;
+                 const range = state.selection.ranges[0];
+
+                 EditorView.dispatch({
+                     changes: {
+                         from: range.from,
+                         to: range.to,
+                         insert: text
+                     },
+                     selection: {anchor: range.from + text.length}
+                 })
              } else {
                  document.location.reload();
              }
