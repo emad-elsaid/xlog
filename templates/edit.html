@@ -89,6 +89,9 @@
      ".cm-line": {
          fontFamily: 'BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif',
      },
+     "&.cm-editor.cm-focused": {
+         outline: "none"
+     }
  })
 
  function Completions(context) {
@@ -158,7 +161,7 @@
 
  form.addEventListener("submit", syncEditor)
 
- document.addEventListener('keydown', function(event) {
+     document.addEventListener('keydown', function(event) {
      const e = event || window.event
 
      if ( e.key === 's' && (e.ctrlKey || e.metaKey ) ) {

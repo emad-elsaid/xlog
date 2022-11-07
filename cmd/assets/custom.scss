@@ -123,21 +123,6 @@
     border-right: 1px solid #ddd;
 }
 
-.CodeMirror {
-    min-height: 100vh;
-    height: auto;
-    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-
-    .cm-header {
-        color: #36364B !important;
-        padding-bottom: 0.5em;
-    }
-}
-
-.ͼ1.cm-editor.cm-focused{
-    outline: none;
-}
-
 .editor-controls {
     position: fixed;
     right:1em;
