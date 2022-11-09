@@ -1,7 +1,0 @@
-<form action="{{.action}}" method="POST" style="display:inline;">
-  {{ .csrf }}
-  {{if .starred }} <input type="hidden" name="_method" value="DELETE"/> {{end}}
-  <a onclick="this.parentElement.submit()">
-    <span class="icon"><i class="{{if .starred }}fa-solid{{else}}fa-regular{{end}} fa-star"></i></span><span>Star</span>
-  </a>
-</form>

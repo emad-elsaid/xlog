@@ -18,14 +18,18 @@ func init() {
 	var rename PageRename
 	var delete PageDelete
 
-	RegisterCommand(rename)
-	RegisterCommand(delete)
+	RegisterCommand(func(p Page) []Command {
+		return []Command{PageDelete{p}, PageRename{p}}
+	})
+
 	Post(`/\+/file/rename`, rename.Handler)
 	Delete(`/\+/file/delete`, delete.Handler)
 	RegisterTemplate(templates, "templates")
 }
 
-type PageRename int
+type PageRename struct {
+	page Page
+}
 
 func (f PageRename) Icon() string {
 	return "fa-solid fa-i-cursor"
@@ -39,13 +43,13 @@ func (f PageRename) OnClick() template.JS {
 	return "renamePage()"
 }
 
-func (f PageRename) Widget(p Page) template.HTML {
-	if !p.Exists() {
+func (f PageRename) Widget() template.HTML {
+	if !f.page.Exists() {
 		return ""
 	}
 
 	return Partial("file-operations-rename", Locals{
-		"page":   p.Name(),
+		"page":   f.page.Name(),
 		"action": "/+/file/rename",
 	})
 }
@@ -67,7 +71,9 @@ func (f PageRename) Handler(w Response, r Request) Output {
 	return NoContent()
 }
 
-type PageDelete int
+type PageDelete struct {
+	page Page
+}
 
 func (f PageDelete) Icon() string {
 	return "fa-solid fa-trash"
@@ -81,13 +87,13 @@ func (f PageDelete) OnClick() template.JS {
 	return "deletePage()"
 }
 
-func (f PageDelete) Widget(p Page) template.HTML {
-	if !p.Exists() {
+func (f PageDelete) Widget() template.HTML {
+	if !f.page.Exists() {
 		return template.HTML("")
 	}
 
 	return Partial("file-operations-delete", Locals{
-		"action": "/+/file/delete?page=" + url.QueryEscape(p.Name()),
+		"action": "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
 	})
 }
 

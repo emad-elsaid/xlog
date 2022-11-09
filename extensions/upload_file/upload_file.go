@@ -31,37 +31,48 @@ var (
 )
 
 func init() {
-	RegisterCommand(command{
-		icon:    "fa-solid fa-file-arrow-up",
-		name:    "Upload File",
-		onClick: "upload()",
-		main:    true,
+	RegisterCommand(func(p Page) []Command {
+		return []Command{
+			command{
+				page:    p,
+				icon:    "fa-solid fa-file-arrow-up",
+				name:    "Upload File",
+				onClick: "upload()",
+				main:    true,
+			},
+			command{
+				page:    p,
+				icon:    "fa-solid fa-camera",
+				name:    "Screenshot",
+				onClick: "screenshot()",
+			},
+			command{
+				page:    p,
+				icon:    "fa-solid fa-desktop",
+				name:    "Record Screen",
+				onClick: "record()",
+			},
+			command{
+				page:    p,
+				icon:    "fa-solid fa-video",
+				name:    "Record Camera",
+				onClick: "recordCamera()",
+			},
+			command{
+				page:    p,
+				icon:    "fa-solid fa-microphone",
+				name:    "Record Audio",
+				onClick: "recordAudio()",
+			},
+		}
 	})
-	RegisterCommand(command{
-		icon:    "fa-solid fa-camera",
-		name:    "Screenshot",
-		onClick: "screenshot()",
-	})
-	RegisterCommand(command{
-		icon:    "fa-solid fa-desktop",
-		name:    "Record Screen",
-		onClick: "record()",
-	})
-	RegisterCommand(command{
-		icon:    "fa-solid fa-video",
-		name:    "Record Camera",
-		onClick: "recordCamera()",
-	})
-	RegisterCommand(command{
-		icon:    "fa-solid fa-microphone",
-		name:    "Record Audio",
-		onClick: "recordAudio()",
-	})
+
 	Post(`/\+/upload-file`, uploadFileHandler)
 	RegisterTemplate(templates, "templates")
 }
 
 type command struct {
+	page    Page
 	icon    string
 	name    string
 	onClick template.JS
@@ -80,14 +91,14 @@ func (u command) OnClick() template.JS {
 	return u.onClick
 }
 
-func (u command) Widget(p Page) template.HTML {
+func (u command) Widget() template.HTML {
 	if !u.main {
 		return ""
 	}
 
 	return Partial("upload-file", Locals{
-		"page":           p,
-		"action":         "/+/upload-file?page=" + url.QueryEscape(p.Name()),
+		"page":           u.page,
+		"action":         "/+/upload-file?page=" + url.QueryEscape(u.page.Name()),
 		"editModeAction": "/+/upload-file",
 	})
 }

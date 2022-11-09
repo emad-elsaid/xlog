@@ -11,11 +11,14 @@
       <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
         <ul class="menu-list">
           {{- range .commands -}}
+          {{- range call . $.page -}}
           <li>
             <a href="#" onclick="{{.OnClick}}" class="icon-text">
               <span class="icon"><i class="{{.Icon}}"></i></span>
               <span>{{.Name}}</span></a>
           </li>
+          {{.Widget}}
+          {{- end -}}
           {{- end -}}
         </ul>
       </aside>
@@ -25,7 +28,6 @@
   <form method="dialog"><button class="modal-close is-large" aria-label="close"></button></form>
 </dialog>
 
-{{ range .commands }}{{.Widget $.page}}{{ end }}
 
 <script type="application/javascript">
  const commands = document.getElementById('commands-modal');

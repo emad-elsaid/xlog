@@ -18,7 +18,7 @@ const STARRED_PAGES = "starred"
 var templates embed.FS
 
 func init() {
-	RegisterWidget(ACTION_WIDGET, 1, starMeta)
+	RegisterQuickCommand(starAction)
 	RegisterLink(starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)
 	Delete(`/\+/star/{page:.*}`, unstarHandler)
@@ -58,18 +58,41 @@ func starredPages(p Page) []Link {
 	return ps
 }
 
-func starMeta(p Page, r Request) template.HTML {
+type action struct {
+	page    Page
+	starred bool
+}
+
+func (l action) Icon() string {
+	if l.starred {
+		return "fa-solid fa-star"
+	} else {
+		return "fa-regular fa-star"
+	}
+}
+func (_ action) Name() string         { return "Star" }
+func (_ action) Link() string         { return "" }
+func (_ action) OnClick() template.JS { return "star(event)" }
+func (l action) Widget() template.HTML {
 	if READONLY {
 		return ""
 	}
 
-	starred := isStarred(p)
+	starred := isStarred(l.page)
 
-	return Partial("star-meta", Locals{
-		"csrf":    CSRF(r),
+	return Partial("star", Locals{
 		"starred": starred,
-		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(p.Name())),
+		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(l.page.Name())),
 	})
+}
+
+func starAction(p Page) []Command {
+	if READONLY {
+		return nil
+	}
+
+	starred := isStarred(p)
+	return []Command{action{starred: starred, page: p}}
 }
 
 func starHandler(w Response, r Request) Output {
@@ -85,7 +108,7 @@ func starHandler(w Response, r Request) Output {
 
 	starred_pages := NewPage(STARRED_PAGES)
 	starred_pages.Write(strings.TrimSpace(starred_pages.Content()) + "\n" + page.Name())
-	return Redirect("/" + page.Name())
+	return NoContent()
 }
 
 func unstarHandler(w Response, r Request) Output {
@@ -109,7 +132,7 @@ func unstarHandler(w Response, r Request) Output {
 	}
 	starred_pages.Write(new_content)
 
-	return Redirect("/" + page.Name())
+	return NoContent()
 }
 
 func isStarred(p Page) bool {

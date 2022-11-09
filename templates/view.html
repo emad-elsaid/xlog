@@ -1,24 +1,11 @@
 {{ template "header" . }}
 
-<div class="is-size-7 has-text-grey my-5">
-  <span> Updated: {{ ago .page.ModTime }} </span>
-
-  {{ .action }}
-
-  {{ if and .edit (not .READONLY) }}
-  <a href="{{.edit}}" title="Ctrl+S">
-    <span class="icon"><i class="fa-solid fa-pen"></i></span>
-    <span>Edit</span>
-  </a>
-  {{ end }}
+<div class="columns is-size-7 has-text-grey">
+    <div class="column"> {{ template "properties" . }} </div>
+    <div class="column is-narrow"> {{ template "quick_commands" . }} </div>
 </div>
 
-<div class="view">
-  {{.content}}
-
-  {{ .afterView }}
-</div>
-
+<div class="view"> {{.content}} {{ .afterView }} </div>
 
 <script>
  {{ if not .READONLY }}

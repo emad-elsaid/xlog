@@ -3,7 +3,6 @@ package versions
 import (
 	"crypto/sha256"
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"os"
 	"path"
@@ -14,7 +13,7 @@ import (
 
 func init() {
 	Listen(BeforeWrite, WriteVersion)
-	RegisterWidget(ACTION_WIDGET, 1, VersionMeta)
+	RegisterProperty(VersionProps)
 	IgnoreDirectory(regexp.MustCompile(`\.versions$`))
 }
 
@@ -31,11 +30,11 @@ func WriteVersion(p Page) error {
 	return ioutil.WriteFile(path.Join(dir, sum), content, 0644)
 }
 
-func VersionMeta(p Page, _ Request) (t template.HTML) {
+func VersionProps(p Page) []Property {
 	dir := p.FileName() + ".versions"
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		return
+		return nil
 	}
 
 	i := 0
@@ -46,13 +45,13 @@ func VersionMeta(p Page, _ Request) (t template.HTML) {
 	}
 
 	if i == 0 {
-		return
+		return nil
 	}
 
-	return template.HTML(
-		fmt.Sprintf(
-			`<span class="icon"><i class="fa-solid fa-code-branch"></i></span><span>%d versions</span>`,
-			i,
-		),
-	)
+	return []Property{prop(i)}
 }
+
+type prop int
+
+func (_ prop) Icon() string { return "fa-solid fa-code-branch" }
+func (l prop) Name() string { return fmt.Sprintf("%d versions", l) }

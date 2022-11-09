@@ -19,7 +19,6 @@ type (
 const (
 	SIDEBAR_WIDGET    widgetSpace = iota // widgets rengered in the sidebar
 	AFTER_VIEW_WIDGET                    // widgets rendered after the content of the view page
-	ACTION_WIDGET                        // widgets rendered in the actions row of the view page
 	HEAD_WIDGET                          // widgets rendered in page <head> tag
 )
 

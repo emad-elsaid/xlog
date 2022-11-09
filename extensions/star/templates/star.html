@@ -1,0 +1,14 @@
+<script>
+ function star(event) {
+     event.preventDefault();
+
+     const data = new FormData()
+     data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+     let method = 'POST'
+     if({{.starred}}) method = 'DELETE';
+
+     fetch("{{.action}}", {method: method, body: data})
+         .then( () => location.reload() );
+ }
+</script>
