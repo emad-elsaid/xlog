@@ -70,7 +70,13 @@ func (l action) Icon() string {
 		return "fa-regular fa-star"
 	}
 }
-func (_ action) Name() string         { return "Star" }
+func (l action) Name() string {
+	if l.starred {
+		return "Unstar"
+	} else {
+		return "Star"
+	}
+}
 func (_ action) Link() string         { return "" }
 func (_ action) OnClick() template.JS { return "star(event)" }
 func (l action) Widget() template.HTML {
