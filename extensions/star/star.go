@@ -18,6 +18,7 @@ const STARRED_PAGES = "starred"
 var templates embed.FS
 
 func init() {
+	RegisterCommand(starAction)
 	RegisterQuickCommand(starAction)
 	RegisterLink(starredPages)
 	Post(`/\+/star/{page:.*}`, starHandler)

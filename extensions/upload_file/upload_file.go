@@ -87,6 +87,8 @@ func (u command) Name() string {
 	return u.name
 }
 
+func (u command) Link() string { return "" }
+
 func (u command) OnClick() template.JS {
 	return u.onClick
 }

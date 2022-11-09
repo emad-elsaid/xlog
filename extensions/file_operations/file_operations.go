@@ -18,13 +18,16 @@ func init() {
 	var rename PageRename
 	var delete PageDelete
 
-	RegisterCommand(func(p Page) []Command {
-		return []Command{PageDelete{p}, PageRename{p}}
-	})
+	RegisterCommand(commands)
+	RegisterQuickCommand(commands)
 
 	Post(`/\+/file/rename`, rename.Handler)
 	Delete(`/\+/file/delete`, delete.Handler)
 	RegisterTemplate(templates, "templates")
+}
+
+func commands(p Page) []Command {
+	return []Command{PageDelete{p}, PageRename{p}}
 }
 
 type PageRename struct {
@@ -36,12 +39,14 @@ func (f PageRename) Icon() string {
 }
 
 func (f PageRename) Name() string {
-	return "Rename Page"
+	return "Rename"
 }
 
 func (f PageRename) OnClick() template.JS {
 	return "renamePage()"
 }
+
+func (_ PageRename) Link() string { return "" }
 
 func (f PageRename) Widget() template.HTML {
 	if !f.page.Exists() {
@@ -80,8 +85,10 @@ func (f PageDelete) Icon() string {
 }
 
 func (f PageDelete) Name() string {
-	return "Delete Page"
+	return "Delete"
 }
+
+func (_ PageDelete) Link() string { return "" }
 
 func (f PageDelete) OnClick() template.JS {
 	return "deletePage()"
