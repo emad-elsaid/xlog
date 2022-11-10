@@ -1,4 +1,4 @@
-{{ if .quick_commands }}
+{{ if and .quick_commands (not .READONLY) }}
 {{.csrf}}
 {{ range .quick_commands }}
 {{ range call . $.page }}

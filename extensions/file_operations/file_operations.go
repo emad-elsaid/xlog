@@ -27,10 +27,6 @@ func init() {
 }
 
 func commands(p Page) []Command {
-	if READONLY {
-		return nil
-	}
-
 	return []Command{PageDelete{p}, PageRename{p}}
 }
 
