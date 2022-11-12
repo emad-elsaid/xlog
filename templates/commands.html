@@ -13,7 +13,7 @@
           {{- range .commands -}}
           {{- range call . $.page -}}
           <li>
-            <a href="#" onclick="{{.OnClick}}" class="icon-text">
+            <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
               <span class="icon"><i class="{{.Icon}}"></i></span>
               <span>{{.Name}}</span></a>
           </li>
