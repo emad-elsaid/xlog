@@ -43,7 +43,7 @@ func (f PageRename) Name() string {
 }
 
 func (f PageRename) OnClick() template.JS {
-	return "renamePage()"
+	return "renamePage(event)"
 }
 
 func (_ PageRename) Link() string { return "" }
@@ -91,7 +91,7 @@ func (f PageDelete) Name() string {
 func (_ PageDelete) Link() string { return "" }
 
 func (f PageDelete) OnClick() template.JS {
-	return "deletePage()"
+	return "deletePage(event)"
 }
 
 func (f PageDelete) Widget() template.HTML {

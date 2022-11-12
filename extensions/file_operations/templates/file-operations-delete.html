@@ -1,5 +1,7 @@
 <script type="application/javascript">
- function deletePage() {
+ function deletePage(event) {
+     event.preventDefault();
+
      if(!confirm('Are you sure?')) return
 
      const csrf = document.querySelector("input[name=csrf]").value;

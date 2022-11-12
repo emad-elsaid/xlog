@@ -33,12 +33,7 @@
  const commands = document.getElementById('commands-modal');
 
  // clicking any link in the commands list executes the command
- commands.querySelectorAll('a').forEach( ele => {
-     ele.addEventListener('click', evt => {
-         evt.preventDefault();
-         commands.close();
-     });
- });
+ commands.querySelectorAll('a').forEach( ele => ele.addEventListener('click', evt => commands.close()));
 
  // Pressing Ctrl+K shows the commands list
  document.addEventListener('keydown', e => {

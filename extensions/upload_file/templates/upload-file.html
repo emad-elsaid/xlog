@@ -24,14 +24,16 @@
          uploadFile(file);
      });
 
-     window.upload = () => {
+     window.upload = (event) => {
+         event.preventDefault();
          var input = document.createElement('input');
          input.type = 'file';
          input.onchange = e => uploadFile(e.target.files[0]);
          input.click();
      }
 
-     window.screenshot = async () => {
+     window.screenshot = async (event) => {
+         event.preventDefault();
          var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
 
          stream.getTracks().forEach(async function(track) {
@@ -52,7 +54,8 @@
          });
      }
 
-     window.record = async () => {
+     window.record = async (event) => {
+         event.preventDefault();
          var stream = await navigator.mediaDevices.getDisplayMedia({
              video: {cursor: "always"},
              audio: true
@@ -62,7 +65,8 @@
      }
 
      var recordCameraStream;
-     window.recordCamera = async () => {
+     window.recordCamera = async (event) => {
+         event.preventDefault();
          if (recordCameraStream!=null) return
          recordCameraStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
          start(recordCameraStream, "video/webm; codecs=vp9", "webm");
@@ -70,7 +74,8 @@
      }
 
      var recordAudioStream;
-     window.recordAudio = async () => {
+     window.recordAudio = async (event) => {
+         event.preventDefault();
          if (recordAudioStream!=null) return
          recordAudioStream = await navigator.mediaDevices.getUserMedia({audio: true});
          start(recordAudioStream, 'audio/webm; codecs=opus', "opus");

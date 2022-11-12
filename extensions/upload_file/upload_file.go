@@ -37,32 +37,32 @@ func init() {
 				page:    p,
 				icon:    "fa-solid fa-file-arrow-up",
 				name:    "Upload File",
-				onClick: "upload()",
+				onClick: "upload(event)",
 				main:    true,
 			},
 			command{
 				page:    p,
 				icon:    "fa-solid fa-camera",
 				name:    "Screenshot",
-				onClick: "screenshot()",
+				onClick: "screenshot(event)",
 			},
 			command{
 				page:    p,
 				icon:    "fa-solid fa-desktop",
 				name:    "Record Screen",
-				onClick: "record()",
+				onClick: "record(event)",
 			},
 			command{
 				page:    p,
 				icon:    "fa-solid fa-video",
 				name:    "Record Camera",
-				onClick: "recordCamera()",
+				onClick: "recordCamera(event)",
 			},
 			command{
 				page:    p,
 				icon:    "fa-solid fa-microphone",
 				name:    "Record Audio",
-				onClick: "recordAudio()",
+				onClick: "recordAudio(event)",
 			},
 		}
 	})

@@ -18,14 +18,14 @@ type Command interface {
 	Widget() template.HTML
 }
 
-var commands = []func(Page) []Command{}
+var commands = []func(Page) []Command{defaultCommands}
 
 // RegisterCommand registers a new command
 func RegisterCommand(c func(Page) []Command) {
 	commands = append(commands, c)
 }
 
-var quickCommands = []func(Page) []Command{defaultQuickCommands}
+var quickCommands = []func(Page) []Command{defaultCommands}
 
 func RegisterQuickCommand(c func(Page) []Command) {
 	quickCommands = append(quickCommands, c)
@@ -39,7 +39,7 @@ func (a editQuickCommand) Link() string          { return "/edit/" + a.page.Name
 func (a editQuickCommand) OnClick() template.JS  { return "" }
 func (a editQuickCommand) Widget() template.HTML { return "" }
 
-func defaultQuickCommands(p Page) []Command {
+func defaultCommands(p Page) []Command {
 	if READONLY {
 		return nil
 	}

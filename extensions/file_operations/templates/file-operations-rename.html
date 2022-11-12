@@ -1,5 +1,6 @@
 <script>
- async function renamePage() {
+ async function renamePage(event) {
+     event.preventDefault();
      const newName = prompt('Page new name:', "{{.page}}");
      if(newName == null || newName.length == 0) {
          return
