@@ -1,6 +1,9 @@
 package xlog
 
-import "html/template"
+import (
+	"html/template"
+	"sort"
+)
 
 type (
 	// a type used to define list of widgets spaces. it's used to register
@@ -23,21 +26,25 @@ const (
 )
 
 // A map to keep track of list of widget functions registered in each widget space
-var widgets = map[widgetSpace]*plist[widgetFunc]{}
+var widgets = map[widgetSpace]byPriority[widgetFunc]{}
 
 // RegisterWidget Register a function to a widget space. functions registered
 // will be executed in order of priority lower to higher when rendering view or
 // edit page. the return values of these widgetfuncs will pass down to the
 // template and injected in reserved places.
 func RegisterWidget(s widgetSpace, priority float32, f widgetFunc) {
-	widgets[s] = widgets[s].insert(priority, f)
+	widgets[s] = append(widgets[s], priorityItem[widgetFunc]{
+		priority: priority,
+		value:    f,
+	})
+	sort.Sort(widgets[s])
 }
 
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
 func RenderWidget(s widgetSpace, p Page, r Request) (o template.HTML) {
-	widgets[s].each(func(f widgetFunc) {
-		o += f(p, r)
-	})
+	for _, f := range widgets[s] {
+		o += f.value(p, r)
+	}
 	return
 }

@@ -1,36 +1,12 @@
 package xlog
 
-type plist[T any] struct {
+type priorityItem[T any] struct {
 	priority float32
 	value    T
-	next     *plist[T]
 }
 
-func (p *plist[T]) insert(priority float32, value T) *plist[T] {
-	node := plist[T]{
-		priority: priority,
-		value:    value,
-	}
+type byPriority[T any] []priorityItem[T]
 
-	if p == nil {
-		return &node
-	} else if p.priority > priority {
-		node.next = p
-		return &node
-	}
-
-	var prev *plist[T]
-	for prev = p; prev.next != nil && prev.next.priority <= priority; prev = prev.next {
-	}
-
-	node.next = prev.next
-	prev.next = &node
-
-	return p
-}
-
-func (p *plist[T]) each(f func(t T)) {
-	for i := p; i != nil; i = i.next {
-		f(i.value)
-	}
-}
+func (a byPriority[T]) Len() int           { return len(a) }
+func (a byPriority[T]) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byPriority[T]) Less(i, j int) bool { return a[i].priority < a[j].priority }
