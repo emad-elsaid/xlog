@@ -44,11 +44,11 @@ jobs:
           --sitemap.domain=xlog.emadelsaid.com
           rm *.md
           chmod -R 0777 .
+          mv -f docs/ .
+
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v1.0.4
-        run:
-          working-directory: docs
         with:
           path: .
 
