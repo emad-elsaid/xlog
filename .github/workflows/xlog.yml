@@ -37,8 +37,8 @@ jobs:
       - name: Build
         run: |
           go run ./cmd/xlog \
-          --build . \
           --source docs \
+          --build .. \
           --sitename "Xlog" \
           --sidebar=false \
           --sitemap.domain=xlog.emadelsaid.com
