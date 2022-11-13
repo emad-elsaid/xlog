@@ -41,7 +41,6 @@ jobs:
           --source docs \
           --sitename "Xlog" \
           --sidebar=false \
-          --index=README \
           --sitemap.domain=xlog.emadelsaid.com
           rm *.md
           chmod -R 0777 .
