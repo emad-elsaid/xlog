@@ -44,7 +44,7 @@ jobs:
           --sitemap.domain=xlog.emadelsaid.com
           rm *.md
           chmod -R 0777 .
-          mv -f docs/ .
+          mv -f docs/* .
 
 
       - name: Upload GitHub Pages artifact
