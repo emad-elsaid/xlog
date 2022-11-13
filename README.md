@@ -7,7 +7,7 @@ XLog
 
 <p align="center"><img width="256" src="public/logo.png" /></p>
 
-Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages. Uses [Goldmark](https://github.com/yuin/goldmark) for rendering markdown and [CodeMirror](https://codemirror.net) for editing.
+Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages. Uses Goldmark for rendering markdown and [CodeMirror](https://codemirror.net) for editing.
 
 # Core Features
 
