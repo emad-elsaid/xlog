@@ -14,3 +14,14 @@ Xlog is built to be small core that offers small set of features. And focus of o
 - Add a route to be exported in case of building static site
 - Add arbitrary link to pages or any URL
 - Add quick command to appear on top of the view page
+
+# Overview
+
+An extension is a 
+
+* Go module/package that imports xlog package
+* Can be hosted anywhere
+*  Has an `init` function
+*  Uses `Register*` functions in the `init` function (checkout Go package documentation)
+*  Adds or improves a feature in xlog using one or more of the extension points.
+*  Imported by a the `main` package of your knowledgebase along with all other extensions and Xlog itself. an example can be found in Xlog CLI

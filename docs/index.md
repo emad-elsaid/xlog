@@ -17,6 +17,11 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 - Local server for Note taking or digital gardening
 - Generate static website just like the one you're reading now
 
+# Documentation
+
+- This website serves as end user documentation and developer entry point to developing extensions
+- There is also a Go package documentation that you can use to understand what xlog expose as public API 
+
 # License
 
 Xlog is released under MIT license
