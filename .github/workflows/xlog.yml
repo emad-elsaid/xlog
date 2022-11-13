@@ -37,14 +37,13 @@ jobs:
       - name: Build
         run: |
           go run ./cmd/xlog \
-          --build ./docs \
+          --build . \
           --source docs \
           --sitename "Xlog" \
           --sidebar=false \
           --sitemap.domain=xlog.emadelsaid.com
           rm *.md
           chmod -R 0777 .
-          mv -f docs/* .
 
 
       - name: Upload GitHub Pages artifact
