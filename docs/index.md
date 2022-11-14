@@ -17,6 +17,12 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 - Local server for Note taking or digital gardening
 - Generate static website just like the one you're reading now
 
+# Getting started 
+
+- Installation
+- Custom installation
+- Extensions
+
 # Documentation
 
 - The README on Github will have basic usage and general information.
