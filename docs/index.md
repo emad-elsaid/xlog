@@ -32,7 +32,7 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 
 - The README on Github will have basic usage and general information.
 - This website serves as end user documentation and developer entry point to developing extensions
-- There is also a Go package documentation that you can use to understand what xlog expose as public API 
+- There is also a Go package documentation that you can use to understand what xlog expose as public API
 
 # License
 
