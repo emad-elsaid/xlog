@@ -23,6 +23,11 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 - Custom installation
 - Extensions
 
+# Principles
+
+* Minimal design and dependencies
+* Small core, flexible enough for developers to extend it.
+
 # Documentation
 
 - The README on Github will have basic usage and general information.
