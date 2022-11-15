@@ -1,5 +1,7 @@
 Xlog is an HTTP server written in Go that serves markdown files as HTML and allows editing files online. 
 
+![](/public/logo.png)
+
 Xlog is a result of trying to build an offline personal knowledgebase with the ability to autolink pages together automatically. Without depending on proprietary file format or online service. 
 
 # Core Features
