@@ -3,7 +3,7 @@ on:
     tags:
       - v*
 jobs:
-  build:
+  create-release:
     name: Create Release
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +20,7 @@ jobs:
           draft: false
           prerelease: false
   releases-matrix:
+    needs: create-release
     name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
