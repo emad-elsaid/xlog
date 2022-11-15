@@ -1,6 +1,6 @@
 # Download latest binary
 
-Github has a release for each xlog version tag. it's build for (windows, Linux, MacOS) for several architectures. you can download the latest version from this page: https://github.com/emad-elsaid/xlog/releases/latest
+Github has a release for each xlog version tag. it has binaries built for (Windows, Linux, MacOS) for several architectures. you can download the latest version from this page: https://github.com/emad-elsaid/xlog/releases/latest
 
 # Using Go
 
