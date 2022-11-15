@@ -1,9 +1,5 @@
 package xlog
 
-import (
-	"time"
-)
-
 // Property represent a piece of information about the current page such as last
 // update time, number of versions, number of words, reading time...etc
 type Property interface {
@@ -24,7 +20,7 @@ func RegisterProperty(a func(Page) []Property) {
 type lastUpdateProp struct{ page Page }
 
 func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }
-func (a lastUpdateProp) Name() string { return ago(time.Since(a.page.ModTime())) }
+func (a lastUpdateProp) Name() string { return ago(a.page.ModTime()) }
 
 func defaultProps(p Page) []Property {
 	return []Property{

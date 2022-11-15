@@ -8,13 +8,7 @@ import (
 )
 
 func init() {
-	RegisterHelper("ago", func(t time.Time) string {
-		if READONLY {
-			return t.Format("Monday 2 January 2006")
-		} else {
-			return ago(time.Since(t))
-		}
-	})
+	RegisterHelper("ago", ago)
 	RegisterHelper("isFontAwesome", func(i string) bool {
 		return len(i) > 3 && i[0:3] == "fa-"
 	})
@@ -36,7 +30,13 @@ func RegisterHelper(name string, f interface{}) {
 // ago". The precision of this function is 2. which means it returns the largest
 // unit of time possible and the next one after it. for example days + hours, or
 // Hours + minutes or Minutes + seconds...etc
-func ago(t time.Duration) string {
+func ago(t time.Time) string {
+	if READONLY {
+		return t.Format("Monday 2 January 2006")
+	}
+
+	d := time.Since(t)
+
 	const day = time.Hour * 24
 	const week = day * 7
 	const month = day * 30
@@ -45,39 +45,39 @@ func ago(t time.Duration) string {
 
 	var o strings.Builder
 
-	if t.Seconds() < 1 {
+	if d.Seconds() < 1 {
 		o.WriteString("Less than a second ")
 	}
 
-	for precision := 0; t.Seconds() > 1 && precision < maxPrecision; precision++ {
+	for precision := 0; d.Seconds() > 1 && precision < maxPrecision; precision++ {
 		switch {
-		case t >= year:
-			years := t / year
-			t -= years * year
+		case d >= year:
+			years := d / year
+			d -= years * year
 			o.WriteString(fmt.Sprintf("%d years ", years))
-		case t >= month:
-			months := t / month
-			t -= months * month
+		case d >= month:
+			months := d / month
+			d -= months * month
 			o.WriteString(fmt.Sprintf("%d months ", months))
-		case t >= week:
-			weeks := t / week
-			t -= weeks * week
+		case d >= week:
+			weeks := d / week
+			d -= weeks * week
 			o.WriteString(fmt.Sprintf("%d weeks ", weeks))
-		case t >= day:
-			days := t / day
-			t -= days * day
+		case d >= day:
+			days := d / day
+			d -= days * day
 			o.WriteString(fmt.Sprintf("%d days ", days))
-		case t >= time.Hour:
-			hours := t / time.Hour
-			t -= hours * time.Hour
+		case d >= time.Hour:
+			hours := d / time.Hour
+			d -= hours * time.Hour
 			o.WriteString(fmt.Sprintf("%d hours ", hours))
-		case t >= time.Minute:
-			minutes := t / time.Minute
-			t -= minutes * time.Minute
+		case d >= time.Minute:
+			minutes := d / time.Minute
+			d -= minutes * time.Minute
 			o.WriteString(fmt.Sprintf("%d minutes ", minutes))
-		case t >= time.Second:
-			seconds := t / time.Second
-			t -= seconds * time.Second
+		case d >= time.Second:
+			seconds := d / time.Second
+			d -= seconds * time.Second
 			o.WriteString(fmt.Sprintf("%d seconds ", seconds))
 		}
 	}
