@@ -24,6 +24,7 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 - Installation
 - Custom installation
 - Extensions
+- Dependencies
 
 # Principles
 

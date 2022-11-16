@@ -277,7 +277,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer echo(xINFO, r.Method, r.URL.Path)()
+		defer timing(r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
 }

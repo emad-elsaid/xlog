@@ -1,0 +1,1 @@
+Xlog is a wordplay on **Blog** exchanging the **B** with **X**. Pronounced "X Log"
