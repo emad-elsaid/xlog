@@ -5,7 +5,7 @@ Github has a release for each xlog version tag. it has binaries built for (Windo
 # Using Go
 
 ```bash
-go install github.com/emad-elsaid/xlog/cmd/xlog@
+go install github.com/emad-elsaid/xlog/cmd/xlog@latest
 ```
 
 # From source
