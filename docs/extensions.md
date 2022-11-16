@@ -1,4 +1,4 @@
-Xlog is built to be small core that offers small set of features. And focus of offering a developer friendly public API to allow extending it with more features.
+Xlog is built to be small core that offers small set of features. And focus on offering a developer friendly public API to allow extending it with more features.
 
 # Extension points
 

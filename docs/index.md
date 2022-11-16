@@ -37,6 +37,13 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 - This website serves as end user documentation and developer entry point for developing extensions
 - There is also a Go package documentation that you can use to understand what xlog expose as public API
 
+# Community
+
+- :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
+- :beetle: [Reporting issues](https://github.com/emad-elsaid/xlog/issues)
+- :keyboard: [Contributors](https://github.com/emad-elsaid/xlog/graphs/contributors)
+- Github
+
 # License
 
 Xlog is released under MIT license

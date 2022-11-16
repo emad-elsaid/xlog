@@ -1,0 +1,1 @@
+Xlog is a Go package that has its public API documented and published on https://pkg.go.dev as all Go packages do. Latest documentation can be found here https://pkg.go.dev/github.com/emad-elsaid/xlog
