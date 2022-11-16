@@ -28,6 +28,7 @@ Xlog is a result of trying to build an offline personal knowledgebase with the a
 
 # Principles
 
+* Uses the file system. No databases
 * Minimal design and dependencies
 * Small core, flexible enough for developers to extend it.
 * Avoid add syntax to markdown, instead enhance how existing syntax is rendered
