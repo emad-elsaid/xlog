@@ -4,6 +4,16 @@
 
 Xlog is a result of trying to build an offline personal knowledgebase with the ability to autolink pages together automatically. Without depending on proprietary file format or online service. 
 
+# Quick Start
+
+```shell
+go install github.com/emad-elsaid/xlog/cmd/xlog@latest
+mkdir new-site
+cd new-site
+xlog
+# => Now browse to http://localhost:3000
+```
+
 # Core Features
 
 - Serves any file from current directory
