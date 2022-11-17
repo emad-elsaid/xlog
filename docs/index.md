@@ -39,7 +39,7 @@ xlog
 
 # :scroll: Principles
 
-* Uses the file system. No databases
+* Uses the file system. No databases required
 * Minimal design and dependencies
 * Small core, flexible enough for developers to extend it.
 * Avoid add syntax to markdown, instead enhance how existing syntax is rendered
