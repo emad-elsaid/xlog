@@ -50,6 +50,10 @@ xlog
 - This website serves as end user documentation and developer entry point for developing extensions
 - There is also a Go package documentation that you can use to understand what xlog expose as public API
 
+# Tutorials
+
+- Hello world extension
+
 # Community
 
 - :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
