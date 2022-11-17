@@ -4,7 +4,7 @@
 
 Xlog is a result of trying to build an offline personal knowledgebase with the ability to autolink pages together automatically. Without depending on proprietary file format or online service. 
 
-# Quick Start
+# :runner: Quick Start
 
 ```shell
 go install github.com/emad-elsaid/xlog/cmd/xlog@latest
@@ -29,7 +29,7 @@ xlog
 - Local server for Note taking or digital gardening
 - Generate static website just like the one you're reading now
 
-# Getting started 
+# :checkered_flag: Getting started 
 
 - Installation
 - Custom installation
@@ -37,24 +37,24 @@ xlog
 - Extensions
 - Dependencies
 
-# Principles
+# :scroll: Principles
 
 * Uses the file system. No databases
 * Minimal design and dependencies
 * Small core, flexible enough for developers to extend it.
 * Avoid add syntax to markdown, instead enhance how existing syntax is rendered
 
-# Documentation
+# :book: Documentation
 
 - The README on Github will have basic usage and general information.
 - This website serves as end user documentation and developer entry point for developing extensions
 - There is also a Go package documentation that you can use to understand what xlog expose as public API
 
-# Tutorials
+# :bulb: Tutorials
 
 - Hello world extension
 
-# Community
+# :people_holding_hands: Community
 
 - :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
 - :beetle: [Reporting issues](https://github.com/emad-elsaid/xlog/issues)
