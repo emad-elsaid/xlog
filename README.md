@@ -7,7 +7,7 @@ XLog
 
 <p align="center"><img width="256" src="public/logo.png" /></p>
 
-Local-first personal knowledge management application with focus on enriching markdown files and surfacing implicit links between pages. Uses Goldmark for rendering markdown and [CodeMirror](https://codemirror.net) for editing.
+:vhs: Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML and allows editing files online. It focuses on enriching markdown files and surfacing implicit links between pages.
 
 # Core Features
 
