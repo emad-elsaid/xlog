@@ -66,7 +66,7 @@ package helloworld
 Now running `cmd/xlog/xlog.go` will start the xlog core with only your extension loaded. so it's a clean environment that include only the xlog core and no other extensions.
 
 ```shell
-go run cmd/xlog/xlog.go
+go run ./cmd/xlog/xlog.go
 ```
 
 You should see output similar to the following. And navigating to [http://localhost:3000](http://localhost:3000) should drop you in the editor to create your `index.md` page.
