@@ -18,15 +18,8 @@
 
       <div class="column content">
         <div class="container is-max-desktop px-3" dir="auto" style="margin-bottom: 50vh;">
+          {{ template "title" . }}
 
-          <h1 class="title is-5 py-5">
-            <a href="/" class="icon-text">
-              <span class="icon"><img src="/public/logo.png"/></span>
-              <span>{{.SITENAME}}</span>
-              <span class="icon"><i class="fas fa-arrow-right"></i></span>
-              <span>{{ .title }}</span>
-            </a>
-          </h1>
 
           {{ end }}
           {{define "footer" }}
