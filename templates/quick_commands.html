@@ -1,12 +1,10 @@
 {{ if and .quick_commands (not .READONLY) }}
 {{.csrf}}
 {{ range .quick_commands }}
-{{ range call . $.page }}
 <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
   <span class="icon"><i class="{{.Icon}}"></i></span>
   <span>{{.Name}}</span>
 </a>
 {{.Widget}}
-{{ end }}
 {{ end }}
 {{ end }}

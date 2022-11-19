@@ -5,7 +5,6 @@
 
     <ul class="menu-list">
       {{ range $.links }}
-      {{ range call . $.page }}
       <li>
         <a href="{{.Link}}" class="icon-text">
           <span class="icon">
@@ -15,7 +14,6 @@
           <span>{{.Name}}</span>
         </a>
       </li>
-      {{ end }}
       {{ end }}
     </ul>
   </div>

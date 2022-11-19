@@ -17,6 +17,17 @@ func RegisterProperty(a func(Page) []Property) {
 	props = append(props, a)
 }
 
+// Properties return a list of properties for a page. It executes all functions
+// registered with RegisterProperty and collect results in one slice. Can be
+// passed to the view to render a page properties
+func Properties(p Page) []Property {
+	ps := []Property{}
+	for pr := range props {
+		ps = append(ps, props[pr](p)...)
+	}
+	return ps
+}
+
 type lastUpdateProp struct{ page Page }
 
 func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }

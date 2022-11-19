@@ -65,10 +65,10 @@ func getPageHandler(w Response, r Request) Output {
 		"page":           page,
 		"edit":           "/edit/" + page.Name(),
 		"content":        page.Render(),
-		"commands":       commands,
-		"quick_commands": quickCommands,
-		"links":          links,
-		"properties":     props,
+		"commands":       Commands(page),
+		"quick_commands": QuickCommands(page),
+		"links":          Links(page),
+		"properties":     Properties(page),
 		"csrf":           CSRF(r),
 		"sidebar":        RenderWidget(SIDEBAR_WIDGET, page, r),    // widgets registered for sidebar
 		"head":           RenderWidget(HEAD_WIDGET, page, r),       // widgets registered to be displayed under the page title
@@ -93,7 +93,7 @@ func getPageEditHandler(w Response, r Request) Output {
 	return Render("edit", Locals{
 		"title":        page.Emoji() + " " + page.Name(),
 		"page":         page,
-		"commands":     commands,
+		"commands":     Commands(page),
 		"content":      content,
 		"autocomplete": autocompletes,
 		"csrf":         CSRF(r),

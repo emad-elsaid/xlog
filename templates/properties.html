@@ -1,8 +1,6 @@
 <span class="icon-text">
 {{ range .properties }}
-{{ range call . $.page }}
   <span class="icon"> <i class="{{.Icon}}"></i> </span>
   <span>{{.Name}}</span>
-{{ end }}
 {{ end }}
 </span>

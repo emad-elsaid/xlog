@@ -11,14 +11,12 @@
       <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
         <ul class="menu-list">
           {{- range .commands -}}
-          {{- range call . $.page -}}
           <li>
             <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
               <span class="icon"><i class="{{.Icon}}"></i></span>
               <span>{{.Name}}</span></a>
           </li>
           {{.Widget}}
-          {{- end -}}
           {{- end -}}
         </ul>
       </aside>

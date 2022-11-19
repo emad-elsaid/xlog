@@ -17,3 +17,14 @@ var links = []func(Page) []Link{}
 func RegisterLink(l func(Page) []Link) {
 	links = append(links, l)
 }
+
+// Links returns a list of links for a Page. it executes all functions
+// registered with RegisterLink and collect them in one slice. Can be passed to
+// the view to render in the sidebar for example.
+func Links(p Page) []Link {
+	lnks := []Link{}
+	for l := range links {
+		lnks = append(lnks, links[l](p)...)
+	}
+	return lnks
+}
