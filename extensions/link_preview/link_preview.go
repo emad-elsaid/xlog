@@ -92,12 +92,19 @@ func fallbackURLPreprocessor(c string) string {
 			title = m
 		}
 
+		url, _ := url.Parse(meta.URL)
+
+		image := meta.Image
+		if len(image) > 0 && image[0] == '/' {
+			image = url.Scheme + "://" + url.Hostname() + image
+		}
+
 		var view string = string(
 			Partial("link-preview", Locals{
 				"url":         m,
 				"title":       title,
 				"description": meta.Description,
-				"image":       meta.Image,
+				"image":       image,
 			}),
 		)
 
