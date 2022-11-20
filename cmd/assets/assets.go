@@ -19,7 +19,7 @@ const DEST = "public"
 
 var CSS_DEST = path.Join(DEST, "style.css")
 
-//go:embed custom.scss
+//go:embed styles.scss
 var CUSTOM_SCSS []byte
 
 var CSS_URLS = []string{
