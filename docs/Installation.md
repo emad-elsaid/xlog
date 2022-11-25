@@ -17,3 +17,11 @@ go run ./cmd/xlog # to run it
 go install ./cmd/xlog # to install it to Go bin.
 ```
 
+# Arch Linux (AUR)
+
+* Xlog is published to AUR: https://aur.archlinux.org/packages/xlog-git
+* Using `yay` for example:
+
+```bash
+yay -S xlog-git
+```
