@@ -33,6 +33,7 @@ xlog
 
 - Installation
 - Custom installation
+- Usage
 - Creating a site
 - Extensions
 - Dependencies
