@@ -55,6 +55,14 @@ xlog
 
 - Hello world extension
 
+# Contributing
+
+You can help Xlog in many ways:
+
+- Create a new extension
+- Improve the core codebase
+- Package it for different operating systems or different Linux distribution
+
 # :people_holding_hands: Community
 
 - :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
