@@ -32,6 +32,10 @@ var (
 
 func init() {
 	RegisterCommand(func(p Page) []Command {
+		if READONLY {
+			return []Command{}
+		}
+
 		return []Command{
 			command{
 				page:    p,

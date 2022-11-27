@@ -1,10 +1,11 @@
-{{ with .sidebar }}
+{{ if or .sidebar .links }}
 <div class="column is-2 is-hidden-mobile">
   <div class="sidebar">
-    {{.}}
+    {{.sidebar}}
 
+    {{ with .links }}
     <ul class="menu-list">
-      {{ range $.links }}
+      {{ range . }}
       <li>
         <a href="{{.Link}}" class="icon-text">
           <span class="icon">
@@ -16,6 +17,8 @@
       </li>
       {{ end }}
     </ul>
+    {{ end }}
+
   </div>
 </div>
 {{ end }}
