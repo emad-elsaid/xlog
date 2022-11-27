@@ -9,17 +9,9 @@ XLog
 
 :vhs: Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML and allows editing files online. It focuses on enriching markdown files and surfacing implicit links between pages.
 
-# Core Features
+# Documentation
 
-- Serve any file from current directory. rendering any Markdown file to HTML format.
-- Supports Github flavor markdown (GFM)
-- One statically compiled binary
-- Has a list of tools defined by extensions. triggered with `Ctrl+K`
-- Special style if there is an image at the start of a page to make it look like a cover photo.
-- Minimal third-party dependencies.
-- The first Emoji used in the page will be considered the icon of the page and displayed beside the title
-- Shows task list (Done/Total tasks) beside page link (auto links)
-
+* [Documentation Home](https://xlog.emadelsaid.com/)
 * [Installation](https://xlog.emadelsaid.com/Installation/)
 * [Usage](https://xlog.emadelsaid.com/Usage/)
 * [Generating static site](http://localhost:3000/Creating%20a%20site)
