@@ -2,6 +2,12 @@
 xlog --help
 
 Usage of xlog:
+  -activitypub.domain string
+        domain used for activitypub stream absolute URLs
+  -activitypub.summary string
+        summary of the user for activitypub actor
+  -activitypub.username string
+        username for activitypub actor
   -bind string
         IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string

@@ -3,6 +3,7 @@ package activitypub
 import (
 	"flag"
 	"fmt"
+	"html/template"
 	"net/url"
 	"sort"
 	"strconv"
@@ -16,14 +17,29 @@ var username string
 var summary string
 
 func init() {
-	flag.StringVar(&domain, "activitypub.domain", "", "domain used for activitypub.")
-	flag.StringVar(&username, "activitypub.username", "xlog", "username for activitypub steam")
-	flag.StringVar(&summary, "activitypub.summary", "", "summary of the user for activitypub")
+	flag.StringVar(&domain, "activitypub.domain", "", "domain used for activitypub stream absolute URLs")
+	flag.StringVar(&username, "activitypub.username", "", "username for activitypub actor")
+	flag.StringVar(&summary, "activitypub.summary", "", "summary of the user for activitypub actor")
 
 	Get(`/\.well-known/webfinger`, webfinger)
 	Get(`/\+/activitypub/@{user:.+}/outbox/{page:[0-9]+}`, outboxPage)
 	Get(`/\+/activitypub/@{user:.+}/outbox`, outbox)
 	Get(`/\+/activitypub/@{user:.+}`, profile)
+	RegisterWidget(HEAD_WIDGET, 1, meta)
+}
+
+func meta(p Page, r Request) template.HTML {
+	if domain == "" || username == "" {
+		return ""
+	}
+
+	RegisterBuildPage("/.well-known/webfinger", false)
+	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s", username), true)
+	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox", username), true)
+
+	o := fmt.Sprintf(`<link href='https://%s/+/activitypub/@%s' rel='alternate' type='application/activity+json'>`, domain, username)
+
+	return template.HTML(o)
 }
 
 type webfingerResponse struct {
@@ -33,6 +49,10 @@ type webfingerResponse struct {
 }
 
 func webfinger(w Response, r Request) Output {
+	if domain == "" || username == "" {
+		return NoContent()
+	}
+
 	return JsonResponse(
 		webfingerResponse{
 			Subject: fmt.Sprintf("acct:%s@%s", username, domain),
@@ -77,6 +97,10 @@ type profileResponse struct {
 }
 
 func profile(w Response, r Request) Output {
+	if domain == "" || username == "" {
+		return NoContent()
+	}
+
 	vars := Vars(r)
 	if vars["user"] != username {
 		return NotFound("User not found")
@@ -113,14 +137,20 @@ type outboxResponse struct {
 }
 
 func outbox(w Response, r Request) Output {
+	if domain == "" || username == "" {
+		return NoContent()
+	}
+
 	vars := Vars(r)
-	fmt.Printf("VARS: %#v", vars)
 	if vars["user"] != username {
 		return NotFound("User not found")
 	}
 
 	count := 0
-	EachPage(r.Context(), func(_ Page) { count += 1 })
+	EachPage(r.Context(), func(_ Page) {
+		count += 1
+		RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
+	})
 
 	return JsonResponse(
 		outboxResponse{
@@ -164,6 +194,10 @@ type outboxPageObject struct {
 }
 
 func outboxPage(w Response, r Request) Output {
+	if domain == "" || username == "" {
+		return NoContent()
+	}
+
 	vars := Vars(r)
 	if vars["user"] != username {
 		return NotFound("User not found")
