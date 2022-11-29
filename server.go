@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -206,6 +207,18 @@ func noContent(w http.ResponseWriter, r *http.Request) {
 func PlainText(text string) Output {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(text))
+	}
+}
+
+func JsonResponse(a any) Output {
+	return func(w http.ResponseWriter, r *http.Request) {
+		b, err := json.Marshal(a)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.Write(b)
 	}
 }
 
