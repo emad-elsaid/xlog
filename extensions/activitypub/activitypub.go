@@ -3,6 +3,7 @@ package activitypub
 import (
 	"flag"
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -19,12 +20,12 @@ func init() {
 	flag.StringVar(&summary, "activitypub.summary", "", "summary of the user for activitypub")
 
 	Get(`/\.well-known/webfinger`, webfinger)
-	Get(`/\+/activitypub/@{user:.+}`, profile)
-	Get(`/\+/activitypub/@{user:.+}/outbox`, outbox)
 	Get(`/\+/activitypub/@{user:.+}/outbox/{page:[0-9]+}`, outboxPage)
+	Get(`/\+/activitypub/@{user:.+}/outbox`, outbox)
+	Get(`/\+/activitypub/@{user:.+}`, profile)
 }
 
-type webFingerResponse struct {
+type webfingerResponse struct {
 	Subject string              `json:"subject,omitempty"`
 	Aliases []string            `json:"aliases,omitempty"`
 	Links   []map[string]string `json:"links,omitempty"`
@@ -32,7 +33,7 @@ type webFingerResponse struct {
 
 func webfinger(w Response, r Request) Output {
 	return JsonResponse(
-		webFingerResponse{
+		webfingerResponse{
 			Subject: fmt.Sprintf("acct:%s@%s", username, domain),
 			Aliases: []string{
 				fmt.Sprintf("https://%s", domain),
@@ -75,6 +76,11 @@ type profileResponse struct {
 }
 
 func profile(w Response, r Request) Output {
+	vars := Vars(r)
+	if vars["user"] != username {
+		return NotFound("User not found")
+	}
+
 	return JsonResponse(
 		profileResponse{
 			Context:           "https://www.w3.org/ns/activitystreams",
@@ -106,6 +112,12 @@ type outboxResponse struct {
 }
 
 func outbox(w Response, r Request) Output {
+	vars := Vars(r)
+	fmt.Printf("VARS: %#v", vars)
+	if vars["user"] != username {
+		return NotFound("User not found")
+	}
+
 	count := 0
 	EachPage(r.Context(), func(_ Page) { count += 1 })
 
@@ -126,6 +138,7 @@ type outboxPageResponse struct {
 	ID           string           `json:"id,omitempty"`
 	Type         string           `json:"type,omitempty"`
 	Prev         string           `json:"prev,omitempty"`
+	Next         string           `json:"next,omitempty"`
 	PartOf       string           `json:"partOf,omitempty"`
 	OrderedItems []outboxPageItem `json:"orderedItems"`
 }
@@ -151,41 +164,60 @@ type outboxPageObject struct {
 
 func outboxPage(w Response, r Request) Output {
 	vars := Vars(r)
+	if vars["user"] != username {
+		return NotFound("User not found")
+	}
+
 	pageIndex, _ := strconv.ParseInt(vars["page"], 10, 64)
+	pageIndex--
+
 	var count int64
-	var page Page
+	pages := orderedPages{}
 	EachPage(r.Context(), func(p Page) {
 		count += 1
-		if count == pageIndex {
-			page = p
-		}
+		pages = append(pages, p)
 	})
+
+	if int(pageIndex) >= len(pages) || pageIndex < 0 {
+		return NotFound("page index is out of context")
+	}
+
+	var page Page
+	sort.Sort(pages)
+	page = pages[pageIndex]
 
 	return JsonResponse(
 		outboxPageResponse{
 			Context: "https://www.w3.org/ns/activitystreams",
-			ID:      "https://{{.domain}}/+/activitypub/@{{.username}}/outbox/{{.page}}",
+			ID:      fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex),
 			Type:    "OrderedCollectionPage",
-			Prev:    "https://{{.domain}}/+/activitypub/@{{.username}}/outbox/1",
-			PartOf:  "https://{{.domain}}/+/activitypub/@{{.username}}/outbox",
+			Prev:    fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex-1),
+			Next:    fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex+1),
+			PartOf:  fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
 			OrderedItems: []outboxPageItem{
 				{
-					ID:        "https://{{.domain}}/+/activitypub/@{{.username}}/statuses/109420100218327922/activity",
+					ID:        fmt.Sprintf("https://%s/%s", domain, page.Name()),
 					Type:      "Create",
-					Actor:     "https://{{.domain}}/+/activitypub/@{{.username}}",
+					Actor:     fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 					Published: page.ModTime(),
 					To:        []string{"https://www.w3.org/ns/activitystreams#Public"},
 					Object: outboxPageObject{
-						ID:           "https://{{.domain}}/{{.name}}",
+						ID:           fmt.Sprintf("https://%s/%s", domain, page.Name()),
 						Type:         "Note",
 						Published:    page.ModTime(),
-						URL:          "https://{{.domain}}/{{.name}}",
-						AttributedTo: "https://{{.domain}}/+/activitypub/@{{.username}}",
+						URL:          fmt.Sprintf("https://%s/%s", domain, page.Name()),
+						AttributedTo: fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 						To:           []string{"https://www.w3.org/ns/activitystreams#Public"},
-						Content:      page.Name() + "\n" + page.Content(),
+						Content:      page.Name() + "\n" + string(page.Render()),
 					},
 				},
 			},
 		},
 	)
 }
+
+type orderedPages []Page
+
+func (a orderedPages) Len() int           { return len(a) }
+func (a orderedPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a orderedPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }
