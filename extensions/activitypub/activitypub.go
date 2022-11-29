@@ -3,6 +3,7 @@ package activitypub
 import (
 	"flag"
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 	"time"
@@ -186,6 +187,11 @@ func outboxPage(w Response, r Request) Output {
 	sort.Sort(pages)
 	page = pages[pageIndex]
 
+	var u url.URL
+	u.Scheme = "https"
+	u.Path = "/" + page.Name()
+	u.Host = domain
+
 	return JsonResponse(
 		outboxPageResponse{
 			Context: "https://www.w3.org/ns/activitystreams",
@@ -196,19 +202,19 @@ func outboxPage(w Response, r Request) Output {
 			PartOf:  fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
 			OrderedItems: []outboxPageItem{
 				{
-					ID:        fmt.Sprintf("https://%s/%s", domain, page.Name()),
+					ID:        u.String(),
 					Type:      "Create",
 					Actor:     fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 					Published: page.ModTime(),
 					To:        []string{"https://www.w3.org/ns/activitystreams#Public"},
 					Object: outboxPageObject{
-						ID:           fmt.Sprintf("https://%s/%s", domain, page.Name()),
+						ID:           u.String(),
 						Type:         "Note",
 						Published:    page.ModTime(),
-						URL:          fmt.Sprintf("https://%s/%s", domain, page.Name()),
+						URL:          u.String(),
 						AttributedTo: fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 						To:           []string{"https://www.w3.org/ns/activitystreams#Public"},
-						Content:      page.Name() + "\n" + string(page.Render()),
+						Content:      fmt.Sprintf("%s\n%s", page.Name(), u.String()),
 					},
 				},
 			},
