@@ -92,8 +92,8 @@ type profileResponse struct {
 	Inbox             string            `json:"inbox,omitempty"`
 	Outbox            string            `json:"outbox,omitempty"`
 	Endpoints         map[string]string `json:"endpoints,omitempty"`
-	Icon              string            `json:"icon,omitempty"`
-	Image             string            `json:"image,omitempty"`
+	Icon              map[string]string `json:"icon,omitempty"`
+	Image             map[string]string `json:"image,omitempty"`
 }
 
 func profile(w Response, r Request) Output {
@@ -120,8 +120,16 @@ func profile(w Response, r Request) Output {
 			Endpoints: map[string]string{
 				"sharedInbox": fmt.Sprintf("https://%s/+/activitypub/@%s/inbox", domain, username),
 			},
-			Icon:  fmt.Sprintf("https://%s/public/logo.png", domain),
-			Image: fmt.Sprintf("https://%s/public/logo.png", domain),
+			Icon: map[string]string{
+				"type":      "Image",
+				"mediaType": "image/png",
+				"href":      fmt.Sprintf("https://%s/public/logo.png", domain),
+			},
+			Image: map[string]string{
+				"type":      "Image",
+				"mediaType": "image/png",
+				"href":      fmt.Sprintf("https://%s/public/logo.png", domain),
+			},
 		},
 	)
 
