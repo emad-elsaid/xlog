@@ -43,7 +43,7 @@ jobs:
           --sidebar=false \
           --sitemap.domain=xlog.emadelsaid.com \
           --activitypub.domain=xlog.emadelsaid.com \
-          --activitypub.username=self \
+          --activitypub.username=app \
           --activitypub.summary="Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML and allows editing files online. It focuses on enriching markdown files and surfacing implicit links between pages."
           rm *.md
           chmod -R 0777 .

@@ -123,12 +123,12 @@ func profile(w Response, r Request) Output {
 			Icon: map[string]string{
 				"type":      "Image",
 				"mediaType": "image/png",
-				"href":      fmt.Sprintf("https://%s/public/logo.png", domain),
+				"url":       fmt.Sprintf("https://%s/public/logo.png", domain),
 			},
 			Image: map[string]string{
 				"type":      "Image",
 				"mediaType": "image/png",
-				"href":      fmt.Sprintf("https://%s/public/logo.png", domain),
+				"url":       fmt.Sprintf("https://%s/public/logo.png", domain),
 			},
 		},
 	)
