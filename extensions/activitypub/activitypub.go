@@ -15,11 +15,15 @@ import (
 var domain string
 var username string
 var summary string
+var icon string
+var image string
 
 func init() {
 	flag.StringVar(&domain, "activitypub.domain", "", "domain used for activitypub stream absolute URLs")
 	flag.StringVar(&username, "activitypub.username", "", "username for activitypub actor")
 	flag.StringVar(&summary, "activitypub.summary", "", "summary of the user for activitypub actor")
+	flag.StringVar(&icon, "activitypub.icon", "/public/logo.png", "the path to the activitypub profile icon. mastodon use it as profile picture for example.")
+	flag.StringVar(&image, "activitypub.image", "/public/logo.png", "the path to the activitypub profile image. mastodon use it as profile cover for example.")
 
 	Get(`/\.well-known/webfinger`, webfinger)
 	Get(`/\+/activitypub/@{user:.+}/outbox/{page:[0-9]+}`, outboxPage)
@@ -123,12 +127,12 @@ func profile(w Response, r Request) Output {
 			Icon: map[string]string{
 				"type":      "Image",
 				"mediaType": "image/png",
-				"url":       fmt.Sprintf("https://%s/public/logo.png", domain),
+				"url":       fmt.Sprintf("https://%s%s", domain, icon),
 			},
 			Image: map[string]string{
 				"type":      "Image",
 				"mediaType": "image/png",
-				"url":       fmt.Sprintf("https://%s/public/logo.png", domain),
+				"url":       fmt.Sprintf("https://%s%s", domain, image),
 			},
 		},
 	)

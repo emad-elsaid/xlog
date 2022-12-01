@@ -4,6 +4,10 @@ xlog --help
 Usage of xlog:
   -activitypub.domain string
         domain used for activitypub stream absolute URLs
+  -activitypub.icon string
+        the path to the activitypub profile icon. mastodon use it as profile picture for example. (default "/public/logo.png")
+  -activitypub.image string
+        the path to the activitypub profile image. mastodon use it as profile cover for example. (default "/public/logo.png")
   -activitypub.summary string
         summary of the user for activitypub actor
   -activitypub.username string
