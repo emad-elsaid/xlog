@@ -37,6 +37,7 @@ xlog
 - Creating a site
 - Extensions
 - Dependencies
+- Security
 
 # :scroll: Principles
 
