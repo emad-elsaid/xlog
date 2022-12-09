@@ -153,8 +153,8 @@ func uploadFileHandler(w Response, r Request) Output {
 	}
 
 	if fileName != "" && page.Exists() {
-		content := strings.TrimSpace(page.Content()) + "\n\n" + output + "\n"
-		page.Write(content)
+		content := strings.TrimSpace(string(page.Content())) + "\n\n" + output + "\n"
+		page.Write(Markdown(content))
 		return Redirect("/" + page.Name())
 	}
 

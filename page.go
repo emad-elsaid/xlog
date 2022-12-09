@@ -14,6 +14,9 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
+// Markdown is used instead of string to make sure it's clear the string is markdown string
+type Markdown string
+
 // a Type that represent a page.
 type Page interface {
 	// Name returns page name without '.md' extension
@@ -27,12 +30,12 @@ type Page interface {
 	// Renders the page content to HTML. it makes sure all preprocessors are called
 	Render() template.HTML
 	// Reads the underlying file and returns the content
-	Content() string
+	Content() Markdown
 	// Deletes the file and makes sure it triggers the AfterDelete event
 	Delete() bool
 	// Overwrite page content with new content. making sure to trigger before and
 	// after write events.
-	Write(string) bool
+	Write(Markdown) bool
 	// ModTime Return the last modification time of the underlying file
 	ModTime() time.Time
 	// Parses the page content and returns the Abstract Syntax Tree (AST).
@@ -85,12 +88,12 @@ func (p *page) Render() template.HTML {
 	return template.HTML(buf.String())
 }
 
-func (p *page) Content() string {
+func (p *page) Content() Markdown {
 	dat, err := os.ReadFile(p.FileName())
 	if err != nil {
 		return ""
 	}
-	return string(dat)
+	return Markdown(dat)
 }
 
 func (p *page) Delete() bool {
@@ -106,14 +109,14 @@ func (p *page) Delete() bool {
 	return true
 }
 
-func (p *page) Write(content string) bool {
+func (p *page) Write(content Markdown) bool {
 	Trigger(BeforeWrite, p)
 	defer Trigger(AfterWrite, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)
 
-	content = strings.ReplaceAll(content, "\r\n", "\n")
+	content = Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	if err := os.WriteFile(name, []byte(content), 0644); err != nil {
 		fmt.Printf("Can't write `%s`, err: %s\n", p.Name(), err)
 		return false

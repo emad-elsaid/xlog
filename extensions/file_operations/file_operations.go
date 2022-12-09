@@ -76,7 +76,7 @@ func (f PageRename) Handler(w Response, r Request) Output {
 	new := NewPage(r.FormValue("new"))
 	new.Write(old.Content())
 
-	old.Write(fmt.Sprintf("Renamed to: %s", new.Name()))
+	old.Write(Markdown(fmt.Sprintf("Renamed to: %s", new.Name())))
 	return NoContent()
 }
 

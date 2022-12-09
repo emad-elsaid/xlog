@@ -5,7 +5,7 @@ package xlog
 // register is so that when page is rendered it will execute all of them in
 // order like a pipeline each function output is passed as an input to the next.
 // at the end the last preprocessor output is then rendered to HTML
-type Preprocessor func(string) string
+type Preprocessor func(Markdown) Markdown
 
 // List of registered preprocessor functions
 var preprocessors = []Preprocessor{}
@@ -16,7 +16,7 @@ func RegisterPreprocessor(f Preprocessor) { preprocessors = append(preprocessors
 
 // This function take the page content and pass it through all registered
 // preprocessors and return the last preprocessor output to the caller
-func preProcess(content string) string {
+func preProcess(content Markdown) Markdown {
 	for _, v := range preprocessors {
 		content = v(content)
 	}

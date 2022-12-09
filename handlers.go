@@ -85,7 +85,7 @@ func getPageEditHandler(w Response, r Request) Output {
 	vars := Vars(r)
 	page := NewPage(vars["page"])
 
-	var content string
+	var content Markdown
 	if page.Exists() {
 		content = page.Content()
 	}
@@ -109,7 +109,7 @@ func postPageHandler(w Response, r Request) Output {
 	vars := Vars(r)
 	page := NewPage(vars["page"])
 	content := r.FormValue("content")
-	page.Write(content)
+	page.Write(Markdown(content))
 
 	return Redirect("/" + page.Name())
 }

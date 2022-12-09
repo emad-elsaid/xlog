@@ -59,7 +59,7 @@ func search(ctx context.Context, keyword string) []searchResult {
 			return
 		}
 
-		match = reg.FindString(p.Content())
+		match = reg.FindString(string(p.Content()))
 		if len(match) > 0 {
 			results = append(results, searchResult{
 				Page: p.Name(),

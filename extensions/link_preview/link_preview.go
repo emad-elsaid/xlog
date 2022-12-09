@@ -33,41 +33,47 @@ func init() {
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)
 
-func imgUrlPreprocessor(c string) string {
-	return imgUrlReg.ReplaceAllString(c, `![]($1)`)
+func imgUrlPreprocessor(c Markdown) Markdown {
+	return Markdown(imgUrlReg.ReplaceAllString(string(c), `![]($1)`))
 }
 
 var tweetUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/twitter.com\/[^ ]+\/status\/[0-9]+)$`)
 
-func tweetUrlPreprocessor(c string) string {
-	return tweetUrlReg.ReplaceAllString(c, `
+func tweetUrlPreprocessor(c Markdown) Markdown {
+	return Markdown(
+		tweetUrlReg.ReplaceAllString(string(c), `
 <blockquote class="twitter-tweet">
 	<a href="$1"></a>
-</blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>`)
+</blockquote><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>`),
+	)
 }
 
 var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=([^ ]+)$`)
 
-func youtubeUrlPreprocessor(c string) string {
-	return youtubeUrlReg.ReplaceAllString(c, `
+func youtubeUrlPreprocessor(c Markdown) Markdown {
+	return Markdown(
+		youtubeUrlReg.ReplaceAllString(string(c), `
 <figure class="image is-16by9 mx-0">
 	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</figure>`)
+</figure>`),
+	)
 }
 
 var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9]+)$`)
 
-func fbUrlPreprocessor(c string) string {
-	return fbUrlReg.ReplaceAllStringFunc(c, func(l string) string {
-		return fmt.Sprintf(`
+func fbUrlPreprocessor(c Markdown) Markdown {
+	return Markdown(
+		fbUrlReg.ReplaceAllStringFunc(string(c), func(l string) string {
+			return fmt.Sprintf(`
 <iframe src="https://www.facebook.com/plugins/post.php?show_text=true&width=500&href=%s" width="500" height="271" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`, url.QueryEscape(l))
-	})
+		}),
+	)
 }
 
 var giphyUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/[^ ]+\-([^ \-]+)$`)
 
-func giphyUrlPreprocessor(c string) string {
-	return giphyUrlReg.ReplaceAllString(c, `![](https://media.giphy.com/media/$1/giphy.gif)`)
+func giphyUrlPreprocessor(c Markdown) Markdown {
+	return Markdown(giphyUrlReg.ReplaceAllString(string(c), `![](https://media.giphy.com/media/$1/giphy.gif)`))
 }
 
 var (
@@ -78,8 +84,8 @@ var (
 	metaContentReg = regexp.MustCompile(`(?imU)content\s*=\s*"(.*)"`)
 )
 
-func fallbackURLPreprocessor(c string) string {
-	return fallbackUrlReg.ReplaceAllStringFunc(c, func(m string) string {
+func fallbackURLPreprocessor(c Markdown) Markdown {
+	output := fallbackUrlReg.ReplaceAllStringFunc(string(c), func(m string) string {
 		meta, err := getUrlMeta(m)
 		if err != nil {
 			return m
@@ -110,6 +116,8 @@ func fallbackURLPreprocessor(c string) string {
 
 		return strings.ReplaceAll(view, "\n", "")
 	})
+
+	return Markdown(output)
 }
 
 type Meta struct {

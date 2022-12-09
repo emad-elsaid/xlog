@@ -44,7 +44,7 @@ func (s starredPage) Link() string {
 
 func starredPages(p Page) []Link {
 	pages := NewPage(STARRED_PAGES)
-	content := strings.TrimSpace(pages.Content())
+	content := strings.TrimSpace(string(pages.Content()))
 	if content == "" {
 		return nil
 	}
@@ -114,7 +114,8 @@ func starHandler(w Response, r Request) Output {
 	}
 
 	starred_pages := NewPage(STARRED_PAGES)
-	starred_pages.Write(strings.TrimSpace(starred_pages.Content()) + "\n" + page.Name())
+	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
+	starred_pages.Write(Markdown(new_content))
 	return NoContent()
 }
 
@@ -130,21 +131,21 @@ func unstarHandler(w Response, r Request) Output {
 	}
 
 	starred_pages := NewPage(STARRED_PAGES)
-	content := strings.Split(strings.TrimSpace(starred_pages.Content()), "\n")
+	content := strings.Split(strings.TrimSpace(string(starred_pages.Content())), "\n")
 	new_content := ""
 	for _, v := range content {
 		if v != page.Name() {
 			new_content += "\n" + v
 		}
 	}
-	starred_pages.Write(new_content)
+	starred_pages.Write(Markdown(new_content))
 
 	return NoContent()
 }
 
 func isStarred(p Page) bool {
 	starred_page := NewPage(STARRED_PAGES)
-	for _, k := range strings.Split(starred_page.Content(), "\n") {
+	for _, k := range strings.Split(string(starred_page.Content()), "\n") {
 		if strings.TrimSpace(k) == p.Name() {
 			return true
 		}

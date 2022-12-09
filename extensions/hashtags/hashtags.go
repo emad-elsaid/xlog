@@ -220,14 +220,14 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	return suggestions
 }
 
-func hashtagPages(hashtag string) string {
-	hashtag = strings.Trim(hashtag, "# ")
-	pages := tagPages(context.Background(), hashtag)
+func hashtagPages(hashtag Markdown) Markdown {
+	hashtag_value := strings.Trim(string(hashtag), "# ")
+	pages := tagPages(context.Background(), hashtag_value)
 
 	output := string(Partial("hashtag-pages", Locals{"pages": pages}))
 	output = strings.ReplaceAll(output, "\n", "")
 	output = strings.TrimSpace(output)
 	output += "\n"
 
-	return output
+	return Markdown(output)
 }
