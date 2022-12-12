@@ -1,8 +1,10 @@
 {{ template "header" . }}
 
 <div class="columns is-size-7 has-text-grey">
-    <div class="column"> {{ template "properties" . }} </div>
-    <div class="column is-narrow"> {{ template "quick_commands" . }} </div>
+  <div class="column"> {{ template "properties" . }} </div>
+  {{ if .quick_commands }}
+  <div class="column is-narrow"> {{ template "quick_commands" . }} </div>
+  {{ end }}
 </div>
 
 <div class="view"> {{.content}} {{ .afterView }} </div>
