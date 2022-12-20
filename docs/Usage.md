@@ -18,6 +18,8 @@ Usage of xlog:
         Build all pages as static site in this directory
   -index string
         Index file name used as home page (default "index")
+  -og.domain string
+        opengraph domain name to be used for meta tags of og:* and twitter:*
   -readonly
         Should xlog hide write operations, read-only means all write operations will be disabled
   -sidebar
@@ -27,5 +29,7 @@ Usage of xlog:
   -sitename string
         Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
-        Directory that will act as a storage (default "current/path")
+        Directory that will act as a storage (default "/path/to/source")
+  -twitter.username string
+        user twitter account @handle. including the @
 ```

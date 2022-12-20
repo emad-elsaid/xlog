@@ -28,6 +28,7 @@ import (
 	"github.com/emad-elsaid/xlog"
 
 	// Extensions
+	_ "github.com/emad-elsaid/xlog/extensions/activitypub"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
 	_ "github.com/emad-elsaid/xlog/extensions/emoji"
