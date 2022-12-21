@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"log"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
@@ -221,14 +222,13 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	return suggestions
 }
 
-func hashtagPages(hashtag Markdown) Markdown {
+func hashtagPages(hashtag Markdown) template.HTML {
 	hashtag_value := strings.Trim(string(hashtag), "# ")
 	pages := tagPages(context.Background(), hashtag_value)
+	log.Printf("%s %#v", hashtag_value, pages)
 
 	output := string(Partial("hashtag-pages", Locals{"pages": pages}))
-	output = strings.ReplaceAll(output, "\n", "")
-	output = strings.TrimSpace(output)
-	output += "\n"
+	log.Println(output)
 
-	return Markdown(output)
+	return template.HTML(output)
 }

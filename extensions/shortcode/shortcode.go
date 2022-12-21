@@ -2,27 +2,32 @@ package shortcode
 
 import (
 	"fmt"
+	"html/template"
 	"regexp"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/util"
 )
 
-var shortcodes = map[string]Preprocessor{
-	"info": func(c Markdown) Markdown {
-		return Markdown(fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+type ShortCodeFunc func(Markdown) template.HTML
+
+var shortcodes = map[string]ShortCodeFunc{
+	"info": func(c Markdown) template.HTML {
+		return template.HTML(fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
 	},
 
-	"success": func(c Markdown) Markdown {
-		return Markdown(fmt.Sprintf(`<p class="notification is-success">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+	"success": func(c Markdown) template.HTML {
+		return template.HTML(fmt.Sprintf(`<p class="notification is-success">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
 	},
 
-	"warning": func(c Markdown) Markdown {
-		return Markdown(fmt.Sprintf(`<p class="notification is-warning">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+	"warning": func(c Markdown) template.HTML {
+		return template.HTML(fmt.Sprintf(`<p class="notification is-warning">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
 	},
 
-	"alert": func(c Markdown) Markdown {
-		return Markdown(fmt.Sprintf(`<p class="notification is-danger">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+	"alert": func(c Markdown) template.HTML {
+		return template.HTML(fmt.Sprintf(`<p class="notification is-danger">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
 	},
 }
 
@@ -31,32 +36,17 @@ func init() {
 		ShortCode(k, v)
 	}
 
-	RegisterAutocomplete(autocomplete(0))
+	MarkDownRenderer.Parser().AddOptions(parser.WithBlockParsers(
+		util.Prioritized(&shortCodeParser{}, 0),
+	))
 }
 
-func ShortCode(name string, shortcode Preprocessor) {
+func ShortCode(name string, shortcode ShortCodeFunc) {
 	shortcodes[name] = shortcode
 
-	// single line
-	reg := regexp.MustCompile(`(?imU)^\/` + regexp.QuoteMeta(name) + `\s+(.*)$`)
-	skip := len("/" + name + " ")
-
-	preprocessor := func(r *regexp.Regexp, skip int, v Preprocessor) Preprocessor {
-		return func(c Markdown) Markdown {
-			output := reg.ReplaceAllStringFunc(string(c), func(i string) string {
-				return string(v(Markdown(i[skip:])))
-			})
-
-			return Markdown(output)
-		}
-	}(reg, skip, shortcode)
-
-	RegisterPreprocessor(preprocessor)
-
-	// multi line
 	headerSkip := len("```" + name + "\n")
 	multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(name) + "$(.*)^```$")
-	multilinePreprocessor := func(r *regexp.Regexp, skip int, v Preprocessor) Preprocessor {
+	multilinePreprocessor := func(skip int, v ShortCodeFunc) Preprocessor {
 		return func(c Markdown) Markdown {
 			output := multireg.ReplaceAllStringFunc(string(c), func(i string) string {
 				input := i[skip : len(i)-4]
@@ -64,26 +54,7 @@ func ShortCode(name string, shortcode Preprocessor) {
 			})
 			return Markdown(output)
 		}
-	}(reg, headerSkip, shortcode)
+	}(headerSkip, shortcode)
 
 	RegisterPreprocessor(multilinePreprocessor)
-}
-
-type autocomplete int
-
-func (a autocomplete) StartChar() string {
-	return "/"
-}
-
-func (a autocomplete) Suggestions() []*Suggestion {
-	suggestions := []*Suggestion{}
-
-	for k := range shortcodes {
-		suggestions = append(suggestions, &Suggestion{
-			Text:        "/" + k,
-			DisplayText: "/" + k,
-		})
-	}
-
-	return suggestions
 }
