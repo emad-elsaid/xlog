@@ -1,10 +1,9 @@
-{{ if and .quick_commands (not .READONLY) }}
-{{.csrf}}
+{{ if and .quick_commands (not .READONLY) }} {{.csrf}} {{ end }}
+
 {{ range .quick_commands }}
 <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
   <span class="icon"><i class="{{.Icon}}"></i></span>
   <span>{{.Name}}</span>
 </a>
 {{.Widget}}
-{{ end }}
 {{ end }}
