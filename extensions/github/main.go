@@ -31,7 +31,7 @@ type editOnGithub struct {
 }
 
 func (e editOnGithub) Icon() string {
-	return "fa-solid fa-pen"
+	return "fa-brands fa-github"
 }
 func (e editOnGithub) Name() string {
 	return "Edit on Github"
