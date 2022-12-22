@@ -55,6 +55,7 @@ xlog
 # :bulb: Tutorials
 
 - Hello world extension
+- Create your own digital garden on Github
 
 # Contributing
 
