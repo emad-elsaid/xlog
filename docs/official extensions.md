@@ -14,6 +14,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                     |
 | Recent          | Adds an item to sidebar to list all pages ordered by last modified page file.       |
+| RSS             | Provides RSS feed served under /+/fee.rss and added to the header of pages          |
 | Search          | Full text search                                                                    |
 | Shortcode       | adds a way for short codes (one line and block)                                     |
 | Sitemap         | adds support for sitemap.xml for search engine crawling                             |

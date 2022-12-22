@@ -26,6 +26,12 @@ Usage of xlog:
         opengraph domain name to be used for meta tags of og:* and twitter:*
   -readonly
         Should xlog hide write operations, read-only means all write operations will be disabled
+  -rss.description string
+        RSS feed description
+  -rss.domain string
+        RSS domain name to be used for RSS feed. without HTTPS://
+  -rss.limit int
+        Limit the number of items in the RSS feed to this amount (default 30)
   -sidebar
         Should render sidebar. (default true)
   -sitemap.domain string
