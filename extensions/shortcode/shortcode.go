@@ -1,10 +1,10 @@
 package shortcode
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"regexp"
-	"strings"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/parser"
@@ -13,21 +13,27 @@ import (
 
 type ShortCodeFunc func(Markdown) template.HTML
 
+func render(i Markdown) string {
+	var b bytes.Buffer
+	MarkDownRenderer.Convert([]byte(i), &b)
+	return b.String()
+}
+
 var shortcodes = map[string]ShortCodeFunc{
 	"info": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<p class="notification is-info">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-info">%s</div>`, render(c)))
 	},
 
 	"success": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<p class="notification is-success">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-success">%s</div>`, render(c)))
 	},
 
 	"warning": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<p class="notification is-warning">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-warning">%s</div>`, render(c)))
 	},
 
 	"alert": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<p class="notification is-danger">%s</p>`, strings.ReplaceAll(string(c), "\n", "<br/>")))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-danger">%s</div>`, render(c)))
 	},
 }
 
