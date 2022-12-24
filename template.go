@@ -58,6 +58,9 @@ func compileTemplates() {
 	}
 }
 
+// Partial executes a template by it's path name. it passes data to the
+// template. returning the output of the template. in case of an error it will
+// return the error string as the output
 func Partial(path string, data Locals) template.HTML {
 	v := templates.Lookup(path)
 	if v == nil {
