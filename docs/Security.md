@@ -14,3 +14,6 @@ Xlog accept a `--readonly` flag to signal all features not to write to the disk.
 Extensions can ignore the readonly flag so make sure you use trusted extensions only in case you intend to expose xlog to the internet.
 
 
+# Reporting Security Issues
+
+Please report any issues to me on Keybase: https://keybase.io/emadelsaid
