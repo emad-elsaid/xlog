@@ -6,6 +6,10 @@
  * Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  * Copyright 2022 Fonticons, Inc.
+ */:root,:host{--fa-style-family-classic: 'Font Awesome 6 Free';--fa-font-regular: normal 400 1em/1 'Font Awesome 6 Free'}@font-face{font-family:'Font Awesome 6 Free';font-style:normal;font-weight:400;font-display:block;src:url(1f3772178d9e5bed38a6.woff2) format("woff2"),url(3cd9fb8fcec4ad0f99d4.ttf) format("truetype")}.far,.fa-regular{font-weight:400}/*!
+ * Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com
+ * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ * Copyright 2022 Fonticons, Inc.
  */:root,:host{--fa-style-family-classic: 'Font Awesome 6 Free';--fa-font-solid: normal 900 1em/1 'Font Awesome 6 Free'}@font-face{font-family:'Font Awesome 6 Free';font-style:normal;font-weight:900;font-display:block;src:url(41c0f706d8ce93933771.woff2) format("woff2"),url(b1a653db79258eeccc5d.ttf) format("truetype")}.fas,.fa-solid{font-weight:900}/*!
  * Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
