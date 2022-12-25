@@ -1,3 +1,12 @@
+@charset "utf-8";
+@import "~bulma/bulma";
+@import "~bulma-prefers-dark/bulma-prefers-dark";
+
+$fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
+@import "~@fortawesome/fontawesome-free/css/fontawesome";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+@import "~@fortawesome/fontawesome-free/scss/brands";
+
 .view {
     p>img:only-child{
         display: block;

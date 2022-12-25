@@ -1,1 +1,4 @@
 *.versions
+node_modules
+yarn-error.log
+public/ignored.js
