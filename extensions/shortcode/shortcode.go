@@ -21,19 +21,19 @@ func render(i Markdown) string {
 
 var shortcodes = map[string]ShortCodeFunc{
 	"info": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<div class="notification is-info">%s</div>`, render(c)))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-info is-light">%s</div>`, render(c)))
 	},
 
 	"success": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<div class="notification is-success">%s</div>`, render(c)))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-success is-light">%s</div>`, render(c)))
 	},
 
 	"warning": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<div class="notification is-warning">%s</div>`, render(c)))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-warning is-light">%s</div>`, render(c)))
 	},
 
 	"alert": func(c Markdown) template.HTML {
-		return template.HTML(fmt.Sprintf(`<div class="notification is-danger">%s</div>`, render(c)))
+		return template.HTML(fmt.Sprintf(`<div class="notification is-danger is-light">%s</div>`, render(c)))
 	},
 }
 
