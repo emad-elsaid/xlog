@@ -6,7 +6,7 @@
     <link rel="icon" href="/public/logo.png">
     <link rel="stylesheet" href="/public/style.css">
     <title>{{.title}} | {{.SITENAME}}</title>
-    {{ .head }}
+    {{ if .page }} {{ widgets "head" .page }} {{ end }}
   </head>
   <body>
 

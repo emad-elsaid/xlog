@@ -18,11 +18,11 @@ var templates embed.FS
 
 func init() {
 	Get(`/\+/search`, searchHandler)
-	RegisterWidget(SIDEBAR_WIDGET, 0, sidebar)
+	RegisterWidget("search", 0, searchWidget)
 	RegisterTemplate(templates, "templates")
 }
 
-func sidebar(_ Page) template.HTML {
+func searchWidget(_ Page) template.HTML {
 	if READONLY {
 		return ""
 	}

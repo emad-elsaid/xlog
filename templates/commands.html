@@ -1,4 +1,10 @@
-{{ if .commands }}
+{{ $commands := "" }}
+
+{{ if .page }}
+{{ $commands = commands .page }}
+{{ end }}
+
+{{ if $commands }}
 {{.csrf}}
 <dialog id="commands-modal" style="border: none;" class="mt-0">
   <div class="modal-content">
@@ -10,7 +16,7 @@
       </div>
       <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
         <ul class="menu-list">
-          {{- range .commands -}}
+          {{- range $commands -}}
           <li>
             <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
               <span class="icon"><i class="{{.Icon}}"></i></span>

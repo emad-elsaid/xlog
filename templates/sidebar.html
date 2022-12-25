@@ -1,9 +1,17 @@
-{{ if or .sidebar .links }}
+{{ $sidebar := "" }}
+{{ $links := "" }}
+
+{{ if .page }}
+{{ $sidebar = widgets "sidebar" .page }}
+{{ $links = links .page }}
+{{ end }}
+
+{{ if or $sidebar $links }}
 <div class="column is-2 is-hidden-mobile">
   <div class="sidebar">
-    {{.sidebar}}
+    {{$sidebar}}
 
-    {{ with .links }}
+    {{ with $links }}
     <ul class="menu-list">
       {{ range . }}
       <li>

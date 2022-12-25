@@ -1,5 +1,9 @@
 package xlog
 
+func init() {
+	RegisterHelper("links", Links)
+}
+
 // Link represent link for the user interface, default theme renders it in the
 // sidebar
 type Link interface {

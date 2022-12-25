@@ -61,18 +61,11 @@ func getPageHandler(w Response, r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"title":          page.Emoji() + " " + page.Name(),
-		"page":           page,
-		"edit":           "/edit/" + page.Name(),
-		"content":        page.Render(),
-		"commands":       Commands(page),
-		"quick_commands": QuickCommands(page),
-		"links":          Links(page),
-		"properties":     Properties(page),
-		"csrf":           CSRF(r),
-		"sidebar":        RenderWidget(SIDEBAR_WIDGET, page),    // widgets registered for sidebar
-		"head":           RenderWidget(HEAD_WIDGET, page),       // widgets registered to be displayed under the page title
-		"afterView":      RenderWidget(AFTER_VIEW_WIDGET, page), // widgets registered to be displayed under the page content in the view page
+		"title":   page.Emoji() + " " + page.Name(),
+		"page":    page,
+		"edit":    "/edit/" + page.Name(),
+		"content": page.Render(),
+		"csrf":    CSRF(r),
 	})
 }
 

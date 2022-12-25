@@ -2,12 +2,31 @@
 
 <div class="columns is-size-7 has-text-grey">
   <div class="column"> {{ template "properties" . }} </div>
-  {{ if .quick_commands }}
-  <div class="column is-narrow"> {{ template "quick_commands" . }} </div>
+
+  {{ $quick_commands := quick_commands .page }}
+  {{ if $quick_commands }}
+  <div class="column is-narrow">
+
+    {{ if not .READONLY }} {{.csrf}} {{ end }}
+
+    {{ range $quick_commands }}
+    <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
+      <span class="icon"><i class="{{.Icon}}"></i></span>
+      <span>{{.Name}}</span>
+    </a>
+    {{.Widget}}
+    {{ end }}
+  </div>
+
   {{ end }}
+
 </div>
 
-<div class="view"> {{.content}} {{ .afterView }} </div>
+<div class="view">
+  {{ widgets "before_view" .page }}
+  {{.content}}
+  {{ widgets "after_view" .page }}
+</div>
 
 <script>
  {{ if not .READONLY }}

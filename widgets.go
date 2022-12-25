@@ -5,23 +5,29 @@ import (
 	"sort"
 )
 
+func init() {
+	RegisterHelper("widgets", RenderWidget)
+}
+
 type (
-	// a type used to represent a widgets spaces. it's used to register
+	// WidgetSpace used to represent a widgets spaces. it's used to register
 	// widgets to be injected in the view or edit pages
 	WidgetSpace string
-	// a function that takes the current page and returns the widget. This can
-	// be used by extensions to define new widgets to be rendered in view or
-	// edit pages. the extension should define this func type and register it to
-	// be rendered in a specific widgetSpace such as before or after the page.
+	// WidgetFunc a function that takes the current page and returns the widget.
+	// This can be used by extensions to define new widgets to be rendered in
+	// view or edit pages. the extension should define this func type and
+	// register it to be rendered in a specific widgetSpace such as before or
+	// after the page.
 	WidgetFunc func(Page) template.HTML
 )
 
 // List of widgets spaces that extensions can use to register a WidgetFunc to
 // inject content into.
-const (
-	SIDEBAR_WIDGET    = "sidebar"    // widgets rendered in the sidebar
-	AFTER_VIEW_WIDGET = "after_view" // widgets rendered after the content of the view page
-	HEAD_WIDGET       = "head"       // widgets rendered in page <head> tag
+var (
+	SIDEBAR_WIDGET     WidgetSpace = "sidebar"     // widgets rendered in the sidebar
+	AFTER_VIEW_WIDGET  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
+	BEFORE_VIEW_WIDGET WidgetSpace = "before_view" // widgets rendered before the content of the view page
+	HEAD_WIDGET        WidgetSpace = "head"        // widgets rendered in page <head> tag
 )
 
 // A map to keep track of list of widget functions registered in each widget space

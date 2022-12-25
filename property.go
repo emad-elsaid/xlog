@@ -1,5 +1,9 @@
 package xlog
 
+func init() {
+	RegisterHelper("properties", Properties)
+}
+
 // Property represent a piece of information about the current page such as last
 // update time, number of versions, number of words, reading time...etc
 type Property interface {

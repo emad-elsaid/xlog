@@ -2,6 +2,11 @@ package xlog
 
 import "html/template"
 
+func init() {
+	RegisterHelper("commands", Commands)
+	RegisterHelper("quick_commands", QuickCommands)
+}
+
 // Command define a command that a user can invoke in view or edit page on a
 // Page.
 type Command interface {
