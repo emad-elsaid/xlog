@@ -32,7 +32,7 @@ func init() {
 	RegisterWidget(HEAD_WIDGET, 1, meta)
 }
 
-func meta(p Page, r Request) template.HTML {
+func meta(p Page) template.HTML {
 	if domain == "" || username == "" {
 		return ""
 	}

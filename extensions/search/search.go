@@ -22,7 +22,7 @@ func init() {
 	RegisterTemplate(templates, "templates")
 }
 
-func sidebar(_ Page, _ Request) template.HTML {
+func sidebar(_ Page) template.HTML {
 	if READONLY {
 		return ""
 	}

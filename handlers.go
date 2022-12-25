@@ -70,9 +70,9 @@ func getPageHandler(w Response, r Request) Output {
 		"links":          Links(page),
 		"properties":     Properties(page),
 		"csrf":           CSRF(r),
-		"sidebar":        RenderWidget(SIDEBAR_WIDGET, page, r),    // widgets registered for sidebar
-		"head":           RenderWidget(HEAD_WIDGET, page, r),       // widgets registered to be displayed under the page title
-		"afterView":      RenderWidget(AFTER_VIEW_WIDGET, page, r), // widgets registered to be displayed under the page content in the view page
+		"sidebar":        RenderWidget(SIDEBAR_WIDGET, page),    // widgets registered for sidebar
+		"head":           RenderWidget(HEAD_WIDGET, page),       // widgets registered to be displayed under the page title
+		"afterView":      RenderWidget(AFTER_VIEW_WIDGET, page), // widgets registered to be displayed under the page content in the view page
 	})
 }
 

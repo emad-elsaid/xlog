@@ -9,12 +9,11 @@ type (
 	// a type used to represent a widgets spaces. it's used to register
 	// widgets to be injected in the view or edit pages
 	WidgetSpace string
-	// a function that takes the current page and the HTTP request and returns
-	// the widget. This can be used by extensions to define new widgets to be
-	// rendered in view or edit pages. the extension should define this func
-	// type and register it to be rendered in a specific widgetSpace such as
-	// before or after the page.
-	WidgetFunc func(Page, Request) template.HTML
+	// a function that takes the current page and returns the widget. This can
+	// be used by extensions to define new widgets to be rendered in view or
+	// edit pages. the extension should define this func type and register it to
+	// be rendered in a specific widgetSpace such as before or after the page.
+	WidgetFunc func(Page) template.HTML
 )
 
 // List of widgets spaces that extensions can use to register a WidgetFunc to
@@ -42,9 +41,9 @@ func RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
 
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
-func RenderWidget(s WidgetSpace, p Page, r Request) (o template.HTML) {
+func RenderWidget(s WidgetSpace, p Page) (o template.HTML) {
 	for _, f := range widgets[s] {
-		o += f.value(p, r)
+		o += f.value(p)
 	}
 	return
 }

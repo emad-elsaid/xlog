@@ -26,7 +26,7 @@ func init() {
 	Get(`/\+/feed.rss`, feed)
 }
 
-func metaTag(p Page, r Request) template.HTML {
+func metaTag(p Page) template.HTML {
 	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
 	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(SITENAME)))
 }

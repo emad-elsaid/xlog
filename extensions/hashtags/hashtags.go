@@ -162,7 +162,7 @@ func tagPages(ctx context.Context, keyword string) []Page {
 	return results
 }
 
-func relatedPages(p Page, r Request) template.HTML {
+func relatedPages(p Page) template.HTML {
 	if p.Name() == INDEX {
 		return ""
 	}

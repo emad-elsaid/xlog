@@ -20,7 +20,7 @@ func init() {
 	RegisterWidget(HEAD_WIDGET, 1, opengraphTags)
 }
 
-func opengraphTags(p Page, r Request) template.HTML {
+func opengraphTags(p Page) template.HTML {
 	escape := template.JSEscapeString
 
 	title := p.Name()

@@ -21,6 +21,6 @@ func manifest(w Response, r Request) Output {
 	return Render("manifest", Locals{"sitename": SITENAME})
 }
 
-func head(_ Page, _ Request) template.HTML {
+func head(_ Page) template.HTML {
 	return template.HTML(`<link rel="manifest" href="/manifest.json">`)
 }
