@@ -24,7 +24,6 @@ type (
 // List of widgets spaces that extensions can use to register a WidgetFunc to
 // inject content into.
 var (
-	SIDEBAR_WIDGET     WidgetSpace = "sidebar"     // widgets rendered in the sidebar
 	AFTER_VIEW_WIDGET  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
 	BEFORE_VIEW_WIDGET WidgetSpace = "before_view" // widgets rendered before the content of the view page
 	HEAD_WIDGET        WidgetSpace = "head"        // widgets rendered in page <head> tag

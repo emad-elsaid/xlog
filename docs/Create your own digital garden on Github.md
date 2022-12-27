@@ -66,8 +66,7 @@ jobs:
         run: |
           xlog \
           --build . \
-          --sitename "user-name" \
-          --sidebar=false
+          --sitename "user-name"
           rm *.md
           chmod -R 0777 .
 
@@ -105,5 +104,3 @@ jobs:
 3. For example **about.md** will be served as **/about**
 4. keep your files names meaningful. as Xlog will autolink pages together by the file name.
 5. so in any page when you have the word **about** in the text, Xlog will convert it to a link to the **about** page.
-
-

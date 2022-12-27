@@ -74,7 +74,6 @@ func Partial(path string, data Locals) template.HTML {
 
 	data["SITENAME"] = SITENAME
 	data["READONLY"] = READONLY
-	data["SIDEBAR"] = SIDEBAR
 
 	w := bytes.NewBufferString("")
 	err := v.Execute(w, data)

@@ -13,11 +13,11 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                         |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                     |
-| Recent          | Adds an item to sidebar to list all pages ordered by last modified page file.       |
-| RSS             | Provides RSS feed served under /+/fee.rss and added to the header of pages          |
+| Recent          | Adds an item to footer to list all pages ordered by last modified page file.        |
+| RSS             | Provides RSS feed served under /+/feed.rss and added to the header of pages         |
 | Search          | Full text search                                                                    |
 | Shortcode       | adds a way for short codes (one line and block)                                     |
 | Sitemap         | adds support for sitemap.xml for search engine crawling                             |
-| Star            | Star pages to pin them to sidebar                                                   |
+| Star            | Star pages to pin them to footer                                                    |
 | Upload file     | Add support for upload files, screenshots, audio and camera recording               |
 | Versions        | Keeps list of pages older versions                                                  |

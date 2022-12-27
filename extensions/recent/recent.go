@@ -3,7 +3,6 @@ package recent
 import (
 	"context"
 	"embed"
-	"html/template"
 	"sort"
 
 	_ "embed"
@@ -38,8 +37,6 @@ func recentHandler(_ Response, r Request) Output {
 		"pages": rp,
 	})
 }
-
-func recent(p Page, r Request) template.HTML { return Partial("recent-sidebar", nil) }
 
 type recentPages []Page
 
