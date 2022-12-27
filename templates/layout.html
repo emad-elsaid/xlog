@@ -19,16 +19,19 @@
 
 
       {{ if .page }}
-      <hr/>
-      {{ range $i, $a := links .page }}
-      <a href="{{.Link}}" class="icon-text">
-        <span class="icon">
-          {{ $icon := .Icon }}
-          {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
-        </span>
-        <span>{{.Name}}</span>
-      </a>
-      {{ end }}
+      <footer class="footer mt-6 p-3 py-5">
+
+        {{ range $i, $a := links .page }}
+        <a href="{{.Link}}" class="icon-text">
+          <span class="icon">
+            {{ $icon := .Icon }}
+            {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
+          </span>
+          <span>{{.Name}}</span>
+        </a> &nbsp; &#8729; &nbsp;
+        {{ end }}
+
+      </footer>
       {{ end }}
 
     </div>
