@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -101,9 +103,19 @@ func postPageHandler(w Response, r Request) Output {
 
 	vars := Vars(r)
 	page := NewPage(vars["page"])
-	content := r.FormValue("content")
-	page.Write(Markdown(content))
 
+	file, content := page.FileName(), r.FormValue("content")
+	var err error
+	if !strings.HasSuffix(file, ",md") {
+		format := filepath.Ext(file)
+		content, err = RevertMd(content, format)
+		if err != nil {
+			log.Printf("%s", err)
+			content = r.FormValue("content")
+		}
+	}
+
+	page.Write(Markdown(content))
 	return Redirect("/" + page.Name())
 }
 

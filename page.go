@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,8 +68,17 @@ func (p *page) Name() string {
 	return p.name
 }
 
+var formats []string = []string{".org", ".rst", ".rtf", ".odt"}
+
 func (p *page) FileName() string {
-	return filepath.FromSlash(p.name) + ".md"
+	path := filepath.FromSlash(p.name)
+	for _, f := range formats {
+		if _, err := os.Stat(path + f); err == nil {
+			return path + ".org"
+		}
+	}
+
+	return path + ".md"
 }
 
 func (p *page) Exists() bool {
@@ -89,12 +99,22 @@ func (p *page) Render() template.HTML {
 }
 
 func (p *page) Content() Markdown {
-	dat, err := os.ReadFile(p.FileName())
+	path := p.FileName()
+	dat, err := os.ReadFile(path)
 	if err != nil {
 		log.Printf("%s", err.Error())
 		return ""
 	}
-	return Markdown(dat)
+	if strings.HasSuffix(path, ".md") {
+		return Markdown(dat)
+	}
+	for _, f := range formats {
+		if strings.HasSuffix(path, f) {
+			return ConvertToMd(path, f)
+		}
+	}
+
+	return ""
 }
 
 func (p *page) Delete() bool {

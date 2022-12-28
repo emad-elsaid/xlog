@@ -1,8 +1,10 @@
 package xlog
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	exec "os/exec"
 	"strings"
 	"time"
 )
@@ -85,4 +87,24 @@ func ago(t time.Time) string {
 	o.WriteString("ago")
 
 	return o.String()
+}
+
+// ConvertToMd converts a markup file to markdown using pandoc
+func ConvertToMd(path, format string) Markdown {
+	cmd := exec.Command("pandoc", "-s", "-f", format[1:], "-t", "markdown", path, "--output", "-")
+	markdown, err := cmd.Output()
+	if err != nil {
+		log.Printf("Couldn't parse %s to markdown using pandoc: %s", path, err.Error())
+	}
+	return Markdown(markdown)
+}
+
+func RevertMd(markdown, format string) (string, error) {
+	cmd := exec.Command("pandoc", "-s", "-f", "markdown", "-t", format[1:], "-")
+	cmd.Stdin = bytes.NewBufferString(markdown)
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(output), err
 }
