@@ -8,6 +8,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/activitypub"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
+	_ "github.com/emad-elsaid/xlog/extensions/date"
 	_ "github.com/emad-elsaid/xlog/extensions/emoji"
 	_ "github.com/emad-elsaid/xlog/extensions/file_operations"
 	_ "github.com/emad-elsaid/xlog/extensions/github"
