@@ -6,6 +6,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | ActiviyPub      | Implements webfinger and activityPub actor and exposing pages as activitypub outbox |
 | Autolink        | Shorten a link string so it wouldn't take unnecessary space                         |
 | Autolink pages  | Convert a page name mentions in the middle of text to a link                        |
+| Date            | Detects dates and converts them to link to a page which lists all pages mentions it |
 | Emoji           | Emoji autocomplete while editing                                                    |
 | File operations | Add a tool item to delete and rename current page                                   |
 | Github          | Adds "Edit on github" quick action                                                  |
