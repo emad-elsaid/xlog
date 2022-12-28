@@ -91,6 +91,7 @@ func (p *page) Render() template.HTML {
 func (p *page) Content() Markdown {
 	dat, err := os.ReadFile(p.FileName())
 	if err != nil {
+		log.Printf("%s", err.Error())
 		return ""
 	}
 	return Markdown(dat)
