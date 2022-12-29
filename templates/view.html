@@ -28,19 +28,15 @@
   {{ widgets "after_view" .page }}
 </div>
 
+{{ if not .READONLY }}
 <script>
- {{ if not .READONLY }}
  document.addEventListener('keydown', e => {
      if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {
          e.preventDefault();
          document.location.pathname = "{{.edit}}";
      }
  });
- {{ end }}
-
- // This is a hack to display right to left text correctly
- document.querySelectorAll('.content *')
-         .forEach( ele => ele.setAttribute("dir", "auto") );
 </script>
+{{ end }}
 
 {{ template "footer" . }}

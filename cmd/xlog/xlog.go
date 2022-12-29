@@ -18,6 +18,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/opengraph"
 	_ "github.com/emad-elsaid/xlog/extensions/recent"
 	_ "github.com/emad-elsaid/xlog/extensions/rss"
+	_ "github.com/emad-elsaid/xlog/extensions/rtl"
 	_ "github.com/emad-elsaid/xlog/extensions/search"
 	_ "github.com/emad-elsaid/xlog/extensions/shortcode"
 	_ "github.com/emad-elsaid/xlog/extensions/sitemap"

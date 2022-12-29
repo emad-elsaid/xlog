@@ -16,6 +16,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                     |
 | Recent          | Adds an item to footer to list all pages ordered by last modified page file.        |
 | RSS             | Provides RSS feed served under /+/feed.rss and added to the header of pages         |
+| RTL             | Fixes text direction for RTL languages in the view page                             |
 | Search          | Full text search                                                                    |
 | Shortcode       | adds a way for short codes (one line and block)                                     |
 | Sitemap         | adds support for sitemap.xml for search engine crawling                             |
