@@ -1,12 +1,26 @@
-<div class="media">
-  <div class="media-left">
-    {{ if .image }}
-    <figure class="image is-128x128"><img src="{{.image}}"></figure>
-    {{ end }}
+<div class="card my-5">
+  <header class="card-header">
+    <p class="card-header-title">
+      <strong><a href="{{.url}}">{{.title}}</a></strong>
+    </p>
+  </header>
+
+  {{ if and .image .description }}
+  <div class="card-content">
+
+    <div class="media">
+
+      <div class="media-left">
+        <figure class="image is-128x128"><img src="{{.image}}"></figure>
+      </div>
+
+      <div class="media-content">{{.description}}</div>
+    </div>
+
   </div>
-  <div class="media-content">
-    <strong><a href="{{.url}}">{{.title}}</a></strong>
-    <p>{{.description}}</p>
-    <p><a href="{{.url}}">{{.url}}</a></p>
+  {{ end }}
+
+  <div class="card-footer">
+    <a class="card-footer-item" href="{{.url}}">{{.url}}</a>
   </div>
 </div>
