@@ -1,23 +1,32 @@
 {{ template "header" . }}
 
 <div class="columns is-size-7 has-text-grey">
-  <div class="column"> {{ template "properties" . }} </div>
 
-  {{ $quick_commands := quick_commands .page }}
-  {{ if $quick_commands }}
+  {{ with properties .page }}
+  <div class="column">
+    <span class="icon-text">
+      {{ range . }}
+      <span class="icon"> <i class="{{.Icon}}"></i> </span>
+      <span>{{.Name}}</span>
+      {{ end }}
+    </span>
+  </div>
+  {{ end }}
+
+  {{ with quick_commands .page }}
   <div class="column is-narrow">
 
-    {{ if not .READONLY }} {{.csrf}} {{ end }}
+    {{ if not $.READONLY }} {{$.csrf}} {{ end }}
 
-    {{ range $quick_commands }}
+    {{ range . }}
     <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
       <span class="icon"><i class="{{.Icon}}"></i></span>
       <span>{{.Name}}</span>
     </a>
     {{.Widget}}
     {{ end }}
-  </div>
 
+  </div>
   {{ end }}
 
 </div>
