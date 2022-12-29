@@ -19,11 +19,11 @@ $fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
     }
     @for $i from 1 through 6 {
         h#{$i} {
-            border-bottom: 1px solid #ddd;
+            border-bottom: $hr-height solid $hr-background-color;
             padding-bottom: 0.5em;
         }
         h#{$i}:before {
-            color: #888;
+            color: $grey-light;
         }
     }
     audio {
