@@ -3,10 +3,19 @@ package shortcode
 import (
 	"strings"
 
+	. "github.com/emad-elsaid/xlog"
+
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/util"
 )
+
+func init() {
+	MarkDownRenderer.Parser().AddOptions(parser.WithBlockParsers(
+		util.Prioritized(&shortCodeParser{}, 0),
+	))
+}
 
 const trigger = '/'
 

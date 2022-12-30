@@ -7,8 +7,6 @@ import (
 	"regexp"
 
 	. "github.com/emad-elsaid/xlog"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/util"
 )
 
 type ShortCodeFunc func(Markdown) template.HTML
@@ -20,7 +18,8 @@ func render(i Markdown) string {
 }
 
 func container(cls string, content Markdown) template.HTML {
-	return template.HTML(fmt.Sprintf(`<article class="message %s"><div class="message-body">%s</div></article>`, cls, render(content)))
+	tpl := `<article class="message %s"><div class="message-body">%s</div></article>`
+	return template.HTML(fmt.Sprintf(tpl, cls, render(content)))
 }
 
 var shortcodes = map[string]ShortCodeFunc{
@@ -34,10 +33,6 @@ func init() {
 	for k, v := range shortcodes {
 		ShortCode(k, v)
 	}
-
-	MarkDownRenderer.Parser().AddOptions(parser.WithBlockParsers(
-		util.Prioritized(&shortCodeParser{}, 0),
-	))
 }
 
 func ShortCode(name string, shortcode ShortCodeFunc) {

@@ -44,11 +44,10 @@ xlog
 * Uses the file system. No databases required
 * Minimal design and dependencies
 * Small core, flexible enough for developers to extend it.
-* Avoid add syntax to markdown, instead enhance how existing syntax is rendered
+* Avoid adding syntax to markdown, instead enhance how existing syntax is rendered
 
 # :book: Documentation
 
-- The README on Github will have basic usage and general information.
 - This website serves as end user documentation and developer entry point for developing extensions
 - There is also a Go package documentation that you can use to understand what xlog expose as public API
 
