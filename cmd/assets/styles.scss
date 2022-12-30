@@ -12,6 +12,12 @@ $fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/scss/brands";
 
 .view {
+
+    // codeblocks border radius
+    pre:has(>code) {
+        border-radius: 0.5em;
+    }
+
     p>img:only-child{
         display: block;
         margin-right: auto;
