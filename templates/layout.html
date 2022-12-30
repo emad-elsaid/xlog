@@ -12,24 +12,34 @@
 
     {{ template "commands" . }}
 
-    <div class="container content is-max-desktop px-3" dir="auto" style="margin-bottom: 50vh;">
+    <div class="container is-max-desktop px-3" dir="auto" style="margin-bottom: 50vh;">
       {{ template "title" . }}
-      {{ end }}
-      {{define "footer" }}
+      <div class="content">
+        {{ end }}
+        {{define "footer" }}
+      </div>
 
 
       {{ if .page }}
       <footer class="footer mt-6 p-3 py-5">
 
-        {{ range $i, $a := links .page }}
-        <a href="{{.Link}}" class="icon-text">
-          <span class="icon">
-            {{ $icon := .Icon }}
-            {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
-          </span>
-          <span>{{.Name}}</span>
-        </a> &nbsp; &#8729; &nbsp;
-        {{ end }}
+        <nav class="breadcrumb has-bullet-separator">
+          <ul>
+            {{ range $i, $a := links .page }}
+
+            <li>
+              <a href="{{.Link}}" class="icon-text has-text-grey-dark">
+                <span class="icon">
+                  {{ $icon := .Icon }}
+                  {{ if isFontAwesome $icon }} <i class="{{.Icon}}"></i> {{ else }} {{ $icon }} {{ end }}
+                </span>
+                <span>{{.Name}}</span>
+              </a>
+            </li>
+
+            {{ end }}
+          </ul>
+        </nav>
 
       </footer>
       {{ end }}
