@@ -133,6 +133,10 @@ $fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
     }
 }
 
+.breadcrumb li {
+    white-space: normal;
+}
+
 .editor-controls {
     position: fixed;
     right:1em;
