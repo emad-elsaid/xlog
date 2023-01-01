@@ -151,45 +151,45 @@ func Vars(r Request) map[string]string {
 
 // HandlerFunc is the type of an HTTP handler function + returns output function.
 // it makes it easier to return the output directly instead of writing the output to w then return.
-type HandlerFunc func(http.ResponseWriter, *http.Request) Output
+type HandlerFunc func(Response, Request) Output
 
 func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		handler(w, r)(w, r)
 	}
 }
 
 // NotFound returns an output function that writes 404 NotFound to http response
 func NotFound(msg string) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		http.Error(w, "", http.StatusNotFound)
 	}
 }
 
 // BadRequest returns an output function that writes BadRequest http response
 func BadRequest(msg string) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 }
 
 // Unauthorized returns an output function that writes Unauthorized http response
 func Unauthorized(msg string) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		http.Error(w, "", http.StatusUnauthorized)
 	}
 }
 
 // InternalServerError returns an output function that writes InternalServerError http response
 func InternalServerError(err error) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 // Redirect returns an output function that writes Found http response to provided URL
 func Redirect(url string) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		http.Redirect(w, r, url, http.StatusFound)
 	}
 }
@@ -199,19 +199,19 @@ func NoContent() Output {
 	return noContent
 }
 
-func noContent(w http.ResponseWriter, r *http.Request) {
+func noContent(w Response, r Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
 // PlainText returns an output function that writes text to response writer
 func PlainText(text string) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		w.Write([]byte(text))
 	}
 }
 
 func JsonResponse(a any) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		b, err := json.Marshal(a)
 		if err != nil {
 			w.Write([]byte(err.Error()))
@@ -266,7 +266,7 @@ func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFu
 
 // Render returns an output function that renders partial with data and writes it as response
 func Render(path string, data Locals) Output {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w Response, r Request) {
 		fmt.Fprint(w, Partial(path, data))
 	}
 }
@@ -280,7 +280,7 @@ func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.Handler
 
 // Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
 func methodOverrideHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w Response, r Request) {
 		if r.Method == "POST" {
 			om := r.FormValue("_method")
 			if om == "PUT" || om == "PATCH" || om == "DELETE" {
@@ -292,7 +292,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 }
 
 func requestLoggerHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w Response, r Request) {
 		defer timing(r.Method, r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
