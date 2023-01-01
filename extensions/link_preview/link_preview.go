@@ -59,7 +59,7 @@ func youtubeUrlPreprocessor(c Markdown) Markdown {
 	)
 }
 
-var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9]+)$`)
+var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9a-zA-Z]+)$`)
 
 func fbUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(
