@@ -25,3 +25,14 @@ func (s *ShortCodeNode) Dump(source []byte, level int) {
 func (h *ShortCodeNode) Kind() ast.NodeKind {
 	return KindShortCode
 }
+
+var KindShortCodeBlock = ast.NewNodeKind("ShortCodeBlock")
+
+type ShortCodeBlock struct {
+	ast.FencedCodeBlock
+	fun ShortCodeFunc
+}
+
+func (s *ShortCodeBlock) Kind() ast.NodeKind {
+	return KindShortCodeBlock
+}

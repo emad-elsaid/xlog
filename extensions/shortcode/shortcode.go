@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"regexp"
 
 	. "github.com/emad-elsaid/xlog"
 )
@@ -29,26 +28,6 @@ var shortcodes = map[string]ShortCodeFunc{
 	"alert":   func(c Markdown) template.HTML { return container("is-danger", c) },
 }
 
-func init() {
-	for k, v := range shortcodes {
-		ShortCode(k, v)
-	}
-}
-
 func ShortCode(name string, shortcode ShortCodeFunc) {
 	shortcodes[name] = shortcode
-
-	headerSkip := len("```" + name + "\n")
-	multireg := regexp.MustCompile("(?imUs)^```" + regexp.QuoteMeta(name) + "$(.*)^```$")
-	multilinePreprocessor := func(skip int, v ShortCodeFunc) Preprocessor {
-		return func(c Markdown) Markdown {
-			output := multireg.ReplaceAllStringFunc(string(c), func(i string) string {
-				input := i[skip : len(i)-4]
-				return string(v(Markdown(input)))
-			})
-			return Markdown(output)
-		}
-	}(headerSkip, shortcode)
-
-	RegisterPreprocessor(multilinePreprocessor)
 }
