@@ -31,6 +31,7 @@ var (
 			csrf.Path("/"),
 			csrf.FieldName("csrf"),
 			csrf.CookieName(xCSRF_COOKIE_NAME),
+			csrf.Secure(false),
 		),
 		requestLoggerHandler,
 	}
