@@ -16,6 +16,8 @@ Usage of xlog:
         IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string
         Build all pages as static site in this directory
+  -disqus string
+        Disqus domain name for example: xlog-emadelsaid.disqus.com
   -github.branch string
         Github repository branch to use for 'edit on Github' quick action (default "master")
   -github.repo string
