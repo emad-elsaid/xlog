@@ -86,6 +86,8 @@ var (
 
 func fallbackURLPreprocessor(c Markdown) Markdown {
 	output := fallbackUrlReg.ReplaceAllStringFunc(string(c), func(m string) string {
+		m, _ = url.PathUnescape(m)
+
 		meta, err := getUrlMeta(m)
 		if err != nil {
 			return m
@@ -98,11 +100,11 @@ func fallbackURLPreprocessor(c Markdown) Markdown {
 			title = m
 		}
 
-		url, _ := url.Parse(meta.URL)
+		u, _ := url.Parse(meta.URL)
 
 		image := meta.Image
 		if len(image) > 0 && image[0] == '/' {
-			image = url.Scheme + "://" + url.Hostname() + image
+			image = u.Scheme + "://" + u.Hostname() + image
 		}
 
 		var view string = string(

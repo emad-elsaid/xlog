@@ -29,7 +29,7 @@ Code using "```"
 fmt.Println("hello world")
 ```
 
-Code using "```" and language name "```go"
+Code using "`\`\`" and language name "\`\`\`go"
 ```go
 fmt.Println("Hello World")
 ```
@@ -44,7 +44,7 @@ https://xlog.emadelsaid.com/public/logo.png
 
 Preview URL if in a line 
 
-https://en.wikipedia.org/wiki/Computer_science
+https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 
 
 # Unordered Lists
