@@ -16,6 +16,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/hashtags"
 	_ "github.com/emad-elsaid/xlog/extensions/link_preview"
 	_ "github.com/emad-elsaid/xlog/extensions/manifest"
+	_ "github.com/emad-elsaid/xlog/extensions/mermaid"
 	_ "github.com/emad-elsaid/xlog/extensions/opengraph"
 	_ "github.com/emad-elsaid/xlog/extensions/recent"
 	_ "github.com/emad-elsaid/xlog/extensions/rss"

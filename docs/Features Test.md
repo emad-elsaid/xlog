@@ -22,7 +22,7 @@ Computer science is the study of computation, automation, and information. Compu
 
 # Blocks
 
-Quote using `>` 
+Quote using `>`
 > Computer science is the study of computation, automation, and information.
 
 Code using "```"
@@ -43,7 +43,7 @@ Auto convert image URL to image
 
 https://xlog.emadelsaid.com/public/logo.png
 
-Preview URL if in a line 
+Preview URL if in a line
 
 https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 
@@ -76,6 +76,26 @@ In a single line with `/SHORTCODE`:
 
 /warning This is a `warning`
 
+[Mermaid](https://mermaid.js.org/) Graphs: 
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : contains
+    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+```
+
+```mermaid
+gantt
+    title A Gantt Diagram
+    dateFormat  YYYY-MM-DD
+    section Section
+    A task           :a1, 2014-01-01, 30d
+    Another task     :after a1  , 20d
+    section Another
+    Task in sec      :2014-01-12  , 12d
+    another task      : 24d
+```
+
 # Tables
 
 | Heading1 | Heading2 |
@@ -84,7 +104,7 @@ In a single line with `/SHORTCODE`:
 | Value 2.1  | Value 2.2   |
 | Value 3.1  | Value 3.2   |
 
-# Horizontal Rule 
+# Horizontal Rule
 
 Using `---`
 
@@ -92,19 +112,19 @@ Using `---`
 
 # Links preview
 
-Tweet link 
+Tweet link
 
 https://twitter.com/emad__elsaid/status/1606071605695651840
 
-Youtube link 
+Youtube link
 
 https://www.youtube.com/watch?v=VO7Qq-Ri9KI
 
-Facebook link 
+Facebook link
 
 https://www.facebook.com/emad.elsaid.hamed/posts/pfbid02oopXrWY5bHjpmRMYrWNxJZLtcF6aBu5BMm3hgUifxSmmHpWpqR81CsSmRydyFu2Al
 
-Giphy link 
+Giphy link
 
 https://giphy.com/gifs/star-trek-tng-the-next-generation-bKnEnd65zqxfq
 
