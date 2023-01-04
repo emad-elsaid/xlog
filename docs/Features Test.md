@@ -18,6 +18,7 @@ Computer science is the study of computation, automation, and information. Compu
 * Detect date `DD-MM-YYYY` : 1-January-2023
 * Detect hashtag using `#`: #Testing
 * Foot note Using `[^1]` [^1]
+* Typography replacement: `'` 'hello', `"` "hello", `--` --, `...` ..., `<<` <<, `>>` >>
 
 # Blocks
 
@@ -29,7 +30,7 @@ Code using "```"
 fmt.Println("hello world")
 ```
 
-Code using "`\`\`" and language name "\`\`\`go"
+Code using "\`\`\`" and language name "\`\`\`go"
 ```go
 fmt.Println("Hello World")
 ```

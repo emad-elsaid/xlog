@@ -20,6 +20,7 @@ var MarkDownRenderer = goldmark.New(
 		extension.GFM,
 		extension.DefinitionList,
 		extension.Footnote,
+		extension.Typographer,
 		highlighting.NewHighlighting(
 			highlighting.WithCustomStyle(styles.Dracula),
 			highlighting.WithFormatOptions(
