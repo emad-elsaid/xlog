@@ -23,6 +23,7 @@ xlog
 - Use image at the top of the page as a cover image
 - The first Emoji used in the page will be considered the icon of the page and displayed beside the title
 - Shows task list (Done/Total tasks) beside page link
+- Full **Features Test** page
 
 # Usecases
 
