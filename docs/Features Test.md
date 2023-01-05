@@ -64,6 +64,17 @@ https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 - [ ] a todo item with `- [ ]`
 - [x] a done item with `- [x]`
 
+# Images in one paragraph rendered in columns
+
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+
 # Shortcode
 
 In a single line with `/SHORTCODE`:

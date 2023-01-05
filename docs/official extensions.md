@@ -12,6 +12,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | File operations | Add a tool item to delete and rename current page                                   |
 | Github          | Adds "Edit on github" quick action                                                  |
 | Hashtags        | Add support for hashtags #hashtag syntax                                            |
+| Images          | Display consecutive images in columns beside each other instead of under each other |
 | Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                         |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
 | Mermaid         | Support for MermaidJS graphing library                                              |
