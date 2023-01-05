@@ -43,7 +43,6 @@ func (t columnizeImagesParagraph) Transform(doc *ast.Document, reader text.Reade
 	for _, p := range paragraphs {
 		removeBreaks(p)
 		replaceWithColumns(p)
-		p.Dump(reader.Source(), 0)
 	}
 }
 
