@@ -13,7 +13,7 @@ var repo string
 var branch string
 
 func init() {
-	flag.StringVar(&repo, "github.repo", "", "Github repository to use for 'edit on Github' quick action")
+	flag.StringVar(&repo, "github.repo", "", "Github repository to use for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog")
 	flag.StringVar(&branch, "github.branch", "master", "Github repository branch to use for 'edit on Github' quick action")
 	RegisterQuickCommand(quickCommands)
 }
