@@ -142,7 +142,7 @@ func (p *page) AST() ast.Node {
 }
 
 func (p *page) Emoji() string {
-	if e, ok := FindInAST[*emojiAst.Emoji](p.AST(), emojiAst.KindEmoji); ok {
+	if e, ok := FindInAST[*emojiAst.Emoji](p.AST()); ok {
 		return string(e.Value.Unicode)
 	}
 

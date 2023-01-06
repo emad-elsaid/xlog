@@ -37,34 +37,30 @@ var MarkDownRenderer = goldmark.New(
 )
 
 // This is a function that takes an AST node and walks the tree depth first
-// recursively calling itself in search for a node of a specific kind
-// can be used to find first image, link, paragraph...etc
-func FindInAST[t ast.Node](n ast.Node, kind ast.NodeKind) (found t, ok bool) {
-	if n.Kind() == kind {
-		if found, ok := n.(t); ok {
-			return found, true
+// searching for a node of a specific type can be used to find first image,
+// link, paragraph...etc
+func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
+	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if casted, success := n.(t); success {
+			found = casted
+			ok = true
+			return ast.WalkStop, nil
 		}
-	}
 
-	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		if a, ok := FindInAST[t](c, kind); ok {
-			return a, true
-		}
-	}
+		return ast.WalkContinue, nil
+	})
 
-	return found, false
+	return
 }
 
 // Extract all nodes of a specific type from the AST
-func FindAllInAST[t ast.Node](n ast.Node, kind ast.NodeKind) (a []t) {
-	if n.Kind() == kind {
-		typed, _ := n.(t)
-		a = []t{typed}
-	}
+func FindAllInAST[t ast.Node](n ast.Node) (a []t) {
+	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if casted, ok := n.(t); ok {
+			a = append(a, casted)
+		}
+		return ast.WalkContinue, nil
+	})
 
-	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		a = append(a, FindAllInAST[t](c, kind)...)
-	}
-
-	return a
+	return
 }

@@ -25,7 +25,7 @@ func dateHandler(w Response, r Request) Output {
 
 	pages := []Page{}
 	EachPage(r.Context(), func(p Page) {
-		allDates := FindAllInAST[*DateNode](p.AST(), KindDate)
+		allDates := FindAllInAST[*DateNode](p.AST())
 		for _, d := range allDates {
 			if d.time.Equal(date) {
 				pages = append(pages, p)

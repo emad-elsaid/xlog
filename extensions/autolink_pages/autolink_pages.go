@@ -173,7 +173,7 @@ func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.
 }
 
 func countTodos(p Page) (total int, done int) {
-	tasks := FindAllInAST[*east.TaskCheckBox](p.AST(), east.KindTaskCheckBox)
+	tasks := FindAllInAST[*east.TaskCheckBox](p.AST())
 	for _, v := range tasks {
 		total++
 		if v.IsChecked {
