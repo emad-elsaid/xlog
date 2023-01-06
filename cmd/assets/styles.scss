@@ -3,6 +3,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 $family-sans-serif: "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+
+// ElementaryOS colors: https://elementary.io/brand
+$red: #c6262e;
+$purple: #a56de2;
+$blue: #0d52bf;
+$cyan: #64baff;
+$turquoise: #3689e6;
+$green: #68b723;
+$yellow: #f9c440;
+$orange: #f37329;
+
 @import "~bulma/bulma";
 @import "~bulma-prefers-dark/bulma-prefers-dark";
 $fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
