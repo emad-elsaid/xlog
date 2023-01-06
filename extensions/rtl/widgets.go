@@ -1,23 +1,39 @@
 package rtl
 
 import (
-	"html/template"
-
 	. "github.com/emad-elsaid/xlog"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/text"
+	"github.com/yuin/goldmark/util"
 )
 
-const script template.HTML = `
-<script>
- // This is a hack to display right to left text correctly
- document.querySelectorAll('.content *')
-         .forEach( ele => ele.setAttribute("dir", "auto") );
-</script>
-`
-
 func init() {
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, scriptWidget)
+	MarkDownRenderer.Parser().AddOptions(
+		parser.WithASTTransformers(
+			util.Prioritized(addDirAuto(0), 0),
+		),
+	)
 }
 
-func scriptWidget(_ Page) template.HTML {
-	return script
+type addDirAuto int
+
+func (t addDirAuto) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
+	tags := []ast.Node{}
+
+	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		kind := node.Kind()
+		if kind == ast.KindParagraph ||
+			kind == ast.KindHeading ||
+			kind == ast.KindList ||
+			kind == ast.KindBlockquote {
+			tags = append(tags, node)
+		}
+
+		return ast.WalkContinue, nil
+	})
+
+	for _, t := range tags {
+		t.SetAttributeString("dir", []byte("auto"))
+	}
 }
