@@ -63,6 +63,7 @@ https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 
 - [ ] a todo item with `- [ ]`
 - [x] a done item with `- [x]`
+- [ ] Mentioning a page shows the number of todos: Features Test
 
 # Images in one paragraph rendered in columns
 
