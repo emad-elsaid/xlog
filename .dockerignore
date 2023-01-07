@@ -5,10 +5,7 @@ AUTHORS.md
 CONTRIBUTING.md
 LICENSE
 Makefile
-NOTICE
 README.md
-arm/
-powerpc/
-mips/
 build/docker/
 deploy/docker/
+docs/
