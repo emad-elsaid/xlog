@@ -43,10 +43,7 @@ func defaultMiddlewares() []func(http.Handler) http.Handler {
 		csrf.Path("/"),
 		csrf.FieldName("csrf"),
 		csrf.CookieName(xCSRF_COOKIE_NAME),
-	}
-
-	if serveInsecure == true {
-		crsfOpts = append(crsfOpts, csrf.Secure(false))
+		csrf.Secure(!serveInsecure),
 	}
 
 	middlewares := []func(http.Handler) http.Handler{
