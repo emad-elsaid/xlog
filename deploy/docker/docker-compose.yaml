@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  xlog:
+    image: emad-elsaid/xlog:latest
+    ports:
+      - "3000:3000"
