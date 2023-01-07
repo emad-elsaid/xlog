@@ -17,24 +17,14 @@ import (
 const xCSRF_COOKIE_NAME = "xlog_csrf"
 
 var (
-	bind_address string
-	router       = &mux{}
+	bindAddress   string
+	serveInsecure bool
+	router        = &mux{}
 	// a function that renders CSRF hidden input field
 	CSRF = csrf.TemplateField
 
 	dynamicSegmentWithPatternRegexp = regexp.MustCompile("{([^}]+):([^}]+)}")
 	dynamicSegmentRegexp            = regexp.MustCompile("{([^}]+)}")
-	middlewares                     = []func(http.Handler) http.Handler{
-		methodOverrideHandler,
-		csrf.Protect(
-			[]byte(os.Getenv("SESSION_SECRET")),
-			csrf.Path("/"),
-			csrf.FieldName("csrf"),
-			csrf.CookieName(xCSRF_COOKIE_NAME),
-			csrf.Secure(false),
-		),
-		requestLoggerHandler,
-	}
 )
 
 type (
@@ -48,26 +38,44 @@ type (
 	Locals map[string]interface{} // passed to templates
 )
 
+func defaultMiddlewares() []func(http.Handler) http.Handler {
+	crsfOpts := []csrf.Option{
+		csrf.Path("/"),
+		csrf.FieldName("csrf"),
+		csrf.CookieName(xCSRF_COOKIE_NAME),
+		csrf.Secure(!serveInsecure),
+	}
+
+	middlewares := []func(http.Handler) http.Handler{
+		methodOverrideHandler,
+		csrf.Protect([]byte(os.Getenv("SESSION_SECRET")), crsfOpts...),
+		requestLoggerHandler,
+	}
+
+	return middlewares
+}
+
 func init() {
-	flag.StringVar(&bind_address, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
+	flag.StringVar(&bindAddress, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
+	flag.BoolVar(&serveInsecure, "serve-insecure", false, "Accept http connections and forward crsf cookie over non secure connections")
 }
 
 func serve() {
 	srv := server()
-	log.Printf("Starting server: %s", bind_address)
+	log.Printf("Starting server: %s", bindAddress)
 	log.Fatal(srv.ListenAndServe())
 }
 
 func server() *http.Server {
 	compileTemplates()
 	var handler http.Handler = router
-	for _, v := range middlewares {
+	for _, v := range defaultMiddlewares() {
 		handler = v(handler)
 	}
 
 	return &http.Server{
 		Handler:      handler,
-		Addr:         bind_address,
+		Addr:         bindAddress,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
