@@ -1,5 +1,7 @@
 Xlog is designed to be accessed by trusted clients inside trusted environments. This means that usually it is not a good idea to expose the Xlog instance directly to the internet or, in general, to an environment where untrusted clients can directly access the Xlog TCP port.
 
+If you want to expose it over unsecure HTTP (for development purposes or in LAN), please use `--serve-insecure true` flag.
+
 # Listening on specific network interface
 
 Xlog accepts `--bind` flag that defines the interface which xlog should listen to. `--bind` is in the format `<ip.address.of.interface>:<port>`. 
