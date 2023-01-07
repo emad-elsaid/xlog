@@ -23,7 +23,18 @@ func init() {
 
 	RegisterWidget(HEAD_WIDGET, 0, metaTag)
 	RegisterBuildPage("/+/feed.rss", false)
+	RegisterLink(links)
 	Get(`/\+/feed.rss`, feed)
+}
+
+type rssLink int
+
+func (_ rssLink) Icon() string { return "fa-solid fa-rss" }
+func (_ rssLink) Name() string { return "RSS" }
+func (_ rssLink) Link() string { return "/+/feed.rss" }
+
+func links(p Page) []Link {
+	return []Link{rssLink(0)}
 }
 
 func metaTag(p Page) template.HTML {
