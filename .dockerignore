@@ -6,6 +6,4 @@ CONTRIBUTING.md
 LICENSE
 Makefile
 README.md
-build/docker/
-deploy/docker/
 docs/
