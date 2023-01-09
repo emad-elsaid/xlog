@@ -25,3 +25,16 @@ go install ./cmd/xlog # to install it to Go bin.
 ```bash
 yay -S xlog-git
 ```
+
+# From source with docker-compose
+
+```bash
+git clone git@github.com:emad-elsaid/xlog.git
+cd xlog
+docker-composer build
+docker-composer run
+```
+
+```info
+Xlog container attach `~/.xlog` as a volume and will write pages to it.
+```
