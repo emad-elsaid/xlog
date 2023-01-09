@@ -10,13 +10,16 @@
     "watch": "webpack --watch --mode production"
   },
   "dependencies": {
+    "@fontsource/inter": "^4.5.14",
     "@fortawesome/fontawesome-free": "^6.2.1",
     "bulma": "^0.9.4",
     "bulma-prefers-dark": "^0.1.0-beta.1",
     "css-loader": "^6.7.3",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.7.2",
     "node-sass": "^8.0.0",
+    "resolve-url-loader": "^5.0.0",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.75.0",

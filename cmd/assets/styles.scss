@@ -1,6 +1,5 @@
 @charset "utf-8";
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import '@fontsource/inter';
 
 $family-sans-serif: "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 
@@ -16,7 +15,6 @@ $orange: #f37329;
 
 @import "~bulma/bulma";
 @import "~bulma-prefers-dark/bulma-prefers-dark";
-$fa-font-path: "node_modules/@fortawesome/fontawesome-free/webfonts";
 @import "~@fortawesome/fontawesome-free/css/fontawesome";
 @import "~@fortawesome/fontawesome-free/scss/regular";
 @import "~@fortawesome/fontawesome-free/scss/solid";

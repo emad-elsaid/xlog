@@ -5,20 +5,29 @@ module.exports = {
   entry: './index.js',
   output: {
     path: path.resolve(__dirname, '../../public'),
-    filename: 'ignored.js'
+    filename: 'ignored.js',
+    assetModuleFilename: 'assets/[name][ext][query]'
   },
   module: {
-    rules: [{
-      test: /\.scss$/,
+    rules: [
+      {
+        test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+        type: 'asset/resource',
+      },
+      {
+      test: /\.s?css$/,
       use: [
         MiniCssExtractPlugin.loader,
         {
           loader: 'css-loader'
         },
         {
+          loader: 'resolve-url-loader',
+        },
+        {
           loader: 'sass-loader',
           options: {
-            sourceMap: false
+            sourceMap: true
           }
         }
       ]
