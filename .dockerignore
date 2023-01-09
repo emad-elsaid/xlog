@@ -1,9 +1,4 @@
 .editorconfig
 .git/
 .github/
-AUTHORS.md
-CONTRIBUTING.md
-LICENSE
-Makefile
-README.md
 docs/
