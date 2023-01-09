@@ -11,4 +11,4 @@ FROM alpine as final
 COPY --from=builder /app/xlog /app/xlog
 
 ENTRYPOINT ["/app/xlog"]
-CMD ["-bind", "0.0.0.0:3000"]
+CMD ["-bind", "0.0.0.0:3000", "-source", "/files"]
