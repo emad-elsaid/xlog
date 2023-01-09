@@ -8,9 +8,7 @@ COPY ./ ./
 RUN go build -o xlog ./cmd/xlog
 
 FROM alpine as final
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/xlog /app/xlog
-RUN chmod +x /app/xlog
 
 ENTRYPOINT ["/app/xlog"]
 CMD ["-bind", "0.0.0.0:3000"]
