@@ -63,6 +63,6 @@ jobs:
         with:
           context: .
           push: true
-          file: ./build/docker/Dockerfile.alpine
+          file: ./Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
