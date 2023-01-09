@@ -38,3 +38,12 @@ docker-composer run
 ```info
 Xlog container attach `~/.xlog` as a volume and will write pages to it.
 ```
+
+# Docker
+
+Releases are packaged as docker images and pushed to GitHub 
+
+```bash
+docker pull ghcr.io/emad-elsaid/xlog:latest
+docker run -p 3000:3000 -v ~/.xlog:/files ghcr.io/emad-elsaid/xlog:latest
+```
