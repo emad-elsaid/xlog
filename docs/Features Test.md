@@ -19,31 +19,43 @@ Computer science is the study of computation, automation, and information. Compu
 * Detect hashtag using `#`: #Testing
 * Foot note Using `[^1]` [^1]
 * Typography replacement: `'` 'hello', `"` "hello", `--` --, `...` ..., `<<` <<, `>>` >>
+* Inline [MathJax](https://www.mathjax.org/) with `$` :  $ax^2 + bx + c = 0$
+* Inline [MathJax](https://www.mathjax.org/) with `$$` :  $$ax^2 + bx + c = 0$$
+
 
 # Blocks
 
-Quote using `>`
+## Quote using `>`
 > Computer science is the study of computation, automation, and information.
 
-Code using "```"
+## Code using "```"
 ```
 fmt.Println("hello world")
 ```
 
-Code using "\`\`\`" and language name "\`\`\`go"
+## Code using "\`\`\`" and language name "\`\`\`go"
 ```go
 fmt.Println("Hello World")
 ```
 
-Image using `![alt](url)`:
+## [MathJax](https://www.mathjax.org/) Block with `$$`
+
+$$
+\vec{\nabla} \times \vec{F} =
+            \left( \frac{\partial F_z}{\partial y} - \frac{\partial F_y}{\partial z} \right) \mathbf{i}
+          + \left( \frac{\partial F_x}{\partial z} - \frac{\partial F_z}{\partial x} \right) \mathbf{j}
+          + \left( \frac{\partial F_y}{\partial x} - \frac{\partial F_x}{\partial y} \right) \mathbf{k}
+$$
+
+## Image using `![alt](url)`:
 
 ![Logo](/public/logo.png)
 
-Auto convert image URL to image
+## Auto-convert image URL to an image
 
 https://xlog.emadelsaid.com/public/logo.png
 
-Preview URL if in a line
+## Preview URL if in a line
 
 https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 

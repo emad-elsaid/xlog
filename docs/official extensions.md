@@ -15,6 +15,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Images          | Display consecutive images in columns beside each other instead of under each other |
 | Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                         |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
+| MathJax         | Support MathJax syntax inline using $ and blocks using $$                           |
 | Mermaid         | Support for MermaidJS graphing library                                              |
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                     |
 | RSS             | Provides RSS feed served under /+/feed.rss and added to the header of pages         |
