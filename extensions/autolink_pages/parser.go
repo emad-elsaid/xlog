@@ -45,7 +45,6 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 
 	var found Page
 	var m int
-	var url string
 
 	for _, p := range autolinkPages {
 		if len(line) < len(p.Name()) {
@@ -55,7 +54,6 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		// Found a page
 		if strings.EqualFold(string(line[0:len(p.Name())]), p.Name()) {
 			found = p
-			url = p.Name()
 			m = len(p.Name())
 			break
 		}
@@ -73,11 +71,11 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 	consumes += m
 	block.Advance(consumes)
+
 	n := ast.NewTextSegment(text.NewSegment(start, start+m))
 	link := &PageLink{
-		page:  found,
-		url:   "/" + url,
-		value: n,
+		page: found,
 	}
+	link.AppendChild(link, n)
 	return link
 }
