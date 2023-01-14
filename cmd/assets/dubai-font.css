@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'Dubai W23';
+    font-style: normal;
+    font-weight: bold;
+    src: local('Dubai W23 Bold Regular'), url('/dubai-font/DubaiW23-Bold.woff') format('woff');
+    unicode-range: U+0600-06FF;
+}
+
+
+@font-face {
+    font-family: 'Dubai W23';
+    font-style: normal;
+    font-weight: regular;
+    src: local('Dubai W23 Regular Regular'), url('/dubai-font/DubaiW23-Regular.woff') format('woff');
+    unicode-range: U+0600-06FF;
+}
