@@ -56,6 +56,10 @@ func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 // Extract all nodes of a specific type from the AST
 func FindAllInAST[t ast.Node](n ast.Node) (a []t) {
 	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+
 		if casted, ok := n.(t); ok {
 			a = append(a, casted)
 		}
