@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/url"
+	"strings"
 
 	. "github.com/emad-elsaid/xlog"
 
@@ -13,6 +14,8 @@ import (
 
 var domain string
 var twitterUsername string
+
+const descriptionLength = 200
 
 func init() {
 	flag.StringVar(&domain, "og.domain", "", "opengraph domain name to be used for meta tags of og:* and twitter:*")
@@ -40,10 +43,7 @@ func opengraphTags(p Page) template.HTML {
 		image = "https://" + domain + string(imageAST.Destination)
 	}
 
-	firstParagraph := title
-	if paragraphs := FindAllInAST[*ast.Text](p.AST(), ast.KindText); len(paragraphs) > 0 {
-		firstParagraph = string(paragraphs[0].Text([]byte(p.Content())))
-	}
+	firstParagraph := rawText([]byte(p.Content()), p.AST(), descriptionLength)
 
 	ogTags := fmt.Sprintf(`
     <meta property="og:site_name" content="%s" />
@@ -78,4 +78,26 @@ func opengraphTags(p Page) template.HTML {
 	)
 
 	return template.HTML(ogTags + twitterTags)
+}
+
+func rawText(source []byte, n ast.Node, limit int) string {
+	out := ""
+	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+
+		if n.Kind() == ast.KindText {
+			out += " " + strings.TrimSpace(string(n.(*ast.Text).Text(source)))
+		}
+
+		if len(out) > limit {
+			out = out[:limit]
+			return ast.WalkStop, nil
+		}
+
+		return ast.WalkContinue, nil
+	})
+
+	return strings.TrimSpace(out)
 }
