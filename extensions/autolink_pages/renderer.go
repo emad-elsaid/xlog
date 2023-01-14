@@ -27,7 +27,7 @@ func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.
 		url := n.page.Name()
 
 		fmt.Fprintf(w,
-			`<a href="%s">`,
+			`<a href="/%s">`,
 			util.EscapeHTML(util.URLEscape([]byte([]byte(url)), false)),
 		)
 
