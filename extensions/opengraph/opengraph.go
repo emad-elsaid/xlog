@@ -40,6 +40,11 @@ func opengraphTags(p Page) template.HTML {
 		image = "https://" + domain + string(imageAST.Destination)
 	}
 
+	firstParagraph := title
+	if paragraphs := FindAllInAST[*ast.Text](p.AST(), ast.KindText); len(paragraphs) > 0 {
+		firstParagraph = string(paragraphs[0].Text([]byte(p.Content())))
+	}
+
 	ogTags := fmt.Sprintf(`
     <meta property="og:site_name" content="%s" />
     <meta property="og:title" content="%s" />
@@ -50,7 +55,7 @@ func opengraphTags(p Page) template.HTML {
 `,
 		escape(SITENAME),
 		escape(title),
-		escape(title),
+		escape(firstParagraph),
 		escape(image),
 		escape(URL),
 	)
@@ -65,7 +70,7 @@ func opengraphTags(p Page) template.HTML {
     <meta name="twitter:image:alt" content="%s" />
 `,
 		escape(title),
-		escape(title),
+		escape(firstParagraph),
 		escape(image),
 		escape(twitterUsername),
 		escape(twitterUsername),
