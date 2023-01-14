@@ -2,7 +2,7 @@
 
 ![](/public/logo.png)
 
-Xlog is a result of trying to build an offline personal knowledgebase with the ability to autolink pages together automatically. Without depending on proprietary file format or online service. 
+Xlog is a result of trying to build an offline personal knowledgebase with the ability to autolink pages together automatically. Without depending on proprietary file format or online service.
 
 # :runner: Quick Start
 
@@ -19,18 +19,23 @@ xlog
 - Serves any file from current directory
 - Any markdown is rendered to HTML format
 - Supports Github flavor markdown
-- Has a list of tools defined by extensions. triggered with `Ctrl+K`
-- Use image at the top of the page as a cover image
-- The first Emoji used in the page will be considered the icon of the page and displayed beside the title
-- Shows task list (Done/Total tasks) beside page link
 - Full **Features Test** page
+
+|                                                                    |                                                                                                    |
+|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| ![](/screenshot/ctrl-k.gif)                                        | ![](/screenshot/emojis.gif)                                                                        |
+| Has a list of tools defined by extensions. triggered with `Ctrl+K` | Supports Emojis, The first Emoji is considered the icon of the page and displayed beside the title |
+| ![](/screenshot/darkmode.gif)                                      | ![](/screenshot/todo.gif)                                                                          |
+| Dark theme and Light theme                                         | Support Todo lists, Shows task list (Done/Total tasks) beside page link                            |
+| ![](/screenshot/math.gif)                                          | ![](/screenshot/autopair.gif)                                                                      |
+| Support MathJax format                                             | Autopair parenthesis/brackets                                                                      |
 
 # Usecases
 
 - Local server for Note taking or digital gardening
 - Generate static website just like the one you're reading now
 
-# :checkered_flag: Getting started 
+# :checkered_flag: Getting started
 
 - Installation
 - Custom installation
