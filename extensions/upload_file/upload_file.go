@@ -68,6 +68,12 @@ func init() {
 				name:    "Record Audio",
 				onClick: "recordAudio(event)",
 			},
+			command{
+				page:    p,
+				icon:    "fa-solid fa-pen",
+				name:    "Toggle Vim",
+				onClick: "",
+			},
 		}
 	})
 

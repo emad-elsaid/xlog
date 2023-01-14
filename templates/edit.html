@@ -33,6 +33,7 @@
          "@lezer/lr": "/public/js/@lezer/lr.js",
          "@lezer/css": "/public/js/@lezer/css.js",
          "@lezer/javascript": "/public/js/@lezer/javascript.js",
+         "@replit/codemirror-vim": "/public/js/@replit/codemirror-vim.js",
          "crelt": "/public/js/crelt.js",
          "style-mod": "/public/js/style-mod.js",
          "w3c-keyname": "/public/js/w3c-keyname.js"
@@ -81,6 +82,7 @@
      closeBracketsKeymap
  } from "@codemirror/autocomplete"
  import {languages} from "@codemirror/language-data"
+ import { vim } from "@replit/codemirror-vim"
 
 
  const textarea = document.getElementById("content")
@@ -128,6 +130,7 @@
          EditorView.perLineTextDirection.of(true),
          highlightSpecialChars(),
          history(),
+         vim(),
          drawSelection(),
          dropCursor(),
          indentOnInput(),
