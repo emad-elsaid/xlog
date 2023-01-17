@@ -288,8 +288,6 @@ function initVim(CodeMirror) {
     { name: 'delmarks', shortName: 'delm' },
     { name: 'registers', shortName: 'reg', excludeFromCommandHistory: true },
     { name: 'vglobal', shortName: 'v' },
-    { name: 'delete', shortName: 'd' },
-    { name: 'join', shortName: 'j' },
     { name: 'global', shortName: 'g' }
   ];
 
@@ -5307,10 +5305,6 @@ function initVim(CodeMirror) {
           return;
         }
         var inverted = params.commandName[0] === 'v';
-        if (argString[0] === '!' && params.commandName[0] === 'g') {
-          inverted = true;
-          argString = argString.slice(1);
-        }
         // range is specified here
         var lineStart = (params.line !== undefined) ? params.line : cm.firstLine();
         var lineEnd = params.lineEnd || params.line || cm.lastLine();
@@ -5337,10 +5331,10 @@ function initVim(CodeMirror) {
         var query = getSearchState(cm).getQuery();
         var matchedLines = [];
         for (var i = lineStart; i <= lineEnd; i++) {
-          var line = cm.getLine(i);
-          var matched = query.test(line);
+          var line = cm.getLineHandle(i);
+          var matched = query.test(line.text);
           if (matched !== inverted) {
-            matchedLines.push(cmd ? cm.getLineHandle(i) : line);
+            matchedLines.push(cmd ? line : line.text);
           }
         }
         // if there is no [cmd], just display the list of matched lines
@@ -5351,8 +5345,8 @@ function initVim(CodeMirror) {
         var index = 0;
         var nextCommand = function() {
           if (index < matchedLines.length) {
-            var lineHandle = matchedLines[index++];
-            var lineNum = cm.getLineNumber(lineHandle);
+            var line = matchedLines[index++];
+            var lineNum = cm.getLineNumber(line);
             if (lineNum == null) {
               nextCommand();
               return;
@@ -5361,8 +5355,6 @@ function initVim(CodeMirror) {
             exCommandDispatcher.processCommand(cm, command, {
               callback: nextCommand
             });
-          } else if (cm.releaseLineHandles) {
-            cm.releaseLineHandles();
           }
         };
         nextCommand();
@@ -5472,19 +5464,6 @@ function initVim(CodeMirror) {
         var lineText = cm.getLine(line);
         vimGlobalState.registerController.pushText(
           '0', 'yank', lineText, true, true);
-      },
-      delete: function(cm, params) {
-        var lineEnd = isNaN(params.lineEnd) ? params.line : params.lineEnd;
-        operators.delete(cm, {linewise: true}, [
-          { anchor: new Pos(params.line, 0), 
-            head: new Pos(lineEnd + 1, 0) }
-        ]);
-      },
-      join: function(cm, params) {
-        var line = params.line;
-        var lineEnd = isNaN(params.lineEnd) ? line : params.lineEnd;
-        cm.setCursor(new Pos(line, 0));
-        actions.joinLines(cm, {repeat: lineEnd - line}, cm.state.vim);
       },
       delmarks: function(cm, params) {
         if (!params.argString || !trim(params.argString)) {
@@ -6335,25 +6314,10 @@ class CodeMirror {
     }
     ;
     getLineHandle(row) {
-        if (!this.$lineHandleChanges)
-            this.$lineHandleChanges = [];
-        return { row: row, index: this.indexFromPos(new Pos(row, 0)) };
+        return { text: this.getLine(row), row: row };
     }
     getLineNumber(handle) {
-        var updates = this.$lineHandleChanges;
-        if (!updates)
-            return null;
-        var offset = handle.index;
-        for (var i = 0; i < updates.length; i++) {
-            offset = updates[i].changes.mapPos(offset);
-            if (offset == null)
-                return null;
-        }
-        var pos = this.posFromIndex(offset);
-        return pos.ch == 0 ? pos.line : null;
-    }
-    releaseLineHandles() {
-        this.$lineHandleChanges = undefined;
+        return handle.row;
     }
     getRange(s, e) {
         var doc = this.cm6.state.doc;
@@ -6682,9 +6646,6 @@ class CodeMirror {
     }
     ;
     onChange(update) {
-        if (this.$lineHandleChanges) {
-            this.$lineHandleChanges.push(update);
-        }
         for (let i in this.marks) {
             let m = this.marks[i];
             m.update(update.changes);
