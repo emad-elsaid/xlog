@@ -24,6 +24,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/shortcode"
 	_ "github.com/emad-elsaid/xlog/extensions/sitemap"
 	_ "github.com/emad-elsaid/xlog/extensions/star"
+	_ "github.com/emad-elsaid/xlog/extensions/todo"
 	_ "github.com/emad-elsaid/xlog/extensions/upload_file"
 	_ "github.com/emad-elsaid/xlog/extensions/versions"
 )

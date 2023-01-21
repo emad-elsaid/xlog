@@ -25,5 +25,6 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Shortcode       | adds a way for short codes (one line and block)                                     |
 | Sitemap         | adds support for sitemap.xml for search engine crawling                             |
 | Star            | Star pages to pin them to footer                                                    |
+| Todo            | allow toggle checkboxes while viewing the page without going to edit mode           |
 | Upload file     | Add support for upload files, screenshots, audio and camera recording               |
 | Versions        | Keeps list of pages older versions                                                  |
