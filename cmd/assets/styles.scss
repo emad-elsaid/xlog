@@ -161,3 +161,7 @@ $orange: #f37329;
     bottom:1em;
     z-index: 10;
 }
+
+*:hover>.show-on-parent-hover {
+    display: inline !important;
+}
