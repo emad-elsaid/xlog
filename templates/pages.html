@@ -1,8 +1,7 @@
-<table class="table is-striped is-hoverable is-fullwidth">
+<ul>
   {{ range . }}
-  <tr>
-    <td class="is-capitalized"><a href="/{{.Name}}">{{ .Emoji }} {{ .Name }}</a></td>
-    <td style="width:0%;white-space: nowrap;" class="has-text-grey"><time>{{ ago .ModTime }}</time></td>
-  </tr>
+  <li>
+    <a href="/{{.Name}}" dir="auto">{{ .Emoji }} {{ .Name }}</a> <time class="has-text-grey is-size-7">{{ ago .ModTime }}</time>
+  </li>
   {{ end }}
-</table>
+</ul>
