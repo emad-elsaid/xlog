@@ -111,8 +111,32 @@
      {{ end }}
  }
 
+ function getCursor() {
+     try {
+         const cursor = localStorage.getItem("{{.title}}");
+         if(cursor === null){
+             return 0
+         }
+
+         return parseInt(cursor);
+     } catch(e) {
+         return 0
+     }
+ }
+
+ function saveCursor(view) {
+     try {
+         localStorage.setItem("{{.title}}", view.state.selection.main.head);
+     } catch(e) {
+         console.log("Can't store cursor to storage", e);
+     }
+ }
+
  const startState = EditorState.create({
      doc: textarea.value,
+     selection: {
+         anchor: getCursor(),
+     },
      extensions: [
          markdown({
              base: markdownLanguage,
@@ -157,7 +181,10 @@
 
  view.focus()
 
- const syncEditor = () => { textarea.value = view.state.sliceDoc() };
+ const syncEditor = function() {
+     textarea.value = view.state.sliceDoc()
+     saveCursor(view)
+ }
 
  form.addEventListener("submit", syncEditor)
 
