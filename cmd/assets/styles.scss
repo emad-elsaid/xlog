@@ -22,6 +22,10 @@ $green: #68b723;
 $yellow: #f9c440;
 $orange: #f37329;
 
+$code-dark: lighten($red, 15%);
+$link-dark: lighten($cyan, 5%);
+
+
 @import "~bulma/bulma";
 @import "~bulma-prefers-dark/bulma-prefers-dark";
 @import "~@fortawesome/fontawesome-free/css/fontawesome";
