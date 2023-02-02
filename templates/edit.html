@@ -111,14 +111,14 @@
      {{ end }}
  }
 
- function getCursor() {
+ function getCursor(doc) {
      try {
          const cursor = localStorage.getItem("{{.title}}");
          if(cursor === null){
              return 0
          }
 
-         return parseInt(cursor);
+         return Math.min(doc.length, parseInt(cursor));
      } catch(e) {
          return 0
      }
@@ -135,7 +135,7 @@
  const startState = EditorState.create({
      doc: textarea.value,
      selection: {
-         anchor: getCursor(),
+         anchor: getCursor(textarea.value),
      },
      extensions: [
          markdown({
