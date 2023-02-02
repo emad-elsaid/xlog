@@ -108,7 +108,7 @@ $link-dark: lighten($cyan, 5%);
         content:counter(h1) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5)  "." counter(h6) ". ";
     }
 
-    li:has(input[type="checkbox"]) {
+    li:has(>input[type="checkbox"]) {
         list-style: none;
     }
 
