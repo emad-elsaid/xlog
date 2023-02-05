@@ -33,7 +33,7 @@ var staticDirs = []fs.FS{assets}
 // when serving static files. can be used to add a directory of CSS or JS files
 // by extensions
 func RegisterStaticDir(f fs.FS) {
-	staticDirs = append([]fs.FS{f}, staticDirs...)
+	staticDirs = append(staticDirs, f)
 }
 
 func staticHandler(r Request) (Output, error) {
