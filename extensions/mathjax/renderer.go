@@ -2,6 +2,7 @@ package mathjax
 
 import (
 	"bytes"
+	"embed"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -9,9 +10,13 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-const script = `<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>`
+//go:embed js
+var js embed.FS
+
+const script = `<script async src="/js/mathjax.js"></script>`
 
 func init() {
+	RegisterStaticDir(js)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
