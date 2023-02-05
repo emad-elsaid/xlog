@@ -8,9 +8,9 @@ import (
 // Prioritizing the end of the slice over earlier FSs.
 type priorityFS []fs.FS
 
-func (df priorityFS) Open(name string) (fs.File, error) {
-	for i := len(df) - 1; i >= 0; i-- {
-		cf := df[i]
+func (p priorityFS) Open(name string) (fs.File, error) {
+	for i := len(p) - 1; i >= 0; i-- {
+		cf := p[i]
 		f, err := cf.Open(name)
 		if err == nil {
 			return f, err
