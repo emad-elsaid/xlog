@@ -14,8 +14,8 @@ XLog
 * [Documentation Home](https://xlog.emadelsaid.com/)
 * [Installation](https://xlog.emadelsaid.com/Installation/)
 * [Usage](https://xlog.emadelsaid.com/Usage/)
-* [Generating static site](http://localhost:3000/Creating%20a%20site)
-* [Overriding Assets](http://localhost:3000/Assets)
+* [Generating static site](https://xlog.emadelsaid.com/Creating%20a%20site)
+* [Overriding Assets](https://xlog.emadelsaid.com/Assets)
 * [Extensions](https://xlog.emadelsaid.com/extensions/)
 * [Writing Your Own Extension](https://xlog.emadelsaid.com/Hello%20world%20extension/)
 
