@@ -1,12 +1,9 @@
 package xlog
 
 import (
-	"embed"
 	"flag"
 	"log"
-	"net/http"
 	"os"
-	"path"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -105,25 +102,4 @@ func postPageHandler(w Response, r Request) Output {
 	page.Write(Markdown(content))
 
 	return Redirect("/" + page.Name())
-}
-
-//go:embed public
-var assets embed.FS
-
-func staticHandler(r Request) (Output, error) {
-	staticFSs := http.FS(priorityFS{
-		assets,
-		os.DirFS(SOURCE),
-	})
-
-	server := http.FileServer(staticFSs)
-
-	cleanPath := path.Clean(r.URL.Path)
-
-	if f, err := staticFSs.Open(cleanPath); err != nil {
-		return nil, err
-	} else {
-		f.Close()
-		return server.ServeHTTP, nil
-	}
 }

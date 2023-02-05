@@ -1,7 +1,11 @@
 package xlog
 
 import (
+	"embed"
 	"io/fs"
+	"net/http"
+	"os"
+	"path"
 )
 
 // return file that exists in one of the FS structs.
@@ -18,4 +22,40 @@ func (p priorityFS) Open(name string) (fs.File, error) {
 	}
 
 	return nil, fs.ErrNotExist
+}
+
+//go:embed public
+var assets embed.FS
+
+var staticDirs = []fs.FS{assets}
+
+// RegisterStaticDir adds a filesystem to the filesystems list scanned for files
+// when serving static files. can be used to add a directory of CSS or JS files
+// by extensions
+func RegisterStaticDir(f fs.FS) {
+	staticDirs = append([]fs.FS{f}, staticDirs...)
+}
+
+func staticHandler(r Request) (Output, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	staticFSs := http.FS(
+		priorityFS(
+			append(staticDirs, os.DirFS(wd)),
+		),
+	)
+
+	server := http.FileServer(staticFSs)
+
+	cleanPath := path.Clean(r.URL.Path)
+
+	if f, err := staticFSs.Open(cleanPath); err != nil {
+		return nil, err
+	} else {
+		f.Close()
+		return server.ServeHTTP, nil
+	}
 }
