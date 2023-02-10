@@ -34,7 +34,7 @@ func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Co
 
 	firstSpace := strings.Index(line, " ")
 	if firstSpace == -1 {
-		firstSpace = len(line)
+		firstSpace = len(line) - 1
 	}
 
 	firstWord := line[1:firstSpace]
@@ -46,9 +46,15 @@ func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Co
 
 	reader.AdvanceLine()
 
+	end := seg.Stop
+	start := seg.Start + len(firstWord) + 2
+	if start > end {
+		start = end
+	}
+
 	return &ShortCodeNode{
-		start: seg.Start + len(firstWord) + 2,
-		end:   seg.Stop - 1,
+		start: start,
+		end:   end,
 		fun:   processor,
 	}, parser.NoChildren
 }
