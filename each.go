@@ -2,10 +2,6 @@ package xlog
 
 import (
 	"context"
-	"errors"
-	"io/fs"
-	"path"
-	"path/filepath"
 	"regexp"
 )
 
@@ -32,7 +28,7 @@ var pages []Page
 // uses it to get all pages and maybe parse them and extract needed information
 func EachPage(ctx context.Context, f func(Page)) {
 	if pages == nil {
-		pages = populatePagesCache(ctx)
+		populatePagesCache(ctx)
 	}
 
 	currentPages := pages
@@ -51,37 +47,16 @@ func clearPagesCache(_ Page) (err error) {
 	return nil
 }
 
-func populatePagesCache(ctx context.Context) []Page {
-	pages := []Page{}
-
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			for _, v := range ignoredDirs {
-				if v.MatchString(name) {
-					return fs.SkipDir
-				}
-			}
-
-			return nil
-		}
-
+func populatePagesCache(ctx context.Context) {
+	pages = []Page{}
+	for _, s := range sources {
 		select {
-
 		case <-ctx.Done():
-			return errors.New("context stopped")
-
+			return
 		default:
-			ext := path.Ext(name)
-			basename := name[:len(name)-len(ext)]
-
-			if ext == ".md" {
-				pages = append(pages, NewPage(basename))
-			}
-
+			s.Each(ctx, func(p Page) {
+				pages = append(pages, p)
+			})
 		}
-
-		return nil
-	})
-
-	return pages
+	}
 }

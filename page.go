@@ -52,17 +52,6 @@ type page struct {
 	ast  ast.Node
 }
 
-// NewPage Creates an instance of Page with name. if no name is passed it's assumed INDEX
-func NewPage(name string) Page {
-	if name == "" {
-		name = INDEX
-	}
-
-	return &page{
-		name: name,
-	}
-}
-
 func (p *page) Name() string {
 	return p.name
 }

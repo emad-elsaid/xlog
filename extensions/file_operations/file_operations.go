@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/url"
+	"os"
+	"path"
 
 	_ "embed"
 
@@ -73,10 +75,13 @@ func (f PageRename) Handler(w Response, r Request) Output {
 		return BadRequest("file doesn't exist")
 	}
 
-	new := NewPage(r.FormValue("new"))
-	new.Write(old.Content())
+	ext := path.Ext(old.FileName())
+	basename := r.FormValue("new")
+	newName := basename + ext
 
-	old.Write(Markdown(fmt.Sprintf("Renamed to: %s", new.Name())))
+	os.Rename(old.FileName(), newName)
+	old.Write(Markdown(fmt.Sprintf("Renamed to: %s", basename)))
+
 	return NoContent()
 }
 
