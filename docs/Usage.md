@@ -28,6 +28,8 @@ Usage of xlog:
         Index file name used as home page (default "index")
   -og.domain string
         opengraph domain name to be used for meta tags of og:* and twitter:*
+  -pandoc
+        Use pandoc to render .org, .rst, .rtf, .odt
   -readonly
         Should xlog hide write operations, read-only means all write operations will be disabled
   -rss.description string
