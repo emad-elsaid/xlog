@@ -3,7 +3,6 @@ package versions
 import (
 	"crypto/sha256"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"regexp"
@@ -27,7 +26,7 @@ func WriteVersion(p Page) error {
 	dir := p.FileName() + ".versions"
 
 	os.Mkdir(dir, 0700)
-	return ioutil.WriteFile(path.Join(dir, sum), content, 0644)
+	return os.WriteFile(path.Join(dir, sum), content, 0644)
 }
 
 func VersionProps(p Page) []Property {

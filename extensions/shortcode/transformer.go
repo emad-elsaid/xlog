@@ -33,8 +33,7 @@ func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reade
 				continue
 			}
 
-			lang := string(n.Language(source))
-			if _, ok := shortcodes[lang]; !ok {
+			if _, ok := shortcodes[string(n.Language(source))]; !ok {
 				continue
 			}
 
@@ -45,11 +44,9 @@ func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reade
 	})
 
 	for _, b := range blocks {
-		lang := string(b.Language(source))
-
 		replacement := ShortCodeBlock{
 			FencedCodeBlock: *b,
-			fun:             shortcodes[lang],
+			fun:             shortcodes[string(b.Language(source))],
 		}
 
 		parent := b.Parent()

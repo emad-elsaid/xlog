@@ -157,7 +157,7 @@ func getUrlMeta(url string) (*Meta, error) {
 
 	titleMatches := titleReg.FindStringSubmatch(html)
 	title := url
-	if titleMatches != nil && len(titleMatches) >= 1 {
+	if len(titleMatches) >= 1 {
 		title = titleMatches[1]
 	}
 

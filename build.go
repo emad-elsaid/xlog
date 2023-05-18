@@ -84,7 +84,7 @@ func buildStaticSite(dest string) error {
 		}
 	}
 
-	fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
+	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -110,8 +110,6 @@ func buildStaticSite(dest string) error {
 
 		return nil
 	})
-
-	return nil
 }
 
 func buildRoute(srv *http.Server, route, dir, file string) error {
