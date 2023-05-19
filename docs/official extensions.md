@@ -13,13 +13,14 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | File operations | Add a tool item to delete and rename current page                                   |
 | Github          | Adds "Edit on github" quick action                                                  |
 | Hashtags        | Add support for hashtags #hashtag syntax                                            |
+| HTML            | Considers HTML files as pages. supports (html, htm, xhtml)                          |
 | Images          | Display consecutive images in columns beside each other instead of under each other |
 | Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                         |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
 | MathJax         | Support MathJax syntax inline using $ and blocks using $$                           |
 | Mermaid         | Support for MermaidJS graphing library                                              |
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                     |
-| Pandoc           | Use pandoc to render documents in other formats as pages like Org-mode files        |
+| Pandoc          | Use pandoc to render documents in other formats as pages like Org-mode files        |
 | RSS             | Provides RSS feed served under /+/feed.rss and added to the header of pages         |
 | RTL             | Fixes text direction for RTL languages in the view page                             |
 | Recent          | Adds an item to footer to list all pages ordered by last modified page file.        |
