@@ -15,6 +15,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Hashtags        | Add support for hashtags #hashtag syntax                                            |
 | HTML            | Considers HTML files as pages. supports (html, htm, xhtml)                          |
 | Images          | Display consecutive images in columns beside each other instead of under each other |
+| Embed           | Adds a shortcode to embed one page in another page                                  |
 | Link preview    | Preview tweets, Facebook posts, youtube videos, Giphy links                         |
 | Manifest        | adds manifest.json to head tag and output proper JSON value.                        |
 | MathJax         | Support MathJax syntax inline using $ and blocks using $$                           |

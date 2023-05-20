@@ -120,6 +120,9 @@ gantt
     another task      : 24d
 ```
 
+Embed another page, header-particles in this case
+/embed header-particles
+
 # Tables
 
 | Heading1 | Heading2 |
