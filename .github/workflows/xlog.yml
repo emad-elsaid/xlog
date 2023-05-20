@@ -41,6 +41,7 @@ jobs:
           --build .. \
           --sitename "Xlog" \
           --sidebar=false \
+          --html=true \
           --sitemap.domain=xlog.emadelsaid.com \
           --rss.domain xlog.emadelsaid.com \
           --activitypub.domain=xlog.emadelsaid.com \
