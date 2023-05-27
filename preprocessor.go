@@ -16,7 +16,7 @@ func RegisterPreprocessor(f Preprocessor) { preprocessors = append(preprocessors
 
 // This function take the page content and pass it through all registered
 // preprocessors and return the last preprocessor output to the caller
-func preProcess(content Markdown) Markdown {
+func PreProcess(content Markdown) Markdown {
 	for _, v := range preprocessors {
 		content = v(content)
 	}

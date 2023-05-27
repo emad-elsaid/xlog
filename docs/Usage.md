@@ -24,6 +24,8 @@ Usage of xlog:
         Github repository branch to use for 'edit on Github' quick action (default "master")
   -github.repo string
         Github repository to use for 'edit on Github' quick action
+  -gpg string
+        PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off
   -html
         Consider HTML files as pages
   -index string

@@ -67,7 +67,7 @@ func (p *page) Exists() bool {
 
 func (p *page) Render() template.HTML {
 	content := p.Content()
-	content = preProcess(content)
+	content = PreProcess(content)
 
 	var buf bytes.Buffer
 	if err := MarkDownRenderer.Convert([]byte(content), &buf); err != nil {

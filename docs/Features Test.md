@@ -2,6 +2,13 @@
 
 Computer science is the study of computation, automation, and information. Computer science spans theoretical disciplines (such as algorithms, theory of computation, information theory, and automation) to practical disciplines (including the design and implementation of hardware and software). Computer science is generally considered an area of academic research and is distinct from computer programming.
 
+## Integrations
+* Generates RSS feed
+* Generates ActivityPub Outbox stream
+* Generates Sitemap for search engines
+* Disqus comments
+* Encrypt files with GPG
+
 ## Styling text
 
 * Bold using `**` : **Bold**
@@ -100,7 +107,7 @@ In a single line with `/SHORTCODE`:
 
 /warning This is a `warning`
 
-[Mermaid](https://mermaid.js.org/) Graphs: 
+[Mermaid](https://mermaid.js.org/) Graphs:
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
