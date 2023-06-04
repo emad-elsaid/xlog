@@ -11,23 +11,25 @@ Computer science is the study of computation, automation, and information. Compu
 
 ## Styling text
 
-* Bold using `**` : **Bold**
-* Bold using `__`: __Bold__
-* Italic using `*` : *Italic*
-* Italic using `_`: _italic_
-* Strikethrough using `~~` : ~~Strikethrough~~
-* Subscript using `<sub>` : X<sub>2</sub>
-* Superscript using `<sup>`: X<sup>2</sup>
-* Linking using `[text](url)`: [Emad Elsaid](https://www.emadelsaid.com)
-* Shorting Long URLs: https://en.wikipedia.org/wiki/Computer_science
-* Auto linking text if it's a page name: index, Features Test
-* Emoji using `:EMOJICODE:` : :wrench:
-* Detect date `DD-MM-YYYY` : 1-January-2023
-* Detect hashtag using `#`: #Testing
-* Foot note Using `[^1]` [^1]
-* Typography replacement: `'` 'hello', `"` "hello", `--` --, `...` ..., `<<` <<, `>>` >>
-* Inline [MathJax](https://www.mathjax.org/) with `$` :  $ax^2 + bx + c = 0$
-* Inline [MathJax](https://www.mathjax.org/) with `$$` :  $$ax^2 + bx + c = 0$$
+| Style                                           | code                         | example                                        |
+|-------------------------------------------------|------------------------------|------------------------------------------------|
+| Bold                                            | `**`                         | **Bold**                                       |
+| Bold                                            | `__`                         | __Bold__                                       |
+| Italic                                          | `*`                          | *Italic*                                       |
+| Italic                                          | `_`                          | _italic_                                       |
+| Strikethrough                                   | `~~`                         | ~~Strikethrough~~                              |
+| Subscript                                       | `<sub>`                      | X<sub>2</sub>                                  |
+| Superscript                                     | `<sup>`                      | X<sup>2</sup>                                  |
+| Linking                                         | `[text](url)`                | [Emad Elsaid](https://www.emadelsaid.com)      |
+| Shorting Long URLs:                             |                              | https://en.wikipedia.org/wiki/Computer_science |
+| Auto linking text if it's a page name           |                              | index, Features Test                           |
+| Emoji                                           | `:EMOJICODE:`                | :wrench:                                       |
+| Detect date                                     | `DD-MM-YYYY`                 | 1-January-2023                                 |
+| Detect hashtag                                  | `#`                          | #Testing                                       |
+| Foot note                                       | `[^1]`                       | [^1]                                           |
+| Typography replacement                          | `'` `"` `--` `...` `<<` `>>` | 'hello', "hello",  --,  ..., <<, >>            |
+| Inline [MathJax](https://www.mathjax.org/) with | `$`                          | $ax^2 + bx + c = 0$                            |
+| Inline [MathJax](https://www.mathjax.org/) with | `$$`                         | $$ax^2 + bx + c = 0$$                          |
 
 
 # Blocks
