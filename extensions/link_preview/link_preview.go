@@ -54,7 +54,7 @@ func youtubeUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(
 		youtubeUrlReg.ReplaceAllString(string(c), `
 <figure class="image is-16by9 mx-0">
-	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" style="border-radius:0.5em;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </figure>`),
 	)
 }
