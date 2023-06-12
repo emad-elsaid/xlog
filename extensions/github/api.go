@@ -82,7 +82,7 @@ func issues(ctx context.Context, query string) string {
 	</figure>
 	<a href="%s">%s</a>
 </span>
-</li>`, assignee.GetAvatarURL(), i.GetURL(), i.GetTitle())
+</li>`, assignee.GetAvatarURL(), i.GetHTMLURL(), i.GetTitle())
 	}
 	issues += "</ul>"
 
