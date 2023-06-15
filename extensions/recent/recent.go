@@ -28,10 +28,6 @@ func recentHandler(_ Response, r Request) Output {
 
 	sort.Sort(rp)
 
-	if len(rp) > 100 {
-		rp = rp[:100]
-	}
-
 	return Render("recent", Locals{
 		"title": "Recent",
 		"pages": rp,
