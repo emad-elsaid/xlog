@@ -4,22 +4,23 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
-	"net/url"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
+var editUrl string
 var repo string
 var branch string
 
 func init() {
-	flag.StringVar(&repo, "github.repo", "", "Github repository to use for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog")
-	flag.StringVar(&branch, "github.branch", "master", "Github repository branch to use for 'edit on Github' quick action")
+	flag.StringVar(&editUrl, "github.url", "", "Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs")
+	flag.StringVar(&repo, "github.repo", "", "[Deprecated] Github repository to use for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog")
+	flag.StringVar(&branch, "github.branch", "master", "[Deprecated] Github repository branch to use for 'edit on Github' quick action")
 	RegisterQuickCommand(quickCommands)
 }
 
 func quickCommands(p Page) []Command {
-	if len(repo) == 0 {
+	if len(repo) == 0 && len(editUrl) == 0 {
 		return nil
 	}
 
@@ -37,7 +38,11 @@ func (e editOnGithub) Name() string {
 	return "Edit on Github"
 }
 func (e editOnGithub) Link() string {
-	return fmt.Sprintf("%s/edit/%s/%s", repo, branch, url.PathEscape(e.page.FileName()))
+	if len(editUrl) > 0 {
+		return fmt.Sprintf("%s/%s", editUrl, e.page.FileName())
+	} else {
+		return fmt.Sprintf("%s/edit/%s/%s", repo, branch, e.page.FileName())
+	}
 }
 func (e editOnGithub) OnClick() template.JS {
 	return ""
