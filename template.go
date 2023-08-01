@@ -72,6 +72,7 @@ func Partial(path string, data Locals) template.HTML {
 		data = Locals{}
 	}
 
+	data["INDEX"] = INDEX
 	data["SITENAME"] = SITENAME
 	data["READONLY"] = READONLY
 

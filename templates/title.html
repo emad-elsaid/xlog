@@ -13,4 +13,6 @@
   {{ end }}
 </div>
 
+{{ if ne .INDEX .page.Name }}
 <div dir="auto" class="title is-1 has-text-weight-bold">{{ .title }}</div>
+{{ end }}
