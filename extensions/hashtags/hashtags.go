@@ -222,7 +222,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 }
 
 func hashtagPages(hashtag Markdown) template.HTML {
-	hashtag_value := strings.Trim(string(hashtag), "# ")
+	hashtag_value := strings.Trim(string(hashtag), "# \n")
 	pages := tagPages(context.Background(), hashtag_value)
 	output := Partial("hashtag-pages", Locals{"pages": pages})
 	return template.HTML(output)

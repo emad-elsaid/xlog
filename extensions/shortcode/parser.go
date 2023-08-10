@@ -1,6 +1,7 @@
 package shortcode
 
 import (
+	"log"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
@@ -26,37 +27,41 @@ func (s *shortCodeParser) Trigger() []byte {
 }
 
 func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
+	log.Println("entered Open")
 	l, seg := reader.PeekLine()
 	line := string(l)
 	if len(line) == 0 || line[0] != trigger {
-		return nil, parser.NoChildren
+		return nil, parser.Close
 	}
 
-	firstSpace := strings.Index(line, " ")
-	if firstSpace == -1 {
-		firstSpace = len(line) - 1
+	endOfShortcode := strings.IndexAny(line, " \n")
+	if endOfShortcode == -1 {
+		endOfShortcode = len(line)
 	}
 
-	firstWord := line[1:firstSpace]
+	firstWord := line[1:endOfShortcode]
 	var processor ShortCodeFunc
 	var ok bool
 	if processor, ok = shortcodes[firstWord]; !ok {
-		return nil, parser.NoChildren
+		return nil, parser.Close
 	}
 
 	reader.AdvanceLine()
 
-	end := seg.Stop
-	start := seg.Start + len(firstWord) + 2
-	if start > end {
-		start = end
+	firstSpace := strings.IndexAny(line, " ")
+	if firstSpace == -1 {
+		return &ShortCodeNode{
+			start: seg.Stop,
+			end:   seg.Stop,
+			fun:   processor,
+		}, parser.Close
 	}
 
 	return &ShortCodeNode{
-		start: start,
-		end:   end,
+		start: seg.Start + endOfShortcode,
+		end:   seg.Stop,
 		fun:   processor,
-	}, parser.NoChildren
+	}, parser.Close
 }
 
 func (s *shortCodeParser) Continue(node ast.Node, reader text.Reader, pc parser.Context) parser.State {
