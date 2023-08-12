@@ -1,7 +1,6 @@
 package shortcode
 
 import (
-	"log"
 	"strings"
 
 	. "github.com/emad-elsaid/xlog"
