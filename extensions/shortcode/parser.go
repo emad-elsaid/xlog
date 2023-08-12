@@ -27,7 +27,6 @@ func (s *shortCodeParser) Trigger() []byte {
 }
 
 func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
-	log.Println("entered Open")
 	l, seg := reader.PeekLine()
 	line := string(l)
 	if len(line) == 0 || line[0] != trigger {
