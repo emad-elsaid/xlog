@@ -43,16 +43,33 @@ func buildStaticSite(dest string) error {
 		log.Printf("error while processing root path, err: %s", err.Error())
 	}
 
-	EachPage(context.Background(), func(p Page) {
-		err := buildRoute(
+	// building 404 page
+	if NOT_FOUND_PAGE != "" {
+		err = buildRoute(
 			srv,
-			"/"+p.Name(),
-			path.Join(dest, p.Name()),
-			path.Join(dest, p.Name(), "index.html"),
+			"/"+NOT_FOUND_PAGE,
+			dest,
+			path.Join(dest, "404.html"),
 		)
 
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
+			log.Printf("error while processing root path, err: %s", err.Error())
+		}
+	}
+
+	EachPage(context.Background(), func(p Page) {
+		// don't make path for 404 page
+		if p.Name() != "404" {
+			err := buildRoute(
+				srv,
+				"/"+p.Name(),
+				path.Join(dest, p.Name()),
+				path.Join(dest, p.Name(), "index.html"),
+			)
+
+			if err != nil {
+				log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
+			}
 		}
 	})
 
