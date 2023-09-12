@@ -43,35 +43,32 @@ func buildStaticSite(dest string) error {
 		log.Printf("error while processing root path, err: %s", err.Error())
 	}
 
-	// building 404 page
-	if NOT_FOUND_PAGE != "" {
-		err = buildRoute(
+	EachPage(context.Background(), func(p Page) {
+		// don't make path for 404 page
+		err := buildRoute(
 			srv,
-			"/"+NOT_FOUND_PAGE,
-			dest,
-			path.Join(dest, "404.html"),
+			"/"+p.Name(),
+			path.Join(dest, p.Name()),
+			path.Join(dest, p.Name(), "index.html"),
 		)
 
 		if err != nil {
-			log.Printf("error while processing root path, err: %s", err.Error())
-		}
-	}
-
-	EachPage(context.Background(), func(p Page) {
-		// don't make path for 404 page
-		if p.Name() != "404" {
-			err := buildRoute(
-				srv,
-				"/"+p.Name(),
-				path.Join(dest, p.Name()),
-				path.Join(dest, p.Name(), "index.html"),
-			)
-
-			if err != nil {
-				log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
-			}
+			log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
 		}
 	})
+
+	// If we render 404 page
+	// Copy 404 page from dest/404/index.html to /dest/404.html
+	if in, err := os.Open(path.Join(dest, NOT_FOUND_PAGE, "index.html")); err == nil {
+		defer in.Close()
+		out, err := os.Create(path.Join(dest, "404.html"))
+		if err != nil {
+			log.Printf("error while opening dest/404.html, err: %s", err.Error())
+		}
+		defer out.Close()
+		io.Copy(out, in)
+		out.Sync()
+	}
 
 	for route := range extension_page_enclosed {
 		err := buildRoute(
