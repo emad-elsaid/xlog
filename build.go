@@ -56,6 +56,18 @@ func buildStaticSite(dest string) error {
 		}
 	})
 
+	// If we render 404 page
+	// Copy 404 page from dest/404/index.html to /dest/404.html
+	if in, err := os.Open(path.Join(dest, NOT_FOUND_PAGE, "index.html")); err == nil {
+		defer in.Close()
+		out, err := os.Create(path.Join(dest, "404.html"))
+		if err != nil {
+			log.Printf("error while opening dest/404.html, err: %s", err.Error())
+		}
+		defer out.Close()
+		io.Copy(out, in)
+	}
+
 	for route := range extension_page_enclosed {
 		err := buildRoute(
 			srv,
