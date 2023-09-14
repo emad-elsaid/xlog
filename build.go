@@ -44,7 +44,6 @@ func buildStaticSite(dest string) error {
 	}
 
 	EachPage(context.Background(), func(p Page) {
-		// don't make path for 404 page
 		err := buildRoute(
 			srv,
 			"/"+p.Name(),
@@ -67,7 +66,6 @@ func buildStaticSite(dest string) error {
 		}
 		defer out.Close()
 		io.Copy(out, in)
-		out.Sync()
 	}
 
 	for route := range extension_page_enclosed {
