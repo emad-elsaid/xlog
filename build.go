@@ -40,7 +40,7 @@ func buildStaticSite(dest string) error {
 	)
 
 	if err != nil {
-		log.Printf("error while processing root path, err: %s", err.Error())
+		log.Printf("Index Page may not exist, make sure your Index Page exists, err: %s", err.Error())
 	}
 
 	EachPage(context.Background(), func(p Page) {
