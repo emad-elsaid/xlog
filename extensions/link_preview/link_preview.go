@@ -49,14 +49,17 @@ func tweetUrlPreprocessor(c Markdown) Markdown {
 }
 
 var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=([^ ]+)$`)
+var youtubeShortReg = regexp.MustCompile(`(?imU)^https\:\/\/youtu\.be\/([^ ]+)$`)
 
 func youtubeUrlPreprocessor(c Markdown) Markdown {
-	return Markdown(
-		youtubeUrlReg.ReplaceAllString(string(c), `
+	tmplt := `
 <figure class="image is-16by9 mx-0">
 	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" style="border-radius:0.5em;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</figure>`),
-	)
+</figure>`
+
+	longUrlReplaced := youtubeUrlReg.ReplaceAllString(string(c), tmplt)
+	shortUrlReplaced := youtubeShortReg.ReplaceAllString(longUrlReplaced, tmplt)
+	return Markdown(shortUrlReplaced)
 }
 
 var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9a-zA-Z]+)$`)
