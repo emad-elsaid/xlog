@@ -1,0 +1,21 @@
+<div style="max-width:468px;margin: 0 auto;">
+  {{ range .photos }}
+
+  <div class="card">
+    <div class="card-image">
+      <a href="{{ .Page }}">
+        <img src="{{ .Thumbnail }}" loading="lazy">
+      </a>
+    </div>
+
+    {{ with .Name }}
+    <div class="card-content">
+      {{.}}
+    </div>
+    {{ end }}
+
+  </div>
+  <br>
+
+  {{ end }}
+</div>

@@ -23,6 +23,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/mermaid"
 	_ "github.com/emad-elsaid/xlog/extensions/opengraph"
 	_ "github.com/emad-elsaid/xlog/extensions/pandoc"
+	_ "github.com/emad-elsaid/xlog/extensions/photos"
 	_ "github.com/emad-elsaid/xlog/extensions/recent"
 	_ "github.com/emad-elsaid/xlog/extensions/rss"
 	_ "github.com/emad-elsaid/xlog/extensions/rtl"
