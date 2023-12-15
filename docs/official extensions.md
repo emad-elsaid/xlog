@@ -22,6 +22,7 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Mermaid         | Support for MermaidJS graphing library                                                  |
 | Opengraph       | Adds Opengraph meta tags for title, type, image                                         |
 | Pandoc          | Use pandoc to render documents in other formats as pages like Org-mode files            |
+| Photos          | lists images in a directory similar to instagram                                        |
 | PGP             | PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off |
 | RSS             | Provides RSS feed served under /+/feed.rss and added to the header of pages             |
 | RTL             | Fixes text direction for RTL languages in the view page                                 |
