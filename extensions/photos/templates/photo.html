@@ -1,9 +1,12 @@
 {{ template "header" . }}
 
 {{ with .photo }}
-<img src="/{{.Original}}" >
+<center>
+  <img src="/{{.Original}}" class="my-3">
+</center>
 
 {{ if .Exif }}
+<p class="my-1">
 
   <i class="fa-regular fa-calendar"></i> {{ .Time.Weekday }} {{.Time.Day}} {{.Time.Month}} {{.Time.Year}}
 
@@ -23,6 +26,7 @@
     {{ with .ShutterSpeed }} {{.}} {{ end }}
   {{ end }}
 
+</p>
 {{ end }}
 
 {{ end }}
