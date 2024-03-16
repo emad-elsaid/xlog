@@ -79,12 +79,7 @@ func feed(w Response, r Request) Output {
 		},
 	}
 
-	pages := []Page{}
-
-	EachPage(r.Context(), func(p Page) {
-		pages = append(pages, p)
-	})
-
+	pages := Pages(r.Context())
 	sort.Slice(pages, func(i, j int) bool {
 		return pages[i].ModTime().After(pages[j].ModTime())
 	})

@@ -215,12 +215,7 @@ func outboxPage(w Response, r Request) Output {
 	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
 	pageIndex--
 
-	var count int64
-	pages := orderedPages{}
-	EachPage(r.Context(), func(p Page) {
-		count += 1
-		pages = append(pages, p)
-	})
+	var pages orderedPages = Pages(r.Context())
 
 	if int(pageIndex) >= len(pages) || pageIndex < 0 {
 		return NotFound("page index is out of context")

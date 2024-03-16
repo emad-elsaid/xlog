@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"strings"
+	"sync"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
@@ -106,7 +107,10 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 func tagsHandler(_ Response, r Request) Output {
 	tags := map[string][]Page{}
-	EachPage(context.Background(), func(a Page) {
+	var lck sync.Mutex
+
+	EachPageCon(context.Background(), func(a Page) {
+
 		set := map[string]bool{}
 		hashes := FindAllInAST[*HashTag](a.AST())
 		for _, v := range hashes {
@@ -118,11 +122,14 @@ func tagsHandler(_ Response, r Request) Output {
 			}
 
 			set[val] = true
+
+			lck.Lock()
 			if ps, ok := tags[val]; ok {
 				tags[val] = append(ps, a)
 			} else {
 				tags[val] = []Page{a}
 			}
+			lck.Unlock()
 		}
 	})
 
@@ -143,8 +150,9 @@ func tagHandler(w Response, r Request) Output {
 
 func tagPages(ctx context.Context, keyword string) []Page {
 	results := []Page{}
+	var lck sync.Mutex
 
-	EachPage(ctx, func(p Page) {
+	EachPageCon(ctx, func(p Page) {
 		if p.Name() == INDEX {
 			return
 		}
@@ -152,7 +160,9 @@ func tagPages(ctx context.Context, keyword string) []Page {
 		tags := FindAllInAST[*HashTag](p.AST())
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
+				lck.Lock()
 				results = append(results, p)
+				lck.Unlock()
 				break
 			}
 		}
@@ -173,8 +183,9 @@ func relatedPages(p Page) template.HTML {
 	}
 
 	pages := []Page{}
+	var lck sync.Mutex
 
-	EachPage(context.Background(), func(rp Page) {
+	EachPageCon(context.Background(), func(rp Page) {
 		if rp.Name() == p.Name() {
 			return
 		}
@@ -182,7 +193,9 @@ func relatedPages(p Page) template.HTML {
 		page_hashtags := FindAllInAST[*HashTag](rp.AST())
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
+				lck.Lock()
 				pages = append(pages, rp)
+				lck.Unlock()
 				return
 			}
 		}
@@ -203,8 +216,11 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	suggestions := []*Suggestion{}
 
 	set := map[string]bool{}
-	EachPage(context.Background(), func(a Page) {
+	var lck sync.Mutex
+	EachPageCon(context.Background(), func(a Page) {
 		hashes := FindAllInAST[*HashTag](a.AST())
+		lck.Lock()
+		defer lck.Unlock()
 		for _, v := range hashes {
 			set[strings.ToLower(string(v.value))] = true
 		}

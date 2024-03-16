@@ -14,7 +14,10 @@ require (
 	golang.org/x/image v0.14.0
 )
 
-require github.com/emad-elsaid/types v0.0.2
+require (
+	github.com/emad-elsaid/types v0.0.2
+	golang.org/x/sync v0.1.0
+)
 
 require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230717121422-5aa5874ade95 // indirect

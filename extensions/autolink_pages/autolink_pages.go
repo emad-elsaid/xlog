@@ -5,6 +5,7 @@ import (
 	"embed"
 	"html/template"
 	"sort"
+	"sync"
 
 	_ "embed"
 
@@ -31,12 +32,13 @@ func init() {
 }
 
 var autolinkPages []Page
+var autolinkPage_lck sync.Mutex
 
 func UpdatePagesList(_ Page) (err error) {
-	ps := []Page{}
-	EachPage(context.Background(), func(p Page) {
-		ps = append(ps, p)
-	})
+	autolinkPage_lck.Lock()
+	defer autolinkPage_lck.Unlock()
+
+	ps := Pages(context.Background())
 	sort.Sort(fileInfoByNameLength(ps))
 	autolinkPages = ps
 	return
@@ -60,15 +62,18 @@ func backlinksSection(p Page) template.HTML {
 	}
 
 	pages := []Page{}
+	var lock sync.Mutex
 
-	EachPage(context.Background(), func(a Page) {
+	EachPageCon(context.Background(), func(a Page) {
 		// a page shouldn't mention itself
 		if a.Name() == p.Name() {
 			return
 		}
 
 		if containLinkTo(a.AST(), p) {
+			lock.Lock()
 			pages = append(pages, a)
+			lock.Unlock()
 		}
 	})
 

@@ -1,7 +1,6 @@
 package recent
 
 import (
-	"context"
 	"embed"
 	"sort"
 
@@ -21,11 +20,7 @@ func init() {
 }
 
 func recentHandler(_ Response, r Request) Output {
-	rp := recentPages{}
-	EachPage(context.Background(), func(i Page) {
-		rp = append(rp, i)
-	})
-
+	var rp recentPages = Pages(r.Context())
 	sort.Sort(rp)
 
 	return Render("recent", Locals{

@@ -3,6 +3,9 @@ package xlog
 import (
 	"context"
 	"regexp"
+	"runtime"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -24,6 +27,14 @@ func IgnoreDirectory(r *regexp.Regexp) {
 
 var pages []Page
 
+func Pages(ctx context.Context) []Page {
+	if pages == nil {
+		populatePagesCache(ctx)
+	}
+
+	return pages[:]
+}
+
 // EachPage iterates on all available pages. many extensions
 // uses it to get all pages and maybe parse them and extract needed information
 func EachPage(ctx context.Context, f func(Page)) {
@@ -42,6 +53,29 @@ func EachPage(ctx context.Context, f func(Page)) {
 	}
 }
 
+// EachPageCon Similar to EachPage but iterates concurrently
+func EachPageCon(ctx context.Context, f func(Page)) {
+	if pages == nil {
+		populatePagesCache(ctx)
+	}
+
+	grp, ctx := errgroup.WithContext(ctx)
+	grp.SetLimit(runtime.NumCPU() * 4)
+
+	currentPages := pages
+	for _, p := range currentPages {
+		select {
+		case <-ctx.Done():
+			break
+		default:
+			grp.Go(func() (err error) { f(p); return })
+		}
+	}
+
+	grp.Wait()
+}
+
+// TODO check if changing the cache based on the page would make xlog faster
 func clearPagesCache(_ Page) (err error) {
 	pages = nil
 	return nil

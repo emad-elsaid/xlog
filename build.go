@@ -10,10 +10,13 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
+	"sync"
 )
 
 var extension_page = map[string]bool{}
+var extension_page_lck sync.Mutex
 var extension_page_enclosed = map[string]bool{}
+var extension_page_enclosed_lck sync.Mutex
 var build_perms fs.FileMode = 0744
 
 // RegisterBuildPage registers a path of a page to export when building static version
@@ -22,9 +25,13 @@ var build_perms fs.FileMode = 0744
 // .html extension to be served with the exact name.
 func RegisterBuildPage(p string, encloseInDir bool) {
 	if encloseInDir {
+		extension_page_enclosed_lck.Lock()
 		extension_page_enclosed[p] = true
+		extension_page_enclosed_lck.Unlock()
 	} else {
+		extension_page_lck.Lock()
 		extension_page[p] = true
+		extension_page_lck.Unlock()
 	}
 }
 
@@ -43,7 +50,7 @@ func buildStaticSite(dest string) error {
 		log.Printf("Index Page may not exist, make sure your Index Page exists, err: %s", err.Error())
 	}
 
-	EachPage(context.Background(), func(p Page) {
+	EachPageCon(context.Background(), func(p Page) {
 		err := buildRoute(
 			srv,
 			"/"+p.Name(),
