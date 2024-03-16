@@ -71,7 +71,7 @@ func init() {
 		}
 	})
 
-	Post(`/\+/upload-file`, uploadFileHandler)
+	Post(`/+/upload-file`, uploadFileHandler)
 	RegisterTemplate(templates, "templates")
 }
 

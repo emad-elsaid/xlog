@@ -17,7 +17,7 @@ const MIN_SEARCH_KEYWORD = 3
 var templates embed.FS
 
 func init() {
-	Get(`/\+/search`, searchHandler)
+	Get(`/+/search`, searchHandler)
 	RegisterWidget("search", 0, searchWidget)
 	RegisterTemplate(templates, "templates")
 }

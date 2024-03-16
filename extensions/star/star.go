@@ -21,8 +21,8 @@ func init() {
 	RegisterCommand(starAction)
 	RegisterQuickCommand(starAction)
 	RegisterLink(starredPages)
-	Post(`/\+/star/{page:.*}`, starHandler)
-	Delete(`/\+/star/{page:.*}`, unstarHandler)
+	Post(`/+/star/{page...}`, starHandler)
+	Delete(`/+/star/{page...}`, unstarHandler)
 	RegisterTemplate(templates, "templates")
 }
 
@@ -107,8 +107,7 @@ func starHandler(w Response, r Request) Output {
 		return Unauthorized("Readonly mode is active")
 	}
 
-	vars := Vars(r)
-	page := NewPage(vars["page"])
+	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")
 	}
@@ -124,8 +123,7 @@ func unstarHandler(w Response, r Request) Output {
 		return Unauthorized("Readonly mode is active")
 	}
 
-	vars := Vars(r)
-	page := NewPage(vars["page"])
+	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")
 	}

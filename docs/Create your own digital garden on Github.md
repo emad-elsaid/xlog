@@ -55,7 +55,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: 1.22
           check-latest: true
 
       - name: Install xlog

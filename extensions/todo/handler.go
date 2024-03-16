@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	Post(`/\+/todo`, toggleHandler)
+	Post(`/+/todo`, toggleHandler)
 }
 
 var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)

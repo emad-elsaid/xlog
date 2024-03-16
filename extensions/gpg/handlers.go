@@ -16,8 +16,7 @@ func encryptHandler(w xlog.Response, r xlog.Request) xlog.Output {
 		return xlog.Unauthorized("read only mode")
 	}
 
-	vars := xlog.Vars(r)
-	p := xlog.NewPage(vars["page"])
+	p := xlog.NewPage(r.PathValue("page"))
 	if !p.Exists() {
 		return xlog.NotFound("page not found")
 	}
@@ -39,8 +38,7 @@ func decryptHandler(w xlog.Response, r xlog.Request) xlog.Output {
 		return xlog.Unauthorized("read only mode")
 	}
 
-	vars := xlog.Vars(r)
-	p := xlog.NewPage(vars["page"])
+	p := xlog.NewPage(r.PathValue("page"))
 	if !p.Exists() {
 		return xlog.NotFound("page not found")
 	}

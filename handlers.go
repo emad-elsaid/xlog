@@ -11,10 +11,10 @@ import (
 func Start() {
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
-	Get("/", rootHandler)
-	Get("/edit/{page:.+}", getPageEditHandler)
-	Get("/{page:.+}", getPageHandler)
-	Post("/{page:.+}", postPageHandler)
+	Get("/{$}", rootHandler)
+	Get("/edit/{page...}", getPageEditHandler)
+	Get("/{page...}", getPageHandler)
+	Post("/{page...}", postPageHandler)
 
 	flag.Parse()
 
@@ -42,8 +42,7 @@ func rootHandler(w Response, r Request) Output {
 // Shows a page. the page name is the path itself. if the page doesn't exist it
 // redirect to edit page otherwise will render it to HTML
 func getPageHandler(w Response, r Request) Output {
-	vars := Vars(r)
-	page := NewPage(vars["page"])
+	page := NewPage(r.PathValue("page"))
 
 	if !page.Exists() {
 		if output, err := staticHandler(r); err == nil {
@@ -72,8 +71,7 @@ func getPageEditHandler(w Response, r Request) Output {
 		return Unauthorized("Readonly mode is active")
 	}
 
-	vars := Vars(r)
-	page := NewPage(vars["page"])
+	page := NewPage(r.PathValue("page"))
 
 	var content Markdown
 	if page.Exists() {
@@ -96,8 +94,7 @@ func postPageHandler(w Response, r Request) Output {
 		return Unauthorized("Readonly mode is active")
 	}
 
-	vars := Vars(r)
-	page := NewPage(vars["page"])
+	page := NewPage(r.PathValue("page"))
 	content := r.FormValue("content")
 	page.Write(Markdown(content))
 

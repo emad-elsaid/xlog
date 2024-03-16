@@ -1,7 +1,6 @@
 package xlog
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -19,7 +18,7 @@ const xCSRF_COOKIE_NAME = "xlog_csrf"
 var (
 	bindAddress   string
 	serveInsecure bool
-	router        = &mux{}
+	router        = http.NewServeMux()
 	// a function that renders CSRF hidden input field
 	CSRF = csrf.TemplateField
 
@@ -79,83 +78,6 @@ func server() *http.Server {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-}
-
-type (
-	// Checks a request for conditions, may modify request returning the new
-	// request and if conditions are met.
-	//
-	// Can be used to check request method, path or other attributes against
-	// expected values.
-	RouteCheck func(Request) (Request, bool)
-	// A route has handler function and set of RouteChecks if all checks are
-	// true, the last request will be passed to the handler function
-	Route struct {
-		checks []RouteCheck
-		route  http.HandlerFunc
-	}
-
-	mux struct {
-		routes []Route
-	}
-)
-
-func (h *mux) ServeHTTP(w Response, r Request) {
-ROUTES:
-	for _, route := range h.routes {
-		rn := r
-		ok := false
-		for _, check := range route.checks {
-			if rn, ok = check(rn); !ok {
-				continue ROUTES
-			}
-		}
-
-		route.route(w, rn)
-		return
-	}
-}
-
-func checkMethod(method string) RouteCheck {
-	return func(r Request) (Request, bool) { return r, r.Method == method }
-}
-
-type contextIndex int
-
-const varsIndex contextIndex = iota + 1
-
-func checkPath(path string) RouteCheck {
-	path = dynamicSegmentWithPatternRegexp.ReplaceAllString(path, "(?P<$1>$2)")
-	path = dynamicSegmentRegexp.ReplaceAllString(path, "(?P<$1>[^/]+)")
-	path = "^" + path + "$"
-	reg := regexp.MustCompile(path)
-	groups := reg.SubexpNames()
-
-	return func(r Request) (Request, bool) {
-		if !reg.MatchString(r.URL.Path) {
-			return r, false
-		}
-
-		values := reg.FindStringSubmatch(r.URL.Path)
-		vars := map[string]string{}
-		for i, g := range groups {
-			vars[g] = values[i]
-		}
-
-		ctx := context.WithValue(r.Context(), varsIndex, vars)
-		return r.WithContext(ctx), true
-	}
-}
-
-// Vars returns a map of key = dynamic segment in the path, value = the value of
-// the segment registering a path like `"/edit/{page:.+}"` calling `Vars in the
-// handler will return a map with one key `page` and the value is that part of
-// the path in r
-func Vars(r Request) map[string]string {
-	if rv := r.Context().Value(varsIndex); rv != nil {
-		return rv.(map[string]string)
-	}
-	return map[string]string{}
 }
 
 // HandlerFunc is the type of an HTTP handler function + returns output function.
@@ -231,45 +153,30 @@ func JsonResponse(a any) Output {
 	}
 }
 
-// Match Adds a new HTTP handler function to the list of routes with a list of checks functions.
-// the list of checks are executed when a request comes in if all of them returned true the handler function gets executed.
-func Match(route http.HandlerFunc, checks ...RouteCheck) Route {
-	r := Route{
-		checks: checks,
-		route:  route,
-	}
-	router.routes = append(router.routes, r)
-
-	return r
-}
-
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get. the list of middlewares are executed in order
-func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	defer timing("GET", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
-	return Match(
+	router.HandleFunc("GET "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
-		checkMethod(http.MethodGet), checkPath(path),
 	)
 }
 
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post. the list of middlewares are executed in order
-func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	defer timing("POST", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
-	return Match(
+	router.HandleFunc("POST "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
-		checkMethod(http.MethodPost), checkPath(path),
 	)
 }
 
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete. the list of middlewares are executed in order
-func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) Route {
+func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
 	defer timing("DELETE", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
-	return Match(
+	router.HandleFunc("DELETE "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
-		checkMethod(http.MethodDelete), checkPath(path),
 	)
 }
 

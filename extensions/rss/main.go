@@ -24,7 +24,7 @@ func init() {
 	RegisterWidget(HEAD_WIDGET, 0, metaTag)
 	RegisterBuildPage("/+/feed.rss", false)
 	RegisterLink(links)
-	Get(`/\+/feed.rss`, feed)
+	Get(`/+/feed.rss`, feed)
 }
 
 type rssLink int

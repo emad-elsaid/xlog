@@ -23,8 +23,8 @@ import (
 var templates embed.FS
 
 func init() {
-	Get(`/\+/tags`, tagsHandler)
-	Get(`/\+/tag/{tag}`, tagHandler)
+	Get(`/+/tags`, tagsHandler)
+	Get(`/+/tag/{tag}`, tagHandler)
 	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
 	RegisterBuildPage("/+/tags", true)
 	RegisterLink(func(_ Page) []Link { return []Link{link(0)} })
@@ -133,8 +133,7 @@ func tagsHandler(_ Response, r Request) Output {
 }
 
 func tagHandler(w Response, r Request) Output {
-	vars := Vars(r)
-	tag := vars["tag"]
+	tag := r.PathValue("tag")
 
 	return Render("tag", Locals{
 		"title": "#" + tag,

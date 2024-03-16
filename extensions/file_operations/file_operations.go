@@ -23,8 +23,8 @@ func init() {
 	RegisterCommand(commands)
 	RegisterQuickCommand(commands)
 
-	Post(`/\+/file/rename`, rename.Handler)
-	Delete(`/\+/file/delete`, delete.Handler)
+	Post(`/+/file/rename`, rename.Handler)
+	Delete(`/+/file/delete`, delete.Handler)
 	RegisterTemplate(templates, "templates")
 }
 

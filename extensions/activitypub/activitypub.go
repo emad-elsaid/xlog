@@ -25,10 +25,10 @@ func init() {
 	flag.StringVar(&icon, "activitypub.icon", "/public/logo.png", "the path to the activitypub profile icon. mastodon use it as profile picture for example.")
 	flag.StringVar(&image, "activitypub.image", "/public/logo.png", "the path to the activitypub profile image. mastodon use it as profile cover for example.")
 
-	Get(`/\.well-known/webfinger`, webfinger)
-	Get(`/\+/activitypub/@{user:.+}/outbox/{page:[0-9]+}`, outboxPage)
-	Get(`/\+/activitypub/@{user:.+}/outbox`, outbox)
-	Get(`/\+/activitypub/@{user:.+}`, profile)
+	Get(`/.well-known/webfinger`, webfinger)
+	Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
+	Get(`/+/activitypub/{user}/outbox`, outbox)
+	Get(`/+/activitypub/{user}`, profile)
 	RegisterWidget(HEAD_WIDGET, 1, meta)
 }
 
@@ -105,8 +105,7 @@ func profile(w Response, r Request) Output {
 		return NoContent()
 	}
 
-	vars := Vars(r)
-	if vars["user"] != username {
+	if r.PathValue("user") != "@"+username {
 		return NotFound("User not found")
 	}
 
@@ -153,8 +152,7 @@ func outbox(w Response, r Request) Output {
 		return NoContent()
 	}
 
-	vars := Vars(r)
-	if vars["user"] != username {
+	if r.PathValue("user") != "@"+username {
 		return NotFound("User not found")
 	}
 
@@ -210,12 +208,11 @@ func outboxPage(w Response, r Request) Output {
 		return NoContent()
 	}
 
-	vars := Vars(r)
-	if vars["user"] != username {
+	if r.PathValue("user") != "@"+username {
 		return NotFound("User not found")
 	}
 
-	pageIndex, _ := strconv.ParseInt(vars["page"], 10, 64)
+	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
 	pageIndex--
 
 	var count int64

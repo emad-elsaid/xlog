@@ -14,7 +14,7 @@ import (
 var templates embed.FS
 
 func init() {
-	Get(`/\+/recent`, recentHandler)
+	Get(`/+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")
 	RegisterLink(func(_ Page) []Link { return []Link{links(0)} })
