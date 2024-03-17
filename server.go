@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/gorilla/csrf"
@@ -21,9 +20,6 @@ var (
 	router        = http.NewServeMux()
 	// a function that renders CSRF hidden input field
 	CSRF = csrf.TemplateField
-
-	dynamicSegmentWithPatternRegexp = regexp.MustCompile("{([^}]+):([^}]+)}")
-	dynamicSegmentRegexp            = regexp.MustCompile("{([^}]+)}")
 )
 
 type (
