@@ -61,20 +61,12 @@ func backlinksSection(p Page) template.HTML {
 		return ""
 	}
 
-	pages := []Page{}
-	var lock sync.Mutex
-
-	EachPageCon(context.Background(), func(a Page) {
-		// a page shouldn't mention itself
-		if a.Name() == p.Name() {
-			return
+	pages := MapPageCon(context.Background(), func(a Page) *Page {
+		if a.Name() == p.Name() || !containLinkTo(a.AST(), p) {
+			return nil
 		}
 
-		if containLinkTo(a.AST(), p) {
-			lock.Lock()
-			pages = append(pages, a)
-			lock.Unlock()
-		}
+		return &a
 	})
 
 	return Partial("backlinks", Locals{"pages": pages})

@@ -2,7 +2,6 @@ package date
 
 import (
 	"embed"
-	"sync"
 	"time"
 
 	. "github.com/emad-elsaid/xlog"
@@ -23,19 +22,15 @@ func dateHandler(w Response, r Request) Output {
 		return BadRequest(err.Error())
 	}
 
-	pages := []Page{}
-	var lck sync.Mutex
-	EachPageCon(r.Context(), func(p Page) {
-		lck.Lock()
-		defer lck.Unlock()
-
+	pages := MapPageCon(r.Context(), func(p Page) *Page {
 		allDates := FindAllInAST[*DateNode](p.AST())
 		for _, d := range allDates {
 			if d.time.Equal(date) {
-				pages = append(pages, p)
-				break
+				return &p
 			}
 		}
+
+		return nil
 	})
 
 	return Render("date", Locals{

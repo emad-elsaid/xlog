@@ -148,27 +148,21 @@ func tagHandler(w Response, r Request) Output {
 	})
 }
 
-func tagPages(ctx context.Context, keyword string) []Page {
-	results := []Page{}
-	var lck sync.Mutex
-
-	EachPageCon(ctx, func(p Page) {
+func tagPages(ctx context.Context, keyword string) []*Page {
+	return MapPageCon(ctx, func(p Page) *Page {
 		if p.Name() == INDEX {
-			return
+			return nil
 		}
 
 		tags := FindAllInAST[*HashTag](p.AST())
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
-				lck.Lock()
-				results = append(results, p)
-				lck.Unlock()
-				break
+				return &p
 			}
 		}
-	})
 
-	return results
+		return nil
+	})
 }
 
 func relatedPages(p Page) template.HTML {
@@ -182,23 +176,19 @@ func relatedPages(p Page) template.HTML {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
 
-	pages := []Page{}
-	var lck sync.Mutex
-
-	EachPageCon(context.Background(), func(rp Page) {
+	pages := MapPageCon(context.Background(), func(rp Page) *Page {
 		if rp.Name() == p.Name() {
-			return
+			return nil
 		}
 
 		page_hashtags := FindAllInAST[*HashTag](rp.AST())
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
-				lck.Lock()
-				pages = append(pages, rp)
-				lck.Unlock()
-				return
+				return &rp
 			}
 		}
+
+		return nil
 	})
 
 	return Partial("related-hashtags-pages", Locals{

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"runtime"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -75,8 +76,45 @@ func EachPageCon(ctx context.Context, f func(Page)) {
 	grp.Wait()
 }
 
-// TODO check if changing the cache based on the page would make xlog faster
-func clearPagesCache(_ Page) (err error) {
+// MapPageCon Similar to EachPage but iterates concurrently
+func MapPageCon[T any](ctx context.Context, f func(Page) *T) []*T {
+	if pages == nil {
+		populatePagesCache(ctx)
+	}
+
+	grp, ctx := errgroup.WithContext(ctx)
+	grp.SetLimit(runtime.NumCPU() * 4)
+
+	currentPages := pages
+	output := make([]*T, 0, len(currentPages))
+	var outputLck sync.Mutex
+
+	for _, p := range currentPages {
+		select {
+		case <-ctx.Done():
+			break
+		default:
+			grp.Go(func() (err error) {
+				val := f(p)
+				if val == nil {
+					return
+				}
+
+				outputLck.Lock()
+				output = append(output, val)
+				outputLck.Unlock()
+
+				return
+			})
+		}
+	}
+
+	grp.Wait()
+
+	return output
+}
+
+func clearPagesCache(p Page) (err error) {
 	pages = nil
 	return nil
 }
