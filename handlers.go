@@ -4,11 +4,14 @@ import (
 	"flag"
 	"log"
 	"os"
+	"runtime"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server
 func Start() {
+	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
 	Get("/{$}", rootHandler)
