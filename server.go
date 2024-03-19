@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -41,9 +42,15 @@ func defaultMiddlewares() []func(http.Handler) http.Handler {
 		csrf.Secure(!serveInsecure),
 	}
 
+	sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
+	if len(sessionSecret) == 0 {
+		sessionSecret = make([]byte, 128)
+		rand.Read(sessionSecret)
+	}
+
 	middlewares := []func(http.Handler) http.Handler{
 		methodOverrideHandler,
-		csrf.Protect([]byte(os.Getenv("SESSION_SECRET")), crsfOpts...),
+		csrf.Protect(sessionSecret, crsfOpts...),
 		requestLoggerHandler,
 	}
 
