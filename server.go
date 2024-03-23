@@ -31,7 +31,7 @@ type (
 	// alias of http.HandlerFunc as output is expected from defined http handlers
 	Output = http.HandlerFunc
 	// map of string to any value used for template rendering
-	Locals map[string]interface{} // passed to templates
+	Locals map[string]any // passed to templates
 )
 
 func defaultMiddlewares() []func(http.Handler) http.Handler {
