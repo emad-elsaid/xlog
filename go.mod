@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/emad-elsaid/types v0.0.3
+	github.com/emad-elsaid/types v0.0.4
 	golang.org/x/sync v0.6.0
 )
 

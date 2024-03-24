@@ -10,13 +10,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-	"sync"
+
+	"github.com/emad-elsaid/types"
 )
 
-var extension_page = map[string]bool{}
-var extension_page_lck sync.Mutex
-var extension_page_enclosed = map[string]bool{}
-var extension_page_enclosed_lck sync.Mutex
+var extension_page = types.Map[string, bool]{}
+var extension_page_enclosed = types.Map[string, bool]{}
 var build_perms fs.FileMode = 0744
 
 // RegisterBuildPage registers a path of a page to export when building static version
@@ -25,13 +24,9 @@ var build_perms fs.FileMode = 0744
 // .html extension to be served with the exact name.
 func RegisterBuildPage(p string, encloseInDir bool) {
 	if encloseInDir {
-		extension_page_enclosed_lck.Lock()
-		extension_page_enclosed[p] = true
-		extension_page_enclosed_lck.Unlock()
+		extension_page_enclosed.Store(p, true)
 	} else {
-		extension_page_lck.Lock()
-		extension_page[p] = true
-		extension_page_lck.Unlock()
+		extension_page.Store(p, true)
 	}
 }
 
@@ -75,7 +70,7 @@ func buildStaticSite(dest string) error {
 		io.Copy(out, in)
 	}
 
-	for route := range extension_page_enclosed {
+	extension_page_enclosed.Range(func(route string, _ bool) bool {
 		err := buildRoute(
 			srv,
 			route,
@@ -85,11 +80,12 @@ func buildStaticSite(dest string) error {
 
 		if err != nil {
 			log.Printf("error while processing: %s, err: %s", route, err.Error())
-			continue
 		}
-	}
 
-	for route := range extension_page {
+		return true
+	})
+
+	extension_page.Range(func(route string, _ bool) bool {
 		err := buildRoute(
 			srv,
 			route,
@@ -99,9 +95,10 @@ func buildStaticSite(dest string) error {
 
 		if err != nil {
 			log.Printf("error while processing: %s, err: %s", route, err.Error())
-			continue
 		}
-	}
+
+		return true
+	})
 
 	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
