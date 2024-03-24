@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"context"
 	"flag"
 	"log"
 	"os"
@@ -9,7 +10,7 @@ import (
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server
-func Start() {
+func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
 
@@ -35,6 +36,15 @@ func Start() {
 
 	srv := server()
 	log.Printf("Starting server: %s", bindAddress)
+
+	go func() {
+		select {
+		case <-ctx.Done():
+			srv.Close()
+			return
+		}
+	}()
+
 	log.Fatal(srv.ListenAndServe())
 }
 

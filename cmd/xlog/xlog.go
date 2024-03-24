@@ -2,6 +2,8 @@ package main
 
 import (
 	// Core
+	"context"
+
 	"github.com/emad-elsaid/xlog"
 
 	// All official extensions
@@ -9,5 +11,5 @@ import (
 )
 
 func main() {
-	xlog.Start()
+	xlog.Start(context.Background())
 }
