@@ -11,6 +11,7 @@ import (
 // building the static pages and exit, or start the HTTP server
 func Start() {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+	flag.Parse()
 
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
@@ -18,8 +19,6 @@ func Start() {
 	Get("/edit/{page...}", getPageEditHandler)
 	Get("/{page...}", getPageHandler)
 	Post("/{page...}", postPageHandler)
-
-	flag.Parse()
 
 	if err := os.Chdir(SOURCE); err != nil {
 		log.Fatal(err)
@@ -34,7 +33,9 @@ func Start() {
 		os.Exit(0)
 	}
 
-	serve()
+	srv := server()
+	log.Printf("Starting server: %s", bindAddress)
+	log.Fatal(srv.ListenAndServe())
 }
 
 // Redirect to `/index` to render the index page.

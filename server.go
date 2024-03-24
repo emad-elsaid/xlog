@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -60,12 +59,6 @@ func defaultMiddlewares() []func(http.Handler) http.Handler {
 func init() {
 	flag.StringVar(&bindAddress, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	flag.BoolVar(&serveInsecure, "serve-insecure", false, "Accept http connections and forward crsf cookie over non secure connections")
-}
-
-func serve() {
-	srv := server()
-	log.Printf("Starting server: %s", bindAddress)
-	log.Fatal(srv.ListenAndServe())
 }
 
 func server() *http.Server {
