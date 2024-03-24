@@ -41,7 +41,7 @@ var MarkDownRenderer = goldmark.New(
 	),
 )
 
-// This is a function that takes an AST node and walks the tree depth first
+// FindInAST takes an AST node and walks the tree depth first
 // searching for a node of a specific type can be used to find first image,
 // link, paragraph...etc
 func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
