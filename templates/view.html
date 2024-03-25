@@ -32,12 +32,12 @@
 </div>
 
 <div class="view">
-  {{ widgets "before_view" .page }}
+  {{- widgets "before_view" .page -}}
   {{.content}}
-  {{ widgets "after_view" .page }}
+  {{- widgets "after_view" .page -}}
 </div>
 
-{{ if not .READONLY }}
+{{- if not .READONLY -}}
 <script>
  document.addEventListener('keydown', e => {
      if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {
@@ -46,6 +46,6 @@
      }
  });
 </script>
-{{ end }}
+{{- end -}}
 
 {{ template "footer" . }}

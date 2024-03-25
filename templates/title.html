@@ -6,13 +6,13 @@
     </a>
   </div>
 
-  {{ if .page }}
-  {{ with widgets "search" .page }}
+  {{- if .page -}}
+  {{- with widgets "search" .page -}}
   <div class="column is-4"> {{ . }} </div>
-  {{ end }}
-  {{ end }}
+  {{- end -}}
+  {{- end -}}
 </div>
 
-{{ if ne .INDEX .page.Name }}
+{{- if ne .INDEX .page.Name -}}
 <div dir="auto" class="title is-1 has-text-weight-bold">{{ .title }}</div>
-{{ end }}
+{{- end -}}

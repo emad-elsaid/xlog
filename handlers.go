@@ -45,7 +45,7 @@ func Start(ctx context.Context) {
 		}
 	}()
 
-	log.Fatal(srv.ListenAndServe())
+	srv.ListenAndServe()
 }
 
 // Redirect to `/index` to render the index page.

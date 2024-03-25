@@ -1,10 +1,10 @@
-{{ $commands := "" }}
+{{- $commands := "" }}
 
-{{ if .page }}
-{{ $commands = commands .page }}
-{{ end }}
+{{- if .page }}
+{{- $commands = commands .page }}
+{{- end }}
 
-{{ if $commands }}
+{{- if $commands }}
 {{.csrf}}
 <dialog id="commands-modal" style="border: none;" class="mt-0">
   <div class="modal-content">
