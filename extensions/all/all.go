@@ -6,6 +6,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
 	_ "github.com/emad-elsaid/xlog/extensions/custom_css"
+	_ "github.com/emad-elsaid/xlog/extensions/custom_widget"
 	_ "github.com/emad-elsaid/xlog/extensions/date"
 	_ "github.com/emad-elsaid/xlog/extensions/disqus"
 	_ "github.com/emad-elsaid/xlog/extensions/embed"

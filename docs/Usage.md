@@ -3,55 +3,65 @@ xlog --help
 
 Usage of xlog:
   -activitypub.domain string
-        domain used for activitypub stream absolute URLs
+    	domain used for activitypub stream absolute URLs
   -activitypub.icon string
-        the path to the activitypub profile icon. mastodon use it as profile picture for example. (default "/public/logo.png")
+    	the path to the activitypub profile icon. mastodon use it as profile picture for example. (default "/public/logo.png")
   -activitypub.image string
-        the path to the activitypub profile image. mastodon use it as profile cover for example. (default "/public/logo.png")
+    	the path to the activitypub profile image. mastodon use it as profile cover for example. (default "/public/logo.png")
   -activitypub.summary string
-        summary of the user for activitypub actor
+    	summary of the user for activitypub actor
   -activitypub.username string
-        username for activitypub actor
+    	username for activitypub actor
   -bind string
-        IP and port to bind the web server to (default "127.0.0.1:3000")
+    	IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string
-        Build all pages as static site in this directory
+    	Build all pages as static site in this directory
+  -custom_after_view string
+    	path to a file it's content will be included in every page AFTER the content of the page
+  -custom_before_view string
+    	path to a file it's content will be included in every page BEFORE the content of the page
   -custom_css string
-        Custom CSS file path
+    	Custom CSS file path
+  -custom_head string
+    	path to a file it's content will be included in every page <head> tag
   -disqus string
-        Disqus domain name for example: xlog-emadelsaid.disqus.com
+    	Disqus domain name for example: xlog-emadelsaid.disqus.com
   -github.branch string
-        Github repository branch to use for 'edit on Github' quick action (default "master")
+    	[Deprecated] Github repository branch to use for 'edit on Github' quick action (default "master")
   -github.repo string
-        Github repository to use for 'edit on Github' quick action
+    	[Deprecated] Github repository to use for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog
+  -github.url string
+    	Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs
   -gpg string
-        PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off
+    	PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off
   -html
-        Consider HTML files as pages
+    	Consider HTML files as pages
   -index string
-        Index file name used as home page (default "index")
+    	Index file name used as home page (default "index")
+  -notfoundpage string
+    	Custom not found page (default "404")
   -og.domain string
-        opengraph domain name to be used for meta tags of og:* and twitter:*
+    	opengraph domain name to be used for meta tags of og:* and twitter:*
   -pandoc
-        Use pandoc to render .org, .rst, .rtf, .odt
+    	Use pandoc to render .org, .rst, .rtf, .odt
   -readonly
-        Should xlog hide write operations, read-only means all write operations will be disabled
+    	Should xlog hide write operations, read-only means all write operations will be disabled
   -rss.description string
-        RSS feed description
+    	RSS feed description
   -rss.domain string
-        RSS domain name to be used for RSS feed. without HTTPS://
+    	RSS domain name to be used for RSS feed. without HTTPS://
   -rss.limit int
-        Limit the number of items in the RSS feed to this amount (default 30)
+    	Limit the number of items in the RSS feed to this amount (default 30)
   -serve-insecure
-        Accept http connections and forward crsf cookie over non secure connections
+    	Accept http connections and forward crsf cookie over non secure connections
   -sidebar
-        Should render sidebar. (default true)
+    	Should render sidebar. (default true)
   -sitemap.domain string
-        domain name without protocol or trailing / to use for sitemap loc
+    	domain name without protocol or trailing / to use for sitemap loc
   -sitename string
-        Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
+    	Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
-        Directory that will act as a storage (default "/path/to/source")
+    	Directory that will act as a storage (default "/home/emad/code/xlog")
   -twitter.username string
-        user twitter account @handle. including the @
+    	user twitter account @handle. including the @
 ```
