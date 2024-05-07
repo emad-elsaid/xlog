@@ -12,7 +12,7 @@ var SITEMAP_DOMAIN string
 
 func init() {
 	flag.StringVar(&SITEMAP_DOMAIN, "sitemap.domain", "", "domain name without protocol or trailing / to use for sitemap loc")
-	Get(`/sitemap\.xml`, handler)
+	Get(`/sitemap.xml`, handler)
 	RegisterBuildPage("/sitemap.xml", false)
 }
 
