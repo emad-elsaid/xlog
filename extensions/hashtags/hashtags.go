@@ -99,7 +99,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	}
 
 	tag := n.(*HashTag)
-	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag is-info is-light">%s</a>`, tag.value, tag.value)
+	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag">%s</a>`, tag.value, tag.value)
 	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
 	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", strings.ToLower(string(tag.value))), true)
 	return ast.WalkContinue, nil

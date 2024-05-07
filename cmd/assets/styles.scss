@@ -1,4 +1,11 @@
 @charset "utf-8";
+
+@use "~bulma/sass" with (
+    $family-sans-serif: '"Dubai W23", "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif',
+
+    $blue: #0d52bf,
+);
+
 @import '@fontsource/inter/100.css';
 @import '@fontsource/inter/200.css';
 @import '@fontsource/inter/300.css';
@@ -10,24 +17,6 @@
 @import '@fontsource/inter/900.css';
 @import './dubai-font.css';
 
-$family-sans-serif: "Dubai W23", "Inter", BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-
-// ElementaryOS colors: https://elementary.io/brand
-$red: #c6262e;
-$purple: #a56de2;
-$blue: #0d52bf;
-$cyan: #64baff;
-$turquoise: #3689e6;
-$green: #68b723;
-$yellow: #f9c440;
-$orange: #f37329;
-
-$code-dark: lighten($red, 15%);
-$link-dark: lighten($cyan, 5%);
-
-
-@import "~bulma/bulma";
-@import "~bulma-prefers-dark/bulma-prefers-dark";
 @import "~@fortawesome/fontawesome-free/css/fontawesome";
 @import "~@fortawesome/fontawesome-free/scss/regular";
 @import "~@fortawesome/fontawesome-free/scss/solid";
@@ -47,11 +36,11 @@ $link-dark: lighten($cyan, 5%);
     }
     @for $i from 1 through 6 {
         h#{$i} {
-            border-bottom: $hr-height solid $hr-background-color;
+            border-bottom: var(--bulma-hr-height) solid var(--bulma-hr-background-color);
             padding-bottom: 0.5em;
         }
         h#{$i}:before {
-            color: $grey-light;
+            color: var(--bulma-grey-light);
         }
     }
     audio {
