@@ -23,7 +23,7 @@ var MarkDownRenderer = goldmark.New(
 		extension.Footnote,
 		extension.Typographer,
 		highlighting.NewHighlighting(
-			highlighting.WithCustomStyle(styles.Dracula),
+			highlighting.WithCustomStyle(styles.Get("dracula")),
 			highlighting.WithFormatOptions(
 				chroma_html.WithLineNumbers(true),
 			),
