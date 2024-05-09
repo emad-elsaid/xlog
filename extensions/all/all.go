@@ -1,7 +1,6 @@
 package all
 
 import (
-	// Extensions
 	_ "github.com/emad-elsaid/xlog/extensions/activitypub"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
