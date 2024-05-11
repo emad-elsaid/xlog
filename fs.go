@@ -56,6 +56,6 @@ func staticHandler(r Request) (Output, error) {
 		return nil, err
 	} else {
 		f.Close()
-		return server.ServeHTTP, nil
+		return Cache(server.ServeHTTP), nil
 	}
 }

@@ -209,3 +209,11 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
+
+// Cache wraps Output and adds header to instruct the browser to cache the output
+func Cache(out Output) Output {
+	return func(w Response, r Request) {
+		w.Header().Add("Cache-Control", "max-age=604800")
+		out(w, r)
+	}
+}

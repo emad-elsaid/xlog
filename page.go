@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	emojiAst "github.com/yuin/goldmark-emoji/ast"
@@ -49,7 +50,11 @@ type Page interface {
 
 type page struct {
 	name string
-	ast  ast.Node
+
+	l          sync.Mutex
+	lastUpdate time.Time
+	ast        ast.Node
+	content    *Markdown
 }
 
 func (p *page) Name() string {
@@ -66,11 +71,11 @@ func (p *page) Exists() bool {
 }
 
 func (p *page) Render() template.HTML {
-	content := p.Content()
-	content = PreProcess(content)
+	content := p.preProcessedContent()
+	ast := p.AST()
 
 	var buf bytes.Buffer
-	if err := MarkDownRenderer.Convert([]byte(content), &buf); err != nil {
+	if err := MarkDownRenderer.Renderer().Render(&buf, []byte(content), ast); err != nil {
 		return template.HTML(err.Error())
 	}
 
@@ -83,6 +88,22 @@ func (p *page) Content() Markdown {
 		return ""
 	}
 	return Markdown(dat)
+}
+
+func (p *page) preProcessedContent() Markdown {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	modtime := p.ModTime()
+
+	if p.content == nil || modtime.Equal(p.lastUpdate) {
+		c := p.Content()
+		c = PreProcess(c)
+		p.content = &c
+		p.lastUpdate = p.ModTime()
+	}
+
+	return Markdown(*p.content)
 }
 
 func (p *page) Delete() bool {
@@ -123,8 +144,11 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) AST() ast.Node {
-	if p.ast == nil {
-		p.ast = MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
+	lastModified := p.lastUpdate
+	content := p.preProcessedContent()
+
+	if p.ast == nil || p.lastUpdate != lastModified {
+		p.ast = MarkDownRenderer.Parser().Parse(text.NewReader([]byte(content)))
 	}
 
 	return p.ast

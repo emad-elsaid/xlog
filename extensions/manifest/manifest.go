@@ -18,7 +18,7 @@ func init() {
 }
 
 func manifest(w Response, r Request) Output {
-	return Render("manifest", Locals{"sitename": SITENAME})
+	return Cache(Render("manifest", Locals{"sitename": SITENAME}))
 }
 
 func head(_ Page) template.HTML {
