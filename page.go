@@ -109,6 +109,8 @@ func (p *page) preProcessedContent() Markdown {
 func (p *page) Delete() bool {
 	defer Trigger(AfterDelete, p)
 
+	p.clearCache()
+
 	if p.Exists() {
 		err := os.Remove(p.FileName())
 		if err != nil {
@@ -123,6 +125,7 @@ func (p *page) Write(content Markdown) bool {
 	Trigger(BeforeWrite, p)
 	defer Trigger(AfterWrite, p)
 
+	p.clearCache()
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)
 
@@ -160,4 +163,10 @@ func (p *page) Emoji() string {
 	}
 
 	return ""
+}
+
+func (p *page) clearCache() {
+	p.content = nil
+	p.ast = nil
+	p.lastUpdate = time.Time{}
 }

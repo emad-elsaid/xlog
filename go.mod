@@ -1,6 +1,6 @@
 module github.com/emad-elsaid/xlog
 
-go 1.22
+go 1.22.3
 
 require (
 	github.com/alecthomas/chroma/v2 v2.13.0
@@ -17,6 +17,14 @@ require (
 require (
 	github.com/emad-elsaid/types v0.0.4
 	golang.org/x/sync v0.6.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/emad-elsaid/memoize v0.0.0-20240512184123-ac0473d98ea9 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

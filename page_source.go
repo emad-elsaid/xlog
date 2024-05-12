@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"path"
 	"path/filepath"
+
+	"github.com/emad-elsaid/memoize"
 )
 
 type PageSource interface {
@@ -19,7 +21,7 @@ var sources = []PageSource{
 	&markdownCWDFS{},
 }
 
-func NewPage(name string) (p Page) {
+var NewPage = memoize.New(func(name string) (p Page) {
 	for i := range sources {
 		p = sources[i].Page(name)
 		if p != nil && p.Exists() {
@@ -28,7 +30,7 @@ func NewPage(name string) (p Page) {
 	}
 
 	return
-}
+})
 
 func RegisterPageSource(p PageSource) {
 	sources = append([]PageSource{p}, sources...)
@@ -37,8 +39,7 @@ func RegisterPageSource(p PageSource) {
 // MarkdownCWDFS a current directory markdown pages
 type markdownCWDFS struct{}
 
-// NewPage Creates an instance of Page with name. if no name is passed it's assumed INDEX
-func (m *markdownCWDFS) Page(name string) Page {
+var cachedPage = memoize.New(func(name string) Page {
 	if name == "" {
 		name = INDEX
 	}
@@ -46,6 +47,11 @@ func (m *markdownCWDFS) Page(name string) Page {
 	return &page{
 		name: name,
 	}
+})
+
+// NewPage Creates an instance of Page with name. if no name is passed it's assumed INDEX
+func (m *markdownCWDFS) Page(name string) Page {
+	return cachedPage(name)
 }
 
 func (m *markdownCWDFS) Each(ctx context.Context, f func(Page)) {
