@@ -15,16 +15,9 @@ require (
 )
 
 require (
+	github.com/emad-elsaid/memoize v0.0.0-20240518113932-cc0da50a362c
 	github.com/emad-elsaid/types v0.0.4
 	golang.org/x/sync v0.6.0
-)
-
-require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/emad-elsaid/memoize v0.0.0-20240512184123-ac0473d98ea9 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
