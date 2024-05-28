@@ -5,7 +5,7 @@ XLog
 
 
 
-<p align="center"><img width="256" src="public/logo.png" /></p>
+<p align="center"><img width="200" src="public/logo.png" /></p>
 
 :vhs: Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML and allows editing files online. It focuses on enriching markdown files and surfacing implicit links between pages.
 
