@@ -2,12 +2,6 @@ package xlog
 
 import (
 	"context"
-	"errors"
-	"io/fs"
-	"path"
-	"path/filepath"
-
-	"github.com/emad-elsaid/memoize"
 )
 
 type PageSource interface {
@@ -18,10 +12,10 @@ type PageSource interface {
 }
 
 var sources = []PageSource{
-	&markdownCWDFS{},
+	newMarkdownFS("."),
 }
 
-var NewPage = memoize.New(func(name string) (p Page) {
+func NewPage(name string) (p Page) {
 	for i := range sources {
 		p = sources[i].Page(name)
 		if p != nil && p.Exists() {
@@ -30,57 +24,8 @@ var NewPage = memoize.New(func(name string) (p Page) {
 	}
 
 	return
-})
+}
 
 func RegisterPageSource(p PageSource) {
 	sources = append([]PageSource{p}, sources...)
-}
-
-// MarkdownCWDFS a current directory markdown pages
-type markdownCWDFS struct{}
-
-var cachedPage = memoize.New(func(name string) Page {
-	if name == "" {
-		name = INDEX
-	}
-
-	return &page{
-		name: name,
-	}
-})
-
-// NewPage Creates an instance of Page with name. if no name is passed it's assumed INDEX
-func (m *markdownCWDFS) Page(name string) Page {
-	return cachedPage(name)
-}
-
-func (m *markdownCWDFS) Each(ctx context.Context, f func(Page)) {
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			for _, v := range ignoredDirs {
-				if v.MatchString(name) {
-					return fs.SkipDir
-				}
-			}
-
-			return nil
-		}
-
-		select {
-
-		case <-ctx.Done():
-			return errors.New("context stopped")
-
-		default:
-			ext := path.Ext(name)
-			basename := name[:len(name)-len(ext)]
-
-			if ext == ".md" {
-				f(m.Page(basename))
-			}
-
-		}
-
-		return nil
-	})
 }
