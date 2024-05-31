@@ -4,23 +4,83 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"log/slog"
 	"path"
 	"path/filepath"
+	"strings"
+	"sync"
 
 	"github.com/emad-elsaid/memoize"
+	"github.com/emad-elsaid/memoize/cache/adapters/hashicorp"
+	"github.com/fsnotify/fsnotify"
+	lru "github.com/hashicorp/golang-lru/v2"
 )
 
-func newMarkdownFS(path string) *markdownFS {
-	m := markdownFS{path: path}
+func newMarkdownFS(p string) *markdownFS {
+	cache, err := lru.New[string, Page](1000)
+	if err != nil {
+		slog.Error("Can't create cache for pages", "error", err)
+		panic("Can't continue without cache instance")
+	}
 
-	m._page = memoize.New(func(name string) Page {
-		if name == "" {
-			name = INDEX
-		}
+	m := markdownFS{
+		cache: cache,
+		path:  p,
+	}
 
-		return &page{
-			name: name,
-		}
+	m._page = memoize.NewWithCache(
+		hashicorp.LRU(cache),
+		func(name string) Page {
+			if name == "" {
+				name = INDEX
+			}
+
+			return &page{
+				name: name,
+			}
+		},
+	)
+
+	m.watch = sync.OnceFunc(func() {
+		go func() {
+			watcher, err := fsnotify.NewWatcher()
+			if err != nil {
+				slog.Error("Can't watch files for change", "error", err)
+			}
+			defer watcher.Close()
+
+			err = watcher.Add(m.path)
+			if err != nil {
+				slog.Error("Can't add Markdown FS path", "error", err)
+			}
+
+			for {
+				select {
+				case event, ok := <-watcher.Events:
+					if !ok {
+						slog.Error("Filesystem watcher returned not OK from Events")
+						return
+					}
+
+					if event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
+						if !strings.HasSuffix(event.Name, ".md") {
+							continue
+						}
+
+						name := strings.TrimSuffix(event.Name, ".md")
+						name, _ = filepath.Rel(m.path, name)
+						m.cache.Remove(name)
+					}
+				case err, ok := <-watcher.Errors:
+					if !ok {
+						slog.Error("Filesystem watcher returned not OK from Errors")
+						return
+					}
+
+					slog.Error("Filesystem watcher error", "error", err)
+				}
+			}
+		}()
 	})
 
 	return &m
@@ -29,11 +89,15 @@ func newMarkdownFS(path string) *markdownFS {
 // MarkdownCWDFS a current directory markdown pages
 type markdownFS struct {
 	path  string
+	cache *lru.Cache[string, Page]
 	_page func(string) Page
+	watch func()
 }
 
 // Page Creates an instance of Page with name. if no name is passed it's assumed INDEX
 func (m *markdownFS) Page(name string) Page {
+	m.watch()
+
 	return m._page(name)
 }
 
