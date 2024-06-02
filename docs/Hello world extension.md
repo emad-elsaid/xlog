@@ -1,4 +1,4 @@
-By the end of this tutorial you'll learn: 
+By the end of this tutorial you'll learn:
 
 * Creating a new extension
 * Creating a custom installation that loads the core and your extension
@@ -25,7 +25,7 @@ Replace the URL to your github account or any other URL where your extension wil
 
 # Create a custom installation
 
-To test our extension we need a `main` package that loads xlog and your own extension. 
+To test our extension we need a `main` package that loads xlog and your own extension.
 
 We'll create `cmd/xlog/xlog.go` that acts as custom installation.
 
@@ -101,14 +101,14 @@ Packages add features to Xlog by calling `Register*` functions in the `init` fun
 * Autocomplete
 * Command
 
-For our extension we want to add "Hello world!" before the actual page content. this is exactly what the Preprocessor is for. a function that processes the page text before rendering it to HTML. 
+For our extension we want to add "Hello world!" before the actual page content. this is exactly what the Preprocessor is for. a function that processes the page text before rendering it to HTML.
 
 We will create a function that implement the [Preprocessor interface](https://pkg.go.dev/github.com/emad-elsaid/xlog#Preprocessor). `helloworld.go` should have the following content.
 
 ```go
 package helloworld
 
-func addHelloWorld(input string) string {
+func addHelloWorld(input xlog.Markdown) xlog.Markdown {
 	return "Hello world!\n" + input
 }
 ```
@@ -128,12 +128,12 @@ func init() {
 	xlog.RegisterPreprocessor(addHelloWorld)
 }
 
-func addHelloWorld(input string) string {
+func addHelloWorld(input xlog.Markdown) xlog.Markdown {
 	return "Hello world!\n" + input
 }
 ```
 
-Restarting the server and refreshing your web page will show the following: 
+Restarting the server and refreshing your web page will show the following:
 
 ```
 Hello world!
@@ -145,4 +145,3 @@ We are creating a Hello world Xlog extension.
 Congrates, You created a new xlog extension. Now you can publish this extension to github and import it in any custom installation of xlog.
 
 Also you may try to explore Xlog package documentation to get familiar with other types and `Register` functions.
-
