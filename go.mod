@@ -24,7 +24,9 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/yuin/goldmark-meta v1.1.0 // indirect
 	golang.org/x/net v0.22.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
 require (

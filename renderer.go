@@ -5,6 +5,7 @@ import (
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
+	meta "github.com/yuin/goldmark-meta"
 
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/ast"
@@ -29,6 +30,7 @@ var MarkDownRenderer = goldmark.New(
 			),
 		),
 		emoji.Emoji,
+		meta.New(meta.WithStoresInDocument()),
 	),
 
 	goldmark.WithParserOptions(
