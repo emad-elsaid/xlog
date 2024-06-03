@@ -89,7 +89,7 @@ func newMarkdownFS(p string) *markdownFS {
 	return &m
 }
 
-// MarkdownCWDFS a current directory markdown pages
+// MarkdownFS a current directory markdown pages
 type markdownFS struct {
 	path  string
 	cache *lru.Cache[string, Page]
