@@ -20,6 +20,7 @@ const (
 	BeforeWrite PageEvent = iota
 	AfterWrite
 	AfterDelete
+	Changed
 )
 
 // a map to keep all page events and respective list of event handlers

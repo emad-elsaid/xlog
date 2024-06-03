@@ -23,6 +23,11 @@ require (
 )
 
 require (
+	github.com/gorilla/websocket v1.5.1 // indirect
+	golang.org/x/net v0.22.0 // indirect
+)
+
+require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
