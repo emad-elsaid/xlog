@@ -6,8 +6,6 @@ import (
     "log"
     "sync"
 
-    _ "embed"
-
     . "github.com/emad-elsaid/xlog"
     "github.com/gorilla/websocket"
 )
@@ -19,11 +17,9 @@ var (
 )
 
 func init() {
-    if !READONLY {
-        Listen(Changed, NotifyPageChange)
-        Get(`/ws`, handleWebSocket)
-        RegisterWidget(AFTER_VIEW_WIDGET, 0, clientWidget)
-    }
+    Listen(Changed, NotifyPageChange)
+    Get(`/ws`, handleWebSocket)
+    RegisterWidget(AFTER_VIEW_WIDGET, 0, clientWidget)
 }
 
 
@@ -52,6 +48,9 @@ func NotifyPageChange(p Page) error {
 func nop(w Response, r Request) {
 }
 func handleWebSocket(w Response, r Request) Output {
+    if !READONLY {
+        return NoContent()
+    }
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
         log.Println("Upgrade error:", err)
@@ -86,13 +85,11 @@ func handleWebSocket(w Response, r Request) Output {
 const clientScript = `
     <script>
     (() => {
-        const socketUrl = 'ws://localhost:3000/ws';
+        const socketUrl = 'ws://'+window.location.host+'/ws';
         let socket = new WebSocket(socketUrl);
         socket.addEventListener('message', (evt) => {
-            if (evt.data.url != window.location.href) {
-                let data = JSON.parse(evt.data)
-                window.location.href = data.url;
-            }
+            let data = JSON.parse(evt.data)
+            window.location.href = data.url;
         });
     })();
     </script>
@@ -100,5 +97,9 @@ const clientScript = `
 
 func clientWidget(p Page) template.HTML {
     // return template.HTML(fmt.Sprint(clientScript, template.JSEscapeString(p.Name())))
-    return template.HTML(clientScript)
+    if !READONLY {
+        return template.HTML(clientScript)
+    }
+
+    return ""
 }
