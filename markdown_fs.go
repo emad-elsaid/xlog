@@ -69,8 +69,8 @@ func newMarkdownFS(p string) *markdownFS {
 
 						name := strings.TrimSuffix(event.Name, ".md")
 						name, _ = filepath.Rel(m.path, name)
-	                    cp := m._page(name)
-	                    Trigger(Changed, cp)
+						cp := m._page(name)
+						Trigger(Changed, cp)
 
 						m.cache.Remove(name)
 					}
