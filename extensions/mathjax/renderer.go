@@ -3,6 +3,7 @@ package mathjax
 import (
 	"bytes"
 	"embed"
+	"html/template"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -13,15 +14,35 @@ import (
 //go:embed js
 var js embed.FS
 
-const script = `<script async src="/js/mathjax.js"></script>`
+const script = `
+<script>
+MathJax = {
+  tex: {
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {
+    fontCache: 'global'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src="/js/tex-chtml-full.js">
+</script>
+    `
 
 func init() {
 	RegisterStaticDir(js)
+	RegisterWidget(HEAD_WIDGET, 1, headScript)
 	RegisterBuildPage("/js/mathjax.js", false)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
 	))
+}
+
+func headScript(_ Page) template.HTML {
+	return template.HTML(script)
 }
 
 type InlineMathRenderer struct {
@@ -50,7 +71,7 @@ func (r *InlineMathRenderer) renderInlineMath(w util.BufWriter, source []byte, n
 		}
 		return ast.WalkSkipChildren, nil
 	}
-	w.WriteString(r.endDelim + `</span>` + script)
+	w.WriteString(r.endDelim + `</span>`)
 	return ast.WalkContinue, nil
 }
 
@@ -73,7 +94,7 @@ func (r *MathBlockRenderer) renderMathBlock(w util.BufWriter, source []byte, nod
 			w.Write(line.Value(source))
 		}
 	} else {
-		_, _ = w.WriteString(r.endDelim + `</p>` + "\n" + script)
+		_, _ = w.WriteString(r.endDelim + `</p>` + "\n")
 	}
 	return ast.WalkContinue, nil
 }
