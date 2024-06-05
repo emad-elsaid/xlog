@@ -126,6 +126,9 @@ func NoContent() Output {
 	return noContent
 }
 
+// Noop is an output that doesn't do anything to the request. can be useful for a websocket upgrader
+func Noop(w Response, r Request) {}
+
 func noContent(w Response, r Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
