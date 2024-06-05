@@ -18,14 +18,12 @@ require (
 	github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5
 	github.com/emad-elsaid/types v0.0.4
 	github.com/fsnotify/fsnotify v1.7.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	golang.org/x/sync v0.6.0
 )
 
-require (
-	github.com/gorilla/websocket v1.5.1 // indirect
-	golang.org/x/net v0.22.0 // indirect
-)
+require golang.org/x/net v0.23.0 // indirect
 
 require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
