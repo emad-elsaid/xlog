@@ -34,7 +34,6 @@ MathJax = {
 func init() {
 	RegisterStaticDir(js)
 	RegisterWidget(HEAD_WIDGET, 1, headScript)
-	RegisterBuildPage("/js/mathjax.js", false)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
