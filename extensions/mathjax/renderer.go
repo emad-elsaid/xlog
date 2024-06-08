@@ -3,7 +3,6 @@ package mathjax
 import (
 	"bytes"
 	"embed"
-	"html/template"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -28,15 +27,10 @@ MathJax = {
 
 func init() {
 	RegisterStaticDir(js)
-	RegisterWidget(HEAD_WIDGET, 1, headScript)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
 	))
-}
-
-func headScript(_ Page) template.HTML {
-	return template.HTML(script)
 }
 
 type InlineMathRenderer struct {
@@ -65,7 +59,7 @@ func (r *InlineMathRenderer) renderInlineMath(w util.BufWriter, source []byte, n
 		}
 		return ast.WalkSkipChildren, nil
 	}
-	w.WriteString(r.endDelim + `</span>`)
+	w.WriteString(r.endDelim + `</span>` + script)
 	return ast.WalkContinue, nil
 }
 
@@ -88,7 +82,7 @@ func (r *MathBlockRenderer) renderMathBlock(w util.BufWriter, source []byte, nod
 			w.Write(line.Value(source))
 		}
 	} else {
-		_, _ = w.WriteString(r.endDelim + `</p>` + "\n")
+		_, _ = w.WriteString(r.endDelim + `</p>` + "\n" + script)
 	}
 	return ast.WalkContinue, nil
 }
