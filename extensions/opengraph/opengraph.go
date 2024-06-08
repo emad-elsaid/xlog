@@ -39,11 +39,12 @@ func opengraphTags(p Page) template.HTML {
 	URL := u.String()
 
 	var image string
-	if imageAST, ok := FindInAST[*ast.Image](p.AST()); ok {
+	src, tree := p.AST()
+	if imageAST, ok := FindInAST[*ast.Image](tree); ok {
 		image = "https://" + domain + string(imageAST.Destination)
 	}
 
-	firstParagraph := rawText([]byte(p.Content()), p.AST(), descriptionLength)
+	firstParagraph := rawText(src, tree, descriptionLength)
 
 	ogTags := fmt.Sprintf(`
     <meta property="og:site_name" content="%s" />

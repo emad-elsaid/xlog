@@ -43,7 +43,7 @@ type Page interface {
 	// extensions can use it to walk the tree and modify it or collect statistics or
 	// parts of the page. for example the following "Emoji" function uses it to
 	// extract the first emoji.
-	AST() ast.Node
+	AST() ([]byte, ast.Node)
 	// Returns the first emoji of the page.
 	Emoji() string
 }
@@ -71,11 +71,10 @@ func (p *page) Exists() bool {
 }
 
 func (p *page) Render() template.HTML {
-	content := p.preProcessedContent()
-	ast := p.AST()
+	src, ast := p.AST()
 
 	var buf bytes.Buffer
-	if err := MarkDownRenderer.Renderer().Render(&buf, []byte(content), ast); err != nil {
+	if err := MarkDownRenderer.Renderer().Render(&buf, src, ast); err != nil {
 		return template.HTML(err.Error())
 	}
 
@@ -146,7 +145,7 @@ func (p *page) ModTime() time.Time {
 	return s.ModTime()
 }
 
-func (p *page) AST() ast.Node {
+func (p *page) AST() (source []byte, tree ast.Node) {
 	lastModified := p.lastUpdate
 	content := p.preProcessedContent()
 
@@ -154,11 +153,12 @@ func (p *page) AST() ast.Node {
 		p.ast = MarkDownRenderer.Parser().Parse(text.NewReader([]byte(content)))
 	}
 
-	return p.ast
+	return []byte(content), p.ast
 }
 
 func (p *page) Emoji() string {
-	if e, ok := FindInAST[*emojiAst.Emoji](p.AST()); ok {
+	_, tree := p.AST()
+	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok {
 		return string(e.Value.Unicode)
 	}
 
