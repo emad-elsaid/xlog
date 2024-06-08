@@ -13,11 +13,20 @@ import (
 //go:embed js
 var js embed.FS
 
-const script = `<script async src="/js/mathjax.js"></script>`
+const script = `
+<script>
+MathJax = {
+  tex: {
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    inlineMath: [['$', '$'], ['\\(', '\\)']]
+  },
+  svg: {fontCache: 'global'}
+};
+</script>
+<script type="text/javascript" src="/js/tex-chtml-full.js" async></script>`
 
 func init() {
 	RegisterStaticDir(js)
-	RegisterBuildPage("/js/mathjax.js", false)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
