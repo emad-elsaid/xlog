@@ -3,6 +3,7 @@ package mathjax
 import (
 	"bytes"
 	"embed"
+	"io/fs"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -27,10 +28,27 @@ MathJax = {
 
 func init() {
 	RegisterStaticDir(js)
+	registerBuildFiles()
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
 	))
+}
+
+func registerBuildFiles() {
+	fs.WalkDir(js, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		RegisterBuildPage("/"+path, false)
+
+		return nil
+	})
 }
 
 type InlineMathRenderer struct {
