@@ -21,15 +21,10 @@ MathJax = {
     displayMath: [['$$', '$$'], ['\\[', '\\]']],
     inlineMath: [['$', '$'], ['\\(', '\\)']]
   },
-  svg: {
-    fontCache: 'global'
-  }
+  svg: {fontCache: 'global'}
 };
 </script>
-<script type="text/javascript" id="MathJax-script" async
-  src="/js/tex-chtml-full.js">
-</script>
-    `
+<script type="text/javascript" src="/js/tex-chtml-full.js" async></script>`
 
 func init() {
 	RegisterStaticDir(js)
