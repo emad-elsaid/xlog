@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"log"
 	"log/slog"
 	"path"
 	"path/filepath"
@@ -12,8 +13,9 @@ import (
 
 	"github.com/emad-elsaid/memoize"
 	"github.com/emad-elsaid/memoize/cache/adapters/hashicorp"
-	"github.com/fsnotify/fsnotify"
+
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/rjeczalik/notify"
 )
 
 func newMarkdownFS(p string) *markdownFS {
@@ -43,44 +45,40 @@ func newMarkdownFS(p string) *markdownFS {
 
 	m.watch = sync.OnceFunc(func() {
 		go func() {
-			watcher, err := fsnotify.NewWatcher()
+			m.eventChan = make(chan notify.EventInfo, 1)
+
+			log.Printf("watchin path %s", m.path+"/...")
+			absolutePath, err := filepath.Abs(m.path)
 			if err != nil {
+				log.Fatal(err)
+			}
+
+			log.Printf("watchin abs path %s", absolutePath+"/...")
+
+			if err := notify.Watch(m.path+"/...", m.eventChan, notify.All); err != nil {
 				slog.Error("Can't watch files for change", "error", err)
 			}
-			defer watcher.Close()
-
-			err = watcher.Add(m.path)
-			if err != nil {
-				slog.Error("Can't add Markdown FS path", "error", err)
-			}
+			defer notify.Stop(m.eventChan)
 
 			for {
-				select {
-				case event, ok := <-watcher.Events:
-					if !ok {
-						slog.Error("Filesystem watcher returned not OK from Events")
-						return
+				switch ei := <-m.eventChan; ei.Event() {
+				case notify.Write, notify.Remove, notify.Rename:
+
+					rel, err := filepath.Rel(absolutePath, ei.Path())
+					if err != nil {
+						log.Fatal(err)
+					}
+					log.Printf("file write or removed %s", rel)
+					if !strings.HasSuffix(rel, ".md") {
+						continue
 					}
 
-					if event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
-						if !strings.HasSuffix(event.Name, ".md") {
-							continue
-						}
+					name := strings.TrimSuffix(rel, ".md")
+					log.Printf("page name %s", name)
+					cp := m._page(name)
+					Trigger(Changed, cp)
 
-						name := strings.TrimSuffix(event.Name, ".md")
-						name, _ = filepath.Rel(m.path, name)
-						cp := m._page(name)
-						Trigger(Changed, cp)
-
-						m.cache.Remove(name)
-					}
-				case err, ok := <-watcher.Errors:
-					if !ok {
-						slog.Error("Filesystem watcher returned not OK from Errors")
-						return
-					}
-
-					slog.Error("Filesystem watcher error", "error", err)
+					m.cache.Remove(name)
 				}
 			}
 		}()
@@ -91,10 +89,11 @@ func newMarkdownFS(p string) *markdownFS {
 
 // MarkdownFS a current directory markdown pages
 type markdownFS struct {
-	path  string
-	cache *lru.Cache[string, Page]
-	_page func(string) Page
-	watch func()
+	path      string
+	cache     *lru.Cache[string, Page]
+	_page     func(string) Page
+	eventChan chan notify.EventInfo
+	watch     func()
 }
 
 // Page Creates an instance of Page with name. if no name is passed it's assumed INDEX
