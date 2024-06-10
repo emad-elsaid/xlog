@@ -47,13 +47,10 @@ func newMarkdownFS(p string) *markdownFS {
 		go func() {
 			m.eventChan = make(chan notify.EventInfo, 1)
 
-			log.Printf("watchin path %s", m.path+"/...")
-			absolutePath, err := filepath.Abs(m.path)
+			absPath, err := filepath.Abs(m.path)
 			if err != nil {
 				log.Fatal(err)
 			}
-
-			log.Printf("watchin abs path %s", absolutePath+"/...")
 
 			if err := notify.Watch(m.path+"/...", m.eventChan, notify.All); err != nil {
 				slog.Error("Can't watch files for change", "error", err)
@@ -63,18 +60,15 @@ func newMarkdownFS(p string) *markdownFS {
 			for {
 				switch ei := <-m.eventChan; ei.Event() {
 				case notify.Write, notify.Remove, notify.Rename:
-
-					rel, err := filepath.Rel(absolutePath, ei.Path())
+					relPath, err := filepath.Rel(absPath, ei.Path())
 					if err != nil {
 						log.Fatal(err)
 					}
-					log.Printf("file write or removed %s", rel)
-					if !strings.HasSuffix(rel, ".md") {
+					if !strings.HasSuffix(relPath, ".md") {
 						continue
 					}
 
-					name := strings.TrimSuffix(rel, ".md")
-					log.Printf("page name %s", name)
+					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
 					Trigger(Changed, cp)
 
