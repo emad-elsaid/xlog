@@ -144,5 +144,5 @@ func (p *page) Write(content xlog.Markdown) bool {
 	return true
 }
 
-func (p *page) AST() ast.Node { return ast.NewDocument() }
-func (p *page) Emoji() string { return "" }
+func (p *page) AST() ([]byte, ast.Node) { return []byte{}, ast.NewDocument() }
+func (p *page) Emoji() string           { return "" }

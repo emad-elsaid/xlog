@@ -23,7 +23,8 @@ func dateHandler(w Response, r Request) Output {
 	}
 
 	pages := MapPageCon(r.Context(), func(p Page) *Page {
-		allDates := FindAllInAST[*DateNode](p.AST())
+		_, tree := p.AST()
+		allDates := FindAllInAST[*DateNode](tree)
 		for _, d := range allDates {
 			if d.time.Equal(date) {
 				return &p

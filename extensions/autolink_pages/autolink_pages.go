@@ -45,7 +45,8 @@ func UpdatePagesList(_ Page) (err error) {
 }
 
 func countTodos(p Page) (total int, done int) {
-	tasks := FindAllInAST[*east.TaskCheckBox](p.AST())
+	_, tree := p.AST()
+	tasks := FindAllInAST[*east.TaskCheckBox](tree)
 	for _, v := range tasks {
 		total++
 		if v.IsChecked {
@@ -62,7 +63,8 @@ func backlinksSection(p Page) template.HTML {
 	}
 
 	pages := MapPageCon(context.Background(), func(a Page) *Page {
-		if a.Name() == p.Name() || !containLinkTo(a.AST(), p) {
+		_, tree := a.AST()
+		if a.Name() == p.Name() || !containLinkTo(tree, p) {
 			return nil
 		}
 

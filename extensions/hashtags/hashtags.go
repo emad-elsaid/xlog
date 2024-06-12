@@ -112,7 +112,8 @@ func tagsHandler(_ Response, r Request) Output {
 	EachPageCon(context.Background(), func(a Page) {
 
 		set := map[string]bool{}
-		hashes := FindAllInAST[*HashTag](a.AST())
+		_, tree := a.AST()
+		hashes := FindAllInAST[*HashTag](tree)
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
 
@@ -154,7 +155,8 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 			return nil
 		}
 
-		tags := FindAllInAST[*HashTag](p.AST())
+		_, tree := p.AST()
+		tags := FindAllInAST[*HashTag](tree)
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
 				return &p
@@ -170,7 +172,8 @@ func relatedPages(p Page) template.HTML {
 		return ""
 	}
 
-	found_hashtags := FindAllInAST[*HashTag](p.AST())
+	_, tree := p.AST()
+	found_hashtags := FindAllInAST[*HashTag](tree)
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {
 		hashtags[strings.ToLower(string(v.value))] = true
@@ -181,7 +184,8 @@ func relatedPages(p Page) template.HTML {
 			return nil
 		}
 
-		page_hashtags := FindAllInAST[*HashTag](rp.AST())
+		_, tree := rp.AST()
+		page_hashtags := FindAllInAST[*HashTag](tree)
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
 				return &rp
@@ -208,7 +212,8 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	set := map[string]bool{}
 	var lck sync.Mutex
 	EachPageCon(context.Background(), func(a Page) {
-		hashes := FindAllInAST[*HashTag](a.AST())
+		_, tree := a.AST()
+		hashes := FindAllInAST[*HashTag](tree)
 		lck.Lock()
 		defer lck.Unlock()
 		for _, v := range hashes {

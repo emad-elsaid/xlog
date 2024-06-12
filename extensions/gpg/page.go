@@ -93,15 +93,17 @@ func (p *page) Write(content xlog.Markdown) bool {
 	return true
 }
 
-func (p *page) AST() ast.Node {
+func (p *page) AST() ([]byte, ast.Node) {
+	src := p.Content()
 	if p.ast == nil {
-		p.ast = xlog.MarkDownRenderer.Parser().Parse(text.NewReader([]byte(p.Content())))
+		p.ast = xlog.MarkDownRenderer.Parser().Parse(text.NewReader([]byte(src)))
 	}
 
-	return p.ast
+	return []byte(src), p.ast
 }
 func (p *page) Emoji() string {
-	if e, ok := xlog.FindInAST[*emojiAst.Emoji](p.AST()); ok {
+	_, tree := p.AST()
+	if e, ok := xlog.FindInAST[*emojiAst.Emoji](tree); ok {
 		return string(e.Value.Unicode)
 	}
 
