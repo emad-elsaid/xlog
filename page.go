@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,11 +63,8 @@ func (p *page) Name() string {
 }
 
 func (p *page) Title() string {
-	log.Printf("getting name %s", p.name)
 	_, ast := p.AST()
-	log.Println("getting ast")
 	mtitle, ok := ast.OwnerDocument().Meta()["title"].(string)
-	log.Println("has meta?")
 	if !ok {
 		mtitle = p.Name()
 	}
