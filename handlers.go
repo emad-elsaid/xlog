@@ -71,7 +71,7 @@ func getPageHandler(w Response, r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"title":   page.Emoji() + " " + page.Name(),
+		"title":   page.Emoji() + " " + page.Title(),
 		"page":    page,
 		"edit":    "/edit/" + page.Name(),
 		"content": page.Render(),
@@ -93,7 +93,7 @@ func getPageEditHandler(w Response, r Request) Output {
 	}
 
 	return Render("edit", Locals{
-		"title":        page.Emoji() + " " + page.Name(),
+		"title":        page.Emoji() + " " + page.Title(),
 		"page":         page,
 		"commands":     Commands(page),
 		"content":      content,

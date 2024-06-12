@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -26,6 +27,7 @@ type Page interface {
 	// needed. this is safe to use when trying to access the file that represent the
 	// page
 	FileName() string
+	Title() string
 	// checks if the page underlying file exists on disk or not.
 	Exists() bool
 	// Renders the page content to HTML. it makes sure all preprocessors are called
@@ -59,6 +61,18 @@ type page struct {
 
 func (p *page) Name() string {
 	return p.name
+}
+
+func (p *page) Title() string {
+	log.Printf("getting name %s", p.name)
+	_, ast := p.AST()
+	log.Println("getting ast")
+	mtitle, ok := ast.OwnerDocument().Meta()["title"].(string)
+	log.Println("has meta?")
+	if !ok {
+		mtitle = p.Name()
+	}
+	return mtitle
 }
 
 func (p *page) FileName() string {

@@ -86,6 +86,10 @@ func (p *page) Name() string {
 	return p.name
 }
 
+func (p *page) Title() string {
+	return p.name
+}
+
 func (p *page) FileName() string {
 	return filepath.FromSlash(p.name) + p.ext
 }
