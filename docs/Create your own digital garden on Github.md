@@ -100,7 +100,7 @@ jobs:
 # Writing new pages
 
 1. When you want to add a new page to your garden add the file in your repository and make sure it's in **.md** (Markdown) format.
-2. After Github fisinish building the page should be served as HTML with the same name without **.md** extension
+2. After Github finishes building the page should be served as HTML with the same name without **.md** extension
 3. For example **about.md** will be served as **/about**
 4. keep your files names meaningful. as Xlog will autolink pages together by the file name.
 5. so in any page when you have the word **about** in the text, Xlog will convert it to a link to the **about** page.
