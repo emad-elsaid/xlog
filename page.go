@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"html/template"
@@ -13,6 +14,7 @@ import (
 	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
+	"gopkg.in/yaml.v2"
 )
 
 // Markdown is used instead of string to make sure it's clear the string is markdown string
@@ -27,6 +29,8 @@ type Page interface {
 	// page
 	FileName() string
 	Title() string
+	// TODO implement getmeta method
+	// GetMeta(string key) string value, error
 	// checks if the page underlying file exists on disk or not.
 	Exists() bool
 	// Renders the page content to HTML. it makes sure all preprocessors are called
@@ -49,8 +53,14 @@ type Page interface {
 	Emoji() string
 }
 
+// TODO make metadata struct reflect the supported fields
+type metadata struct {
+	Title string `yaml:"title"`
+}
+
 type page struct {
-	name string
+	name  string
+	title string
 
 	l          sync.Mutex
 	lastUpdate time.Time
@@ -63,12 +73,58 @@ func (p *page) Name() string {
 }
 
 func (p *page) Title() string {
-	_, ast := p.AST()
-	mtitle, ok := ast.OwnerDocument().Meta()["title"].(string)
-	if !ok {
-		mtitle = p.Name()
+	if p.title == "" {
+		y, err := p.yamlContent()
+		if err != nil || len(y) == 0 {
+			p.title = p.name
+			return p.title
+		}
+		var meta metadata
+		err = yaml.Unmarshal([]byte(y), &meta)
+		if err != nil {
+			p.title = p.name
+			return p.title
+		}
+		p.title = meta.Title
 	}
-	return mtitle
+	return p.title
+}
+
+func (p *page) yamlContent() (string, error) {
+	file, err := os.Open(p.FileName())
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var yamlContent strings.Builder
+	inYAMLSection := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Check for the start of the YAML section
+		if line == "---" && !inYAMLSection {
+			inYAMLSection = true
+			continue
+		}
+
+		// Check for the end of the YAML section
+		if line == "---" && inYAMLSection {
+			break
+		}
+
+		// Append lines within the YAML section
+		if inYAMLSection {
+			yamlContent.WriteString(line + "\n")
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+	return yamlContent.String(), nil
 }
 
 func (p *page) FileName() string {
