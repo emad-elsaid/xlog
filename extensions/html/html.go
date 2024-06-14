@@ -90,6 +90,10 @@ func (p *page) Title() string {
 	return p.name
 }
 
+func (p *page) GetMeta() (xlog.Metadata, bool) {
+	return xlog.Metadata{}, false
+}
+
 func (p *page) FileName() string {
 	return filepath.FromSlash(p.name) + p.ext
 }

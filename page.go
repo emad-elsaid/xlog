@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,9 +29,10 @@ type Page interface {
 	// needed. this is safe to use when trying to access the file that represent the
 	// page
 	FileName() string
+	// returns the title of the page. The title can be defined using frontmatter, otherwise, it fallback to Name
 	Title() string
-	// TODO implement getmeta method
-	// GetMeta(string key) string value, error
+	// returns the metadata of the page. if metadata is not cached, it will first parse the file. if metadata exists, okey is true
+	GetMeta() (Metadata, bool)
 	// checks if the page underlying file exists on disk or not.
 	Exists() bool
 	// Renders the page content to HTML. it makes sure all preprocessors are called
@@ -53,14 +55,15 @@ type Page interface {
 	Emoji() string
 }
 
-// TODO make metadata struct reflect the supported fields
-type metadata struct {
-	Title string `yaml:"title"`
+type Metadata struct {
+	Title string   `yaml:"title"`
+	Tags  []string `yaml:"tags"`
+	Date  string   `yaml:"date"`
 }
 
 type page struct {
-	name  string
-	title string
+	name     string
+	metadata Metadata
 
 	l          sync.Mutex
 	lastUpdate time.Time
@@ -72,22 +75,30 @@ func (p *page) Name() string {
 	return p.name
 }
 
-func (p *page) Title() string {
-	if p.title == "" {
-		y, err := p.yamlContent()
-		if err != nil || len(y) == 0 {
-			p.title = p.name
-			return p.title
-		}
-		var meta metadata
-		err = yaml.Unmarshal([]byte(y), &meta)
-		if err != nil {
-			p.title = p.name
-			return p.title
-		}
-		p.title = meta.Title
+func (p *page) GetMeta() (Metadata, bool) {
+	if p.metadata.Title != "" || p.metadata.Tags != nil || p.metadata.Date != "" {
+		// Metadata is already cached, return it
+		return p.metadata, true
 	}
-	return p.title
+
+	log.Println("Parsing metadata for", p.Name())
+	y, err := p.yamlContent()
+	if err != nil || len(y) == 0 {
+		return Metadata{}, false
+	}
+	err = yaml.Unmarshal([]byte(y), &p.metadata)
+	if err != nil {
+		return Metadata{}, false
+	}
+	return p.metadata, true
+}
+
+func (p *page) Title() string {
+	meta, ok := p.GetMeta()
+	if !ok {
+		return p.name
+	}
+	return meta.Title
 }
 
 func (p *page) yamlContent() (string, error) {
@@ -104,15 +115,14 @@ func (p *page) yamlContent() (string, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Check for the start of the YAML section
-		if line == "---" && !inYAMLSection {
+		if line == "---" {
+			if inYAMLSection {
+				// End of YAML section
+				break
+			}
+			// Start of YAML section
 			inYAMLSection = true
 			continue
-		}
-
-		// Check for the end of the YAML section
-		if line == "---" && inYAMLSection {
-			break
 		}
 
 		// Append lines within the YAML section
@@ -202,6 +212,7 @@ func (p *page) Write(content Markdown) bool {
 	return true
 }
 
+// TODO use date from metadata
 func (p *page) ModTime() time.Time {
 	s, err := os.Stat(p.FileName())
 	if err != nil {
