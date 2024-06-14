@@ -110,20 +110,24 @@ func tagsHandler(_ Response, r Request) Output {
 	var lck sync.Mutex
 
 	EachPageCon(context.Background(), func(a Page) {
-
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
+
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
+			set[val] = true
+		}
 
-			// don't use same tag twice for same page
-			if _, ok := set[val]; ok {
-				continue
+		meta, ok := a.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				val := strings.ToLower(v)
+				set[val] = true
 			}
 
-			set[val] = true
-
+		}
+		for val := range set {
 			lck.Lock()
 			if ps, ok := tags[val]; ok {
 				tags[val] = append(ps, a)
