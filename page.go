@@ -59,6 +59,7 @@ type Metadata struct {
 	Title string   `yaml:"title"`
 	Tags  []string `yaml:"tags"`
 	Date  string   `yaml:"date"`
+	checked int
 }
 
 type page struct {
@@ -76,20 +77,20 @@ func (p *page) Name() string {
 }
 
 func (p *page) GetMeta() (Metadata, bool) {
-	if p.metadata.Title != "" || p.metadata.Tags != nil || p.metadata.Date != "" {
-		// Metadata is already cached, return it
-		return p.metadata, true
+	if p.metadata.checked > 0 {
+		return p.metadata, p.metadata.checked-1 == 1
 	}
 
-	log.Println("Parsing metadata for", p.Name())
+	p.metadata.checked = 1
 	y, err := p.yamlContent()
 	if err != nil || len(y) == 0 {
-		return Metadata{}, false
+		return p.metadata, false
 	}
 	err = yaml.Unmarshal([]byte(y), &p.metadata)
 	if err != nil {
-		return Metadata{}, false
+		return p.metadata, false
 	}
+	p.metadata.checked = 2
 	return p.metadata, true
 }
 
