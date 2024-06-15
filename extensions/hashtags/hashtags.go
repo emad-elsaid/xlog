@@ -211,6 +211,15 @@ func relatedPages(p Page) template.HTML {
 			}
 		}
 
+		meta, ok := p.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				if _, ok := hashtags[strings.ToLower(v)]; ok {
+					return &rp
+				}
+			}
+		}
+
 		return nil
 	})
 
