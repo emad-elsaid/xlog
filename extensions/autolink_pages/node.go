@@ -18,7 +18,7 @@ func (_ *PageLink) Kind() ast.NodeKind {
 
 func (p *PageLink) Dump(source []byte, level int) {
 	m := map[string]string{
-		"value": p.page.Name(),
+		"value": p.page.Title(),
 	}
 	ast.DumpHelper(p, source, level, m, nil)
 }

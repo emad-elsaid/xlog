@@ -4,7 +4,9 @@ import (
 	"context"
 	"embed"
 	"html/template"
+	"path"
 	"sort"
+	"strings"
 	"sync"
 
 	_ "embed"
@@ -21,7 +23,7 @@ type fileInfoByNameLength []Page
 
 func (a fileInfoByNameLength) Len() int           { return len(a) }
 func (a fileInfoByNameLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > len(a[j].Name()) }
+func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Title()) > len(a[j].Title()) }
 
 func init() {
 	Listen(AfterWrite, UpdatePagesList)
@@ -77,8 +79,32 @@ func backlinksSection(p Page) template.HTML {
 func containLinkTo(n ast.Node, p Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
-		if t.page.FileName() == p.FileName() {
+		// log.Printf("link %s", t.page.FileName())
+		if t.page.Title() == p.Title() {
 			return true
+		}
+	}
+	if n.Kind() == ast.KindLink {
+		t, _ := n.(*ast.Link)
+		// log.Printf("link %s", t.Destination)
+		dst := string(t.Destination)
+
+		// link is absolute: remove /
+		if strings.HasPrefix(dst, "/") {
+			path := strings.TrimPrefix(dst, "/")
+			if string(path) == p.Name() {
+				return true
+			}
+		} else { // link is relative: get relative part
+			// TODO: what if another folder has the same filename?
+			// * just ignore that fact
+			// * dont support relative paths
+			// there is no way to know who is the parent folder
+			// log.Printf("-> relative link %s", dst)
+			base := path.Base(p.Name())
+			if dst == base {
+				return true
+			}
 		}
 	}
 
