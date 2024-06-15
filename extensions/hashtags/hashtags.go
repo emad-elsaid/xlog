@@ -167,6 +167,15 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 			}
 		}
 
+		meta, ok := p.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				if strings.EqualFold(v, keyword) {
+					return &p
+				}
+			}
+		}
+
 		return nil
 	})
 }
@@ -181,6 +190,12 @@ func relatedPages(p Page) template.HTML {
 	hashtags := map[string]bool{}
 	for _, v := range found_hashtags {
 		hashtags[strings.ToLower(string(v.value))] = true
+	}
+	meta, ok := p.GetMeta()
+	if ok {
+		for _, v := range meta.Tags {
+			hashtags[strings.ToLower(v)] = true
+		}
 	}
 
 	pages := MapPageCon(context.Background(), func(rp Page) *Page {
@@ -218,6 +233,16 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	EachPageCon(context.Background(), func(a Page) {
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
+
+		meta, ok := a.GetMeta()
+		if ok {
+			lck.Lock()
+			for _, v := range meta.Tags {
+				set[strings.ToLower(v)] = true
+			}
+			lck.Unlock()
+		}
+
 		lck.Lock()
 		defer lck.Unlock()
 		for _, v := range hashes {
