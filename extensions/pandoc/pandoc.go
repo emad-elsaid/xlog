@@ -123,7 +123,7 @@ func (p *page) Content() xlog.Markdown {
 	return xlog.Markdown(dat)
 }
 
-func (p *page) ModTime() time.Time {
+func (p *page) ModTime(real bool) time.Time {
 	s, err := os.Stat(p.FileName())
 	if err != nil {
 		return time.Time{}

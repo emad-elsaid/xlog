@@ -1,7 +1,7 @@
 <ul>
   {{- range . -}}
   <li>
-    <a href="/{{.Name}}" dir="auto">{{ .Emoji }} {{ .Title }}</a> <time class="has-text-grey is-size-7">{{ ago .ModTime }}</time>
+    <a href="/{{.Name}}" dir="auto">{{ .Emoji }} {{ .Title }}</a> <time class="has-text-grey is-size-7">{{ ago (.ModTime false) }}</time>
   </li>
   {{- end -}}
 </ul>

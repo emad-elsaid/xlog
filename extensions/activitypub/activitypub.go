@@ -243,12 +243,12 @@ func outboxPage(w Response, r Request) Output {
 					ID:        u.String(),
 					Type:      "Create",
 					Actor:     fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
-					Published: page.ModTime(),
+					Published: page.ModTime(false),
 					To:        []string{"https://www.w3.org/ns/activitystreams#Public"},
 					Object: outboxPageObject{
 						ID:           u.String(),
 						Type:         "Note",
-						Published:    page.ModTime(),
+						Published:    page.ModTime(false),
 						URL:          u.String(),
 						AttributedTo: fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 						To:           []string{"https://www.w3.org/ns/activitystreams#Public"},
@@ -264,4 +264,4 @@ type orderedPages []Page
 
 func (a orderedPages) Len() int           { return len(a) }
 func (a orderedPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a orderedPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }
+func (a orderedPages) Less(i, j int) bool { return a[i].ModTime(false).After(a[j].ModTime(false)) }

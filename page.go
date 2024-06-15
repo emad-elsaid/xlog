@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,8 +43,8 @@ type Page interface {
 	// Overwrite page content with new content. making sure to trigger before and
 	// after write events.
 	Write(Markdown) bool
-	// ModTime Return the last modification time of the underlying file
-	ModTime() time.Time
+	// ModTime returns the last modification time of the page. If the field Date in metadata is set, this is return, otherwise the modification time of the underlying file.  if real is true, the metadata Date field is ignored
+	ModTime(bool) time.Time
 	// Parses the page content and returns the Abstract Syntax Tree (AST).
 	// extensions can use it to walk the tree and modify it or collect statistics or
 	// parts of the page. for example the following "Emoji" function uses it to
@@ -55,11 +54,35 @@ type Page interface {
 	Emoji() string
 }
 
+type Date struct {
+	time.Time
+}
+
+func (t *Date) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var buf string
+	err := unmarshal(&buf)
+	if err != nil {
+		return err
+	}
+
+	var formats = []string{time.DateOnly, time.DateTime}
+	for _, format := range formats {
+		pt, err := time.Parse(format, buf)
+		if err == nil {
+			t.Time = pt
+			break
+		}
+	}
+
+	return nil
+}
+
 type Metadata struct {
-	Title string   `yaml:"title"`
-	Tags  []string `yaml:"tags"`
-	Date  string   `yaml:"date"`
 	checked int
+	Title   string   `yaml:"title"`
+	Tags    []string `yaml:"tags"`
+	// supports formats: time.DateOnly and time.DateTime
+	Date Date `yaml:"date"`
 }
 
 type page struct {
@@ -170,13 +193,13 @@ func (p *page) preProcessedContent() Markdown {
 	p.l.Lock()
 	defer p.l.Unlock()
 
-	modtime := p.ModTime()
+	modtime := p.ModTime(true)
 
 	if p.content == nil || modtime.Equal(p.lastUpdate) {
 		c := p.Content()
 		c = PreProcess(c)
 		p.content = &c
-		p.lastUpdate = p.ModTime()
+		p.lastUpdate = p.ModTime(true)
 	}
 
 	return Markdown(*p.content)
@@ -213,8 +236,14 @@ func (p *page) Write(content Markdown) bool {
 	return true
 }
 
-// TODO use date from metadata
-func (p *page) ModTime() time.Time {
+func (p *page) ModTime(real bool) time.Time {
+	if !real {
+		meta, ok := p.GetMeta()
+		if ok && !meta.Date.IsZero() {
+			return meta.Date.Time
+		}
+	}
+
 	s, err := os.Stat(p.FileName())
 	if err != nil {
 		return time.Time{}
