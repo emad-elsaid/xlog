@@ -64,10 +64,8 @@ func backlinksSection(p Page) template.HTML {
 		return ""
 	}
 
-	// log.Printf("backlink from %s", p.Name())
 	pages := MapPageCon(context.Background(), func(a Page) *Page {
 		_, tree := a.AST()
-		// log.Printf("visiting %s from %s", a.FileName(), p.FileName())
 		if a.Name() == p.Name() || !containLinkTo(tree, p) {
 			return nil
 		}
@@ -81,14 +79,12 @@ func backlinksSection(p Page) template.HTML {
 func containLinkTo(n ast.Node, p Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
-		// log.Printf("link %s", t.page.FileName())
 		if t.page.FileName() == p.FileName() {
 			return true
 		}
 	}
 	if n.Kind() == ast.KindLink {
 		t, _ := n.(*ast.Link)
-		// log.Printf("link %s", t.Destination)
 		dst := string(t.Destination)
 
 		// link is absolute: remove /
