@@ -4,7 +4,9 @@ import (
 	"context"
 	"embed"
 	"html/template"
+	"path"
 	"sort"
+	"strings"
 	"sync"
 
 	_ "embed"
@@ -79,6 +81,27 @@ func containLinkTo(n ast.Node, p Page) bool {
 		t, _ := n.(*PageLink)
 		if t.page.FileName() == p.FileName() {
 			return true
+		}
+	}
+	if n.Kind() == ast.KindLink {
+		t, _ := n.(*ast.Link)
+		dst := string(t.Destination)
+
+		// link is absolute: remove /
+		if strings.HasPrefix(dst, "/") {
+			path := strings.TrimPrefix(dst, "/")
+			if string(path) == p.Name() {
+				return true
+			}
+		} else { // link is relative: get relative part
+			// TODO: what if another folder has the same filename?
+			// * just ignore that fact
+			// * dont support relative paths
+			// there is no way to know who is the parent folder
+			base := path.Base(p.Name())
+			if dst == base {
+				return true
+			}
 		}
 	}
 
