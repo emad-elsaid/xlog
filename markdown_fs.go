@@ -45,25 +45,27 @@ func newMarkdownFS(p string) *markdownFS {
 
 	m.watch = sync.OnceFunc(func() {
 		go func() {
-			m.eventChan = make(chan notify.EventInfo, 1)
+			events := make(chan notify.EventInfo, 1)
 
 			absPath, err := filepath.Abs(m.path)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			if err := notify.Watch(m.path+"/...", m.eventChan, notify.All); err != nil {
+			if err := notify.Watch(m.path+"/...", events, notify.All); err != nil {
 				slog.Error("Can't watch files for change", "error", err)
 			}
-			defer notify.Stop(m.eventChan)
+			defer notify.Stop(events)
 
 			for {
-				switch ei := <-m.eventChan; ei.Event() {
+				switch ei := <-events; ei.Event() {
 				case notify.Write, notify.Remove, notify.Rename:
 					relPath, err := filepath.Rel(absPath, ei.Path())
 					if err != nil {
-						log.Fatal(err)
+						slog.Error("Can't resolve relative path", "error", err)
+						continue
 					}
+
 					if !strings.HasSuffix(relPath, ".md") {
 						continue
 					}
@@ -83,11 +85,10 @@ func newMarkdownFS(p string) *markdownFS {
 
 // MarkdownFS a current directory markdown pages
 type markdownFS struct {
-	path      string
-	cache     *lru.Cache[string, Page]
-	_page     func(string) Page
-	eventChan chan notify.EventInfo
-	watch     func()
+	path  string
+	cache *lru.Cache[string, Page]
+	_page func(string) Page
+	watch func()
 }
 
 // Page Creates an instance of Page with name. if no name is passed it's assumed INDEX
