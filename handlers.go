@@ -60,7 +60,6 @@ func getPageHandler(w Response, r Request) Output {
 
 	if !page.Exists() {
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
-			// TODO now it redirects to index (md or html). check if the files exists, otherwise render default template. template should just print all childrent notes
 			return Redirect(INDEX)
 		}
 		if output, err := staticHandler(r); err == nil {
