@@ -1,0 +1,39 @@
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="icon-text navbar-item" href="/">
+      <span class="icon"><img alt="logo" src="/public/logo.png"/></span>
+      <span class="has-text-weight-bold">{{.SITENAME}}</span>
+    </a>
+
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarMenu" class="navbar-menu">
+    <div class="navbar-start">
+      {{- if .page }}
+      {{- range $i, $a := links .page -}}
+      <a href="{{.Link}}" class="navbar-item">
+        <span>{{.Name}}</span>
+      </a>
+      {{- end -}}
+      {{- end }}
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+
+      {{- if .page -}}
+      {{- with widgets "search" .page -}}
+      {{ . }}
+      {{- end -}}
+      {{- end -}}
+
+      </div>
+    </div>
+  </div>
+</nav>
