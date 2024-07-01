@@ -81,8 +81,7 @@ type Metadata struct {
 	checked int
 	Title   string   `yaml:"title"`
 	Tags    []string `yaml:"tags"`
-	// supports formats: time.DateOnly and time.DateTime
-	Date Date `yaml:"date"`
+	Date    Date     `yaml:"date"`
 }
 
 type page struct {
