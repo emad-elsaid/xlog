@@ -86,7 +86,6 @@ func containLinkTo(n ast.Node, p Page) bool {
 	}
 	if n.Kind() == ast.KindLink {
 		t, _ := n.(*ast.Link)
-		// log.Printf("link %s", t.Destination)
 		dst := string(t.Destination)
 
 		// link is absolute: remove /
@@ -100,7 +99,6 @@ func containLinkTo(n ast.Node, p Page) bool {
 			// * just ignore that fact
 			// * dont support relative paths
 			// there is no way to know who is the parent folder
-			// log.Printf("-> relative link %s", dst)
 			base := path.Base(p.Name())
 			if dst == base {
 				return true

@@ -11,15 +11,15 @@ require (
 
 require (
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
-	golang.org/x/image v0.15.0
+	golang.org/x/image v0.18.0
 )
 
 require (
 	github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5
 	github.com/emad-elsaid/types v0.0.4
-	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
+	github.com/rjeczalik/notify v0.9.3
 	golang.org/x/sync v0.6.0
 	gopkg.in/yaml.v2 v2.3.0
 )
@@ -34,7 +34,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/oauth2 v0.18.0
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )

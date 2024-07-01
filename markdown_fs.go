@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io/fs"
+	"log"
 	"log/slog"
 	"path"
 	"path/filepath"
@@ -12,8 +13,9 @@ import (
 
 	"github.com/emad-elsaid/memoize"
 	"github.com/emad-elsaid/memoize/cache/adapters/hashicorp"
-	"github.com/fsnotify/fsnotify"
+
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/rjeczalik/notify"
 )
 
 func newMarkdownFS(p string) *markdownFS {
@@ -43,44 +45,36 @@ func newMarkdownFS(p string) *markdownFS {
 
 	m.watch = sync.OnceFunc(func() {
 		go func() {
-			watcher, err := fsnotify.NewWatcher()
+			events := make(chan notify.EventInfo, 1)
+
+			absPath, err := filepath.Abs(m.path)
 			if err != nil {
+				log.Fatal(err)
+			}
+
+			if err := notify.Watch(m.path+"/...", events, notify.All); err != nil {
 				slog.Error("Can't watch files for change", "error", err)
 			}
-			defer watcher.Close()
-
-			err = watcher.Add(m.path)
-			if err != nil {
-				slog.Error("Can't add Markdown FS path", "error", err)
-			}
+			defer notify.Stop(events)
 
 			for {
-				select {
-				case event, ok := <-watcher.Events:
-					if !ok {
-						slog.Error("Filesystem watcher returned not OK from Events")
-						return
+				switch ei := <-events; ei.Event() {
+				case notify.Write, notify.Remove, notify.Rename:
+					relPath, err := filepath.Rel(absPath, ei.Path())
+					if err != nil {
+						slog.Error("Can't resolve relative path", "error", err)
+						continue
 					}
 
-					if event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
-						if !strings.HasSuffix(event.Name, ".md") {
-							continue
-						}
-
-						name := strings.TrimSuffix(event.Name, ".md")
-						name, _ = filepath.Rel(m.path, name)
-						cp := m._page(name)
-						Trigger(Changed, cp)
-
-						m.cache.Remove(name)
-					}
-				case err, ok := <-watcher.Errors:
-					if !ok {
-						slog.Error("Filesystem watcher returned not OK from Errors")
-						return
+					if !strings.HasSuffix(relPath, ".md") {
+						continue
 					}
 
-					slog.Error("Filesystem watcher error", "error", err)
+					name := strings.TrimSuffix(relPath, ".md")
+					cp := m._page(name)
+					Trigger(Changed, cp)
+
+					m.cache.Remove(name)
 				}
 			}
 		}()

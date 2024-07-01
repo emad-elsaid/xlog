@@ -59,6 +59,9 @@ func getPageHandler(w Response, r Request) Output {
 	page := NewPage(r.PathValue("page"))
 
 	if !page.Exists() {
+		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
+			return Redirect(INDEX)
+		}
 		if output, err := staticHandler(r); err == nil {
 			return output
 		}
