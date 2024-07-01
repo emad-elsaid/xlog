@@ -21,9 +21,10 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/rjeczalik/notify v0.9.3
 	golang.org/x/sync v0.6.0
+	gopkg.in/yaml.v2 v2.3.0
 )
 
-require golang.org/x/net v0.23.0 // indirect
+require golang.org/x/net v0.22.0 // indirect
 
 require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect

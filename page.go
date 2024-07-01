@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"html/template"
@@ -13,6 +14,7 @@ import (
 	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
+	"gopkg.in/yaml.v2"
 )
 
 // Markdown is used instead of string to make sure it's clear the string is markdown string
@@ -26,6 +28,10 @@ type Page interface {
 	// needed. this is safe to use when trying to access the file that represent the
 	// page
 	FileName() string
+	// returns the title of the page. The title can be defined using frontmatter, otherwise, it fallback to Name
+	Title() string
+	// returns the metadata of the page. if metadata is not cached, it will first parse the file. if metadata exists, okey is true
+	GetMeta() (Metadata, bool)
 	// checks if the page underlying file exists on disk or not.
 	Exists() bool
 	// Renders the page content to HTML. it makes sure all preprocessors are called
@@ -37,8 +43,8 @@ type Page interface {
 	// Overwrite page content with new content. making sure to trigger before and
 	// after write events.
 	Write(Markdown) bool
-	// ModTime Return the last modification time of the underlying file
-	ModTime() time.Time
+	// ModTime returns the last modification time of the page. If the field Date in metadata is set, this is return, otherwise the modification time of the underlying file.  if real is true, the metadata Date field is ignored
+	ModTime(bool) time.Time
 	// Parses the page content and returns the Abstract Syntax Tree (AST).
 	// extensions can use it to walk the tree and modify it or collect statistics or
 	// parts of the page. for example the following "Emoji" function uses it to
@@ -48,8 +54,39 @@ type Page interface {
 	Emoji() string
 }
 
+type Date struct {
+	time.Time
+}
+
+func (t *Date) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var buf string
+	err := unmarshal(&buf)
+	if err != nil {
+		return err
+	}
+
+	var formats = []string{time.DateOnly, time.DateTime}
+	for _, format := range formats {
+		pt, err := time.Parse(format, buf)
+		if err == nil {
+			t.Time = pt
+			break
+		}
+	}
+
+	return nil
+}
+
+type Metadata struct {
+	checked int
+	Title   string   `yaml:"title"`
+	Tags    []string `yaml:"tags"`
+	Date    Date     `yaml:"date"`
+}
+
 type page struct {
-	name string
+	name     string
+	metadata Metadata
 
 	l          sync.Mutex
 	lastUpdate time.Time
@@ -59,6 +96,68 @@ type page struct {
 
 func (p *page) Name() string {
 	return p.name
+}
+
+func (p *page) GetMeta() (Metadata, bool) {
+	if p.metadata.checked > 0 {
+		return p.metadata, p.metadata.checked-1 == 1
+	}
+
+	p.metadata.checked = 1
+	y, err := p.yamlContent()
+	if err != nil || len(y) == 0 {
+		return p.metadata, false
+	}
+	err = yaml.Unmarshal([]byte(y), &p.metadata)
+	if err != nil {
+		return p.metadata, false
+	}
+	p.metadata.checked = 2
+	return p.metadata, true
+}
+
+func (p *page) Title() string {
+	meta, ok := p.GetMeta()
+	if !ok {
+		return p.name
+	}
+	return meta.Title
+}
+
+func (p *page) yamlContent() (string, error) {
+	file, err := os.Open(p.FileName())
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var yamlContent strings.Builder
+	inYAMLSection := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if line == "---" {
+			if inYAMLSection {
+				// End of YAML section
+				break
+			}
+			// Start of YAML section
+			inYAMLSection = true
+			continue
+		}
+
+		// Append lines within the YAML section
+		if inYAMLSection {
+			yamlContent.WriteString(line + "\n")
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", err
+	}
+	return yamlContent.String(), nil
 }
 
 func (p *page) FileName() string {
@@ -93,13 +192,13 @@ func (p *page) preProcessedContent() Markdown {
 	p.l.Lock()
 	defer p.l.Unlock()
 
-	modtime := p.ModTime()
+	modtime := p.ModTime(true)
 
 	if p.content == nil || modtime.Equal(p.lastUpdate) {
 		c := p.Content()
 		c = PreProcess(c)
 		p.content = &c
-		p.lastUpdate = p.ModTime()
+		p.lastUpdate = p.ModTime(true)
 	}
 
 	return Markdown(*p.content)
@@ -136,7 +235,14 @@ func (p *page) Write(content Markdown) bool {
 	return true
 }
 
-func (p *page) ModTime() time.Time {
+func (p *page) ModTime(real bool) time.Time {
+	if !real {
+		meta, ok := p.GetMeta()
+		if ok && !meta.Date.IsZero() {
+			return meta.Date.Time
+		}
+	}
+
 	s, err := os.Stat(p.FileName())
 	if err != nil {
 		return time.Time{}

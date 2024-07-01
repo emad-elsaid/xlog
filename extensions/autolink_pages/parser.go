@@ -47,14 +47,14 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	var m int
 
 	for _, p := range autolinkPages {
-		if len(line) < len(p.Name()) {
+		if len(line) < len(p.Title()) {
 			continue
 		}
 
 		// Found a page
-		if strings.EqualFold(string(line[0:len(p.Name())]), p.Name()) {
+		if strings.EqualFold(string(line[0:len(p.Title())]), p.Title()) {
 			found = p
-			m = len(p.Name())
+			m = len(p.Title())
 			break
 		}
 	}

@@ -23,7 +23,12 @@ type page struct {
 }
 
 func (p *page) Name() string     { return p.name }
+func (p *page) Title() string    { return p.name }
 func (p *page) FileName() string { return filepath.FromSlash(p.name) + EXT }
+
+func (p *page) GetMeta() (xlog.Metadata, bool) {
+	return xlog.Metadata{}, false
+}
 
 func (p *page) Exists() bool {
 	_, err := os.Stat(p.FileName())
@@ -51,7 +56,7 @@ func (p *page) Content() xlog.Markdown {
 	return xlog.Markdown(out)
 }
 
-func (p *page) ModTime() time.Time {
+func (p *page) ModTime(real bool) time.Time {
 	s, err := os.Stat(p.FileName())
 	if err != nil {
 		return time.Time{}

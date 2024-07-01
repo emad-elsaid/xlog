@@ -110,20 +110,24 @@ func tagsHandler(_ Response, r Request) Output {
 	var lck sync.Mutex
 
 	EachPageCon(context.Background(), func(a Page) {
-
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
+
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
+			set[val] = true
+		}
 
-			// don't use same tag twice for same page
-			if _, ok := set[val]; ok {
-				continue
+		meta, ok := a.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				val := strings.ToLower(v)
+				set[val] = true
 			}
 
-			set[val] = true
-
+		}
+		for val := range set {
 			lck.Lock()
 			if ps, ok := tags[val]; ok {
 				tags[val] = append(ps, a)
@@ -163,6 +167,15 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 			}
 		}
 
+		meta, ok := p.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				if strings.EqualFold(v, keyword) {
+					return &p
+				}
+			}
+		}
+
 		return nil
 	})
 }
@@ -178,6 +191,12 @@ func relatedPages(p Page) template.HTML {
 	for _, v := range found_hashtags {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
+	meta, ok := p.GetMeta()
+	if ok {
+		for _, v := range meta.Tags {
+			hashtags[strings.ToLower(v)] = true
+		}
+	}
 
 	pages := MapPageCon(context.Background(), func(rp Page) *Page {
 		if rp.Name() == p.Name() {
@@ -189,6 +208,15 @@ func relatedPages(p Page) template.HTML {
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
 				return &rp
+			}
+		}
+
+		meta, ok := rp.GetMeta()
+		if ok {
+			for _, v := range meta.Tags {
+				if _, ok := hashtags[strings.ToLower(v)]; ok {
+					return &rp
+				}
 			}
 		}
 
@@ -214,6 +242,16 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	EachPageCon(context.Background(), func(a Page) {
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
+
+		meta, ok := a.GetMeta()
+		if ok {
+			lck.Lock()
+			for _, v := range meta.Tags {
+				set[strings.ToLower(v)] = true
+			}
+			lck.Unlock()
+		}
+
 		lck.Lock()
 		defer lck.Unlock()
 		for _, v := range hashes {
