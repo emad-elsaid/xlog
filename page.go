@@ -239,7 +239,7 @@ func (p *page) ModTime() time.Time {
 	var modtime time.Time
 
 	s, err := os.Stat(p.FileName())
-	if err != nil {
+	if err == nil {
 		modtime = s.ModTime()
 	}
 
