@@ -81,7 +81,7 @@ func feed(w Response, r Request) Output {
 
 	pages := Pages(r.Context())
 	sort.Slice(pages, func(i, j int) bool {
-		return pages[i].ModTime(false).After(pages[j].ModTime(false))
+		return pages[i].ModTime().After(pages[j].ModTime())
 	})
 
 	if len(pages) > limit {
@@ -92,7 +92,7 @@ func feed(w Response, r Request) Output {
 		f.Channel.Items = append(f.Channel.Items, Item{
 			Title:       p.Name(),
 			Description: string(p.Render()),
-			PubDate:     p.ModTime(false),
+			PubDate:     p.ModTime(),
 			GUID:        p.Name(),
 			Link: (&url.URL{
 				Scheme: "https",

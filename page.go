@@ -43,8 +43,8 @@ type Page interface {
 	// Overwrite page content with new content. making sure to trigger before and
 	// after write events.
 	Write(Markdown) bool
-	// ModTime returns the last modification time of the page. If the field Date in metadata is set, this is return, otherwise the modification time of the underlying file.  if real is true, the metadata Date field is ignored
-	ModTime(bool) time.Time
+	// ModTime returns the last modification time of the page.
+	ModTime() time.Time
 	// Parses the page content and returns the Abstract Syntax Tree (AST).
 	// extensions can use it to walk the tree and modify it or collect statistics or
 	// parts of the page. for example the following "Emoji" function uses it to
@@ -192,13 +192,13 @@ func (p *page) preProcessedContent() Markdown {
 	p.l.Lock()
 	defer p.l.Unlock()
 
-	modtime := p.ModTime(true)
+	modtime := p.ModTime()
 
 	if p.content == nil || modtime.Equal(p.lastUpdate) {
 		c := p.Content()
 		c = PreProcess(c)
 		p.content = &c
-		p.lastUpdate = p.ModTime(true)
+		p.lastUpdate = p.ModTime()
 	}
 
 	return Markdown(*p.content)
@@ -235,20 +235,22 @@ func (p *page) Write(content Markdown) bool {
 	return true
 }
 
-func (p *page) ModTime(real bool) time.Time {
-	if !real {
-		meta, ok := p.GetMeta()
-		if ok && !meta.Date.IsZero() {
-			return meta.Date.Time
-		}
-	}
+func (p *page) ModTime() time.Time {
+	var modtime time.Time
 
 	s, err := os.Stat(p.FileName())
 	if err != nil {
-		return time.Time{}
+		modtime = s.ModTime()
 	}
 
-	return s.ModTime()
+	meta, ok := p.GetMeta()
+	if ok && !meta.Date.IsZero() {
+		fmModtime := meta.Date.Time.Truncate(time.Millisecond)
+		fmModtime.Add(time.Duration(modtime.Truncate(time.Millisecond).Nanosecond()))
+		modtime = fmModtime
+	}
+
+	return modtime
 }
 
 func (p *page) AST() (source []byte, tree ast.Node) {

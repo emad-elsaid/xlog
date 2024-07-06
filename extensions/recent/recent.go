@@ -33,7 +33,7 @@ type recentPages []Page
 
 func (a recentPages) Len() int           { return len(a) }
 func (a recentPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a recentPages) Less(i, j int) bool { return a[i].ModTime(false).After(a[j].ModTime(false)) }
+func (a recentPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }
 
 type links int
 

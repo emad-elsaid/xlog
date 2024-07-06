@@ -35,7 +35,7 @@ func Properties(p Page) []Property {
 type lastUpdateProp struct{ page Page }
 
 func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }
-func (a lastUpdateProp) Name() string { return ago(a.page.ModTime(false)) }
+func (a lastUpdateProp) Name() string { return ago(a.page.ModTime()) }
 
 func defaultProps(p Page) []Property {
 	return []Property{
