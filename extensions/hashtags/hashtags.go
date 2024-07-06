@@ -119,7 +119,7 @@ func tagsHandler(_ Response, r Request) Output {
 			set[val] = true
 		}
 
-		meta, ok := a.GetMeta()
+		meta, ok := a.Metadata()
 		if ok {
 			for _, v := range meta.Tags {
 				val := strings.ToLower(v)
@@ -167,7 +167,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 			}
 		}
 
-		meta, ok := p.GetMeta()
+		meta, ok := p.Metadata()
 		if ok {
 			for _, v := range meta.Tags {
 				if strings.EqualFold(v, keyword) {
@@ -191,7 +191,7 @@ func relatedPages(p Page) template.HTML {
 	for _, v := range found_hashtags {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
-	meta, ok := p.GetMeta()
+	meta, ok := p.Metadata()
 	if ok {
 		for _, v := range meta.Tags {
 			hashtags[strings.ToLower(v)] = true
@@ -211,7 +211,7 @@ func relatedPages(p Page) template.HTML {
 			}
 		}
 
-		meta, ok := rp.GetMeta()
+		meta, ok := rp.Metadata()
 		if ok {
 			for _, v := range meta.Tags {
 				if _, ok := hashtags[strings.ToLower(v)]; ok {
@@ -243,7 +243,7 @@ func (a autocomplete) Suggestions() []*Suggestion {
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
 
-		meta, ok := a.GetMeta()
+		meta, ok := a.Metadata()
 		if ok {
 			lck.Lock()
 			for _, v := range meta.Tags {

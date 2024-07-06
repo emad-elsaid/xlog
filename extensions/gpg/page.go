@@ -26,7 +26,7 @@ func (p *page) Name() string     { return p.name }
 func (p *page) Title() string    { return p.name }
 func (p *page) FileName() string { return filepath.FromSlash(p.name) + EXT }
 
-func (p *page) GetMeta() (xlog.Metadata, bool) {
+func (p *page) Metadata() (xlog.Metadata, bool) {
 	return xlog.Metadata{}, false
 }
 

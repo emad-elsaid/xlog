@@ -31,7 +31,7 @@ type Page interface {
 	// returns the title of the page. The title can be defined using frontmatter, otherwise, it fallback to Name
 	Title() string
 	// returns the metadata of the page. if metadata is not cached, it will first parse the file. if metadata exists, okey is true
-	GetMeta() (Metadata, bool)
+	Metadata() (Metadata, bool)
 	// checks if the page underlying file exists on disk or not.
 	Exists() bool
 	// Renders the page content to HTML. it makes sure all preprocessors are called
@@ -98,7 +98,7 @@ func (p *page) Name() string {
 	return p.name
 }
 
-func (p *page) GetMeta() (Metadata, bool) {
+func (p *page) Metadata() (Metadata, bool) {
 	if p.metadata.checked > 0 {
 		return p.metadata, p.metadata.checked-1 == 1
 	}
@@ -117,7 +117,7 @@ func (p *page) GetMeta() (Metadata, bool) {
 }
 
 func (p *page) Title() string {
-	meta, ok := p.GetMeta()
+	meta, ok := p.Metadata()
 	if !ok {
 		return p.name
 	}
@@ -243,7 +243,7 @@ func (p *page) ModTime() time.Time {
 		modtime = s.ModTime()
 	}
 
-	meta, ok := p.GetMeta()
+	meta, ok := p.Metadata()
 	if ok && !meta.Date.IsZero() {
 		fmModtime := meta.Date.Time.Truncate(time.Millisecond)
 		fmModtime.Add(time.Duration(modtime.Truncate(time.Millisecond).Nanosecond()))
