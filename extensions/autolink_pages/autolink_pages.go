@@ -79,7 +79,6 @@ func backlinksSection(p Page) template.HTML {
 func containLinkTo(n ast.Node, p Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
-		// log.Printf("link %s", t.page.FileName())
 		if t.page.Title() == p.Title() {
 			return true
 		}
