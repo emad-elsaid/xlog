@@ -37,7 +37,7 @@ func imgUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(imgUrlReg.ReplaceAllString(string(c), `![]($1)`))
 }
 
-var tweetUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/twitter.com\/[^ ]+\/status\/[0-9]+)$`)
+var tweetUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/twitter\.com\/[^ ]+\/status\/[0-9]+)$`)
 
 func tweetUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(
