@@ -152,6 +152,10 @@ Tweet link
 
 https://twitter.com/emad__elsaid/status/1606071605695651840
 
+X link
+
+https://x.com/emad__elsaid/status/1606071605695651840
+
 Youtube link
 
 https://www.youtube.com/watch?v=VO7Qq-Ri9KI
