@@ -28,6 +28,6 @@ var shortcodes = map[string]ShortCodeFunc{
 	"alert":   func(c Markdown) template.HTML { return container("is-danger", c) },
 }
 
-func ShortCode(name string, shortcode ShortCodeFunc) {
+func RegisterShortCode(name string, shortcode ShortCodeFunc) {
 	shortcodes[name] = shortcode
 }

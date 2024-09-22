@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	shortcode.ShortCode("mermaid", renderer)
+	shortcode.RegisterShortCode("mermaid", renderer)
 }
 
 const script = `

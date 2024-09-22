@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	shortcode.ShortCode("embed", embedShortcode)
+	shortcode.RegisterShortCode("embed", embedShortcode)
 }
 
 func embedShortcode(in xlog.Markdown) template.HTML {

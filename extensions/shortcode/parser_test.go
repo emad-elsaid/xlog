@@ -57,7 +57,7 @@ func TestShortCode(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			handler := func(xlog.Markdown) template.HTML { return template.HTML(tc.handlerOutput) }
-			shortcode.ShortCode("test", handler)
+			shortcode.RegisterShortCode("test", handler)
 
 			output := bytes.NewBufferString("")
 			xlog.MarkDownRenderer.Convert([]byte(tc.input), output)
