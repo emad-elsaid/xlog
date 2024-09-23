@@ -4,6 +4,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/activitypub"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
+	_ "github.com/emad-elsaid/xlog/extensions/book"
 	_ "github.com/emad-elsaid/xlog/extensions/custom_css"
 	_ "github.com/emad-elsaid/xlog/extensions/custom_widget"
 	_ "github.com/emad-elsaid/xlog/extensions/date"
@@ -15,6 +16,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/gpg"
 	_ "github.com/emad-elsaid/xlog/extensions/hashtags"
 	_ "github.com/emad-elsaid/xlog/extensions/heading"
+	_ "github.com/emad-elsaid/xlog/extensions/hotreload"
 	_ "github.com/emad-elsaid/xlog/extensions/html"
 	_ "github.com/emad-elsaid/xlog/extensions/images"
 	_ "github.com/emad-elsaid/xlog/extensions/link_preview"
@@ -34,5 +36,4 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/todo"
 	_ "github.com/emad-elsaid/xlog/extensions/upload_file"
 	_ "github.com/emad-elsaid/xlog/extensions/versions"
-	_ "github.com/emad-elsaid/xlog/extensions/hotreload"
 )

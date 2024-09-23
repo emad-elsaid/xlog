@@ -8,7 +8,10 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-type ShortCodeFunc func(Markdown) template.HTML
+type ShortCode struct {
+	Render  func(Markdown) template.HTML
+	Default string
+}
 
 func render(i Markdown) string {
 	var b bytes.Buffer
@@ -21,13 +24,13 @@ func container(cls string, content Markdown) template.HTML {
 	return template.HTML(fmt.Sprintf(tpl, cls, render(content)))
 }
 
-var shortcodes = map[string]ShortCodeFunc{
-	"info":    func(c Markdown) template.HTML { return container("is-info", c) },
-	"success": func(c Markdown) template.HTML { return container("is-success", c) },
-	"warning": func(c Markdown) template.HTML { return container("is-warning", c) },
-	"alert":   func(c Markdown) template.HTML { return container("is-danger", c) },
+var shortcodes = map[string]ShortCode{
+	"info":    {Render: func(c Markdown) template.HTML { return container("is-info", c) }},
+	"success": {Render: func(c Markdown) template.HTML { return container("is-success", c) }},
+	"warning": {Render: func(c Markdown) template.HTML { return container("is-warning", c) }},
+	"alert":   {Render: func(c Markdown) template.HTML { return container("is-danger", c) }},
 }
 
-func RegisterShortCode(name string, shortcode ShortCodeFunc) {
+func RegisterShortCode(name string, shortcode ShortCode) {
 	shortcodes[name] = shortcode
 }

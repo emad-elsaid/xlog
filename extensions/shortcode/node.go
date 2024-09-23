@@ -12,7 +12,7 @@ type ShortCodeNode struct {
 	ast.BaseBlock
 	start int
 	end   int
-	fun   ShortCodeFunc
+	fun   ShortCode
 }
 
 func (s *ShortCodeNode) Dump(source []byte, level int) {
@@ -30,7 +30,7 @@ var KindShortCodeBlock = ast.NewNodeKind("ShortCodeBlock")
 
 type ShortCodeBlock struct {
 	ast.FencedCodeBlock
-	fun ShortCodeFunc
+	fun ShortCode
 }
 
 func (s *ShortCodeBlock) Kind() ast.NodeKind {

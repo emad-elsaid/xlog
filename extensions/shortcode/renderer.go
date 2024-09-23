@@ -31,7 +31,7 @@ func (s *shortCodeRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 	}
 
 	content := source[node.start:node.end]
-	output := node.fun(Markdown(content))
+	output := node.fun.Render(Markdown(content))
 	w.Write([]byte(output))
 
 	return ast.WalkContinue, nil
@@ -54,7 +54,7 @@ func (s *shortCodeRenderer) renderBlock(w util.BufWriter, source []byte, n ast.N
 		content += string(line.Value(source))
 	}
 
-	output := node.fun(Markdown(content))
+	output := node.fun.Render(Markdown(content))
 	w.Write([]byte(output))
 
 	return ast.WalkContinue, nil

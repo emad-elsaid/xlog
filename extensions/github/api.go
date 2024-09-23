@@ -19,7 +19,7 @@ var tokenNotAvailable = errors.New("Github token env variable not found in any o
 var perPage = 100
 
 func init() {
-	shortcode.RegisterShortCode("github-search-issues", seachIssuesShortcode)
+	shortcode.RegisterShortCode("github-search-issues", shortcode.ShortCode{Render: seachIssuesShortcode})
 }
 
 func seachIssuesShortcode(in xlog.Markdown) template.HTML {

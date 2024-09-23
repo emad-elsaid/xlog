@@ -31,7 +31,7 @@ func init() {
 	RegisterLink(func(_ Page) []Link { return []Link{link(0)} })
 	RegisterAutocomplete(autocomplete(0))
 	RegisterTemplate(templates, "templates")
-	shortcode.RegisterShortCode("hashtag-pages", hashtagPages)
+	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: hashtagPages})
 
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),

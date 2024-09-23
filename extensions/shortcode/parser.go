@@ -38,7 +38,7 @@ func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Co
 	}
 
 	firstWord := line[1:endOfShortcode]
-	var processor ShortCodeFunc
+	var processor ShortCode
 	var ok bool
 	if processor, ok = shortcodes[firstWord]; !ok {
 		return nil, parser.Close
