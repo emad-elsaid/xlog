@@ -64,14 +64,14 @@ jobs:
 
       - name: Build
         run: |
-          xlog \
+          ../xlog \
           --build . \
           --sitename "user-name"
           rm *.md
           chmod -R 0777 .
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v1.0.4
+        uses: actions/upload-pages-artifact@v2.0.0
         with:
           path: .
 
