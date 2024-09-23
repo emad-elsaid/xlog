@@ -3,6 +3,7 @@ package book
 import (
 	"embed"
 	"html/template"
+	"io/fs"
 	"strings"
 
 	"github.com/emad-elsaid/xlog"
@@ -30,7 +31,24 @@ func init() {
 	})
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.RegisterStaticDir(public)
+	registerBuildFiles()
 	xlog.RegisterWidget(xlog.HEAD_WIDGET, 0, style)
+}
+
+func registerBuildFiles() {
+	fs.WalkDir(public, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		xlog.RegisterBuildPage("/"+path, false)
+
+		return nil
+	})
 }
 
 func style(xlog.Page) template.HTML {
