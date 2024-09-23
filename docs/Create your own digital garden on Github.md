@@ -49,18 +49,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Allow non-ASCII character
+        run: git config core.quotepath false
+
       - name: restore timestamps
         uses: chetan/git-restore-mtime-action@v1
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.22
-          check-latest: true
-
       - name: Install xlog
+        env:
+          XLOG_VERSION: v1.6.1
         run: |
-          go install github.com/emad-elsaid/xlog/cmd/xlog@latest
+          curl -vvv --location -o ../xlog.tar.gz https://github.com/emad-elsaid/xlog/releases/download/${XLOG_VERSION}/xlog-${XLOG_VERSION}-linux-amd64.tar.gz
+          tar -xvf ../xlog.tar.gz -C ..
 
       - name: Build
         run: |
