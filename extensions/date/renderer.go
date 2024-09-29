@@ -34,7 +34,7 @@ func (s *dateRenderer) render(w util.BufWriter, source []byte, n ast.Node, enter
 	path := fmt.Sprintf(`/+/date/%s`, node.time.Format("2-1-2006"))
 	RegisterBuildPage(path, true)
 
-	fmt.Fprintf(w, ` <a href="%s" class="tag is-info is-light">%s</a> `, path, node.time.Format("2 January 2006"))
+	fmt.Fprintf(w, ` <a href="%s" class="tag">%s</a> `, path, node.time.Format("2 January 2006"))
 
 	return ast.WalkContinue, nil
 }
