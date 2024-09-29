@@ -62,7 +62,8 @@ xlog --build /destination/directory/path
 
 # Integration with Github pages
 
-If your markdown is hosted as Gituhub repository. You can use github workflows to download and execute xlog to generate HTML pages and host it with github pages. examples can be found here:
+If your markdown is hosted as Gituhub repository. You can use github workflows to download and execute xlog to generate HTML pages and host it with github pages. 
 
+Tutorial can be found in Create your own digital garden on Github and Examples can be found here:
 - [Emad Elsaid Blog](https://github.com/emad-elsaid/emad-elsaid.github.io/blob/master/.github/workflows/xlog.yml)
 - [Xlog documentation](https://github.com/emad-elsaid/xlog/blob/master/.github/workflows/xlog.yml)
