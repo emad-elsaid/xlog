@@ -34,7 +34,7 @@ func Start(ctx context.Context) {
 			os.Exit(1)
 		}
 
-		os.Exit(0)
+		return
 	}
 
 	srv := server()
