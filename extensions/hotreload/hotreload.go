@@ -3,7 +3,7 @@ package hotreload
 import (
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/emad-elsaid/xlog"
@@ -50,7 +50,7 @@ func handleWebSocket(w Response, r Request) Output {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Upgrade error:", err)
+		slog.Error("Failed to upgrade", "error", err)
 		return BadRequest(err.Error())
 	}
 

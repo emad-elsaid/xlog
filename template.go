@@ -43,7 +43,7 @@ func compileTemplates() {
 			if strings.HasSuffix(p, ext) && d.Type().IsRegular() {
 				ext := path.Ext(p)
 				name := strings.TrimSuffix(p, ext)
-				defer timing("Template", name)()
+				defer timing("Template " + name)()
 
 				c, err := fs.ReadFile(tfs, p)
 				if err != nil {

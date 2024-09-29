@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -45,7 +45,7 @@ func (p *page) Content() xlog.Markdown {
 	cmd := exec.Command("gpg", "--decrypt", p.FileName())
 	out, err := cmd.Output()
 	if err != nil {
-		log.Printf("Coudln't decrypt file: %s, err: %s", p.FileName(), err.Error())
+		slog.Error("Coudln't decrypt", "file", p.FileName(), "error", err)
 	}
 
 	return xlog.Markdown(out)

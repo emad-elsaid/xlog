@@ -5,7 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -42,7 +42,7 @@ func buildStaticSite(dest string) error {
 	)
 
 	if err != nil {
-		log.Printf("Index Page may not exist, make sure your Index Page exists, err: %s", err.Error())
+		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", INDEX, "error", err)
 	}
 
 	EachPageCon(context.Background(), func(p Page) {
@@ -54,7 +54,7 @@ func buildStaticSite(dest string) error {
 		)
 
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", p.Name(), err.Error())
+			slog.Error("Failed to process", "page", p.Name(), "error", err)
 		}
 	})
 
@@ -64,7 +64,7 @@ func buildStaticSite(dest string) error {
 		defer in.Close()
 		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {
-			log.Printf("error while opening dest/404.html, err: %s", err.Error())
+			slog.Error("Failed to open dest/404.html", "error", err)
 		}
 		defer out.Close()
 		io.Copy(out, in)
@@ -79,7 +79,7 @@ func buildStaticSite(dest string) error {
 		)
 
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", route, err.Error())
+			slog.Error("Failed to process extension page", "route", route, "error", err)
 		}
 
 		return true
@@ -94,7 +94,7 @@ func buildStaticSite(dest string) error {
 		)
 
 		if err != nil {
-			log.Printf("error while processing: %s, err: %s", route, err.Error())
+			slog.Error("Failed to process extension page", "route", route, "error", err)
 		}
 
 		return true
@@ -112,7 +112,7 @@ func buildStaticSite(dest string) error {
 				return err
 			}
 		} else if _, err := os.Stat(destPath); err == nil {
-			log.Printf("Asset %s already exists", destPath)
+			slog.Warn("Asset file already exists", "path", destPath)
 		} else {
 			content, err := fs.ReadFile(assets, p)
 			if err != nil {

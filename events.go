@@ -1,6 +1,6 @@
 package xlog
 
-import "log"
+import "log/slog"
 
 type (
 	// a type used to define events to be used when the page is manipulated for
@@ -48,7 +48,7 @@ func Trigger(e PageEvent, p Page) {
 
 	for _, h := range pageEvents[e] {
 		if err := h(p); err != nil {
-			log.Printf("Executing Event %#v handler %#v failed with error: %s\n", e, h, err)
+			slog.Error("Failed to execute handler for event", "event", e, "handler", h, "error", err)
 		}
 	}
 }

@@ -1,16 +1,24 @@
 package xlog
 
 import (
-	"log"
+	"log/slog"
+	"os"
 	"reflect"
 	"runtime"
 	"time"
+
+	"github.com/golang-cz/devslog"
 )
 
-func timing(label, text string) func() {
+func init() {
+	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, nil)))
+}
+
+func timing(msg string, args ...any) func() {
 	start := time.Now()
+	l := slog.With(args...)
 	return func() {
-		log.Printf("[%10s] %-10s %s", label, time.Since(start), text)
+		l.Info(msg, "time", time.Since(start))
 	}
 }
 

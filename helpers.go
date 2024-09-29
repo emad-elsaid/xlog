@@ -2,7 +2,8 @@ package xlog
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
 	"strings"
 	"time"
 )
@@ -19,7 +20,8 @@ func init() {
 // starts as compiling templates happened right before starting the http server.
 func RegisterHelper(name string, f any) {
 	if _, ok := helpers[name]; ok {
-		log.Fatalf("Helper: %s already registered", name)
+		slog.Error("Helper already registered", "helper", name)
+		os.Exit(1)
 	}
 
 	helpers[name] = f

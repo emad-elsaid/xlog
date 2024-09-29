@@ -22,6 +22,8 @@ github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5 h1:M5V6cvhr4f8
 github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5/go.mod h1:StFIjzcCkMtwKnLcaCGx66uBSH68sfGoz8q227+ZxFo=
 github.com/emad-elsaid/types v0.0.4 h1:wk9ftd4uoRAdwDIJKzigAmexK05D0RWqNYdsYXxHZOg=
 github.com/emad-elsaid/types v0.0.4/go.mod h1:7A4ii8wOJCtw6WUyJjlNVpA/AoMEfj/r8Oi2l9q5FF4=
+github.com/golang-cz/devslog v0.0.11 h1:v4Yb9o0ZpuZ/D8ZrtVw1f9q5XrjnkxwHF1XmWwO8IHg=
+github.com/golang-cz/devslog v0.0.11/go.mod h1:bSe5bm0A7Nyfqtijf1OMNgVJHlWEuVSXnkuASiE1vV8=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=

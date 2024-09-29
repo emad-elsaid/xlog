@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path"
@@ -101,7 +101,7 @@ func (p *page) Render() template.HTML {
 	cmd := exec.Command("pandoc", "-f", p.ext[1:], "-t", "html", p.FileName(), "--output", "-")
 	html, err := cmd.Output()
 	if err != nil {
-		log.Printf("Couldn't parse %s to markdown using pandoc: %s", p.FileName(), err.Error())
+		slog.Error("Couldn't parse file to markdown using pandoc", "file", p.FileName(), "error", err)
 	}
 
 	return template.HTML(html)

@@ -3,7 +3,7 @@ package xlog
 import (
 	"context"
 	"flag"
-	"log"
+	"log/slog"
 	"os"
 	"runtime"
 )
@@ -22,20 +22,23 @@ func Start(ctx context.Context) {
 	Post("/{page...}", postPageHandler)
 
 	if err := os.Chdir(SOURCE); err != nil {
-		log.Fatal(err)
+		slog.Error("Failed to change dir to source", "error", err, "source", SOURCE)
+		os.Exit(1)
 	}
 
 	if len(BUILD) > 0 {
 		READONLY = true
 
 		if err := buildStaticSite(BUILD); err != nil {
-			log.Printf("%s", err.Error())
+			slog.Error("Failed to build static pages", "error", err)
+			os.Exit(1)
 		}
+
 		os.Exit(0)
 	}
 
 	srv := server()
-	log.Printf("Starting server: %s", bindAddress)
+	slog.Info("Starting server", "address", bindAddress)
 
 	go func() {
 		select {

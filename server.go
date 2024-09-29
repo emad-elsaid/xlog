@@ -155,7 +155,7 @@ func JsonResponse(a any) Output {
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get. the list of middlewares are executed in order
 func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("GET", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
+	defer timing("GET", "path", path, "func", FuncName(handler))()
 	router.HandleFunc("GET "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -164,7 +164,7 @@ func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc)
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post. the list of middlewares are executed in order
 func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("POST", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
+	defer timing("POST", "path", path, "func", FuncName(handler))()
 	router.HandleFunc("POST "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -173,7 +173,7 @@ func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete. the list of middlewares are executed in order
 func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("DELETE", fmt.Sprintf("%s ⇾ %v", path, FuncName(handler)))()
+	defer timing("DELETE", "path", path, "func", FuncName(handler))()
 	router.HandleFunc("DELETE "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -208,7 +208,7 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w Response, r Request) {
-		defer timing(r.Method, r.URL.Path)()
+		defer timing(r.Method + " " + r.URL.Path)()
 		h.ServeHTTP(w, r)
 	})
 }
