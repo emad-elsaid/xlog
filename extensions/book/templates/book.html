@@ -2,7 +2,7 @@
   <div class="cover">
     <img alt="{{ .book.Title }}" src="{{ .book.Image }}"/>
   </div>
-  <div class="effect"></div>
+  <a class="effect" href="/{{.book.Title}}"></a>
   {{ if .book.Title }}
   <div class="meta">
     <div class="title">{{ .book.Title }}</div>
