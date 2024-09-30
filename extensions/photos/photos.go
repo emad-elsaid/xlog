@@ -1,6 +1,8 @@
 package photos
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"embed"
 	"fmt"
 	"html/template"
@@ -207,10 +209,21 @@ func photosShortcode(input xlog.Markdown) template.HTML {
 }
 
 func resizeHandler(w xlog.Response, r xlog.Request) xlog.Output {
-	path := r.PathValue("path")
+	photo_path := r.PathValue("path")
+
+	const cacheDir = ".cache"
+	os.Mkdir(cacheDir, 0700)
+
+	cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photo_path))))
+	cache, err := os.ReadFile(cacheFile)
+	if err == nil {
+		return func(w xlog.Response, r xlog.Request) {
+			w.Write(cache)
+		}
+	}
 
 	return func(w xlog.Response, r xlog.Request) {
-		inputImage, err := os.Open(path)
+		inputImage, err := os.Open(photo_path)
 		if err != nil {
 			fmt.Fprint(w, err.Error())
 			return
@@ -227,13 +240,17 @@ func resizeHandler(w xlog.Response, r xlog.Request) xlog.Output {
 		dst := image.NewRGBA(image.Rect(0, 0, width, height))
 		draw.NearestNeighbor.Scale(dst, dst.Rect, src, bounds, draw.Over, nil)
 
-		png.Encode(w, dst)
+		var out bytes.Buffer
+
+		png.Encode(&out, dst)
+		os.WriteFile(cacheFile, out.Bytes(), 0700)
+		w.Write(out.Bytes())
 	}
 }
 
 func photoHandler(w xlog.Response, r xlog.Request) xlog.Output {
-	path := r.PathValue("path")
-	photo, err := NewPhoto(path)
+	photo_path := r.PathValue("path")
+	photo, err := NewPhoto(photo_path)
 	if err != nil {
 		return xlog.InternalServerError(err)
 	}
