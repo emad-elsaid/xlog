@@ -57,7 +57,7 @@ jobs:
 
       - name: Install xlog
         env:
-          XLOG_VERSION: v1.6.1
+          XLOG_VERSION: v1.6.5
         run: |
           curl -vvv --location -o ../xlog.tar.gz https://github.com/emad-elsaid/xlog/releases/download/${XLOG_VERSION}/xlog-${XLOG_VERSION}-linux-amd64.tar.gz
           tar -xvf ../xlog.tar.gz -C ..
