@@ -95,11 +95,11 @@ func (p *page) preProcessedContent() Markdown {
 
 	modtime := p.ModTime()
 
-	if p.content == nil || modtime.Equal(p.lastUpdate) {
+	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()
 		c = PreProcess(c)
 		p.content = &c
-		p.lastUpdate = p.ModTime()
+		p.lastUpdate = modtime
 	}
 
 	return Markdown(*p.content)
