@@ -21,7 +21,7 @@ Assuming your user name on github is `user-name`:
 2. Click **Add file** > **Create new file**
 3. Name your file **.github/workflows/xlog.yml**
 4. Add The following content to your file
-```
+```yaml
 name: Xlog
 
 on:
