@@ -54,6 +54,8 @@ func EachPage(ctx context.Context, f func(Page)) {
 	}
 }
 
+var concurrency = runtime.NumCPU() * 4
+
 // EachPageCon Similar to EachPage but iterates concurrently
 func EachPageCon(ctx context.Context, f func(Page)) {
 	if pages == nil {
@@ -61,7 +63,7 @@ func EachPageCon(ctx context.Context, f func(Page)) {
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
-	grp.SetLimit(runtime.NumCPU() * 2)
+	grp.SetLimit(concurrency)
 
 	currentPages := pages
 	for _, p := range currentPages {
@@ -83,7 +85,7 @@ func MapPageCon[T any](ctx context.Context, f func(Page) *T) []*T {
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
-	grp.SetLimit(runtime.NumCPU() * 4)
+	grp.SetLimit(concurrency)
 
 	currentPages := pages
 	output := make([]*T, 0, len(currentPages))
