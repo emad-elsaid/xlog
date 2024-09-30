@@ -31,13 +31,13 @@ func init() {
 	RegisterTemplate(templates, "templates")
 }
 
-var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/[^ ]+\.(svg|jpg|jpeg|gif|png|webp))$`)
+var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/\S+\.(svg|jpg|jpeg|gif|png|webp))$`)
 
 func imgUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(imgUrlReg.ReplaceAllString(string(c), `![]($1)`))
 }
 
-var tweetUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/(?:twitter|x)\.com(\/[^ ]+\/status\/[0-9]+)$`)
+var tweetUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/(?:twitter|x)\.com(\/\S+\/status\/[0-9]+)$`)
 
 func tweetUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(
@@ -48,8 +48,8 @@ func tweetUrlPreprocessor(c Markdown) Markdown {
 	)
 }
 
-var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=([^ ]+)$`)
-var youtubeShortReg = regexp.MustCompile(`(?imU)^https\:\/\/youtu\.be\/([^ ]+)$`)
+var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=(\S+)$`)
+var youtubeShortReg = regexp.MustCompile(`(?imU)^https\:\/\/youtu\.be\/(\S+)$`)
 
 func youtubeUrlPreprocessor(c Markdown) Markdown {
 	tmplt := `
@@ -62,7 +62,7 @@ func youtubeUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(shortUrlReplaced)
 }
 
-var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^ \/]+/posts/[0-9a-zA-Z]+)$`)
+var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^\t\n\f\r \/]+/posts/[0-9a-zA-Z]+)$`)
 
 func fbUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(
@@ -73,14 +73,14 @@ func fbUrlPreprocessor(c Markdown) Markdown {
 	)
 }
 
-var giphyUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/[^ ]+\-([^ \-]+)$`)
+var giphyUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/\S+\-([^\t\n\f\r \-]+)$`)
 
 func giphyUrlPreprocessor(c Markdown) Markdown {
 	return Markdown(giphyUrlReg.ReplaceAllString(string(c), `![](https://media.giphy.com/media/$1/giphy.gif)`))
 }
 
 var (
-	fallbackUrlReg = regexp.MustCompile(`(?imU)^(https?\:\/\/[^ ]+)$`)
+	fallbackUrlReg = regexp.MustCompile(`(?imU)^(https?\:\/\/\S+)$`)
 	titleReg       = regexp.MustCompile(`(?imU)<title>(.*)</title>`)
 	metaReg        = regexp.MustCompile(`(?imU)<meta.*\>`)
 	metaNameReg    = regexp.MustCompile(`(?imU)(?:name|property)\s*=\s*"(.*)"`)
