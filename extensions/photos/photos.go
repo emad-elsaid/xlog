@@ -218,13 +218,14 @@ func resizeHandler(w xlog.Response, r xlog.Request) xlog.Output {
 		defer inputImage.Close()
 
 		src, _, _ := image.Decode(inputImage)
-		dim := src.Bounds().Max
+		bounds := src.Bounds()
+		dim := bounds.Max
 
 		width := 700
 		height := int(float32(width) / float32(dim.X) * float32(dim.Y))
 
 		dst := image.NewRGBA(image.Rect(0, 0, width, height))
-		draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Bounds(), draw.Over, nil)
+		draw.NearestNeighbor.Scale(dst, dst.Rect, src, bounds, draw.Over, nil)
 
 		png.Encode(w, dst)
 	}

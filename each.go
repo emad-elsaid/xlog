@@ -61,7 +61,7 @@ func EachPageCon(ctx context.Context, f func(Page)) {
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
-	grp.SetLimit(runtime.NumCPU() * 4)
+	grp.SetLimit(runtime.NumCPU() * 2)
 
 	currentPages := pages
 	for _, p := range currentPages {
