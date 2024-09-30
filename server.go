@@ -33,27 +33,29 @@ type (
 	Locals map[string]any // passed to templates
 )
 
-func defaultMiddlewares() []func(http.Handler) http.Handler {
-	crsfOpts := []csrf.Option{
-		csrf.Path("/"),
-		csrf.FieldName("csrf"),
-		csrf.CookieName(xCSRF_COOKIE_NAME),
-		csrf.Secure(!serveInsecure),
+func defaultMiddlewares(readonly bool) (middlewares []func(http.Handler) http.Handler) {
+	if !readonly {
+		crsfOpts := []csrf.Option{
+			csrf.Path("/"),
+			csrf.FieldName("csrf"),
+			csrf.CookieName(xCSRF_COOKIE_NAME),
+			csrf.Secure(!serveInsecure),
+		}
+
+		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
+		if len(sessionSecret) == 0 {
+			sessionSecret = make([]byte, 128)
+			rand.Read(sessionSecret)
+		}
+
+		middlewares = append(middlewares,
+			methodOverrideHandler,
+			csrf.Protect(sessionSecret, crsfOpts...))
 	}
 
-	sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
-	if len(sessionSecret) == 0 {
-		sessionSecret = make([]byte, 128)
-		rand.Read(sessionSecret)
-	}
+	middlewares = append(middlewares, requestLoggerHandler)
 
-	middlewares := []func(http.Handler) http.Handler{
-		methodOverrideHandler,
-		csrf.Protect(sessionSecret, crsfOpts...),
-		requestLoggerHandler,
-	}
-
-	return middlewares
+	return
 }
 
 func init() {
@@ -64,7 +66,7 @@ func init() {
 func server() *http.Server {
 	compileTemplates()
 	var handler http.Handler = router
-	for _, v := range defaultMiddlewares() {
+	for _, v := range defaultMiddlewares(READONLY) {
 		handler = v(handler)
 	}
 
