@@ -129,6 +129,13 @@ gantt
     another task      : 24d
 ```
 
+Books cover 
+```book
+title: The food of the gods
+author: H. G. Wells
+image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
+```
+
 Embed another page, header-particles in this case
 /embed header-particles
 
