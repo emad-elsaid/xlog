@@ -13,19 +13,21 @@ func init() {
 
 const script = `
 <script>
-function toggleCheckbox() {
-  const csrf = document.querySelector("input[name=csrf]").value;
-  const data = new FormData();
+(()=>{
+	function toggleCheckbox() {
+	  const csrf = document.querySelector("input[name=csrf]").value;
+	  const data = new FormData();
 
-  data.append('csrf', csrf);
-  data.append('checked', this.checked);
-  data.append('page', '%s');
-  data.append('pos', this.dataset.pos);
+	  data.append('csrf', csrf);
+	  data.append('checked', this.checked);
+	  data.append('page', '%s');
+	  data.append('pos', this.dataset.pos);
 
-  fetch("/+/todo", {method: 'POST', body: data});
-}
-let todos = document.querySelectorAll(".view input[type=checkbox][data-pos]");
-todos.forEach(elem => elem.addEventListener("click", toggleCheckbox));
+	  fetch("/+/todo", {method: 'POST', body: data});
+	}
+	let todos = document.querySelectorAll(".view input[type=checkbox][data-pos]");
+	todos.forEach(elem => elem.addEventListener("click", toggleCheckbox));
+})()
 </script>
 `
 

@@ -34,33 +34,35 @@
 
 
 <script type="application/javascript">
- const commands = document.getElementById('commands-modal');
+ (function() {
+     const commands = () => document.getElementById('commands-modal');
 
- // clicking any link in the commands list executes the command
- commands.querySelectorAll('a').forEach( ele => ele.addEventListener('click', evt => commands.close()));
+     // clicking any link in the commands list executes the command
+     commands().querySelectorAll('a').forEach( ele => ele.addEventListener('click', evt => commands().close()));
 
- // Pressing Ctrl+K shows the commands list
- document.addEventListener('keydown', e => {
-     if ( e.key === 'k' && ( e.metaKey || e.ctrlKey ) ) {
-         e.preventDefault();
-         commands.showModal();
-     }
- });
-
- // Typing in the search field filter the commands
- commands.querySelector('input[type=search]').addEventListener('keyup', e => {
-     const keyword = e.target.value.toLowerCase();
-     const lis = document.querySelectorAll("#commands-modal li");
-
-     for(var i=0; i < lis.length; i++){
-         const li = lis[i];
-         if( li.textContent.toLowerCase().includes(keyword) ) {
-             li.classList.remove("is-hidden");
-         } else {
-             li.classList.add("is-hidden");
+     // Pressing Ctrl+K shows the commands list
+     document.addEventListener('keydown', e => {
+         if ( e.key === 'k' && ( e.metaKey || e.ctrlKey ) ) {
+             e.preventDefault();
+             commands().showModal();
          }
-     }
- });
+     });
+
+     // Typing in the search field filter the commands
+     commands().querySelector('input[type=search]').addEventListener('keyup', e => {
+         const keyword = e.target.value.toLowerCase();
+         const lis = document.querySelectorAll("#commands-modal li");
+
+         for(var i=0; i < lis.length; i++){
+             const li = lis[i];
+             if( li.textContent.toLowerCase().includes(keyword) ) {
+                 li.classList.remove("is-hidden");
+             } else {
+                 li.classList.add("is-hidden");
+             }
+         }
+     });
+ })()
 </script>
 
 {{ end }}
