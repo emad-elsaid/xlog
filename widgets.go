@@ -2,7 +2,6 @@ package xlog
 
 import (
 	"html/template"
-	"sort"
 )
 
 func init() {
@@ -30,25 +29,27 @@ var (
 )
 
 // A map to keep track of list of widget functions registered in each widget space
-var widgets = map[WidgetSpace]byPriority[WidgetFunc]{}
+var widgets = map[WidgetSpace]*priorityList[WidgetFunc]{}
 
 // RegisterWidget Register a function to a widget space. functions registered
 // will be executed in order of priority lower to higher when rendering view or
 // edit page. the return values of these widgetfuncs will pass down to the
 // template and injected in reserved places.
 func RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
-	widgets[s] = append(widgets[s], priorityItem[WidgetFunc]{
-		priority: priority,
-		value:    f,
-	})
-	sort.Sort(widgets[s])
+	pl, ok := widgets[s]
+	if !ok {
+		pl = new(priorityList[WidgetFunc])
+		widgets[s] = pl
+	}
+
+	pl.Add(f, priority)
 }
 
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
 func RenderWidget(s WidgetSpace, p Page) (o template.HTML) {
-	for _, f := range widgets[s] {
-		o += f.value(p)
-	}
+	widgets[s].Each(func(f WidgetFunc) {
+		o += f(p)
+	})
 	return
 }

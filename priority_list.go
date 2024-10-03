@@ -1,12 +1,31 @@
 package xlog
 
+import (
+	"sort"
+)
+
 type priorityItem[T any] struct {
-	priority float32
-	value    T
+	Item     T
+	Priority float32
 }
 
-type byPriority[T any] []priorityItem[T]
+type priorityList[T any] struct {
+	items []priorityItem[T]
+}
 
-func (a byPriority[T]) Len() int           { return len(a) }
-func (a byPriority[T]) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byPriority[T]) Less(i, j int) bool { return a[i].priority < a[j].priority }
+func (pl *priorityList[T]) Add(item T, priority float32) {
+	pl.items = append(pl.items, priorityItem[T]{Item: item, Priority: priority})
+	pl.sortByPriority()
+}
+
+func (pl *priorityList[T]) sortByPriority() {
+	sort.Slice(pl.items, func(i, j int) bool {
+		return pl.items[i].Priority < pl.items[j].Priority
+	})
+}
+
+func (pl *priorityList[T]) Each(fn func(item T)) {
+	for _, priorityItem := range pl.items {
+		fn(priorityItem.Item)
+	}
+}
