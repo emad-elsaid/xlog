@@ -125,15 +125,13 @@ func Redirect(url string) Output {
 
 // NoContent returns an output function that writes NoContent http status
 func NoContent() Output {
-	return noContent
+	return func(w Response, r Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 // Noop is an output that doesn't do anything to the request. can be useful for a websocket upgrader
 func Noop(w Response, r Request) {}
-
-func noContent(w Response, r Request) {
-	w.WriteHeader(http.StatusNoContent)
-}
 
 // PlainText returns an output function that writes text to response writer
 func PlainText(text string) Output {
