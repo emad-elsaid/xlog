@@ -24,7 +24,7 @@ func RegisterLink(l func(Page) []Link) {
 
 // Links returns a list of links for a Page. it executes all functions
 // registered with RegisterLink and collect them in one slice. Can be passed to
-// the view to render in the footer or sidebar for example.
+// the view to render in the footer for example.
 func Links(p Page) []Link {
 	lnks := []Link{}
 	for l := range links {

@@ -78,7 +78,6 @@ You should see output similar to the following. And navigating to [http://localh
 2022/11/17 17:13:38  Template  (21.99µs) pages
 2022/11/17 17:13:38  Template  (27.596µs) properties
 2022/11/17 17:13:38  Template  (67.411µs) quick_commands
-2022/11/17 17:13:38  Template  (116.689µs) sidebar
 2022/11/17 17:13:38  Template  (80.292µs) view
 2022/11/17 17:13:38 Starting server: 127.0.0.1:3000
 ```

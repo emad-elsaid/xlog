@@ -54,8 +54,6 @@ Usage of xlog:
     	Limit the number of items in the RSS feed to this amount (default 30)
   -serve-insecure
     	Accept http connections and forward crsf cookie over non secure connections
-  -sidebar
-    	Should render sidebar. (default true)
   -sitemap.domain string
     	domain name without protocol or trailing / to use for sitemap loc
   -sitename string
