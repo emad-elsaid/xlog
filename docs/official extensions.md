@@ -35,3 +35,4 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Todo            | allow toggle checkboxes while viewing the page without going to edit mode               |
 | Upload file     | Add support for upload files, screenshots, audio and camera recording                   |
 | Versions        | Keeps list of pages older versions                                                      |
+| Editor          | Open the current page in your editor. it uses $EDITOR env variable                      |

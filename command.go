@@ -18,7 +18,7 @@ type Command interface {
 	Widget() template.HTML
 }
 
-var commands = []func(Page) []Command{defaultCommands}
+var commands = []func(Page) []Command{}
 
 // RegisterCommand registers a new command
 func RegisterCommand(c func(Page) []Command) {
@@ -37,7 +37,7 @@ func Commands(p Page) []Command {
 	return cmds
 }
 
-var quickCommands = []func(Page) []Command{defaultCommands}
+var quickCommands = []func(Page) []Command{}
 
 func RegisterQuickCommand(c func(Page) []Command) {
 	quickCommands = append(quickCommands, c)
@@ -53,20 +53,4 @@ func QuickCommands(p Page) []Command {
 	}
 
 	return cmds
-}
-
-type editQuickCommand struct{ page Page }
-
-func (a editQuickCommand) Icon() string          { return "fa-solid fa-pen" }
-func (a editQuickCommand) Name() string          { return "Edit" }
-func (a editQuickCommand) Link() string          { return "/edit/" + a.page.Name() }
-func (a editQuickCommand) OnClick() template.JS  { return "" }
-func (a editQuickCommand) Widget() template.HTML { return "" }
-
-func defaultCommands(p Page) []Command {
-	if Config.Readonly {
-		return nil
-	}
-
-	return []Command{editQuickCommand{p}}
 }

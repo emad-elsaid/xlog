@@ -2,7 +2,6 @@ package xlog
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"log/slog"
 	"os"
@@ -23,14 +22,8 @@ func Start(ctx context.Context) {
 
 	initExtensions()
 
-	// Program Core routes. View, Edit routes and a route to write new content
-	// to the page. + handling root path which just show `index` page.
 	Get("/{$}", rootHandler)
-	if !Config.Readonly {
-		Get("/edit/{page...}", getPageEditHandler)
-	}
 	Get("/{page...}", getPageHandler)
-	Post("/{page...}", postPageHandler)
 
 	if err := os.Chdir(Config.Source); err != nil {
 		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
@@ -88,51 +81,13 @@ func getPageHandler(w Response, r Request) Output {
 			return NotFound("can't find page")
 		}
 
-		return Redirect("/edit/" + page.Name())
+		return NotFound("Page does not exist")
 	}
 
 	return Render("view", Locals{
 		"title":   page.Emoji() + " " + page.Name(),
 		"page":    page,
-		"edit":    "/edit/" + page.Name(),
 		"content": page.Render(),
 		"csrf":    CSRF(r),
 	})
-}
-
-// Edit page, gets the page from path
-func getPageEditHandler(w Response, r Request) Output {
-	page := NewPage(r.PathValue("page"))
-
-	if page == nil {
-		return NoContent()
-	}
-
-	var content Markdown
-	if page.Exists() {
-		content = page.Content()
-	}
-
-	return Render("edit", Locals{
-		"title":        page.Emoji() + " " + page.Name(),
-		"page":         page,
-		"commands":     Commands(page),
-		"content":      content,
-		"autocomplete": autocompletes,
-		"csrf":         CSRF(r),
-	})
-}
-
-// Save new content of the page
-func postPageHandler(w Response, r Request) Output {
-	page := NewPage(r.PathValue("page"))
-
-	if page == nil {
-		return InternalServerError(errors.New("Can't save page, NewPage returned nil"))
-	}
-
-	content := r.FormValue("content")
-	page.Write(Markdown(content))
-
-	return Redirect("/" + page.Name())
 }

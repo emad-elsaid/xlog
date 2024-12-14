@@ -37,15 +37,4 @@
   {{- widgets "after_view" .page -}}
 </div>
 
-{{- if not $.config.Readonly -}}
-<script>
- document.addEventListener('keydown', e => {
-     if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {
-         e.preventDefault();
-         document.location.pathname = "{{.edit}}";
-     }
- });
-</script>
-{{- end -}}
-
 {{ template "footer" . }}

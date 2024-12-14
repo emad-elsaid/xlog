@@ -9,6 +9,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/custom_widget"
 	_ "github.com/emad-elsaid/xlog/extensions/date"
 	_ "github.com/emad-elsaid/xlog/extensions/disqus"
+	_ "github.com/emad-elsaid/xlog/extensions/editor"
 	_ "github.com/emad-elsaid/xlog/extensions/embed"
 	_ "github.com/emad-elsaid/xlog/extensions/emoji"
 	_ "github.com/emad-elsaid/xlog/extensions/file_operations"
