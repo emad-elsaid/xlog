@@ -71,9 +71,7 @@ func Partial(path string, data Locals) template.HTML {
 		data = Locals{}
 	}
 
-	data["index"] = Config.Index
-	data["sitename"] = Config.Sitename
-	data["readonly"] = Config.Readonly
+	data["config"] = Config
 
 	w := bytes.NewBufferString("")
 
