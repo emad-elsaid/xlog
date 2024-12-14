@@ -3,6 +3,7 @@ package emoji
 import (
 	_ "embed"
 	"encoding/json"
+	"sync"
 
 	. "github.com/emad-elsaid/xlog"
 )
@@ -21,10 +22,10 @@ func (Emoji) Init()        { RegisterAutocomplete(autocomplete(0)) }
 
 type autocomplete int
 
-func (a autocomplete) StartChar() string { return ":" }
+func (a autocomplete) StartChar() string          { return ":" }
+func (a autocomplete) Suggestions() []*Suggestion { return suggestions() }
 
-// TODO this is a bit inefficient as it parses the emoji json everytime
-func (a autocomplete) Suggestions() []*Suggestion {
+var suggestions = sync.OnceValue(func() []*Suggestion {
 	emojis := []struct {
 		Emoji   string   `json:"emoji"`
 		Aliases []string `json:"aliases"`
@@ -44,4 +45,4 @@ func (a autocomplete) Suggestions() []*Suggestion {
 	}
 
 	return suggestions
-}
+})
