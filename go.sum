@@ -22,8 +22,6 @@ github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5 h1:M5V6cvhr4f8
 github.com/emad-elsaid/memoize v0.0.0-20240524185039-a963118906c5/go.mod h1:StFIjzcCkMtwKnLcaCGx66uBSH68sfGoz8q227+ZxFo=
 github.com/emad-elsaid/types v0.0.4 h1:wk9ftd4uoRAdwDIJKzigAmexK05D0RWqNYdsYXxHZOg=
 github.com/emad-elsaid/types v0.0.4/go.mod h1:7A4ii8wOJCtw6WUyJjlNVpA/AoMEfj/r8Oi2l9q5FF4=
-github.com/golang-cz/devslog v0.0.11 h1:v4Yb9o0ZpuZ/D8ZrtVw1f9q5XrjnkxwHF1XmWwO8IHg=
-github.com/golang-cz/devslog v0.0.11/go.mod h1:bSe5bm0A7Nyfqtijf1OMNgVJHlWEuVSXnkuASiE1vV8=
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
@@ -64,6 +62,8 @@ github.com/yuin/goldmark-emoji v1.0.2 h1:c/RgTShNgHTtc6xdz2KKI74jJr6rWi7FPgnP9GA
 github.com/yuin/goldmark-emoji v1.0.2/go.mod h1:RhP/RWpexdp+KHs7ghKnifRoIs/Bq4nDS7tRbCkOwKY=
 github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc h1:+IAOyRda+RLrxa1WC7umKOZRsGq4QrFFMYApOeHzQwQ=
 github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc/go.mod h1:ovIvrum6DQJA4QsJSovrkC4saKHQVs7TvcaeO8AIl5I=
+gitlab.com/greyxor/slogor v1.5.2 h1:ushBskVMbduRt3mWLpIct9mOGAkxnytVNoSn2IHBgXM=
+gitlab.com/greyxor/slogor v1.5.2/go.mod h1:P8dDYZxKsh/omu91z+vep/m78GxWEOc2KP2f0zaCasE=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/crypto v0.3.1-0.20221117191849-2c476679df9a/go.mod h1:hebNnKkNXi2UzZN1eVRvBB7co0a+JxK6XbPiWVs/3J4=

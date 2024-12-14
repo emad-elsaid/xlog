@@ -4,7 +4,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/activitypub"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink"
 	_ "github.com/emad-elsaid/xlog/extensions/autolink_pages"
-	_ "github.com/emad-elsaid/xlog/extensions/book"
+	_ "github.com/emad-elsaid/xlog/extensions/blocks"
 	_ "github.com/emad-elsaid/xlog/extensions/custom_css"
 	_ "github.com/emad-elsaid/xlog/extensions/custom_widget"
 	_ "github.com/emad-elsaid/xlog/extensions/date"

@@ -22,6 +22,13 @@ import (
 var templates embed.FS
 
 func init() {
+	RegisterExtension(LinkPreview{})
+}
+
+type LinkPreview struct{}
+
+func (LinkPreview) Name() string { return "link-preview" }
+func (LinkPreview) Init() {
 	RegisterPreprocessor(imgUrlPreprocessor)
 	RegisterPreprocessor(tweetUrlPreprocessor)
 	RegisterPreprocessor(youtubeUrlPreprocessor)

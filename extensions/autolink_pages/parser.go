@@ -10,12 +10,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-func init() {
-	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(&pageLinkParser{}, 999),
-	))
-}
-
 type pageLinkParser struct{}
 
 func (_ *pageLinkParser) Trigger() []byte {

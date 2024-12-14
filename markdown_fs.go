@@ -34,7 +34,7 @@ func newMarkdownFS(p string) *markdownFS {
 		hashicorp.LRU(cache),
 		func(name string) Page {
 			if name == "" {
-				name = INDEX
+				name = Config.Index
 			}
 
 			return &page{
@@ -92,7 +92,8 @@ type markdownFS struct {
 	watch func()
 }
 
-// Page Creates an instance of Page with name. if no name is passed it's assumed INDEX
+// Page Creates an instance of Page with name. if no name is passed it's assumed
+// xlog.Config.Index
 func (m *markdownFS) Page(name string) Page {
 	m.watch()
 

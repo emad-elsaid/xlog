@@ -17,22 +17,25 @@ import (
 var templates embed.FS
 
 func init() {
-	var rename PageRename
-	var delete PageDelete
+	RegisterExtension(FileOps{})
+}
+
+type FileOps struct{}
+
+func (FileOps) Name() string { return "file-operations" }
+func (FileOps) Init() {
+	if Config.Readonly {
+		return
+	}
 
 	RegisterCommand(commands)
 	RegisterQuickCommand(commands)
-
-	Post(`/+/file/rename`, rename.Handler)
-	Delete(`/+/file/delete`, delete.Handler)
 	RegisterTemplate(templates, "templates")
+	Post(`/+/file/rename`, PageRename{}.Handler)
+	Delete(`/+/file/delete`, PageDelete{}.Handler)
 }
 
 func commands(p Page) []Command {
-	if READONLY {
-		return []Command{}
-	}
-
 	return []Command{PageDelete{p}, PageRename{p}}
 }
 
@@ -66,10 +69,6 @@ func (f PageRename) Widget() template.HTML {
 }
 
 func (f PageRename) Handler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	old := NewPage(r.FormValue("old"))
 	if !old.Exists() {
 		return BadRequest("file doesn't exist")
@@ -114,10 +113,6 @@ func (f PageDelete) Widget() template.HTML {
 }
 
 func (f PageDelete) Handler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	if page := NewPage(r.FormValue("page")); page.Exists() {
 		page.Delete()
 	}

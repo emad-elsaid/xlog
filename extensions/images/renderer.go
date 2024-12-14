@@ -7,12 +7,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-func init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&imagesColumnsRenderer{}, 0),
-	))
-}
-
 type imagesColumnsRenderer struct{}
 
 func (s *imagesColumnsRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {

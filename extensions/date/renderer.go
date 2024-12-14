@@ -9,12 +9,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-func init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&dateRenderer{}, 0),
-	))
-}
-
 type dateRenderer struct{}
 
 func (s *dateRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {

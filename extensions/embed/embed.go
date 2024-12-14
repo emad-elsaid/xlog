@@ -10,6 +10,13 @@ import (
 )
 
 func init() {
+	xlog.RegisterExtension(Embed{})
+}
+
+type Embed struct{}
+
+func (Embed) Name() string { return "embed" }
+func (Embed) Init() {
 	shortcode.RegisterShortCode("embed", shortcode.ShortCode{Render: embedShortcode})
 }
 

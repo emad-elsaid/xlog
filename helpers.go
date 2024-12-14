@@ -2,17 +2,20 @@ package xlog
 
 import (
 	"fmt"
+	"html/template"
 	"log/slog"
 	"os"
 	"strings"
 	"time"
 )
 
-func init() {
-	RegisterHelper("ago", ago)
-	RegisterHelper("isFontAwesome", func(i string) bool {
-		return len(i) > 3 && i[0:3] == "fa-"
-	})
+var helpers = template.FuncMap{
+	"ago":            ago,
+	"properties":     Properties,
+	"links":          Links,
+	"widgets":        RenderWidget,
+	"commands":       Commands,
+	"quick_commands": QuickCommands,
 }
 
 // RegisterHelper registers a new helper function. all helpers are used when compiling
@@ -33,7 +36,7 @@ func RegisterHelper(name string, f any) {
 // unit of time possible and the next one after it. for example days + hours, or
 // Hours + minutes or Minutes + seconds...etc
 func ago(t time.Time) string {
-	if READONLY {
+	if Config.Readonly {
 		return t.Format("Monday 2 January 2006")
 	}
 

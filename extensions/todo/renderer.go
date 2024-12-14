@@ -10,12 +10,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-func init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&TaskCheckBoxHTMLRenderer{}, 0),
-	))
-}
-
 type TaskCheckBoxHTMLRenderer struct{}
 
 func (r *TaskCheckBoxHTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
@@ -36,7 +30,7 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 		w.WriteString(`checked="" `)
 	}
 
-	if READONLY {
+	if Config.Readonly {
 		w.WriteString(`disabled="" `)
 	} else if p.Kind() == ast.KindTextBlock {
 		if l := p.Lines(); l != nil {

@@ -9,6 +9,13 @@ import (
 )
 
 func init() {
+	RegisterExtension(Mermaid{})
+}
+
+type Mermaid struct{}
+
+func (Mermaid) Name() string { return "mermaid" }
+func (Mermaid) Init() {
 	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
 }
 

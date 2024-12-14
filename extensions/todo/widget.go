@@ -7,10 +7,6 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-func init() {
-	RegisterWidget(AFTER_VIEW_WIDGET, 0, scriptWidget)
-}
-
 const script = `
 <script>
 (()=>{
@@ -32,9 +28,5 @@ const script = `
 `
 
 func scriptWidget(p Page) template.HTML {
-	if READONLY {
-		return ""
-	}
-
 	return template.HTML(fmt.Sprintf(script, template.JSEscapeString(p.Name())))
 }

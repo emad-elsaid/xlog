@@ -31,11 +31,18 @@ var (
 )
 
 func init() {
-	RegisterCommand(func(p Page) []Command {
-		if READONLY {
-			return []Command{}
-		}
+	RegisterExtension(UploadFile{})
+}
 
+type UploadFile struct{}
+
+func (UploadFile) Name() string { return "upload-file" }
+func (UploadFile) Init() {
+	if Config.Readonly {
+		return
+	}
+
+	RegisterCommand(func(p Page) []Command {
 		return []Command{
 			command{
 				page:    p,

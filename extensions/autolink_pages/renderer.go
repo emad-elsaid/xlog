@@ -3,17 +3,10 @@ package autolink_pages
 import (
 	"fmt"
 
-	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/util"
 )
-
-func init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&pageLinkRenderer{}, -1),
-	))
-}
 
 type pageLinkRenderer struct{}
 

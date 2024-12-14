@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log/slog"
 	"path"
 	"strings"
 )
@@ -13,7 +14,6 @@ import (
 //go:embed templates
 var defaultTemplates embed.FS
 var templates *template.Template
-var helpers = template.FuncMap{}
 var templatesFSs []fs.FS
 
 // RegisterTemplate registers a filesystem that contains templates, specifying subDir as
@@ -43,7 +43,7 @@ func compileTemplates() {
 			if strings.HasSuffix(p, ext) && d.Type().IsRegular() {
 				ext := path.Ext(p)
 				name := strings.TrimSuffix(p, ext)
-				defer timing("Template " + name)()
+				slog.Info("Template " + name)
 
 				c, err := fs.ReadFile(tfs, p)
 				if err != nil {
@@ -72,13 +72,13 @@ func Partial(path string, data Locals) template.HTML {
 		data = Locals{}
 	}
 
-	data["INDEX"] = INDEX
-	data["SITENAME"] = SITENAME
-	data["READONLY"] = READONLY
+	data["index"] = Config.Index
+	data["sitename"] = Config.Sitename
+	data["readonly"] = Config.Readonly
 
 	w := bytes.NewBufferString("")
-	err := v.Execute(w, data)
-	if err != nil {
+
+	if err := v.Execute(w, data); err != nil {
 		return template.HTML("rendering error " + path + " " + err.Error())
 	}
 

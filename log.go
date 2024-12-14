@@ -5,23 +5,26 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"strings"
 	"time"
 
-	"github.com/golang-cz/devslog"
+	"gitlab.com/greyxor/slogor"
 )
 
-func init() {
-	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, nil)))
+func SetupLogger() {
+	level := slogor.SetLevel(slog.LevelDebug)
+	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
+	handler := slogor.NewHandler(os.Stderr, level, timeFmt)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
+
 }
 
-func timing(msg string, args ...any) func() {
-	start := time.Now()
-	l := slog.With(args...)
-	return func() {
-		l.Info(msg, "time", time.Since(start))
-	}
-}
-
-func FuncName(f any) string {
-	return runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+func callerName(f any) string {
+	const xlogPrefix = "emad-elsaid/xlog/"
+	const ghPrefix = "github.com/"
+	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	name = strings.TrimPrefix(name, ghPrefix)
+	name = strings.TrimPrefix(name, xlogPrefix)
+	return name
 }

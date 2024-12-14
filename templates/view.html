@@ -16,7 +16,7 @@
   {{ with quick_commands .page }}
   <div class="column is-narrow">
 
-    {{ if not $.READONLY }} {{$.csrf}} {{ end }}
+    {{ if not $.readonly }} {{$.csrf}} {{ end }}
 
     {{ range . }}
     <a href="{{.Link}}" onclick="{{.OnClick}}" class="icon-text">
@@ -37,7 +37,7 @@
   {{- widgets "after_view" .page -}}
 </div>
 
-{{- if not .READONLY -}}
+{{- if not .readonly -}}
 <script>
  document.addEventListener('keydown', e => {
      if ( e.key === 's' && ( e.metaKey || e.ctrlKey ) ) {

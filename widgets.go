@@ -4,10 +4,6 @@ import (
 	"html/template"
 )
 
-func init() {
-	RegisterHelper("widgets", RenderWidget)
-}
-
 type (
 	// WidgetSpace used to represent a widgets spaces. it's used to register
 	// widgets to be injected in the view or edit pages
@@ -48,7 +44,12 @@ func RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
 func RenderWidget(s WidgetSpace, p Page) (o template.HTML) {
-	widgets[s].Each(func(f WidgetFunc) {
+	w, ok := widgets[s]
+	if !ok {
+		return
+	}
+
+	w.Each(func(f WidgetFunc) {
 		o += f(p)
 	})
 	return

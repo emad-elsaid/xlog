@@ -34,6 +34,13 @@ var templates embed.FS
 var supportedExt = types.Slice[string]{".jpg", ".jpeg", ".gif", ".png"}
 
 func init() {
+	xlog.RegisterExtension(Photos{})
+}
+
+type Photos struct{}
+
+func (Photos) Name() string { return "photos" }
+func (Photos) Init() {
 	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode})
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.Get(`/+/photos/thumbnail/{path...}`, resizeHandler)

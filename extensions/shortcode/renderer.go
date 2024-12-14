@@ -7,12 +7,6 @@ import (
 	"github.com/yuin/goldmark/util"
 )
 
-func init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(&shortCodeRenderer{}, 0),
-	))
-}
-
 type shortCodeRenderer struct{}
 
 func (s *shortCodeRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {

@@ -18,6 +18,17 @@ var (
 )
 
 func init() {
+	RegisterExtension(Hotreload{})
+}
+
+type Hotreload struct{}
+
+func (Hotreload) Name() string { return "hotreload" }
+func (Hotreload) Init() {
+	if Config.Readonly {
+		return
+	}
+
 	Listen(Changed, NotifyPageChange)
 	Get(`/+/hotreload`, handleWebSocket)
 	RegisterWidget(AFTER_VIEW_WIDGET, 0, clientWidget)
@@ -44,10 +55,6 @@ func NotifyPageChange(p Page) error {
 }
 
 func handleWebSocket(w Response, r Request) Output {
-	if READONLY {
-		return NoContent()
-	}
-
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		slog.Error("Failed to upgrade", "error", err)
@@ -100,9 +107,5 @@ const clientScript = `
     `
 
 func clientWidget(p Page) template.HTML {
-	if !READONLY {
-		return template.HTML(clientScript)
-	}
-
-	return ""
+	return template.HTML(clientScript)
 }

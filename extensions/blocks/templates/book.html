@@ -1,0 +1,12 @@
+<div class="book">
+  <div class="cover">
+    <img alt="{{ .title }}" src="{{ .image }}"/>
+  </div>
+  <a class="effect" href="/{{.title}}"></a>
+  {{- if .title }}
+  <div class="meta">
+    <div class="title">{{ .title }}</div>
+    {{ if .author }}<div class="author">{{ .author }}</div>{{ end }}
+  </div>
+  {{- end }}
+</div>

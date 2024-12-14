@@ -11,6 +11,13 @@ import (
 var emojiFile []byte
 
 func init() {
+	RegisterExtension(Emoji{})
+}
+
+type Emoji struct{}
+
+func (Emoji) Name() string { return "emoji" }
+func (Emoji) Init() {
 	RegisterAutocomplete(autocomplete(0))
 }
 

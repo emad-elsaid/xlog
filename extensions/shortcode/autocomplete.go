@@ -6,10 +6,6 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-func init() {
-	RegisterAutocomplete(autocomplete(0))
-}
-
 type autocomplete int
 
 func (a autocomplete) StartChar() string {

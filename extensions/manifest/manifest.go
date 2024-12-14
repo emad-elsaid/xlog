@@ -11,6 +11,13 @@ import (
 var templates embed.FS
 
 func init() {
+	RegisterExtension(Manifest{})
+}
+
+type Manifest struct{}
+
+func (Manifest) Name() string { return "manifest" }
+func (Manifest) Init() {
 	Get("/manifest.json", manifest)
 	RegisterBuildPage("/manifest.json", false)
 	RegisterWidget(HEAD_WIDGET, 1, head)
@@ -18,7 +25,7 @@ func init() {
 }
 
 func manifest(w Response, r Request) Output {
-	return Cache(Render("manifest", Locals{"sitename": SITENAME}))
+	return Cache(Render("manifest", Locals{"sitename": Config.Sitename}))
 }
 
 func head(_ Page) template.HTML {

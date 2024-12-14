@@ -24,6 +24,13 @@ import (
 var templates embed.FS
 
 func init() {
+	RegisterExtension(Hashtags{})
+}
+
+type Hashtags struct{}
+
+func (Hashtags) Name() string { return "hashtags" }
+func (Hashtags) Init() {
 	Get(`/+/tags`, tagsHandler)
 	Get(`/+/tag/{tag}`, tagHandler)
 	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
@@ -151,7 +158,7 @@ func tagHandler(w Response, r Request) Output {
 
 func tagPages(ctx context.Context, keyword string) []*Page {
 	return MapPageCon(ctx, func(p Page) *Page {
-		if p.Name() == INDEX {
+		if p.Name() == Config.Index {
 			return nil
 		}
 
@@ -168,7 +175,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 }
 
 func relatedPages(p Page) template.HTML {
-	if p.Name() == INDEX {
+	if p.Name() == Config.Index {
 		return ""
 	}
 

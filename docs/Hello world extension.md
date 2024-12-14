@@ -116,7 +116,9 @@ This is a function that takes the page content as string and return the content 
 
 # The Init function
 
-Now we'll need to register this function as a preprocessor. we'll do this by importing xlog core and use [`RegisterPreprocessor`](https://pkg.go.dev/github.com/emad-elsaid/xlog#RegisterPreprocessor).
+Now we'll need to register this function as a preprocessor.
+1. We create a struct that imports `xlog.Extension`
+1. We'll do this by importing xlog core and use [`RegisterPreprocessor`](https://pkg.go.dev/github.com/emad-elsaid/xlog#RegisterPreprocessor) in the Extension `Init`.
 
 ```go
 package helloworld
@@ -124,6 +126,13 @@ package helloworld
 import "github.com/emad-elsaid/xlog"
 
 func init() {
+    xlog.RegisterExtension(Helloworld{})
+}
+
+type Helloworld struct{}
+
+func (Helloworld) Name() string { return "hello-world" }
+func (Helloworld) Init() {
 	xlog.RegisterPreprocessor(addHelloWorld)
 }
 

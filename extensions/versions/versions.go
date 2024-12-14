@@ -11,9 +11,20 @@ import (
 )
 
 func init() {
-	Listen(BeforeWrite, WriteVersion)
+	RegisterExtension(Versions{})
+}
+
+type Versions struct{}
+
+func (Versions) Name() string { return "versions" }
+func (Versions) Init() {
 	RegisterProperty(VersionProps)
 	IgnoreDirectory(regexp.MustCompile(`\.versions$`))
+
+	if !Config.Readonly {
+		Listen(BeforeWrite, WriteVersion)
+	}
+
 }
 
 func WriteVersion(p Page) error {

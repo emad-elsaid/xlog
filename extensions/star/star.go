@@ -18,12 +18,22 @@ const STARRED_PAGES = "starred"
 var templates embed.FS
 
 func init() {
-	RegisterCommand(starAction)
-	RegisterQuickCommand(starAction)
+	RegisterExtension(Star{})
+}
+
+type Star struct{}
+
+func (Star) Name() string { return "star" }
+func (Star) Init() {
 	RegisterLink(starredPages)
-	Post(`/+/star/{page...}`, starHandler)
-	Delete(`/+/star/{page...}`, unstarHandler)
 	RegisterTemplate(templates, "templates")
+
+	if !Config.Readonly {
+		RegisterCommand(starAction)
+		RegisterQuickCommand(starAction)
+		Post(`/+/star/{page...}`, starHandler)
+		Delete(`/+/star/{page...}`, unstarHandler)
+	}
 }
 
 type starredPage struct {
@@ -81,10 +91,6 @@ func (l action) Name() string {
 func (_ action) Link() string         { return "" }
 func (_ action) OnClick() template.JS { return "star(event)" }
 func (l action) Widget() template.HTML {
-	if READONLY {
-		return ""
-	}
-
 	starred := isStarred(l.page)
 
 	return Partial("star", Locals{
@@ -94,19 +100,11 @@ func (l action) Widget() template.HTML {
 }
 
 func starAction(p Page) []Command {
-	if READONLY {
-		return nil
-	}
-
 	starred := isStarred(p)
 	return []Command{action{starred: starred, page: p}}
 }
 
 func starHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")
@@ -119,10 +117,6 @@ func starHandler(w Response, r Request) Output {
 }
 
 func unstarHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")

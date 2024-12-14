@@ -11,4 +11,4 @@ ReadOnly mode which can be specified using `--readonly=true` flag. This flag is 
 
 Generate static website process will turn on readonly mode automatically.
 
-Any extensions that writes or modify the filesystem is responsible for checking if `READONLY` global variable is true and make sure that part is not executed.
+Any extensions that writes or modify the filesystem is responsible for checking if `Config.Readonly` global variable is true and make sure that part is not executed.

@@ -10,6 +10,13 @@ import (
 )
 
 func init() {
+	RegisterExtension(AutoLink{})
+}
+
+type AutoLink struct{}
+
+func (AutoLink) Name() string { return "autolink" }
+func (AutoLink) Init() {
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&extension{}, -1),
 	))

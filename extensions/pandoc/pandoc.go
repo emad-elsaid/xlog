@@ -25,10 +25,16 @@ var pandoc_support bool
 
 func init() {
 	flag.BoolVar(&pandoc_support, "pandoc", false, "Use pandoc to render "+strings.Join(SUPPORTED_EXT, ", "))
-	xlog.RegisterPageSource(new(pandoc))
+
+	xlog.RegisterExtension(pandoc{})
 }
 
 type pandoc struct{}
+
+func (pandoc) Name() string { return "pandoc" }
+func (p pandoc) Init() {
+	xlog.RegisterPageSource(&p)
+}
 
 func (p *pandoc) Page(name string) xlog.Page {
 	if !pandoc_support {
@@ -138,6 +144,10 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content xlog.Markdown) bool {
+	if xlog.Config.Readonly {
+		return false
+	}
+
 	xlog.Trigger(xlog.BeforeWrite, p)
 	defer xlog.Trigger(xlog.AfterWrite, p)
 

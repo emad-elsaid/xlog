@@ -25,6 +25,13 @@ func init() {
 	flag.StringVar(&icon, "activitypub.icon", "/public/logo.png", "the path to the activitypub profile icon. mastodon use it as profile picture for example.")
 	flag.StringVar(&image, "activitypub.image", "/public/logo.png", "the path to the activitypub profile image. mastodon use it as profile cover for example.")
 
+	RegisterExtension(ActivityPub{})
+}
+
+type ActivityPub struct{}
+
+func (ActivityPub) Name() string { return "activitypub" }
+func (ActivityPub) Init() {
 	Get(`/.well-known/webfinger`, webfinger)
 	Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
 	Get(`/+/activitypub/{user}/outbox`, outbox)

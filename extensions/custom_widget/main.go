@@ -15,6 +15,13 @@ func init() {
 	flag.StringVar(&before_view_file, "custom_before_view", "", "path to a file it's content will be included in every page BEFORE the content of the page")
 	flag.StringVar(&after_view_file, "custom_after_view", "", "path to a file it's content will be included in every page AFTER the content of the page")
 
+	RegisterExtension(CustomWidget{})
+}
+
+type CustomWidget struct{}
+
+func (CustomWidget) Name() string { return "custom-widget" }
+func (CustomWidget) Init() {
 	RegisterWidget(HEAD_WIDGET, 1, custom_head)
 	RegisterWidget(BEFORE_VIEW_WIDGET, 1, custom_before_view)
 	RegisterWidget(AFTER_VIEW_WIDGET, 1, custom_after_view)

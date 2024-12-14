@@ -36,13 +36,13 @@ func buildStaticSite(dest string) error {
 	// building Index separately
 	err := buildRoute(
 		srv,
-		"/"+INDEX,
+		"/"+Config.Index,
 		dest,
 		path.Join(dest, "index.html"),
 	)
 
 	if err != nil {
-		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", INDEX, "error", err)
+		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", Config.Index, "error", err)
 	}
 
 	EachPageCon(context.Background(), func(p Page) {
@@ -60,7 +60,7 @@ func buildStaticSite(dest string) error {
 
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
-	if in, err := os.Open(path.Join(dest, NOT_FOUND_PAGE, "index.html")); err == nil {
+	if in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html")); err == nil {
 		defer in.Close()
 		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {

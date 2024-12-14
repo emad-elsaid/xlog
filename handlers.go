@@ -13,23 +13,33 @@ import (
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
+	SetupLogger()
+
+	if !Config.Readonly {
+		Listen(AfterWrite, clearPagesCache)
+		Listen(AfterDelete, clearPagesCache)
+	}
+
+	initExtensions()
 
 	// Program Core routes. View, Edit routes and a route to write new content
 	// to the page. + handling root path which just show `index` page.
 	Get("/{$}", rootHandler)
-	Get("/edit/{page...}", getPageEditHandler)
+	if !Config.Readonly {
+		Get("/edit/{page...}", getPageEditHandler)
+	}
 	Get("/{page...}", getPageHandler)
 	Post("/{page...}", postPageHandler)
 
-	if err := os.Chdir(SOURCE); err != nil {
-		slog.Error("Failed to change dir to source", "error", err, "source", SOURCE)
+	if err := os.Chdir(Config.Source); err != nil {
+		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
 		os.Exit(1)
 	}
 
-	if len(BUILD) > 0 {
-		READONLY = true
+	if len(Config.Build) > 0 {
+		Config.Readonly = true
 
-		if err := buildStaticSite(BUILD); err != nil {
+		if err := buildStaticSite(Config.Build); err != nil {
 			slog.Error("Failed to build static pages", "error", err)
 			os.Exit(1)
 		}
@@ -38,7 +48,7 @@ func Start(ctx context.Context) {
 	}
 
 	srv := server()
-	slog.Info("Starting server", "address", bindAddress)
+	slog.Info("Starting server", "address", Config.BindAddress)
 
 	go func() {
 		select {
@@ -53,7 +63,7 @@ func Start(ctx context.Context) {
 
 // Redirect to `/index` to render the index page.
 func rootHandler(w Response, r Request) Output {
-	return Redirect("/" + INDEX)
+	return Redirect("/" + Config.Index)
 }
 
 // Shows a page. the page name is the path itself. if the page doesn't exist it
@@ -63,13 +73,13 @@ func getPageHandler(w Response, r Request) Output {
 
 	if !page.Exists() {
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
-			return Redirect(INDEX)
+			return Redirect(Config.Index)
 		}
 		if output, err := staticHandler(r); err == nil {
 			return output
 		}
 
-		if READONLY {
+		if Config.Readonly {
 			return NotFound("can't find page")
 		}
 
@@ -87,10 +97,6 @@ func getPageHandler(w Response, r Request) Output {
 
 // Edit page, gets the page from path
 func getPageEditHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	page := NewPage(r.PathValue("page"))
 
 	var content Markdown
@@ -110,10 +116,6 @@ func getPageEditHandler(w Response, r Request) Output {
 
 // Save new content of the page
 func postPageHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("Readonly mode is active")
-	}
-
 	page := NewPage(r.PathValue("page"))
 	content := r.FormValue("content")
 	page.Write(Markdown(content))

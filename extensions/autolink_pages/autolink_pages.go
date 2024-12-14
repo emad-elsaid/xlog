@@ -25,14 +25,6 @@ func (a fileInfoByNameLength) Len() int           { return len(a) }
 func (a fileInfoByNameLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > len(a[j].Name()) }
 
-func init() {
-	Listen(AfterWrite, UpdatePagesList)
-	Listen(AfterDelete, UpdatePagesList)
-
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, backlinksSection)
-	RegisterTemplate(templates, "templates")
-}
-
 var autolinkPages []Page
 var autolinkPage_lck sync.Mutex
 
@@ -60,7 +52,7 @@ func countTodos(p Page) (total int, done int) {
 }
 
 func backlinksSection(p Page) template.HTML {
-	if p.Name() == INDEX {
+	if p.Name() == Config.Index {
 		return ""
 	}
 

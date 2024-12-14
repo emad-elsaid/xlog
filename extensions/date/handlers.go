@@ -10,11 +10,6 @@ import (
 //go:embed templates
 var templates embed.FS
 
-func init() {
-	RegisterTemplate(templates, "templates")
-	Get(`/+/date/{date}`, dateHandler)
-}
-
 func dateHandler(w Response, r Request) Output {
 	dateV := r.PathValue("date")
 	date, err := time.Parse("2-1-2006", dateV)

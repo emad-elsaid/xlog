@@ -11,6 +11,13 @@ var custom_css_file string
 
 func init() {
 	flag.StringVar(&custom_css_file, "custom_css", "", "Custom CSS file path")
+	RegisterExtension(CustomCSS{})
+}
+
+type CustomCSS struct{}
+
+func (CustomCSS) Name() string { return "custom-css" }
+func (CustomCSS) Init() {
 	RegisterWidget(HEAD_WIDGET, 1, custom_css_tag)
 }
 

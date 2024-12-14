@@ -17,16 +17,23 @@ const MIN_SEARCH_KEYWORD = 3
 var templates embed.FS
 
 func init() {
+	RegisterExtension(Search{})
+}
+
+type Search struct{}
+
+func (Search) Name() string { return "search" }
+func (Search) Init() {
+	if Config.Readonly {
+		return
+	}
+
 	Get(`/+/search`, searchHandler)
 	RegisterWidget("search", 0, searchWidget)
 	RegisterTemplate(templates, "templates")
 }
 
 func searchWidget(_ Page) template.HTML {
-	if READONLY {
-		return ""
-	}
-
 	return Partial("search-widget", nil)
 }
 

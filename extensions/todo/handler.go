@@ -8,17 +8,9 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-func init() {
-	Post(`/+/todo`, toggleHandler)
-}
-
 var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)
 
 func toggleHandler(w Response, r Request) Output {
-	if READONLY {
-		return Unauthorized("")
-	}
-
 	page := NewPage(r.FormValue("page"))
 	if !page.Exists() {
 		return NotFound(fmt.Sprintf("page: %s not found", page.Name()))

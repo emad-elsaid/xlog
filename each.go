@@ -9,11 +9,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func init() {
-	Listen(AfterWrite, clearPagesCache)
-	Listen(AfterDelete, clearPagesCache)
-}
-
 // a List of directories that should be ignored by directory walking function.
 // for example the versioning extension can register `.versions` directory to be
 // ignored

@@ -9,6 +9,13 @@ import (
 )
 
 func init() {
+	RegisterExtension(RTL{})
+}
+
+type RTL struct{}
+
+func (RTL) Name() string { return "rtl" }
+func (RTL) Init() {
 	MarkDownRenderer.Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(addDirAuto(0), 0),

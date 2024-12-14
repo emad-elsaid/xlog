@@ -23,6 +23,13 @@ var html_support bool
 
 func init() {
 	flag.BoolVar(&html_support, "html", false, "Consider HTML files as pages")
+	xlog.RegisterExtension(HTML{})
+}
+
+type HTML struct{}
+
+func (HTML) Name() string { return "html" }
+func (HTML) Init() {
 	xlog.RegisterPageSource(new(htmlSource))
 }
 

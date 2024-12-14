@@ -3,8 +3,8 @@ package xlog
 import (
 	"crypto/rand"
 	"encoding/json"
-	"flag"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -12,12 +12,8 @@ import (
 	"github.com/gorilla/csrf"
 )
 
-const xCSRF_COOKIE_NAME = "xlog_csrf"
-
 var (
-	bindAddress   string
-	serveInsecure bool
-	router        = http.NewServeMux()
+	router = http.NewServeMux()
 	// a function that renders CSRF hidden input field
 	CSRF = csrf.TemplateField
 )
@@ -38,8 +34,8 @@ func defaultMiddlewares(readonly bool) (middlewares []func(http.Handler) http.Ha
 		crsfOpts := []csrf.Option{
 			csrf.Path("/"),
 			csrf.FieldName("csrf"),
-			csrf.CookieName(xCSRF_COOKIE_NAME),
-			csrf.Secure(!serveInsecure),
+			csrf.CookieName(Config.CsrfCookieName),
+			csrf.Secure(!Config.ServeInsecure),
 		}
 
 		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
@@ -58,21 +54,16 @@ func defaultMiddlewares(readonly bool) (middlewares []func(http.Handler) http.Ha
 	return
 }
 
-func init() {
-	flag.StringVar(&bindAddress, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
-	flag.BoolVar(&serveInsecure, "serve-insecure", false, "Accept http connections and forward crsf cookie over non secure connections")
-}
-
 func server() *http.Server {
 	compileTemplates()
 	var handler http.Handler = router
-	for _, v := range defaultMiddlewares(READONLY) {
+	for _, v := range defaultMiddlewares(Config.Readonly) {
 		handler = v(handler)
 	}
 
 	return &http.Server{
 		Handler:      handler,
-		Addr:         bindAddress,
+		Addr:         Config.BindAddress,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -155,7 +146,7 @@ func JsonResponse(a any) Output {
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get. the list of middlewares are executed in order
 func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("GET", "path", path, "func", FuncName(handler))()
+	slog.Info("GET", "path", path, "func", callerName(handler))
 	router.HandleFunc("GET "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -164,7 +155,7 @@ func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc)
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post. the list of middlewares are executed in order
 func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("POST", "path", path, "func", FuncName(handler))()
+	slog.Info("POST", "path", path, "func", callerName(handler))
 	router.HandleFunc("POST "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -173,7 +164,7 @@ func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete. the list of middlewares are executed in order
 func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
-	defer timing("DELETE", "path", path, "func", FuncName(handler))()
+	slog.Info("DELETE", "path", path, "func", callerName(handler))
 	router.HandleFunc("DELETE "+path,
 		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
 	)
@@ -208,8 +199,9 @@ func methodOverrideHandler(h http.Handler) http.Handler {
 
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w Response, r Request) {
-		defer timing(r.Method + " " + r.URL.Path)()
+		start := time.Now()
 		h.ServeHTTP(w, r)
+		slog.Info(r.Method+" "+r.URL.Path, "time", time.Since(start))
 	})
 }
 

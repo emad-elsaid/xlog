@@ -4,23 +4,11 @@ package mathjax
 // https://github.com/litao91/goldmark-mathjax
 
 import (
-	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 )
-
-func init() {
-	MarkDownRenderer.Parser().AddOptions(
-		parser.WithInlineParsers(
-			util.Prioritized(&inlineMathParser{}, 999),
-		),
-		parser.WithBlockParsers(
-			util.Prioritized(&mathJaxBlockParser{}, 999),
-		),
-	)
-}
 
 type inlineMathParser struct{}
 

@@ -21,6 +21,13 @@ func init() {
 	flag.StringVar(&description, "rss.description", "", "RSS feed description")
 	flag.IntVar(&limit, "rss.limit", 30, "Limit the number of items in the RSS feed to this amount")
 
+	RegisterExtension(RSS{})
+}
+
+type RSS struct{}
+
+func (RSS) Name() string { return "rss" }
+func (RSS) Init() {
 	RegisterWidget(HEAD_WIDGET, 0, metaTag)
 	RegisterBuildPage("/+/feed.rss", false)
 	RegisterLink(links)
@@ -39,7 +46,7 @@ func links(p Page) []Link {
 
 func metaTag(p Page) template.HTML {
 	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
-	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(SITENAME)))
+	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(Config.Sitename)))
 }
 
 type rss struct {
@@ -67,7 +74,7 @@ func feed(w Response, r Request) Output {
 	f := rss{
 		Version: "2.0",
 		Channel: Channel{
-			Title: SITENAME,
+			Title: Config.Sitename,
 			Link: (&url.URL{
 				Scheme: "https",
 				Host:   domain,

@@ -3,18 +3,10 @@ package date
 import (
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
-	"github.com/yuin/goldmark/util"
 )
-
-func init() {
-	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(&dateParser{}, 999),
-	))
-}
 
 type dateParser struct{}
 

@@ -13,6 +13,13 @@ import (
 var templates embed.FS
 
 func init() {
+	RegisterExtension(Recent{})
+}
+
+type Recent struct{}
+
+func (Recent) Name() string { return "recent" }
+func (Recent) Init() {
 	Get(`/+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")
