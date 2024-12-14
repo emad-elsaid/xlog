@@ -1,5 +1,11 @@
 package xlog
 
+import (
+	"log/slog"
+	"slices"
+	"strings"
+)
+
 type Extension interface {
 	Name() string
 	Init()
@@ -12,7 +18,16 @@ func RegisterExtension(e Extension) {
 }
 
 func initExtensions() {
+	disabled := strings.Split(Config.DisabledExtensions, ",")
+	names := []string{}
 	for i := range extensions {
+		if slices.Contains(disabled, extensions[i].Name()) {
+			continue
+		}
+
 		extensions[i].Init()
+		names = append(names, extensions[i].Name())
 	}
+
+	slog.Info("extensions", "names", names)
 }

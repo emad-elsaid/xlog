@@ -2,7 +2,7 @@
 xlog --help
 
 Usage of xlog:
-  -activitypub.domain string
+-activitypub.domain string
     	domain used for activitypub stream absolute URLs
   -activitypub.icon string
     	the path to the activitypub profile icon. mastodon use it as profile picture for example. (default "/public/logo.png")
@@ -16,6 +16,8 @@ Usage of xlog:
     	IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string
     	Build all pages as static site in this directory
+  -csrf-cookie string
+    	CSRF cookie name (default "xlog_csrf")
   -custom_after_view string
     	path to a file it's content will be included in every page AFTER the content of the page
   -custom_before_view string
@@ -24,6 +26,8 @@ Usage of xlog:
     	Custom CSS file path
   -custom_head string
     	path to a file it's content will be included in every page <head> tag
+  -disabled-extensions string
+    	disable list of extensions by name, comma separated
   -disqus string
     	Disqus domain name for example: xlog-emadelsaid.disqus.com
   -github.branch string

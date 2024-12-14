@@ -6,15 +6,16 @@ import (
 )
 
 type Configuration struct {
-	Source         string // path to markdown files directory
-	Build          string // path to write built files
-	Readonly       bool   // is xlog in readonly mode
-	Sitename       string // name of knowledgebase
-	Index          string // name of the index page markdown file
-	NotFoundPage   string // name of the index page markdown file
-	BindAddress    string // bind address for the server
-	ServeInsecure  bool   // should the server use https for cookie
-	CsrfCookieName string
+	Source             string // path to markdown files directory
+	Build              string // path to write built files
+	Readonly           bool   // is xlog in readonly mode
+	Sitename           string // name of knowledgebase
+	Index              string // name of the index page markdown file
+	NotFoundPage       string // name of the index page markdown file
+	BindAddress        string // bind address for the server
+	ServeInsecure      bool   // should the server use https for cookie
+	CsrfCookieName     string
+	DisabledExtensions string
 }
 
 var Config Configuration
@@ -33,4 +34,5 @@ func init() {
 	flag.StringVar(&Config.BindAddress, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	flag.BoolVar(&Config.ServeInsecure, "serve-insecure", false, "Accept http connections and forward crsf cookie over non secure connections")
 	flag.StringVar(&Config.CsrfCookieName, "csrf-cookie", "xlog_csrf", "CSRF cookie name")
+	flag.StringVar(&Config.DisabledExtensions, "disabled-extensions", "", "disable list of extensions by name, comma separated")
 }

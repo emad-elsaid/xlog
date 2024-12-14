@@ -21,10 +21,11 @@ An extension is a
 
 * Go module/package that imports xlog package
 * Can be hosted anywhere
-*  Has an `init` function
-*  Uses `Register*` functions in the `init` function (checkout Go package documentation)
-*  Adds or improves a feature in xlog using one or more of the extension points.
-*  Imported by a the `main` package of your knowledgebase along with all other extensions and Xlog itself. an example can be found in Xlog CLI
+* Implements `xlog.Extension` interface
+* Has an `Init` function to register all of its components using `Register*`
+* Uses `RegisterExtension` functions in the `init` function of the package to register the extension
+* Adds or improves a feature in xlog using one or more of the extension points.
+* Imported by a the `main` package of your knowledgebase along with all other extensions and Xlog itself. an example can be found in Xlog CLI
 
 # Creating extensions
 
