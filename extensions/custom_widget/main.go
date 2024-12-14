@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"os"
 
+	"github.com/emad-elsaid/memoize"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -22,61 +23,28 @@ type CustomWidget struct{}
 
 func (CustomWidget) Name() string { return "custom-widget" }
 func (CustomWidget) Init() {
-	RegisterWidget(HEAD_WIDGET, 1, custom_head)
-	RegisterWidget(BEFORE_VIEW_WIDGET, 1, custom_before_view)
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, custom_after_view)
+	if head_file != "" {
+		RegisterWidget(HEAD_WIDGET, 1, func(Page) template.HTML {
+			return readFile(head_file)
+		})
+	}
+	if before_view_file != "" {
+		RegisterWidget(BEFORE_VIEW_WIDGET, 1, func(Page) template.HTML {
+			return readFile(before_view_file)
+		})
+	}
+	if after_view_file != "" {
+		RegisterWidget(AFTER_VIEW_WIDGET, 1, func(Page) template.HTML {
+			return readFile(after_view_file)
+		})
+	}
 }
 
-var head_content []byte
-
-func custom_head(_ Page) template.HTML {
-	if head_file == "" {
-		return ""
+var readFile = memoize.New(func(f string) template.HTML {
+	b, err := os.ReadFile(f)
+	if err != nil {
+		panic(err)
 	}
 
-	if head_content == nil {
-		var err error
-		head_content, err = os.ReadFile(head_file)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return template.HTML(head_content)
-}
-
-var before_view_content []byte
-
-func custom_before_view(_ Page) template.HTML {
-	if before_view_file == "" {
-		return ""
-	}
-
-	if before_view_content == nil {
-		var err error
-		before_view_content, err = os.ReadFile(before_view_file)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return template.HTML(before_view_content)
-}
-
-var after_view_content []byte
-
-func custom_after_view(_ Page) template.HTML {
-	if after_view_file == "" {
-		return ""
-	}
-
-	if after_view_content == nil {
-		var err error
-		after_view_content, err = os.ReadFile(after_view_file)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return template.HTML(after_view_content)
-}
+	return template.HTML(b)
+})

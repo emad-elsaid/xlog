@@ -18,13 +18,11 @@ type CustomCSS struct{}
 
 func (CustomCSS) Name() string { return "custom-css" }
 func (CustomCSS) Init() {
-	RegisterWidget(HEAD_WIDGET, 1, custom_css_tag)
+	if custom_css_file != "" {
+		RegisterWidget(HEAD_WIDGET, 1, custom_css_tag)
+	}
 }
 
 func custom_css_tag(_ Page) template.HTML {
-	if custom_css_file == "" {
-		return ""
-	}
-
 	return template.HTML(`<link rel="stylesheet" href="` + custom_css_file + `">`)
 }
