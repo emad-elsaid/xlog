@@ -67,7 +67,6 @@ func Partial(path string, data Locals) template.HTML {
 		return template.HTML(fmt.Sprintf("template %s not found", path))
 	}
 
-	// set extra locals here
 	if data == nil {
 		data = Locals{}
 	}
