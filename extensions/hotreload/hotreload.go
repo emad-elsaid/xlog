@@ -85,7 +85,6 @@ func handleWebSocket(w Response, r Request) Output {
 	return xlog.Noop
 }
 
-// TODO use same HOST and PORT than server
 const clientScript = `
     <script>
     (() => {
