@@ -145,28 +145,28 @@ func JsonResponse(a any) Output {
 
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get. the list of middlewares are executed in order
-func Get(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+func Get(path string, handler HandlerFunc) {
 	slog.Info("GET", "path", path, "func", callerName(handler))
 	router.HandleFunc("GET "+path,
-		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		handlerFuncToHttpHandler(handler),
 	)
 }
 
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post. the list of middlewares are executed in order
-func Post(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+func Post(path string, handler HandlerFunc) {
 	slog.Info("POST", "path", path, "func", callerName(handler))
 	router.HandleFunc("POST "+path,
-		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		handlerFuncToHttpHandler(handler),
 	)
 }
 
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete. the list of middlewares are executed in order
-func Delete(path string, handler HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) {
+func Delete(path string, handler HandlerFunc) {
 	slog.Info("DELETE", "path", path, "func", callerName(handler))
 	router.HandleFunc("DELETE "+path,
-		applyMiddlewares(handlerFuncToHttpHandler(handler), middlewares...),
+		handlerFuncToHttpHandler(handler),
 	)
 }
 
@@ -175,17 +175,6 @@ func Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
 		fmt.Fprint(w, Partial(path, data))
 	}
-}
-
-func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
-	if len(middlewares) == 0 {
-		return handler
-	}
-
-	for i := len(middlewares) - 1; i >= 0; i-- {
-		handler = middlewares[i](handler)
-	}
-	return handler
 }
 
 // Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
