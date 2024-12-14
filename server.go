@@ -178,6 +178,10 @@ func Render(path string, data Locals) Output {
 }
 
 func applyMiddlewares(handler http.HandlerFunc, middlewares ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
+	if len(middlewares) == 0 {
+		return handler
+	}
+
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		handler = middlewares[i](handler)
 	}

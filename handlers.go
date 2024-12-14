@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"log/slog"
 	"os"
@@ -71,6 +72,10 @@ func rootHandler(w Response, r Request) Output {
 func getPageHandler(w Response, r Request) Output {
 	page := NewPage(r.PathValue("page"))
 
+	if page == nil {
+		return NoContent()
+	}
+
 	if !page.Exists() {
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
 			return Redirect(Config.Index)
@@ -99,6 +104,10 @@ func getPageHandler(w Response, r Request) Output {
 func getPageEditHandler(w Response, r Request) Output {
 	page := NewPage(r.PathValue("page"))
 
+	if page == nil {
+		return NoContent()
+	}
+
 	var content Markdown
 	if page.Exists() {
 		content = page.Content()
@@ -117,6 +126,11 @@ func getPageEditHandler(w Response, r Request) Output {
 // Save new content of the page
 func postPageHandler(w Response, r Request) Output {
 	page := NewPage(r.PathValue("page"))
+
+	if page == nil {
+		return InternalServerError(errors.New("Can't save page, NewPage returned nil"))
+	}
+
 	content := r.FormValue("content")
 	page.Write(Markdown(content))
 

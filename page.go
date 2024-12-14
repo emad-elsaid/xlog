@@ -158,7 +158,7 @@ func (p *page) AST() (source []byte, tree ast.Node) {
 
 func (p *page) Emoji() string {
 	_, tree := p.AST()
-	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok {
+	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
 		return string(e.Value.Unicode)
 	}
 
