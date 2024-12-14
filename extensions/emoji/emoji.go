@@ -17,15 +17,11 @@ func init() {
 type Emoji struct{}
 
 func (Emoji) Name() string { return "emoji" }
-func (Emoji) Init() {
-	RegisterAutocomplete(autocomplete(0))
-}
+func (Emoji) Init()        { RegisterAutocomplete(autocomplete(0)) }
 
 type autocomplete int
 
-func (a autocomplete) StartChar() string {
-	return ":"
-}
+func (a autocomplete) StartChar() string { return ":" }
 
 // TODO this is a bit inefficient as it parses the emoji json everytime
 func (a autocomplete) Suggestions() []*Suggestion {

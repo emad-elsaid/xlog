@@ -43,19 +43,10 @@ type PageRename struct {
 	page Page
 }
 
-func (f PageRename) Icon() string {
-	return "fa-solid fa-i-cursor"
-}
-
-func (f PageRename) Name() string {
-	return "Rename"
-}
-
-func (f PageRename) OnClick() template.JS {
-	return "renamePage(event)"
-}
-
-func (_ PageRename) Link() string { return "" }
+func (PageRename) Icon() string         { return "fa-solid fa-i-cursor" }
+func (PageRename) Name() string         { return "Rename" }
+func (PageRename) OnClick() template.JS { return "renamePage(event)" }
+func (PageRename) Link() string         { return "" }
 
 func (f PageRename) Widget() template.HTML {
 	if !f.page.Exists() {
@@ -88,19 +79,10 @@ type PageDelete struct {
 	page Page
 }
 
-func (f PageDelete) Icon() string {
-	return "fa-solid fa-trash"
-}
-
-func (f PageDelete) Name() string {
-	return "Delete"
-}
-
-func (_ PageDelete) Link() string { return "" }
-
-func (f PageDelete) OnClick() template.JS {
-	return "deletePage(event)"
-}
+func (PageDelete) Icon() string         { return "fa-solid fa-trash" }
+func (PageDelete) Name() string         { return "Delete" }
+func (PageDelete) Link() string         { return "" }
+func (PageDelete) OnClick() template.JS { return "deletePage(event)" }
 
 func (f PageDelete) Widget() template.HTML {
 	if !f.page.Exists() {
