@@ -33,14 +33,12 @@ type pandoc struct{}
 
 func (pandoc) Name() string { return "pandoc" }
 func (p pandoc) Init() {
-	xlog.RegisterPageSource(&p)
+	if pandoc_support {
+		xlog.RegisterPageSource(&p)
+	}
 }
 
 func (p *pandoc) Page(name string) xlog.Page {
-	if !pandoc_support {
-		return nil
-	}
-
 	for _, ext := range SUPPORTED_EXT {
 		pg := page{
 			name: name,
@@ -55,10 +53,6 @@ func (p *pandoc) Page(name string) xlog.Page {
 }
 
 func (p *pandoc) Each(ctx context.Context, f func(xlog.Page)) {
-	if !pandoc_support {
-		return
-	}
-
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		select {
 

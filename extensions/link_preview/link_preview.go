@@ -13,8 +13,6 @@ import (
 	"regexp"
 	"strings"
 
-	_ "embed"
-
 	. "github.com/emad-elsaid/xlog"
 )
 

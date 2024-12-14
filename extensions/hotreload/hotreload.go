@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"sync"
 
-	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 	"github.com/gorilla/websocket"
 )
@@ -82,7 +81,7 @@ func handleWebSocket(w Response, r Request) Output {
 	clients[conn] = true
 	clientsMutex.Unlock()
 
-	return xlog.Noop
+	return Noop
 }
 
 const clientScript = `

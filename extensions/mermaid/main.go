@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"html/template"
 
+	_ "embed"
+
 	. "github.com/emad-elsaid/xlog"
 	shortcode "github.com/emad-elsaid/xlog/extensions/shortcode"
 )
@@ -19,19 +21,13 @@ func (Mermaid) Init() {
 	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
 }
 
-const script = `
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs';
-  mermaid.initialize({
-	startOnLoad: true,
-    securityLevel: 'loose',
-    theme: "neutral"
-  });
-</script>
-`
+//go:embed script.html
+var script string
+
+const pre = `<pre class="mermaid" style="background: transparent;text-align:center;">%s</pre>`
 
 func renderer(md Markdown) template.HTML {
-	html := fmt.Sprintf(`<pre class="mermaid" style="background: transparent;text-align:center;">%s</pre>`, md)
+	html := fmt.Sprintf(pre, md)
 	return template.HTML(html + script)
 
 }

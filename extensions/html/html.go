@@ -13,9 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yuin/goldmark/ast"
-
 	"github.com/emad-elsaid/xlog"
+	"github.com/yuin/goldmark/ast"
 )
 
 var SUPPORTED_EXT = []string{".htm", ".html", ".xhtml"}
@@ -30,16 +29,14 @@ type HTML struct{}
 
 func (HTML) Name() string { return "html" }
 func (HTML) Init() {
-	xlog.RegisterPageSource(new(htmlSource))
+	if html_support {
+		xlog.RegisterPageSource(new(htmlSource))
+	}
 }
 
 type htmlSource struct{}
 
 func (p *htmlSource) Page(name string) xlog.Page {
-	if !html_support {
-		return nil
-	}
-
 	for _, ext := range SUPPORTED_EXT {
 		pg := page{
 			name: name,
@@ -54,10 +51,6 @@ func (p *htmlSource) Page(name string) xlog.Page {
 }
 
 func (p *htmlSource) Each(ctx context.Context, f func(xlog.Page)) {
-	if !html_support {
-		return
-	}
-
 	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		select {
 
