@@ -7,3 +7,4 @@ If you were a user for v1 and would like to upgrade to v2 please take the follow
 * For extensions development 
   * You're now required to `xlog.RegisterExtension` your extension in your `init()` function then `Register*` the rest of your components in the extension `.Init()` function instead of the global one. this allow for future development to enable/disable extensions by the user.
   * Your extension can now check for `xlog.Config.Readonly` instead of `xlog.READONLY` during initialization (extension `Init()`)
+  * `Get/Post/Delete/..etc` doesn't accept middlewares parameters anymore
