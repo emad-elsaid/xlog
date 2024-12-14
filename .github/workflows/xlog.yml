@@ -42,7 +42,6 @@ jobs:
           go run ../cmd/xlog \
           --build . \
           --sitename "Xlog" \
-          --sidebar=false \
           --html=true \
           --sitemap.domain=xlog.emadelsaid.com \
           --rss.domain xlog.emadelsaid.com \
