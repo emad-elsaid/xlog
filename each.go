@@ -12,13 +12,23 @@ import (
 // a List of directories that should be ignored by directory walking function.
 // for example the versioning extension can register `.versions` directory to be
 // ignored
-var ignoredDirs = []*regexp.Regexp{
-	regexp.MustCompile(`\..+`), // Ignore any hidden directory
+var ignoredPaths = []*regexp.Regexp{
+	regexp.MustCompile(`^\.`), // Ignore any hidden directory
 }
 
-// IgnoreDirectory Register a pattern to be ignored when walking directories.
-func IgnoreDirectory(r *regexp.Regexp) {
-	ignoredDirs = append(ignoredDirs, r)
+// IgnorePath Register a pattern to be ignored when walking directories.
+func IgnorePath(r *regexp.Regexp) {
+	ignoredPaths = append(ignoredPaths, r)
+}
+
+func IsIgnoredPath(d string) bool {
+	for _, v := range ignoredPaths {
+		if v.MatchString(d) {
+			return true
+		}
+	}
+
+	return false
 }
 
 var pages []Page

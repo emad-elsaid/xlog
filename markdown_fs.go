@@ -71,9 +71,14 @@ func newMarkdownFS(p string) *markdownFS {
 						continue
 					}
 
+					if IsIgnoredPath(relPath) {
+						continue
+					}
+
 					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
-					Trigger(Changed, cp)
+
+					Trigger(PageChanged, cp)
 
 					m.cache.Remove(name)
 				}
@@ -102,14 +107,8 @@ func (m *markdownFS) Page(name string) Page {
 
 func (m *markdownFS) Each(ctx context.Context, f func(Page)) {
 	filepath.WalkDir(m.path, func(name string, d fs.DirEntry, err error) error {
-		if d.IsDir() {
-			for _, v := range ignoredDirs {
-				if v.MatchString(name) {
-					return fs.SkipDir
-				}
-			}
-
-			return nil
+		if name != "." && d.IsDir() && IsIgnoredPath(name) {
+			return fs.SkipDir
 		}
 
 		select {

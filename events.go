@@ -17,10 +17,8 @@ type (
 // notified when the page is created or overwritten or deleted should register
 // an event handler for the interesting events.
 const (
-	BeforeWrite PageEvent = iota
-	AfterWrite
-	AfterDelete
-	Changed
+	PageChanged PageEvent = iota
+	PageDeleted
 	PageNotFound // user requested a page that's not found
 )
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/url"
+	"regexp"
 	"strings"
 
 	_ "embed"
@@ -27,6 +28,7 @@ func (Star) Name() string { return "star" }
 func (Star) Init() {
 	RegisterLink(starredPages)
 	RegisterTemplate(templates, "templates")
+	IgnorePath(regexp.MustCompile(`^starred\.md$`))
 
 	if !Config.Readonly {
 		RegisterCommand(starAction)

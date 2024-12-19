@@ -125,7 +125,7 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) Delete() bool {
-	defer xlog.Trigger(xlog.AfterDelete, p)
+	defer xlog.Trigger(xlog.PageDeleted, p)
 
 	if p.Exists() {
 		err := os.Remove(p.FileName())
@@ -142,8 +142,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 		return false
 	}
 
-	xlog.Trigger(xlog.BeforeWrite, p)
-	defer xlog.Trigger(xlog.AfterWrite, p)
+	defer xlog.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)

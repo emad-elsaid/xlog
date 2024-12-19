@@ -16,9 +16,9 @@ func Start(ctx context.Context) {
 	SetupLogger()
 
 	if !Config.Readonly {
-		Listen(AfterWrite, clearPagesCache)
-		Listen(Changed, clearPagesCache)
-		Listen(AfterDelete, clearPagesCache)
+		Listen(PageChanged, clearPagesCache)
+		Listen(PageChanged, clearPagesCache)
+		Listen(PageDeleted, clearPagesCache)
 	}
 
 	initExtensions()

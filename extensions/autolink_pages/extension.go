@@ -18,8 +18,8 @@ func (AutoLinkPages) Init() {
 	RegisterAutocomplete(autocomplete{})
 
 	if !Config.Readonly {
-		Listen(AfterWrite, UpdatePagesList)
-		Listen(AfterDelete, UpdatePagesList)
+		Listen(PageChanged, UpdatePagesList)
+		Listen(PageDeleted, UpdatePagesList)
 	}
 
 	RegisterWidget(WidgetAfterView, 1, backlinksSection)
