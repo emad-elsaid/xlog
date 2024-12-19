@@ -23,7 +23,7 @@ func (Recent) Init() {
 	Get(`/+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")
-	RegisterLink(func(_ Page) []Link { return []Link{links{}} })
+	RegisterLink(func(Page) []Link { return []Link{links{}} })
 }
 
 func recentHandler(r Request) Output {

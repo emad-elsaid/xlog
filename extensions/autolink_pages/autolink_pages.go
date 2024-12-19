@@ -28,7 +28,7 @@ func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > le
 var autolinkPages []Page
 var autolinkPage_lck sync.Mutex
 
-func UpdatePagesList(_ Page) (err error) {
+func UpdatePagesList(Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 

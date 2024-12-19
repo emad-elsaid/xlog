@@ -23,6 +23,6 @@ func (CustomCSS) Init() {
 	}
 }
 
-func custom_css_tag(_ Page) template.HTML {
+func custom_css_tag(Page) template.HTML {
 	return template.HTML(`<link rel="stylesheet" href="` + custom_css_file + `">`)
 }

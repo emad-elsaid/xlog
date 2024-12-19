@@ -36,9 +36,9 @@ func (RSS) Init() {
 
 type rssLink struct{}
 
-func (_ rssLink) Icon() string { return "fa-solid fa-rss" }
-func (_ rssLink) Name() string { return "RSS" }
-func (_ rssLink) Link() string { return "/+/feed.rss" }
+func (rssLink) Icon() string { return "fa-solid fa-rss" }
+func (rssLink) Name() string { return "RSS" }
+func (rssLink) Link() string { return "/+/feed.rss" }
 
 func links(p Page) []Link {
 	return []Link{rssLink{}}

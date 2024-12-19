@@ -88,8 +88,8 @@ func (l action) Name() string {
 		return "Star"
 	}
 }
-func (_ action) Link() string         { return "" }
-func (_ action) OnClick() template.JS { return "star(event)" }
+func (action) Link() string         { return "" }
+func (action) OnClick() template.JS { return "star(event)" }
 func (l action) Widget() template.HTML {
 	starred := isStarred(l.page)
 

@@ -60,7 +60,7 @@ func newMarkdownFS(p string) *markdownFS {
 
 			for {
 				switch ei := <-events; ei.Event() {
-				case notify.Write, notify.Remove, notify.Rename:
+				case notify.Write, notify.Remove, notify.Rename, notify.Create:
 					relPath, err := filepath.Rel(absPath, ei.Path())
 					if err != nil {
 						slog.Error("Can't resolve relative path", "error", err)

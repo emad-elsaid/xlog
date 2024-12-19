@@ -33,7 +33,7 @@ func (Search) Init() {
 	RegisterTemplate(templates, "templates")
 }
 
-func searchWidget(_ Page) template.HTML {
+func searchWidget(Page) template.HTML {
 	return Partial("search-widget", nil)
 }
 

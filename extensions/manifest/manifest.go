@@ -28,6 +28,6 @@ func manifest(r Request) Output {
 	return Cache(Render("manifest", Locals{"sitename": Config.Sitename}))
 }
 
-func head(_ Page) template.HTML {
+func head(Page) template.HTML {
 	return template.HTML(`<link rel="manifest" href="/manifest.json">`)
 }

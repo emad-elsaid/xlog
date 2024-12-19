@@ -63,5 +63,5 @@ func VersionProps(p Page) []Property {
 
 type prop int
 
-func (_ prop) Icon() string { return "fa-solid fa-code-branch" }
+func (prop) Icon() string { return "fa-solid fa-code-branch" }
 func (l prop) Name() string { return fmt.Sprintf("%d versions", l) }

@@ -12,7 +12,7 @@ type PageLink struct {
 	page Page
 }
 
-func (_ *PageLink) Kind() ast.NodeKind {
+func (*PageLink) Kind() ast.NodeKind {
 	return KindPageLink
 }
 

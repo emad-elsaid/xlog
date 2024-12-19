@@ -12,7 +12,7 @@ import (
 
 type pageLinkParser struct{}
 
-func (_ *pageLinkParser) Trigger() []byte {
+func (*pageLinkParser) Trigger() []byte {
 	// ' ' indicates any white spaces and a line head
 	return []byte{' ', '*', '_', '~', '('}
 }

@@ -164,7 +164,7 @@ func outbox(r Request) Output {
 	}
 
 	count := 0
-	EachPage(r.Context(), func(_ Page) {
+	EachPage(r.Context(), func(Page) {
 		count += 1
 		RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
 	})
