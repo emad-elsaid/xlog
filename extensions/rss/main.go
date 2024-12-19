@@ -34,14 +34,14 @@ func (RSS) Init() {
 	Get(`/+/feed.rss`, feed)
 }
 
-type rssLink int
+type rssLink struct{}
 
 func (_ rssLink) Icon() string { return "fa-solid fa-rss" }
 func (_ rssLink) Name() string { return "RSS" }
 func (_ rssLink) Link() string { return "/+/feed.rss" }
 
 func links(p Page) []Link {
-	return []Link{rssLink(0)}
+	return []Link{rssLink{}}
 }
 
 func metaTag(p Page) template.HTML {

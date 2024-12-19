@@ -6,7 +6,7 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-type columnizeImagesParagraph int
+type columnizeImagesParagraph struct{}
 
 func (t columnizeImagesParagraph) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
 	paragraphs := []*ast.Paragraph{}

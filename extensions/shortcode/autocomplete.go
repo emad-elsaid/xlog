@@ -6,7 +6,7 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
-type autocomplete int
+type autocomplete struct{}
 
 func (a autocomplete) StartChar() string {
 	return string(trigger)

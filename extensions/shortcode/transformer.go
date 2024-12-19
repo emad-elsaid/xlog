@@ -6,7 +6,7 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-type transformShortCodeBlocks int
+type transformShortCodeBlocks struct{}
 
 func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
 	source := reader.Source()

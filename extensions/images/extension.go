@@ -17,7 +17,7 @@ func (Images) Name() string { return "images" }
 func (Images) Init() {
 	MarkDownRenderer.Parser().AddOptions(
 		parser.WithASTTransformers(
-			util.Prioritized(columnizeImagesParagraph(0), 0),
+			util.Prioritized(columnizeImagesParagraph{}, 0),
 		),
 	)
 	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(

@@ -32,8 +32,8 @@ func (Hashtags) Init() {
 	Get(`/+/tag/{tag}`, tagHandler)
 	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
 	RegisterBuildPage("/+/tags", true)
-	RegisterLink(func(_ Page) []Link { return []Link{link(0)} })
-	RegisterAutocomplete(autocomplete(0))
+	RegisterLink(func(_ Page) []Link { return []Link{link{}} })
+	RegisterAutocomplete(autocomplete{})
 	RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: hashtagPages})
 
@@ -45,7 +45,7 @@ func (Hashtags) Init() {
 	))
 }
 
-type link int
+type link struct{}
 
 func (l link) Icon() string { return "fa-solid fa-tags" }
 func (l link) Name() string { return "Hashtags" }
@@ -204,7 +204,7 @@ func relatedPages(p Page) template.HTML {
 	})
 }
 
-type autocomplete int
+type autocomplete struct{}
 
 func (a autocomplete) StartChar() string {
 	return "#"

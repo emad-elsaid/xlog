@@ -18,12 +18,12 @@ func (RTL) Name() string { return "rtl" }
 func (RTL) Init() {
 	MarkDownRenderer.Parser().AddOptions(
 		parser.WithASTTransformers(
-			util.Prioritized(addDirAuto(0), 0),
+			util.Prioritized(addDirAuto{}, 0),
 		),
 	)
 }
 
-type addDirAuto int
+type addDirAuto struct{}
 
 func (t addDirAuto) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
 	tags := []ast.Node{}

@@ -18,9 +18,9 @@ func init() {
 type Emoji struct{}
 
 func (Emoji) Name() string { return "emoji" }
-func (Emoji) Init()        { RegisterAutocomplete(autocomplete(0)) }
+func (Emoji) Init()        { RegisterAutocomplete(autocomplete{}) }
 
-type autocomplete int
+type autocomplete struct{}
 
 func (a autocomplete) StartChar() string          { return ":" }
 func (a autocomplete) Suggestions() []*Suggestion { return suggestions() }
