@@ -44,6 +44,10 @@ func newPage(p xlog.Page) error {
 var ignoredPages = []string{"favicon.ico"}
 
 func openEditor(page xlog.Page) {
+	if page == nil {
+		return
+	}
+
 	if slices.Contains(ignoredPages, page.Name()) {
 		return
 	}

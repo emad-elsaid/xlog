@@ -27,6 +27,10 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 
 	line, segment := block.PeekLine()
+	if line == nil {
+		return nil
+	}
+
 	consumes := 0
 	start := segment.Start
 	c := line[0]
