@@ -121,9 +121,6 @@ func NoContent() Output {
 	}
 }
 
-// Noop is an output that doesn't do anything to the request. can be useful for a websocket upgrader
-func Noop(w Response, r Request) {}
-
 // PlainText returns an output function that writes text to response writer
 func PlainText(text string) Output {
 	return func(w Response, r Request) {
