@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 
 	"github.com/emad-elsaid/xlog"
@@ -40,7 +41,13 @@ func newPage(p xlog.Page) error {
 	return nil
 }
 
+var ignoredPages = []string{"favicon.ico"}
+
 func openEditor(page xlog.Page) {
+	if slices.Contains(ignoredPages, page.Name()) {
+		return
+	}
+
 	segments := strings.Split(editor, " ")
 	if len(segments) == 0 {
 		return
