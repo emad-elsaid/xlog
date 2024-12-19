@@ -147,27 +147,21 @@ func JsonResponse(a any) Output {
 // method is http Get. the list of middlewares are executed in order
 func Get(path string, handler HandlerFunc) {
 	slog.Info("GET", "path", path, "func", callerName(handler))
-	router.HandleFunc("GET "+path,
-		handlerFuncToHttpHandler(handler),
-	)
+	router.HandleFunc("GET "+path, handlerFuncToHttpHandler(handler))
 }
 
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post. the list of middlewares are executed in order
 func Post(path string, handler HandlerFunc) {
 	slog.Info("POST", "path", path, "func", callerName(handler))
-	router.HandleFunc("POST "+path,
-		handlerFuncToHttpHandler(handler),
-	)
+	router.HandleFunc("POST "+path, handlerFuncToHttpHandler(handler))
 }
 
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete. the list of middlewares are executed in order
 func Delete(path string, handler HandlerFunc) {
 	slog.Info("DELETE", "path", path, "func", callerName(handler))
-	router.HandleFunc("DELETE "+path,
-		handlerFuncToHttpHandler(handler),
-	)
+	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
 }
 
 // Render returns an output function that renders partial with data and writes it as response

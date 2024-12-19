@@ -81,6 +81,9 @@ func getPageHandler(w Response, r Request) Output {
 			return NotFound("can't find page")
 		}
 
+		// Allow extensions to handle the event
+		Trigger(PageNotFound, page)
+
 		return NotFound("Page does not exist")
 	}
 

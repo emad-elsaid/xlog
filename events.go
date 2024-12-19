@@ -21,6 +21,7 @@ const (
 	AfterWrite
 	AfterDelete
 	Changed
+	PageNotFound // user requested a page that's not found
 )
 
 // a map to keep all page events and respective list of event handlers

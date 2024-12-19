@@ -31,15 +31,19 @@ func (Editor) Init() {
 
 	xlog.RegisterQuickCommand(links)
 	xlog.Post(`/+/editor/{page...}`, editorHandler)
+	xlog.Listen(xlog.PageNotFound, newPage)
 }
 
-func editorHandler(w xlog.Response, r xlog.Request) xlog.Output {
-	page := xlog.NewPage(r.PathValue("page"))
-	slog.Info("Editing page", "name", page)
+func newPage(p xlog.Page) error {
+	openEditor(p)
 
+	return nil
+}
+
+func openEditor(page xlog.Page) {
 	segments := strings.Split(editor, " ")
 	if len(segments) == 0 {
-		return xlog.NoContent()
+		return
 	}
 
 	name := segments[0]
@@ -49,6 +53,13 @@ func editorHandler(w xlog.Response, r xlog.Request) xlog.Output {
 	if err := cmd.Start(); err != nil {
 		slog.Error("Error start command", "command", cmd.String(), "error", err)
 	}
+}
+
+func editorHandler(w xlog.Response, r xlog.Request) xlog.Output {
+	page := xlog.NewPage(r.PathValue("page"))
+	slog.Info("Editing page", "name", page)
+
+	openEditor(page)
 
 	return xlog.NoContent()
 }
