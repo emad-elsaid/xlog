@@ -116,7 +116,7 @@ func (u command) Widget() template.HTML {
 	})
 }
 
-func uploadFileHandler(w Response, r Request) Output {
+func uploadFileHandler(r Request) Output {
 	r.ParseMultipartForm(MAX_FILE_UPLOAD)
 
 	fileName := r.FormValue("page")

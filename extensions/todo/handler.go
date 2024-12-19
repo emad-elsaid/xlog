@@ -10,7 +10,7 @@ import (
 
 var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)
 
-func toggleHandler(w Response, r Request) Output {
+func toggleHandler(r Request) Output {
 	page := NewPage(r.FormValue("page"))
 	if !page.Exists() {
 		return NotFound(fmt.Sprintf("page: %s not found", page.Name()))

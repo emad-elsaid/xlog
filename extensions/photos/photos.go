@@ -215,7 +215,7 @@ func photosShortcode(input xlog.Markdown) template.HTML {
 	})
 }
 
-func resizeHandler(w xlog.Response, r xlog.Request) xlog.Output {
+func resizeHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 
 	const cacheDir = ".cache"
@@ -255,7 +255,7 @@ func resizeHandler(w xlog.Response, r xlog.Request) xlog.Output {
 	}
 }
 
-func photoHandler(w xlog.Response, r xlog.Request) xlog.Output {
+func photoHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 	photo, err := NewPhoto(photo_path)
 	if err != nil {

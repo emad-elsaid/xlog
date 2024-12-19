@@ -104,7 +104,7 @@ func starAction(p Page) []Command {
 	return []Command{action{starred: starred, page: p}}
 }
 
-func starHandler(w Response, r Request) Output {
+func starHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")
@@ -116,7 +116,7 @@ func starHandler(w Response, r Request) Output {
 	return NoContent()
 }
 
-func unstarHandler(w Response, r Request) Output {
+func unstarHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
 	if !page.Exists() {
 		return Redirect("/")

@@ -56,13 +56,13 @@ func Start(ctx context.Context) {
 }
 
 // Redirect to `/index` to render the index page.
-func rootHandler(w Response, r Request) Output {
+func rootHandler(r Request) Output {
 	return Redirect("/" + Config.Index)
 }
 
 // Shows a page. the page name is the path itself. if the page doesn't exist it
 // redirect to edit page otherwise will render it to HTML
-func getPageHandler(w Response, r Request) Output {
+func getPageHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
 
 	if page == nil {

@@ -26,7 +26,7 @@ func (Recent) Init() {
 	RegisterLink(func(_ Page) []Link { return []Link{links(0)} })
 }
 
-func recentHandler(_ Response, r Request) Output {
+func recentHandler(r Request) Output {
 	var rp recentPages = Pages(r.Context())
 	sort.Sort(rp)
 

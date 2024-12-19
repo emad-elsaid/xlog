@@ -71,11 +71,11 @@ func server() *http.Server {
 
 // HandlerFunc is the type of an HTTP handler function + returns output function.
 // it makes it easier to return the output directly instead of writing the output to w then return.
-type HandlerFunc func(Response, Request) Output
+type HandlerFunc func(Request) Output
 
 func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	return func(w Response, r Request) {
-		handler(w, r)(w, r)
+		handler(r)(w, r)
 	}
 }
 

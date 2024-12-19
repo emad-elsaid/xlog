@@ -59,7 +59,7 @@ type webfingerResponse struct {
 	Links   []map[string]string `json:"links,omitempty"`
 }
 
-func webfinger(w Response, r Request) Output {
+func webfinger(r Request) Output {
 	if domain == "" || username == "" {
 		return NoContent()
 	}
@@ -107,7 +107,7 @@ type profileResponse struct {
 	Image             map[string]string `json:"image,omitempty"`
 }
 
-func profile(w Response, r Request) Output {
+func profile(r Request) Output {
 	if domain == "" || username == "" {
 		return NoContent()
 	}
@@ -154,7 +154,7 @@ type outboxResponse struct {
 	Last       string `json:"last,omitempty"`
 }
 
-func outbox(w Response, r Request) Output {
+func outbox(r Request) Output {
 	if domain == "" || username == "" {
 		return NoContent()
 	}
@@ -210,7 +210,7 @@ type outboxPageObject struct {
 	Content      string
 }
 
-func outboxPage(w Response, r Request) Output {
+func outboxPage(r Request) Output {
 	if domain == "" || username == "" {
 		return NoContent()
 	}

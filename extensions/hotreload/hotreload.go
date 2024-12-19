@@ -53,35 +53,35 @@ func NotifyPageChange(p Page) error {
 	return nil
 }
 
-func handleWebSocket(w Response, r Request) Output {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		slog.Error("Failed to upgrade", "error", err)
-		return BadRequest(err.Error())
-	}
+func handleWebSocket(r Request) Output {
+	return func(w Response, r Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			slog.Error("Failed to upgrade", "error", err)
+			BadRequest(err.Error())(w, r)
+		}
 
-	// keep connection open
-	go func() {
-		defer func() {
-			clientsMutex.Lock()
-			delete(clients, conn)
-			clientsMutex.Unlock()
-			conn.Close()
+		// keep connection open
+		go func() {
+			defer func() {
+				clientsMutex.Lock()
+				delete(clients, conn)
+				clientsMutex.Unlock()
+				conn.Close()
+			}()
+
+			for {
+				mt, _, err := conn.ReadMessage()
+				if err != nil || mt == websocket.CloseMessage {
+					break
+				}
+			}
 		}()
 
-		for {
-			mt, _, err := conn.ReadMessage()
-			if err != nil || mt == websocket.CloseMessage {
-				break
-			}
-		}
-	}()
-
-	clientsMutex.Lock()
-	clients[conn] = true
-	clientsMutex.Unlock()
-
-	return Noop
+		clientsMutex.Lock()
+		clients[conn] = true
+		clientsMutex.Unlock()
+	}
 }
 
 const clientScript = `

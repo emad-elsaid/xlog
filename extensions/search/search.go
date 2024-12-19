@@ -37,7 +37,7 @@ func searchWidget(_ Page) template.HTML {
 	return Partial("search-widget", nil)
 }
 
-func searchHandler(w Response, r Request) Output {
+func searchHandler(r Request) Output {
 	return Render("search-datalist", Locals{
 		"results": search(r.Context(), r.FormValue("q")),
 	})

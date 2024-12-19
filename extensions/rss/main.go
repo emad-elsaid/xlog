@@ -70,7 +70,7 @@ type Item struct {
 	Link        string    `xml:"link"`
 }
 
-func feed(w Response, r Request) Output {
+func feed(r Request) Output {
 	f := rss{
 		Version: "2.0",
 		Channel: Channel{

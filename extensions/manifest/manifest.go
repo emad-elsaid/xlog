@@ -24,7 +24,7 @@ func (Manifest) Init() {
 	RegisterTemplate(templates, "templates")
 }
 
-func manifest(w Response, r Request) Output {
+func manifest(r Request) Output {
 	return Cache(Render("manifest", Locals{"sitename": Config.Sitename}))
 }
 

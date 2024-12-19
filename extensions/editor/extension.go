@@ -55,7 +55,7 @@ func openEditor(page xlog.Page) {
 	}
 }
 
-func editorHandler(w xlog.Response, r xlog.Request) xlog.Output {
+func editorHandler(r xlog.Request) xlog.Output {
 	page := xlog.NewPage(r.PathValue("page"))
 	slog.Info("Editing page", "name", page)
 

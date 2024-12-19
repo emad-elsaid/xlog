@@ -23,7 +23,7 @@ func (Sitemap) Init() {
 	RegisterBuildPage("/sitemap.xml", false)
 }
 
-func handler(w Response, r Request) Output {
+func handler(r Request) Output {
 	output := `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
 
 	EachPage(r.Context(), func(p Page) {

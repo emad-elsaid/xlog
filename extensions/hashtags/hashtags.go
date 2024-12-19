@@ -109,7 +109,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	return ast.WalkContinue, nil
 }
 
-func tagsHandler(_ Response, r Request) Output {
+func tagsHandler(r Request) Output {
 	tags := map[string][]Page{}
 	var lck sync.Mutex
 
@@ -144,7 +144,7 @@ func tagsHandler(_ Response, r Request) Output {
 	})
 }
 
-func tagHandler(w Response, r Request) Output {
+func tagHandler(r Request) Output {
 	tag := r.PathValue("tag")
 
 	return Render("tag", Locals{

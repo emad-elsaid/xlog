@@ -59,7 +59,7 @@ func (f PageRename) Widget() template.HTML {
 	})
 }
 
-func (f PageRename) Handler(w Response, r Request) Output {
+func (f PageRename) Handler(r Request) Output {
 	old := NewPage(r.FormValue("old"))
 	if !old.Exists() {
 		return BadRequest("file doesn't exist")
@@ -94,7 +94,7 @@ func (f PageDelete) Widget() template.HTML {
 	})
 }
 
-func (f PageDelete) Handler(w Response, r Request) Output {
+func (f PageDelete) Handler(r Request) Output {
 	if page := NewPage(r.FormValue("page")); page.Exists() {
 		page.Delete()
 	}
