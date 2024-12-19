@@ -56,13 +56,13 @@ func backlinksSection(p Page) template.HTML {
 		return ""
 	}
 
-	pages := MapPageCon(context.Background(), func(a Page) *Page {
+	pages := MapPageCon(context.Background(), func(a Page) Page {
 		_, tree := a.AST()
 		if a.Name() == p.Name() || !containLinkTo(tree, p) {
 			return nil
 		}
 
-		return &a
+		return a
 	})
 
 	return Partial("backlinks", Locals{"pages": pages})

@@ -157,8 +157,8 @@ func tagHandler(r Request) Output {
 	})
 }
 
-func tagPages(ctx context.Context, keyword string) []*Page {
-	return MapPageCon(ctx, func(p Page) *Page {
+func tagPages(ctx context.Context, keyword string) []Page {
+	return MapPageCon(ctx, func(p Page) Page {
 		if p.Name() == Config.Index {
 			return nil
 		}
@@ -167,7 +167,7 @@ func tagPages(ctx context.Context, keyword string) []*Page {
 		tags := FindAllInAST[*HashTag](tree)
 		for _, t := range tags {
 			if strings.EqualFold(string(t.value), keyword) {
-				return &p
+				return p
 			}
 		}
 
@@ -187,7 +187,7 @@ func relatedPages(p Page) template.HTML {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
 
-	pages := MapPageCon(context.Background(), func(rp Page) *Page {
+	pages := MapPageCon(context.Background(), func(rp Page) Page {
 		if rp.Name() == p.Name() {
 			return nil
 		}
@@ -196,7 +196,7 @@ func relatedPages(p Page) template.HTML {
 		page_hashtags := FindAllInAST[*HashTag](tree)
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
-				return &rp
+				return rp
 			}
 		}
 

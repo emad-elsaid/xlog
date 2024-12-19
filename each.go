@@ -74,7 +74,7 @@ func EachPageCon(ctx context.Context, f func(Page)) {
 }
 
 // MapPageCon Similar to EachPage but iterates concurrently
-func MapPageCon[T any](ctx context.Context, f func(Page) *T) []*T {
+func MapPageCon[T any](ctx context.Context, f func(Page) T) []T {
 	if pages == nil {
 		populatePagesCache(ctx)
 	}
@@ -83,7 +83,7 @@ func MapPageCon[T any](ctx context.Context, f func(Page) *T) []*T {
 	grp.SetLimit(concurrency)
 
 	currentPages := pages
-	output := make([]*T, 0, len(currentPages))
+	output := make([]T, 0, len(currentPages))
 	var outputLck sync.Mutex
 
 	for _, p := range currentPages {
@@ -93,7 +93,7 @@ func MapPageCon[T any](ctx context.Context, f func(Page) *T) []*T {
 		default:
 			grp.Go(func() (err error) {
 				val := f(p)
-				if val == nil {
+				if any(val) == nil {
 					return
 				}
 
