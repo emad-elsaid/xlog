@@ -93,13 +93,6 @@ func BadRequest(msg string) Output {
 	}
 }
 
-// Unauthorized returns an output function that writes Unauthorized http response
-func Unauthorized(msg string) Output {
-	return func(w Response, r Request) {
-		http.Error(w, "", http.StatusUnauthorized)
-	}
-}
-
 // InternalServerError returns an output function that writes InternalServerError http response
 func InternalServerError(err error) Output {
 	return func(w Response, r Request) {
