@@ -28,7 +28,7 @@ type Opengraph struct{}
 
 func (Opengraph) Name() string { return "opengraph" }
 func (Opengraph) Init() {
-	RegisterWidget(HEAD_WIDGET, 1, opengraphTags)
+	RegisterWidget(WidgetHead, 1, opengraphTags)
 }
 
 func opengraphTags(p Page) template.HTML {

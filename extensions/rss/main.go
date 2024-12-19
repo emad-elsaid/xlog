@@ -28,7 +28,7 @@ type RSS struct{}
 
 func (RSS) Name() string { return "rss" }
 func (RSS) Init() {
-	RegisterWidget(HEAD_WIDGET, 0, metaTag)
+	RegisterWidget(WidgetHead, 0, metaTag)
 	RegisterBuildPage("/+/feed.rss", false)
 	RegisterLink(links)
 	Get(`/+/feed.rss`, feed)

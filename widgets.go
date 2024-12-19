@@ -19,9 +19,9 @@ type (
 // List of widgets spaces that extensions can use to register a WidgetFunc to
 // inject content into.
 var (
-	AFTER_VIEW_WIDGET  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
-	BEFORE_VIEW_WIDGET WidgetSpace = "before_view" // widgets rendered before the content of the view page
-	HEAD_WIDGET        WidgetSpace = "head"        // widgets rendered in page <head> tag
+	WidgetAfterView  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
+	WidgetBeforeView WidgetSpace = "before_view" // widgets rendered before the content of the view page
+	WidgetHead       WidgetSpace = "head"        // widgets rendered in page <head> tag
 )
 
 // A map to keep track of list of widget functions registered in each widget space

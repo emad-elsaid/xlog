@@ -30,7 +30,7 @@ func (Hotreload) Init() {
 
 	Listen(Changed, NotifyPageChange)
 	Get(`/+/hotreload`, handleWebSocket)
-	RegisterWidget(AFTER_VIEW_WIDGET, 0, clientWidget)
+	RegisterWidget(WidgetAfterView, 0, clientWidget)
 }
 
 func NotifyPageChange(p Page) error {

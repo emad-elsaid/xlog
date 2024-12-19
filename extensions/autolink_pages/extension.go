@@ -22,7 +22,7 @@ func (AutoLinkPages) Init() {
 		Listen(AfterDelete, UpdatePagesList)
 	}
 
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, backlinksSection)
+	RegisterWidget(WidgetAfterView, 1, backlinksSection)
 	RegisterTemplate(templates, "templates")
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&pageLinkParser{}, 999),

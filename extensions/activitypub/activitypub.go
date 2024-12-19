@@ -36,7 +36,7 @@ func (ActivityPub) Init() {
 	Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
 	Get(`/+/activitypub/{user}/outbox`, outbox)
 	Get(`/+/activitypub/{user}`, profile)
-	RegisterWidget(HEAD_WIDGET, 1, meta)
+	RegisterWidget(WidgetHead, 1, meta)
 }
 
 func meta(p Page) template.HTML {

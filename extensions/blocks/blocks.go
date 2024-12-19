@@ -29,7 +29,7 @@ func (Blocks) Init() {
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.RegisterStaticDir(public)
 	registerBuildFiles()
-	xlog.RegisterWidget(xlog.HEAD_WIDGET, 0, style)
+	xlog.RegisterWidget(xlog.WidgetHead, 0, style)
 }
 
 func RegisterShortCodes() {

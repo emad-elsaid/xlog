@@ -38,7 +38,7 @@ type Disqus struct{}
 
 func (Disqus) Name() string { return "disqus" }
 func (Disqus) Init() {
-	RegisterWidget(AFTER_VIEW_WIDGET, 2, widget)
+	RegisterWidget(WidgetAfterView, 2, widget)
 }
 
 func widget(p Page) template.HTML {

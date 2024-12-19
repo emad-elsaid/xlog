@@ -19,7 +19,7 @@ type CustomCSS struct{}
 func (CustomCSS) Name() string { return "custom-css" }
 func (CustomCSS) Init() {
 	if custom_css_file != "" {
-		RegisterWidget(HEAD_WIDGET, 1, custom_css_tag)
+		RegisterWidget(WidgetHead, 1, custom_css_tag)
 	}
 }
 

@@ -30,9 +30,9 @@ func (Hashtags) Name() string { return "hashtags" }
 func (Hashtags) Init() {
 	Get(`/+/tags`, tagsHandler)
 	Get(`/+/tag/{tag}`, tagHandler)
-	RegisterWidget(AFTER_VIEW_WIDGET, 1, relatedPages)
+	RegisterWidget(WidgetAfterView, 1, relatedPages)
 	RegisterBuildPage("/+/tags", true)
-	RegisterLink(func(_ Page) []Link { return []Link{link{}} })
+	RegisterLink(links)
 	RegisterAutocomplete(autocomplete{})
 	RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: hashtagPages})
@@ -43,6 +43,10 @@ func (Hashtags) Init() {
 	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&HashTag{}, 999),
 	))
+}
+
+func links(Page) []Link {
+	return []Link{link{}}
 }
 
 type link struct{}

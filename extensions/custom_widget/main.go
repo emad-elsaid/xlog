@@ -24,17 +24,17 @@ type CustomWidget struct{}
 func (CustomWidget) Name() string { return "custom-widget" }
 func (CustomWidget) Init() {
 	if head_file != "" {
-		RegisterWidget(HEAD_WIDGET, 1, func(Page) template.HTML {
+		RegisterWidget(WidgetHead, 1, func(Page) template.HTML {
 			return readFile(head_file)
 		})
 	}
 	if before_view_file != "" {
-		RegisterWidget(BEFORE_VIEW_WIDGET, 1, func(Page) template.HTML {
+		RegisterWidget(WidgetBeforeView, 1, func(Page) template.HTML {
 			return readFile(before_view_file)
 		})
 	}
 	if after_view_file != "" {
-		RegisterWidget(AFTER_VIEW_WIDGET, 1, func(Page) template.HTML {
+		RegisterWidget(WidgetAfterView, 1, func(Page) template.HTML {
 			return readFile(after_view_file)
 		})
 	}

@@ -20,7 +20,7 @@ func (Manifest) Name() string { return "manifest" }
 func (Manifest) Init() {
 	Get("/manifest.json", manifest)
 	RegisterBuildPage("/manifest.json", false)
-	RegisterWidget(HEAD_WIDGET, 1, head)
+	RegisterWidget(WidgetHead, 1, head)
 	RegisterTemplate(templates, "templates")
 }
 
