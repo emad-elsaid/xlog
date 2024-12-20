@@ -33,7 +33,6 @@ func (Hashtags) Init() {
 	RegisterWidget(WidgetAfterView, 1, relatedPages)
 	RegisterBuildPage("/+/tags", true)
 	RegisterLink(links)
-	RegisterAutocomplete(autocomplete{})
 	RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: hashtagPages})
 
@@ -206,37 +205,6 @@ func relatedPages(p Page) template.HTML {
 	return Partial("related-hashtags-pages", Locals{
 		"pages": pages,
 	})
-}
-
-type autocomplete struct{}
-
-func (a autocomplete) StartChar() string {
-	return "#"
-}
-
-func (a autocomplete) Suggestions() []*Suggestion {
-	suggestions := []*Suggestion{}
-
-	set := map[string]bool{}
-	var lck sync.Mutex
-	EachPageCon(context.Background(), func(a Page) {
-		_, tree := a.AST()
-		hashes := FindAllInAST[*HashTag](tree)
-		lck.Lock()
-		defer lck.Unlock()
-		for _, v := range hashes {
-			set[strings.ToLower(string(v.value))] = true
-		}
-	})
-
-	for t := range set {
-		suggestions = append(suggestions, &Suggestion{
-			Text:        "#" + t,
-			DisplayText: "#" + t,
-		})
-	}
-
-	return suggestions
 }
 
 func hashtagPages(hashtag Markdown) template.HTML {

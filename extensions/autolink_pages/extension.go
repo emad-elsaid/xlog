@@ -15,8 +15,6 @@ type AutoLinkPages struct{}
 
 func (AutoLinkPages) Name() string { return "autolink-pages" }
 func (AutoLinkPages) Init() {
-	RegisterAutocomplete(autocomplete{})
-
 	if !Config.Readonly {
 		Listen(PageChanged, UpdatePagesList)
 		Listen(PageDeleted, UpdatePagesList)

@@ -15,7 +15,6 @@ type ShortCodeEx struct{}
 
 func (ShortCodeEx) Name() string { return "shortcode" }
 func (ShortCodeEx) Init() {
-	RegisterAutocomplete(autocomplete{})
 	MarkDownRenderer.Parser().AddOptions(parser.WithBlockParsers(
 		util.Prioritized(&shortCodeParser{}, 0),
 	))
