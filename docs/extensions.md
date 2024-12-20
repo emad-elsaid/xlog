@@ -3,7 +3,6 @@ Xlog is built to be small core that offers small set of features. And focus on o
 # Extension points
 
 - Add any HTTP route with your handler function
-- Add autocomplete list for the editor
 - Add Goldmark extension for parsing or rendering
 - Add a Preprocessor function to process page content before converting to HTML
 - Listen to Page events such as Write or Delete.

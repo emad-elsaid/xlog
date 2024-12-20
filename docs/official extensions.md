@@ -10,7 +10,6 @@ Defined under `/extensions` sub package. each extension is a subpackage. **All e
 | Custom Widget   | Allow specifying content that is added in <head> tag, before or after the content       |
 | Date            | Detects dates and converts them to link to a page which lists all pages mentions it     |
 | Disqus          | Add Disqus comments after the view page if -disqus flag is passed                       |
-| Emoji           | Emoji autocomplete while editing                                                        |
 | File operations | Add a tool item to delete and rename current page                                       |
 | Github          | Adds "Edit on github" quick action                                                      |
 | Hashtags        | Add support for hashtags #hashtag syntax                                                |

@@ -40,7 +40,7 @@ Notice that specifying the index page doesn't need the extension `.md`.
 
 # Open your new site
 
-Now you can navigate to [http://localhost:3000](http://localhost:3000) in your browser to start browsing the markdown files. if it's a new directory you'll be redirected to the editor to write your first page. 
+Now you can navigate to [http://localhost:3000](http://localhost:3000) in your browser to start browsing the markdown files. if it's a new directory your editor will open to write your first page. 
 
 Note that pressing `Ctrl+S` will save the page if you're in the edit page. and also navigate to the edit page if you're viewing a page. so you can switch between edit and view mode with `Ctrl+S` and on MacOS `⌘+S`
 

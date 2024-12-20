@@ -6,4 +6,3 @@ Compile time dependencies:
 Run time dependencies:
 
 * Bulma CSS framework
-* Codemirror Javascript editor
