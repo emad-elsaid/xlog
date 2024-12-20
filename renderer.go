@@ -50,9 +50,7 @@ var MarkdownConverter = sync.OnceValue(func() goldmark.Markdown {
 // link, paragraph...etc
 func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
-		if casted, success := n.(t); success {
-			found = casted
-			ok = true
+		if found, ok = n.(t); ok {
 			return ast.WalkStop, nil
 		}
 
