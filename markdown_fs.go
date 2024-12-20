@@ -60,7 +60,7 @@ func newMarkdownFS(p string) *markdownFS {
 
 			for {
 				switch ei := <-events; ei.Event() {
-				case notify.Write, notify.Remove, notify.Rename, notify.Create:
+				case notify.Write, notify.Rename, notify.Create:
 					relPath, err := filepath.Rel(absPath, ei.Path())
 					if err != nil {
 						slog.Error("Can't resolve relative path", "error", err)
@@ -77,9 +77,26 @@ func newMarkdownFS(p string) *markdownFS {
 
 					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
-
 					Trigger(PageChanged, cp)
+					m.cache.Remove(name)
+				case notify.Remove:
+					relPath, err := filepath.Rel(absPath, ei.Path())
+					if err != nil {
+						slog.Error("Can't resolve relative path", "error", err)
+						continue
+					}
 
+					if !strings.HasSuffix(relPath, ".md") {
+						continue
+					}
+
+					if IsIgnoredPath(relPath) {
+						continue
+					}
+
+					name := strings.TrimSuffix(relPath, ".md")
+					cp := m._page(name)
+					Trigger(PageDeleted, cp)
 					m.cache.Remove(name)
 				}
 			}
