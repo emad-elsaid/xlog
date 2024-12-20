@@ -29,8 +29,8 @@ type (
 	Locals map[string]any // passed to templates
 )
 
-func defaultMiddlewares(readonly bool) (middlewares []func(http.Handler) http.Handler) {
-	if !readonly {
+func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
+	if !Config.Readonly {
 		crsfOpts := []csrf.Option{
 			csrf.Path("/"),
 			csrf.FieldName("csrf"),
@@ -57,7 +57,7 @@ func defaultMiddlewares(readonly bool) (middlewares []func(http.Handler) http.Ha
 func server() *http.Server {
 	compileTemplates()
 	var handler http.Handler = router
-	for _, v := range defaultMiddlewares(Config.Readonly) {
+	for _, v := range defaultMiddlewares() {
 		handler = v(handler)
 	}
 
