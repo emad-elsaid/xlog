@@ -74,7 +74,7 @@ func (p *page) Render() template.HTML {
 	src, ast := p.AST()
 
 	var buf bytes.Buffer
-	if err := MarkDownRenderer.Renderer().Render(&buf, src, ast); err != nil {
+	if err := MarkdownConverter().Renderer().Render(&buf, src, ast); err != nil {
 		return template.HTML(err.Error())
 	}
 
@@ -149,7 +149,7 @@ func (p *page) AST() (source []byte, tree ast.Node) {
 	content := p.preProcessedContent()
 
 	if p.ast == nil || p.lastUpdate != lastModified {
-		p.ast = MarkDownRenderer.Parser().Parse(text.NewReader([]byte(content)))
+		p.ast = MarkdownConverter().Parser().Parse(text.NewReader([]byte(content)))
 	}
 
 	return []byte(content), p.ast

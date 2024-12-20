@@ -15,13 +15,13 @@ type ShortCodeEx struct{}
 
 func (ShortCodeEx) Name() string { return "shortcode" }
 func (ShortCodeEx) Init() {
-	MarkDownRenderer.Parser().AddOptions(parser.WithBlockParsers(
+	MarkdownConverter().Parser().AddOptions(parser.WithBlockParsers(
 		util.Prioritized(&shortCodeParser{}, 0),
 	))
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&shortCodeRenderer{}, 0),
 	))
-	MarkDownRenderer.Parser().AddOptions(
+	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(transformShortCodeBlocks{}, 0),
 		),

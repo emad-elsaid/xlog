@@ -1,6 +1,8 @@
 package xlog
 
 import (
+	"sync"
+
 	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/yuin/goldmark"
@@ -16,30 +18,32 @@ import (
 // The instance of markdown renderer. this is what takes the page content and
 // converts it to HTML. it defines what features to use from goldmark and what
 // options to turn on
-var MarkDownRenderer = goldmark.New(
-	goldmark.WithExtensions(
-		extension.GFM,
-		extension.DefinitionList,
-		extension.Footnote,
-		extension.Typographer,
-		highlighting.NewHighlighting(
-			highlighting.WithCustomStyle(styles.Get("dracula")),
-			highlighting.WithFormatOptions(
-				chroma_html.WithLineNumbers(true),
+var MarkdownConverter = sync.OnceValue(func() goldmark.Markdown {
+	return goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.DefinitionList,
+			extension.Footnote,
+			extension.Typographer,
+			highlighting.NewHighlighting(
+				highlighting.WithCustomStyle(styles.Get(Config.CodeStyle)),
+				highlighting.WithFormatOptions(
+					chroma_html.WithLineNumbers(true),
+				),
 			),
+			emoji.Emoji,
 		),
-		emoji.Emoji,
-	),
 
-	goldmark.WithParserOptions(
-		parser.WithAutoHeadingID(),
-	),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
 
-	goldmark.WithRendererOptions(
-		html.WithHardWraps(),
-		html.WithUnsafe(),
-	),
-)
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithUnsafe(),
+		),
+	)
+})
 
 // FindInAST takes an AST node and walks the tree depth first
 // searching for a node of a specific type can be used to find first image,

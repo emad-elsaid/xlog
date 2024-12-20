@@ -60,7 +60,7 @@ func TestShortCode(t *testing.T) {
 			shortcode.RegisterShortCode("test", shortcode.ShortCode{Render: handler, Default: ""})
 
 			output := bytes.NewBufferString("")
-			xlog.MarkDownRenderer.Convert([]byte(tc.input), output)
+			xlog.MarkdownConverter().Convert([]byte(tc.input), output)
 			if output.String() != tc.output {
 				t.Errorf("input: %s\nexpected: %s\noutput: %s", tc.input, tc.output, output.String())
 			}

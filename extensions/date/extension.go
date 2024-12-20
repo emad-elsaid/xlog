@@ -17,10 +17,10 @@ func (Date) Name() string { return "date" }
 func (Date) Init() {
 	RegisterTemplate(templates, "templates")
 	Get(`/+/date/{date}`, dateHandler)
-	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
+	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&dateParser{}, 999),
 	))
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&dateRenderer{}, 0),
 	))
 }

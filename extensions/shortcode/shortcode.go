@@ -15,7 +15,7 @@ type ShortCode struct {
 
 func render(i Markdown) string {
 	var b bytes.Buffer
-	MarkDownRenderer.Convert([]byte(i), &b)
+	MarkdownConverter().Convert([]byte(i), &b)
 	return b.String()
 }
 

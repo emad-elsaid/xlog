@@ -18,7 +18,7 @@ type Heading struct{}
 
 func (Heading) Name() string { return "heading" }
 func (Heading) Init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&headingRenderer{}, 0),
 	))
 }

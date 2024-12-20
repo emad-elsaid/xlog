@@ -19,7 +19,7 @@ func (s *imagesColumnsRenderer) render(w util.BufWriter, source []byte, n ast.No
 
 		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
 			w.WriteString(`<div class="column">`)
-			MarkDownRenderer.Renderer().Render(w, source, c)
+			MarkdownConverter().Renderer().Render(w, source, c)
 			w.WriteString(`</div>`)
 		}
 

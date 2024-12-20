@@ -14,7 +14,7 @@ type TODO struct{}
 
 func (TODO) Name() string { return "todo" }
 func (TODO) Init() {
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&TaskCheckBoxHTMLRenderer{}, 0),
 	))
 

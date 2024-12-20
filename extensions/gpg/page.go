@@ -34,7 +34,7 @@ func (p *page) Render() template.HTML {
 	content := p.Content()
 	content = xlog.PreProcess(content)
 	var buf bytes.Buffer
-	if err := xlog.MarkDownRenderer.Convert([]byte(content), &buf); err != nil {
+	if err := xlog.MarkdownConverter().Convert([]byte(content), &buf); err != nil {
 		return template.HTML(err.Error())
 	}
 
@@ -95,7 +95,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 func (p *page) AST() ([]byte, ast.Node) {
 	src := p.Content()
 	if p.ast == nil {
-		p.ast = xlog.MarkDownRenderer.Parser().Parse(text.NewReader([]byte(src)))
+		p.ast = xlog.MarkdownConverter().Parser().Parse(text.NewReader([]byte(src)))
 	}
 
 	return []byte(src), p.ast

@@ -22,10 +22,10 @@ func (AutoLinkPages) Init() {
 
 	RegisterWidget(WidgetAfterView, 1, backlinksSection)
 	RegisterTemplate(templates, "templates")
-	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
+	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&pageLinkParser{}, 999),
 	))
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&pageLinkRenderer{}, -1),
 	))
 }

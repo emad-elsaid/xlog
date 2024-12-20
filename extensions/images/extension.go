@@ -15,12 +15,12 @@ type Images struct{}
 
 func (Images) Name() string { return "images" }
 func (Images) Init() {
-	MarkDownRenderer.Parser().AddOptions(
+	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(columnizeImagesParagraph{}, 0),
 		),
 	)
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&imagesColumnsRenderer{}, 0),
 	))
 }

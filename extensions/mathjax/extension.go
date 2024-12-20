@@ -17,7 +17,7 @@ func (Mathjax) Name() string { return "mathjax" }
 func (Mathjax) Init() {
 	RegisterStaticDir(js)
 	registerBuildFiles()
-	MarkDownRenderer.Parser().AddOptions(
+	MarkdownConverter().Parser().AddOptions(
 		parser.WithInlineParsers(
 			util.Prioritized(&inlineMathParser{}, 999),
 		),
@@ -25,7 +25,7 @@ func (Mathjax) Init() {
 			util.Prioritized(&mathJaxBlockParser{}, 999),
 		),
 	)
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&InlineMathRenderer{startDelim: `\(`, endDelim: `\)`}, 0),
 		util.Prioritized(&MathBlockRenderer{startDelim: `\[`, endDelim: `\]`}, 0),
 	))

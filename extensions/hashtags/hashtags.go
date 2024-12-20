@@ -36,10 +36,10 @@ func (Hashtags) Init() {
 	RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: hashtagPages})
 
-	MarkDownRenderer.Renderer().AddOptions(renderer.WithNodeRenderers(
+	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
 	))
-	MarkDownRenderer.Parser().AddOptions(parser.WithInlineParsers(
+	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&HashTag{}, 999),
 	))
 }

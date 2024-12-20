@@ -16,7 +16,7 @@ type RTL struct{}
 
 func (RTL) Name() string { return "rtl" }
 func (RTL) Init() {
-	MarkDownRenderer.Parser().AddOptions(
+	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(addDirAuto{}, 0),
 		),
