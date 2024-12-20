@@ -97,7 +97,6 @@ You should see output similar to the following. And navigating to [http://localh
 Packages add features to Xlog by calling `Register*` functions in the `init` function of the page. This allow registering a group of types for xlog to use in the appropriate time. Like:
 
 * Preprocessor
-* Autocomplete
 * Command
 
 For our extension we want to add "Hello world!" before the actual page content. this is exactly what the Preprocessor is for. a function that processes the page text before rendering it to HTML.
