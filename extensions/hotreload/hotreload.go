@@ -28,7 +28,7 @@ func (Hotreload) Init() {
 		return
 	}
 
-	Listen(PageChanged, NotifyPageChange)
+	Listen(PageChangedExtern, NotifyPageChange)
 	Get(`/+/hotreload`, handleWebSocket)
 	RegisterWidget(WidgetAfterView, 0, clientWidget)
 }
