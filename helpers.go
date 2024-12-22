@@ -1,10 +1,9 @@
 package xlog
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
-	"log/slog"
-	"os"
 	"strings"
 	"time"
 )
@@ -18,16 +17,19 @@ var helpers = template.FuncMap{
 	"quick_commands": QuickCommands,
 }
 
+var ErrHelperRegistered = errors.New("Helper already registered")
+
 // RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
 // starts as compiling templates happened right before starting the http server.
-func RegisterHelper(name string, f any) {
+func RegisterHelper(name string, f any) error {
 	if _, ok := helpers[name]; ok {
-		slog.Error("Helper already registered", "helper", name)
-		os.Exit(1)
+		return ErrHelperRegistered
 	}
 
 	helpers[name] = f
+
+	return nil
 }
 
 // A function that takes time.duration and return a string representation of the

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io/fs"
 	"log/slog"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -50,11 +49,12 @@ func newMarkdownFS(p string) *markdownFS {
 			absPath, err := filepath.Abs(m.path)
 			if err != nil {
 				slog.Error("failed to get absolute path", "error", err)
-				os.Exit(1)
+				return
 			}
 
 			if err := notify.Watch(m.path+"/...", events, notify.All); err != nil {
 				slog.Error("Can't watch files for change", "error", err)
+				return
 			}
 			defer notify.Stop(events)
 
