@@ -49,8 +49,8 @@ func RenderWidget(s WidgetSpace, p Page) (o template.HTML) {
 		return
 	}
 
-	w.Each(func(f WidgetFunc) {
+	for f := range w.All() {
 		o += f(p)
-	})
+	}
 	return
 }

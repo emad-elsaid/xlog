@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"iter"
 	"sort"
 )
 
@@ -24,8 +25,13 @@ func (pl *priorityList[T]) sortByPriority() {
 	})
 }
 
-func (pl *priorityList[T]) Each(fn func(item T)) {
-	for _, priorityItem := range pl.items {
-		fn(priorityItem.Item)
+// An iterator over all items
+func (pl *priorityList[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, v := range pl.items {
+			if !yield(v.Item) {
+				return
+			}
+		}
 	}
 }
