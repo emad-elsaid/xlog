@@ -86,7 +86,8 @@ func handleWebSocket(r Request) Output {
 
 const clientScript = `
     <script>
-    (() => {
+   // prevent multiple time loading if the event was received multiple times
+    setTimeout(() => {
         const socketUrl = 'ws://'+window.location.host+'/+/hotreload';
         let socket = new WebSocket(socketUrl);
         socket.addEventListener('message', (evt) => {
@@ -94,7 +95,7 @@ const clientScript = `
   			sessionStorage.setItem('scrollPosition', window.scrollY);
             window.location.href = data.url;
         });
-    })();
+    }, 300);
     window.addEventListener('load', function() {
     	const scrollPosition = sessionStorage.getItem('scrollPosition');
     	if (scrollPosition !== null) {
