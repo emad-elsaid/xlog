@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"sync"
 
+	_ "embed"
+
 	. "github.com/emad-elsaid/xlog"
 	"github.com/gorilla/websocket"
 )
@@ -84,26 +86,8 @@ func handleWebSocket(r Request) Output {
 	}
 }
 
-const clientScript = `
-    <script>
-   // prevent multiple time loading if the event was received multiple times
-    setTimeout(() => {
-        const socketUrl = 'ws://'+window.location.host+'/+/hotreload';
-        let socket = new WebSocket(socketUrl);
-        socket.addEventListener('message', (evt) => {
-            let data = JSON.parse(evt.data)
-  			sessionStorage.setItem('scrollPosition', window.scrollY);
-            window.location.href = data.url;
-        });
-    }, 300);
-    window.addEventListener('load', function() {
-    	const scrollPosition = sessionStorage.getItem('scrollPosition');
-    	if (scrollPosition !== null) {
-    		window.scrollTo(0, parseInt(scrollPosition, 10));
-    	}
-    });
-    </script>
-    `
+//go:embed script.html
+var clientScript string
 
 func clientWidget(p Page) template.HTML {
 	return template.HTML(clientScript)
