@@ -136,21 +136,21 @@ func JsonResponse(a any) Output {
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get.
 func Get(path string, handler HandlerFunc) {
-	slog.Info("GET", "path", path, "func", callerName(handler))
+	slog.Info("GET", "path", path, "func", funcStringer{handler})
 	router.HandleFunc("GET "+path, handlerFuncToHttpHandler(handler))
 }
 
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post.
 func Post(path string, handler HandlerFunc) {
-	slog.Info("POST", "path", path, "func", callerName(handler))
+	slog.Info("POST", "path", path, "func", funcStringer{handler})
 	router.HandleFunc("POST "+path, handlerFuncToHttpHandler(handler))
 }
 
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete.
 func Delete(path string, handler HandlerFunc) {
-	slog.Info("DELETE", "path", path, "func", callerName(handler))
+	slog.Info("DELETE", "path", path, "func", funcStringer{handler})
 	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
 }
 

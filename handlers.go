@@ -13,7 +13,7 @@ import (
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
-	SetupLogger()
+	setupLogger()
 
 	if !Config.Readonly {
 		Listen(PageChanged, clearPagesCache)

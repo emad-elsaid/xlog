@@ -11,7 +11,7 @@ import (
 	"gitlab.com/greyxor/slogor"
 )
 
-func SetupLogger() {
+func setupLogger() {
 	level := slogor.SetLevel(slog.LevelDebug)
 	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
 	handler := slogor.NewHandler(os.Stderr, level, timeFmt)
@@ -20,10 +20,14 @@ func SetupLogger() {
 
 }
 
-func callerName(f any) string {
+type funcStringer struct {
+	any
+}
+
+func (f funcStringer) String() string {
 	const xlogPrefix = "emad-elsaid/xlog/"
 	const ghPrefix = "github.com/"
-	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
+	name := runtime.FuncForPC(reflect.ValueOf(f.any).Pointer()).Name()
 	name = strings.TrimPrefix(name, ghPrefix)
 	name = strings.TrimPrefix(name, xlogPrefix)
 	return name
