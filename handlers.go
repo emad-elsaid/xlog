@@ -17,7 +17,6 @@ func Start(ctx context.Context) {
 
 	if !Config.Readonly {
 		Listen(PageChanged, clearPagesCache)
-		Listen(PageChanged, clearPagesCache)
 		Listen(PageDeleted, clearPagesCache)
 	}
 
