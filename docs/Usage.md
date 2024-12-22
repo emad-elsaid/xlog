@@ -30,10 +30,6 @@ Usage of xlog:
     	disable list of extensions by name, comma separated
   -disqus string
     	Disqus domain name for example: xlog-emadelsaid.disqus.com
-  -github.branch string
-    	[Deprecated] Github repository branch to use for 'edit on Github' quick action (default "master")
-  -github.repo string
-    	[Deprecated] Github repository to use for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog
   -github.url string
     	Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs
   -gpg string
