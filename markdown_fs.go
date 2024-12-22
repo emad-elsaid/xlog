@@ -77,9 +77,8 @@ func newMarkdownFS(p string) *markdownFS {
 
 					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
-					Trigger(PageChangedExtern, cp)
+					Trigger(PageChanged, cp)
 					m.cache.Remove(name)
-
 				case notify.Remove:
 					relPath, err := filepath.Rel(absPath, ei.Path())
 					if err != nil {

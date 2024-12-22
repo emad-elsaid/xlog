@@ -17,8 +17,7 @@ type (
 // notified when the page is created or overwritten or deleted should register
 // an event handler for the interesting events.
 const (
-	PageChanged       PageEvent = iota
-	PageChangedExtern           // indicate the page was changed by another program
+	PageChanged PageEvent = iota
 	PageDeleted
 	PageNotFound // user requested a page that's not found
 )
