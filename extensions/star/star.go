@@ -1,9 +1,9 @@
 package star
 
 import (
-	"embed"
 	"fmt"
 	"html/template"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -15,9 +15,6 @@ import (
 
 const STARRED_PAGES = "starred"
 
-//go:embed templates
-var templates embed.FS
-
 func init() {
 	RegisterExtension(Star{})
 }
@@ -27,10 +24,10 @@ type Star struct{}
 func (Star) Name() string { return "star" }
 func (Star) Init() {
 	RegisterLink(starredPages)
-	RegisterTemplate(templates, "templates")
 	IgnorePath(regexp.MustCompile(`^starred\.md$`))
 
 	if !Config.Readonly {
+		RequireHTMX()
 		RegisterCommand(starAction)
 		RegisterQuickCommand(starAction)
 		Post(`/+/star/{page...}`, starHandler)
@@ -90,15 +87,19 @@ func (l action) Name() string {
 		return "Star"
 	}
 }
-func (action) Link() string         { return "" }
-func (action) OnClick() template.JS { return "star(event)" }
-func (l action) Widget() template.HTML {
-	starred := isStarred(l.page)
+func (action) Link() string            { return "" }
+func (action) OnClick() template.JS    { return "" }
+func (l action) Widget() template.HTML { return "" }
 
-	return Partial("star", Locals{
-		"starred": starred,
-		"action":  fmt.Sprintf("/+/star/%s", url.PathEscape(l.page.Name())),
-	})
+func (l action) Attrs() map[template.HTMLAttr]any {
+	var method template.HTMLAttr = "hx-post"
+	if l.starred {
+		method = "hx-delete"
+	}
+
+	return map[template.HTMLAttr]any{
+		method: fmt.Sprintf("/+/star/%s", url.PathEscape(l.page.Name())),
+	}
 }
 
 func starAction(p Page) []Command {
@@ -115,7 +116,11 @@ func starHandler(r Request) Output {
 	starred_pages := NewPage(STARRED_PAGES)
 	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
 	starred_pages.Write(Markdown(new_content))
-	return NoContent()
+
+	return func(w Response, r Request) {
+		w.Header().Add("HX-Refresh", "true")
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 func unstarHandler(r Request) Output {
@@ -134,7 +139,10 @@ func unstarHandler(r Request) Output {
 	}
 	starred_pages.Write(Markdown(new_content))
 
-	return NoContent()
+	return func(w Response, r Request) {
+		w.Header().Add("HX-Refresh", "true")
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 func isStarred(p Page) bool {

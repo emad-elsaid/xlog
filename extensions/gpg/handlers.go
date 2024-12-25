@@ -2,6 +2,7 @@ package gpg
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/emad-elsaid/xlog"
 )
@@ -26,7 +27,10 @@ func encryptHandler(r xlog.Request) xlog.Output {
 		return xlog.InternalServerError(deleteFailedErr)
 	}
 
-	return xlog.NoContent()
+	return func(w xlog.Response, r xlog.Request) {
+		w.Header().Add("HX-Refresh", "true")
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 func decryptHandler(r xlog.Request) xlog.Output {
@@ -45,5 +49,8 @@ func decryptHandler(r xlog.Request) xlog.Output {
 		return xlog.InternalServerError(encryptionFailedErr)
 	}
 
-	return xlog.NoContent()
+	return func(w xlog.Response, r xlog.Request) {
+		w.Header().Add("HX-Refresh", "true")
+		w.WriteHeader(http.StatusNoContent)
+	}
 }

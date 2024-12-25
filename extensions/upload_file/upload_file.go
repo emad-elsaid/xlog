@@ -42,6 +42,7 @@ func (UploadFile) Init() {
 		return
 	}
 
+	RequireHTMX()
 	RegisterCommand(func(p Page) []Command {
 		return []Command{
 			command{
@@ -103,6 +104,8 @@ func (u command) Link() string { return "" }
 func (u command) OnClick() template.JS {
 	return u.onClick
 }
+
+func (u command) Attrs() map[template.HTMLAttr]any { return nil }
 
 func (u command) Widget() template.HTML {
 	if !u.main {

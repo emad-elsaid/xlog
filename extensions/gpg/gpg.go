@@ -23,6 +23,7 @@ func (PGP) Init() {
 
 	if !xlog.Config.Readonly {
 		xlog.RegisterQuickCommand(quickCommands)
+		xlog.RequireHTMX()
 		xlog.Post(`/+/gpg/encrypt/{page...}`, encryptHandler)
 		xlog.Post(`/+/gpg/decrypt/{page...}`, decryptHandler)
 	}

@@ -19,6 +19,7 @@ var editor string
 func init() {
 	flag.StringVar(&editor, "editor", os.Getenv("EDITOR"), "command to use to open pages for editing")
 
+	xlog.RequireHTMX()
 	xlog.RegisterExtension(Editor{})
 }
 
@@ -85,21 +86,13 @@ type editButton struct {
 	page xlog.Page
 }
 
-func (editButton) Icon() string {
-	return "fa-solid fa-pen"
-}
-func (editButton) Name() string {
-	return "Edit"
-}
-
-func (editButton) Link() string { return "" }
-func (e editButton) OnClick() template.JS {
-	action := fmt.Sprintf("/+/editor/%s", url.PathEscape(e.page.Name()))
-	script := `
-     const data = new FormData()
-     data.append('csrf', document.querySelector('input[name=csrf]').value);
-     fetch("%s", {method: 'POST', body: data});
-`
-	return template.JS(fmt.Sprintf(script, action))
-}
+func (editButton) Icon() string          { return "fa-solid fa-pen" }
+func (editButton) Name() string          { return "Edit" }
+func (editButton) Link() string          { return "" }
+func (editButton) OnClick() template.JS  { return "" }
 func (editButton) Widget() template.HTML { return "" }
+func (e editButton) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"hx-post": fmt.Sprintf("/+/editor/%s", url.PathEscape(e.page.Name())),
+	}
+}

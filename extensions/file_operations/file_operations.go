@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/url"
 	"os"
 	"path"
@@ -28,6 +29,7 @@ func (FileOps) Init() {
 		return
 	}
 
+	RequireHTMX()
 	RegisterCommand(commands)
 	RegisterQuickCommand(commands)
 	RegisterTemplate(templates, "templates")
@@ -43,10 +45,11 @@ type PageRename struct {
 	page Page
 }
 
-func (PageRename) Icon() string         { return "fa-solid fa-i-cursor" }
-func (PageRename) Name() string         { return "Rename" }
-func (PageRename) OnClick() template.JS { return "renamePage(event)" }
-func (PageRename) Link() string         { return "" }
+func (PageRename) Icon() string                     { return "fa-solid fa-i-cursor" }
+func (PageRename) Name() string                     { return "Rename" }
+func (PageRename) OnClick() template.JS             { return "renamePage(event)" }
+func (PageRename) Link() string                     { return "" }
+func (PageRename) Attrs() map[template.HTMLAttr]any { return nil }
 
 func (f PageRename) Widget() template.HTML {
 	if !f.page.Exists() {
@@ -81,23 +84,33 @@ type PageDelete struct {
 
 func (PageDelete) Icon() string         { return "fa-solid fa-trash" }
 func (PageDelete) Name() string         { return "Delete" }
-func (PageDelete) Link() string         { return "" }
-func (PageDelete) OnClick() template.JS { return "deletePage(event)" }
+func (f PageDelete) Link() string       { return "" }
+func (PageDelete) OnClick() template.JS { return "" }
+func (f PageDelete) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"hx-delete":  "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
+		"hx-confirm": "Are you sure?",
+	}
+}
 
 func (f PageDelete) Widget() template.HTML {
 	if !f.page.Exists() {
 		return template.HTML("")
 	}
 
-	return Partial("file-operations-delete", Locals{
-		"action": "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
-	})
+	return ""
 }
 
 func (f PageDelete) Handler(r Request) Output {
-	if page := NewPage(r.FormValue("page")); page != nil && page.Exists() {
+	name := r.FormValue("page")
+	page := NewPage(name)
+	if page == nil || !page.Exists() {
+		slog.Error("Can't delete page", "page", page, "name", name)
+	} else {
 		page.Delete()
 	}
 
-	return NoContent()
+	return func(w Response, r Request) {
+		w.Header().Add("HX-Redirect", "/")
+	}
 }
