@@ -27,7 +27,7 @@ func toggleHandler(r Request) Output {
 	}
 
 	replacement := "[ ] "
-	if r.FormValue("checked") == "true" {
+	if len(r.FormValue("checked")) > 0 {
 		replacement = "[x] "
 	}
 

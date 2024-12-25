@@ -15,6 +15,8 @@ var helpers = template.FuncMap{
 	"widgets":        RenderWidget,
 	"commands":       Commands,
 	"quick_commands": QuickCommands,
+	"includeJS":      includeJS,
+	"scripts":        scripts,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
@@ -92,4 +94,31 @@ func ago(t time.Time) string {
 	o.WriteString("ago")
 
 	return o.String()
+}
+
+var js = map[string]bool{}
+
+// RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template
+func RegisterJS(f string) {
+	js[f] = true
+}
+
+// RequireHTMX registes HTML library, this helps include one version of HTMX
+func RequireHTMX() {
+	RegisterJS("https://unpkg.com/htmx.org@2.0.4")
+}
+
+func includeJS(f string) template.HTML {
+	RegisterJS(f)
+
+	return ""
+}
+
+func scripts() template.HTML {
+	var b strings.Builder
+	for f := range js {
+		fmt.Fprintf(&b, `<script src="%s"></script>`, f)
+	}
+
+	return template.HTML(b.String())
 }

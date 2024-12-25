@@ -2,6 +2,7 @@ package todo
 
 import (
 	"fmt"
+	"html/template"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/yuin/goldmark/ast"
@@ -24,7 +25,7 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 	n := node.(*east.TaskCheckBox)
 	p := n.Parent()
 
-	w.WriteString(`<input type="checkbox" `)
+	w.WriteString(`<input name="checked" type="checkbox" `)
 
 	if n.IsChecked {
 		w.WriteString(`checked="" `)
@@ -34,7 +35,13 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 		w.WriteString(`disabled="" `)
 	} else if p.Kind() == ast.KindTextBlock {
 		if l := p.Lines(); l != nil {
-			w.WriteString(fmt.Sprintf(`data-pos="%d" `, l.At(0).Start))
+
+			vals := fmt.Sprintf(`{"page": decodeURI(document.location.pathname.substr(1)), "pos": %d}
+`,
+				l.At(0).Start,
+			)
+
+			fmt.Fprintf(w, `hx-post="/+/todo" hx-vals="js:%s"`, template.HTMLEscapeString(vals))
 		}
 	}
 

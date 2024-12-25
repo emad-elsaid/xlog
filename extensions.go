@@ -19,15 +19,17 @@ func RegisterExtension(e Extension) {
 
 func initExtensions() {
 	disabled := strings.Split(Config.DisabledExtensions, ",")
-	names := []string{}
+	disabledNames := []string{} // because the user can input wrong extension name
+	enabledNames := []string{}
 	for i := range extensions {
 		if slices.Contains(disabled, extensions[i].Name()) {
+			disabledNames = append(disabledNames, extensions[i].Name())
 			continue
 		}
 
 		extensions[i].Init()
-		names = append(names, extensions[i].Name())
+		enabledNames = append(enabledNames, extensions[i].Name())
 	}
 
-	slog.Info("extensions", "names", names)
+	slog.Info("extensions", "enabled", enabledNames, "disabled", disabled)
 }

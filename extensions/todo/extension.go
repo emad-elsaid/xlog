@@ -19,7 +19,7 @@ func (TODO) Init() {
 	))
 
 	if !Config.Readonly {
-		RegisterWidget(WidgetAfterView, 0, scriptWidget)
+		RequireHTMX()
 		Post(`/+/todo`, toggleHandler)
 	}
 }

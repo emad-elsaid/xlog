@@ -1,6 +1,6 @@
 {{- define "header" -}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" hx-vals='{"csrf":"{{.csrf_token}}"}'>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
@@ -21,6 +21,7 @@
       </div>
     </div>
 
+    {{ scripts }}
   </body>
 </html>
 {{- end -}}

@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+
+	"github.com/gorilla/csrf"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -88,9 +90,10 @@ func getPageHandler(r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"title":   page.Emoji() + " " + page.Name(),
-		"page":    page,
-		"content": page.Render(),
-		"csrf":    CSRF(r),
+		"title":      page.Emoji() + " " + page.Name(),
+		"page":       page,
+		"content":    page.Render(),
+		"csrf":       CSRF(r),
+		"csrf_token": csrf.Token(r),
 	})
 }
