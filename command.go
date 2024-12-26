@@ -11,8 +11,6 @@ type Command interface {
 	Name() string
 	// Link returns the link/url/path of the command if any
 	Link() string
-	// OnClick action. a Javascript code to invoke when the command is executed
-	OnClick() template.JS
 	// Attrs a map of attributes to their values
 	Attrs() map[template.HTMLAttr]any
 	// Widget a HTML snippet to embed in the page that include any needed

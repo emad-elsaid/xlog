@@ -88,7 +88,6 @@ func (l action) Name() string {
 	}
 }
 func (action) Link() string            { return "" }
-func (action) OnClick() template.JS    { return "" }
 func (l action) Widget() template.HTML { return "" }
 
 func (l action) Attrs() map[template.HTMLAttr]any {

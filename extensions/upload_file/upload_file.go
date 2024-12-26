@@ -91,21 +91,15 @@ type command struct {
 	main    bool
 }
 
-func (u command) Icon() string {
-	return u.icon
-}
-
-func (u command) Name() string {
-	return u.name
-}
-
+func (u command) Icon() string { return u.icon }
+func (u command) Name() string { return u.name }
 func (u command) Link() string { return "" }
 
-func (u command) OnClick() template.JS {
-	return u.onClick
+func (u command) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"onclick": u.onClick,
+	}
 }
-
-func (u command) Attrs() map[template.HTMLAttr]any { return nil }
 
 func (u command) Widget() template.HTML {
 	if !u.main {

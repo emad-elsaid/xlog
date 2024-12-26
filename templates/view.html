@@ -19,7 +19,7 @@
     {{ if not $.config.Readonly }} {{$.csrf}} {{ end }}
 
     {{ range . }}
-    <a href="{{.Link}}" onclick="{{.OnClick}}" {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
+    <a href="{{.Link}}" {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
       <span class="icon"><i class="{{.Icon}}"></i></span>
       <span>{{.Name}}</span>
     </a>
