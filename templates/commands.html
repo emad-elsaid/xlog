@@ -18,7 +18,7 @@
         <ul class="menu-list">
           {{- range $commands -}}
           <li>
-            <a href="{{.Link}}" {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
+            <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
               <span class="icon"><i class="{{.Icon}}"></i></span>
               <span>{{.Name}}</span></a>
           </li>

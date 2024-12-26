@@ -88,7 +88,6 @@ type editButton struct {
 
 func (editButton) Icon() string          { return "fa-solid fa-pen" }
 func (editButton) Name() string          { return "Edit" }
-func (editButton) Link() string          { return "" }
 func (editButton) Widget() template.HTML { return "" }
 func (e editButton) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{

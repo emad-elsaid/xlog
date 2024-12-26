@@ -34,8 +34,11 @@ type editOnGithub struct {
 	page Page
 }
 
-func (e editOnGithub) Icon() string                     { return "fa-brands fa-github" }
-func (e editOnGithub) Name() string                     { return "Edit on Github" }
-func (e editOnGithub) Link() string                     { return fmt.Sprintf("%s/%s", editUrl, e.page.FileName()) }
-func (e editOnGithub) Widget() template.HTML            { return "" }
-func (e editOnGithub) Attrs() map[template.HTMLAttr]any { return nil }
+func (e editOnGithub) Icon() string          { return "fa-brands fa-github" }
+func (e editOnGithub) Name() string          { return "Edit on Github" }
+func (e editOnGithub) Widget() template.HTML { return "" }
+func (e editOnGithub) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"href": fmt.Sprintf("%s/%s", editUrl, e.page.FileName()),
+	}
+}

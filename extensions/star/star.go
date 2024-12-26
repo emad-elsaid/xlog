@@ -87,7 +87,6 @@ func (l action) Name() string {
 		return "Star"
 	}
 }
-func (action) Link() string            { return "" }
 func (l action) Widget() template.HTML { return "" }
 
 func (l action) Attrs() map[template.HTMLAttr]any {

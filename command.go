@@ -9,8 +9,6 @@ type Command interface {
 	Icon() string
 	// Name of the command. to be displayed in the list
 	Name() string
-	// Link returns the link/url/path of the command if any
-	Link() string
 	// Attrs a map of attributes to their values
 	Attrs() map[template.HTMLAttr]any
 	// Widget a HTML snippet to embed in the page that include any needed

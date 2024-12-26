@@ -14,7 +14,6 @@ type PageDelete struct {
 
 func (PageDelete) Icon() string            { return "fa-solid fa-trash" }
 func (PageDelete) Name() string            { return "Delete" }
-func (f PageDelete) Link() string          { return "" }
 func (f PageDelete) Widget() template.HTML { return "" }
 func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
