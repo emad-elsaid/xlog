@@ -82,23 +82,16 @@ type PageDelete struct {
 	page Page
 }
 
-func (PageDelete) Icon() string         { return "fa-solid fa-trash" }
-func (PageDelete) Name() string         { return "Delete" }
-func (f PageDelete) Link() string       { return "" }
-func (PageDelete) OnClick() template.JS { return "" }
+func (PageDelete) Icon() string            { return "fa-solid fa-trash" }
+func (PageDelete) Name() string            { return "Delete" }
+func (f PageDelete) Link() string          { return "" }
+func (PageDelete) OnClick() template.JS    { return "" }
+func (f PageDelete) Widget() template.HTML { return "" }
 func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
 		"hx-delete":  "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
 		"hx-confirm": "Are you sure?",
 	}
-}
-
-func (f PageDelete) Widget() template.HTML {
-	if !f.page.Exists() {
-		return template.HTML("")
-	}
-
-	return ""
 }
 
 func (f PageDelete) Handler(r Request) Output {
