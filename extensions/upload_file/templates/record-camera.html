@@ -1,3 +1,18 @@
+<div class="modal is-active">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Recording</p>
+      </header>
+      <section class="modal-card-body"> Camera recording in progress... </section>
+      <footer class="modal-card-foot">
+        <div class="buttons">
+          <button type="button" id="stop-camera" class="button is-danger"> Stop </button>
+        </div>
+      </footer>
+  </div>
+</div>
+
 <script>
  (async function() {
      function uploadFile(file) {
@@ -22,5 +37,8 @@
              uploadFile(new File([event.data], 'recording.'+extension, {type: mimetype}));
      }
      recorder.start();
+     document.getElementById("stop-camera").onclick = () => {
+         stream.getTracks().forEach((t) => t.stop());
+     }
  })()
 </script>

@@ -18,8 +18,10 @@ func (s RecordAudio) Attrs() map[template.HTMLAttr]any {
 	link := fmt.Sprintf("/+/upload-file/record-audio-form?page=%s", url.PathEscape(s.p.Name()))
 
 	return map[template.HTMLAttr]any{
-		"href":    link,
-		"hx-post": link,
+		"href":      link,
+		"hx-post":   link,
+		"hx-target": "body",
+		"hx-swap":   "beforeend",
 	}
 }
 
