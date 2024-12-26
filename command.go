@@ -49,3 +49,21 @@ func QuickCommands(p Page) []Command {
 
 	return cmds
 }
+
+var links = []func(Page) []Command{}
+
+// Register a new links function, should return a list of Links
+func RegisterLink(l func(Page) []Command) {
+	links = append(links, l)
+}
+
+// Links returns a list of links for a Page. it executes all functions
+// registered with RegisterLink and collect them in one slice. Can be passed to
+// the view to render in the footer for example.
+func Links(p Page) []Command {
+	lnks := []Command{}
+	for l := range links {
+		lnks = append(lnks, links[l](p)...)
+	}
+	return lnks
+}

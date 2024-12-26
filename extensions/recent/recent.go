@@ -2,6 +2,7 @@ package recent
 
 import (
 	"embed"
+	"html/template"
 	"sort"
 
 	_ "embed"
@@ -23,7 +24,7 @@ func (Recent) Init() {
 	Get(`/+/recent`, recentHandler)
 	RegisterBuildPage("/+/recent", true)
 	RegisterTemplate(templates, "templates")
-	RegisterLink(func(Page) []Link { return []Link{links{}} })
+	RegisterLink(func(Page) []Command { return []Command{links{}} })
 }
 
 func recentHandler(r Request) Output {
@@ -46,4 +47,8 @@ type links struct{}
 
 func (l links) Icon() string { return "fa-solid fa-clock-rotate-left" }
 func (l links) Name() string { return "Recent" }
-func (l links) Link() string { return "/+/recent" }
+func (l links) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"href": "/+/recent",
+	}
+}

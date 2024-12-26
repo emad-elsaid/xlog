@@ -44,15 +44,19 @@ func (Hashtags) Init() {
 	))
 }
 
-func links(Page) []Link {
-	return []Link{link{}}
+func links(Page) []Command {
+	return []Command{link{}}
 }
 
 type link struct{}
 
 func (l link) Icon() string { return "fa-solid fa-tags" }
 func (l link) Name() string { return "Hashtags" }
-func (l link) Link() string { return "/+/tags" }
+func (l link) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"href": "/+/tags",
+	}
+}
 
 type HashTag struct {
 	ast.BaseInline

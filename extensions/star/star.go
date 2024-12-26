@@ -47,11 +47,13 @@ func (s starredPage) Icon() string {
 	}
 }
 
-func (s starredPage) Link() string {
-	return "/" + s.Name()
+func (s starredPage) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"href": "/" + s.Name(),
+	}
 }
 
-func starredPages(p Page) []Link {
+func starredPages(p Page) []Command {
 	pages := NewPage(STARRED_PAGES)
 	content := strings.TrimSpace(string(pages.Content()))
 	if content == "" {
@@ -59,7 +61,7 @@ func starredPages(p Page) []Link {
 	}
 
 	list := strings.Split(content, "\n")
-	ps := make([]Link, 0, len(list))
+	ps := make([]Command, 0, len(list))
 	for _, v := range list {
 		p := starredPage{NewPage(v)}
 		ps = append(ps, p)

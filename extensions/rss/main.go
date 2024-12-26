@@ -38,10 +38,14 @@ type rssLink struct{}
 
 func (rssLink) Icon() string { return "fa-solid fa-rss" }
 func (rssLink) Name() string { return "RSS" }
-func (rssLink) Link() string { return "/+/feed.rss" }
+func (rssLink) Attrs() map[template.HTMLAttr]any {
+	return map[template.HTMLAttr]any{
+		"href": "/+/feed.rss",
+	}
+}
 
-func links(p Page) []Link {
-	return []Link{rssLink{}}
+func links(p Page) []Command {
+	return []Command{rssLink{}}
 }
 
 func metaTag(p Page) template.HTML {
