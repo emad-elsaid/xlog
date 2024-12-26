@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"slices"
 	"strings"
 	"time"
 )
@@ -96,11 +97,15 @@ func ago(t time.Time) string {
 	return o.String()
 }
 
-var js = map[string]bool{}
+var js = []string{}
 
 // RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template
 func RegisterJS(f string) {
-	js[f] = true
+	if slices.Contains(js, f) {
+		return
+	}
+
+	js = append(js, f)
 }
 
 // RequireHTMX registes HTML library, this helps include one version of HTMX
@@ -116,7 +121,7 @@ func includeJS(f string) template.HTML {
 
 func scripts() template.HTML {
 	var b strings.Builder
-	for f := range js {
+	for _, f := range js {
 		fmt.Fprintf(&b, `<script src="%s"></script>`, f)
 	}
 
