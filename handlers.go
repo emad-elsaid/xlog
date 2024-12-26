@@ -6,8 +6,10 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/gorilla/csrf"
+	"gitlab.com/greyxor/slogor"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
@@ -15,7 +17,11 @@ import (
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
-	setupLogger()
+	level := slogor.SetLevel(slog.LevelDebug)
+	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
+	handler := slogor.NewHandler(os.Stderr, level, timeFmt)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 
 	if !Config.Readonly {
 		Listen(PageChanged, clearPagesCache)

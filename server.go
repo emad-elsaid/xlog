@@ -7,6 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"reflect"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/gorilla/csrf"
@@ -188,4 +191,17 @@ func Cache(out Output) Output {
 		w.Header().Add("Cache-Control", "max-age=604800")
 		out(w, r)
 	}
+}
+
+type funcStringer struct {
+	any
+}
+
+func (f funcStringer) String() string {
+	const xlogPrefix = "emad-elsaid/xlog/"
+	const ghPrefix = "github.com/"
+	name := runtime.FuncForPC(reflect.ValueOf(f.any).Pointer()).Name()
+	name = strings.TrimPrefix(name, ghPrefix)
+	name = strings.TrimPrefix(name, xlogPrefix)
+	return name
 }
