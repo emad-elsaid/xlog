@@ -1,0 +1,29 @@
+<div class="modal is-active" id="rename-page">
+  <div class="modal-background"></div>
+
+  <div class="modal-card">
+    <form method="POST" action="/+/file/rename" hx-post="/+/file/rename">
+      <header class="modal-card-head">
+        <p class="modal-card-title">Rename {{.page.Name}}</p>
+        <button type="button" class="delete" aria-label="close" onclick="document.getElementById('rename-page').remove()"></button>
+      </header>
+      <section class="modal-card-body">
+        <input type="hidden" name="old" value="{{.page.Name}}"/>
+
+        <div class="field">
+          <label class="label">New name</label>
+          <div class="control">
+            <input name="new" class="input" type="text" placeholder="new page name..." value="{{.page.Name}}" autofocus>
+          </div>
+        </div>
+
+      </section>
+      <footer class="modal-card-foot">
+        <div class="buttons">
+          <button type="submit" class="button is-success">Rename</button>
+        </div>
+      </footer>
+    </form>
+  </div>
+
+</div>
