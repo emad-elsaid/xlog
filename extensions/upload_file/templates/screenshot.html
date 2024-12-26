@@ -1,0 +1,34 @@
+<script>
+ (async function() {
+     function uploadFile(file) {
+         var data = new FormData()
+         data.append('file', file)
+         data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+         var params = {method: 'POST', body: data};
+
+         fetch('{{ .action }}', params).then(resp => resp.text()).then(text => {
+             document.location.reload();
+         });
+     }
+
+     var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
+
+     stream.getTracks().forEach(async function(track) {
+         var ic = new ImageCapture(track);
+         var bmp = await ic.grabFrame();
+         track.stop();
+
+         const canvas = document.createElement('canvas');
+         canvas.width = bmp.width;
+         canvas.height = bmp.height;
+         const ctx = canvas.getContext('bitmaprenderer');
+         ctx.transferFromImageBitmap(bmp);
+
+         canvas.toBlob( recording => {
+             var file = new File([recording], 'screenshot.png', {type: 'image/png'});
+             uploadFile(file);
+         }, "image/png");
+     });
+ })()
+</script>

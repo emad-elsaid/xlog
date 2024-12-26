@@ -86,9 +86,8 @@ type editButton struct {
 	page xlog.Page
 }
 
-func (editButton) Icon() string          { return "fa-solid fa-pen" }
-func (editButton) Name() string          { return "Edit" }
-func (editButton) Widget() template.HTML { return "" }
+func (editButton) Icon() string { return "fa-solid fa-pen" }
+func (editButton) Name() string { return "Edit" }
 func (e editButton) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
 		"hx-post": fmt.Sprintf("/+/editor/%s", url.PathEscape(e.page.Name())),

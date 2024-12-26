@@ -24,10 +24,6 @@ func (f PageRename) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
-func (f PageRename) Widget() template.HTML {
-	return ""
-}
-
 func (f PageRename) Form(r Request) Output {
 	name := r.FormValue("page")
 	page := NewPage(name)

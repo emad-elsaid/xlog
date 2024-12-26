@@ -1,0 +1,20 @@
+<script>
+ (function() {
+     function uploadFile(file) {
+         var data = new FormData()
+         data.append('file', file)
+         data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+         var params = {method: 'POST', body: data};
+
+         fetch('{{ .action }}', params).then(resp => resp.text()).then(text => {
+             document.location.reload();
+         });
+     }
+
+     let i = document.createElement('input');
+     i.type = 'file';
+     i.onchange = e => uploadFile(e.target.files[0]);
+     i.click()
+ })()
+</script>

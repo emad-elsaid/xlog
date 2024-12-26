@@ -1,0 +1,30 @@
+<script>
+ (async function() {
+     function uploadFile(file) {
+         var data = new FormData()
+         data.append('file', file)
+         data.append('csrf', document.querySelector('input[name=csrf]').value);
+
+         var params = {method: 'POST', body: data};
+
+         fetch('{{ .action }}', params).then(resp => resp.text()).then(text => {
+             document.location.reload();
+         });
+     }
+
+     let params = {
+         video: {cursor: "always"},
+         audio: true
+     }
+     let stream = await navigator.mediaDevices.getDisplayMedia(params);
+     let extension = "webm"
+     let mimetype = "video/webm; codecs=vp9"
+     let options = { mimeType: mimetype };
+     let recorder = new MediaRecorder(stream, options);
+     recorder.ondataavailable = (event) => {
+         if (event.data.size > 0)
+             uploadFile(new File([event.data], 'recording.'+extension, {type: mimetype}));
+     }
+     recorder.start();
+ })()
+</script>

@@ -12,9 +12,8 @@ type PageDelete struct {
 	page Page
 }
 
-func (PageDelete) Icon() string            { return "fa-solid fa-trash" }
-func (PageDelete) Name() string            { return "Delete" }
-func (f PageDelete) Widget() template.HTML { return "" }
+func (PageDelete) Icon() string { return "fa-solid fa-trash" }
+func (PageDelete) Name() string { return "Delete" }
 func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
 		"hx-delete":  "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),

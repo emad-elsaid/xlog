@@ -87,8 +87,6 @@ func (l action) Name() string {
 		return "Star"
 	}
 }
-func (l action) Widget() template.HTML { return "" }
-
 func (l action) Attrs() map[template.HTMLAttr]any {
 	var method template.HTMLAttr = "hx-post"
 	if l.starred {

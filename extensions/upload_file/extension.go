@@ -4,12 +4,11 @@ import (
 	"crypto/sha256"
 	"embed"
 	"fmt"
-	"html/template"
 	"io"
-	"net/url"
 	"os"
 	"path"
 	"regexp"
+	"slices"
 	"strings"
 
 	_ "embed"
@@ -45,72 +44,22 @@ func (UploadFile) Init() {
 	RequireHTMX()
 	RegisterCommand(func(p Page) []Command {
 		return []Command{
-			command{
-				page:    p,
-				icon:    "fa-solid fa-file-arrow-up",
-				name:    "Upload File",
-				onClick: "upload(event)",
-				main:    true,
-			},
-			command{
-				page:    p,
-				icon:    "fa-solid fa-camera",
-				name:    "Screenshot",
-				onClick: "screenshot(event)",
-			},
-			command{
-				page:    p,
-				icon:    "fa-solid fa-desktop",
-				name:    "Record Screen",
-				onClick: "record(event)",
-			},
-			command{
-				page:    p,
-				icon:    "fa-solid fa-video",
-				name:    "Record Camera",
-				onClick: "recordCamera(event)",
-			},
-			command{
-				page:    p,
-				icon:    "fa-solid fa-microphone",
-				name:    "Record Audio",
-				onClick: "recordAudio(event)",
-			},
+			Upload{p: p},
+			Screenshot{p: p},
+			RecordScreen{p: p},
+			RecordCamera{p: p},
+			RecordAudio{p: p},
 		}
 	})
 
+	Post("/+/upload-file/form", UploadForm)
+	Post("/+/upload-file/screenshot-form", ScreenshotForm)
+	Post("/+/upload-file/record-screen-form", RecordScreenForm)
+	Post("/+/upload-file/record-camera-form", RecordCameraForm)
+	Post("/+/upload-file/record-audio-form", RecordAudioForm)
+
 	Post(`/+/upload-file`, uploadFileHandler)
 	RegisterTemplate(templates, "templates")
-}
-
-type command struct {
-	page    Page
-	icon    string
-	name    string
-	onClick template.JS
-	main    bool
-}
-
-func (u command) Icon() string { return u.icon }
-func (u command) Name() string { return u.name }
-func (u command) Link() string { return "" }
-
-func (u command) Attrs() map[template.HTMLAttr]any {
-	return map[template.HTMLAttr]any{
-		"onclick": u.onClick,
-	}
-}
-
-func (u command) Widget() template.HTML {
-	if !u.main {
-		return ""
-	}
-
-	return Partial("upload-file", Locals{
-		"page":           u.page,
-		"action":         "/+/upload-file?page=" + url.QueryEscape(u.page.Name()),
-		"editModeAction": "/+/upload-file",
-	})
 }
 
 func uploadFileHandler(r Request) Output {
@@ -145,11 +94,11 @@ func uploadFileHandler(r Request) Output {
 			return InternalServerError(err)
 		}
 
-		if containString(IMAGES_EXTENSIONS, ext) {
+		if slices.Contains(IMAGES_EXTENSIONS, ext) {
 			output = fmt.Sprintf("![](/%s)", p)
-		} else if containString(VIDEOS_EXTENSIONS, ext) {
+		} else if slices.Contains(VIDEOS_EXTENSIONS, ext) {
 			output = fmt.Sprintf("<video controls src=\"/%s\"></video>", p)
-		} else if containString(AUDIO_EXTENSIONS, ext) {
+		} else if slices.Contains(AUDIO_EXTENSIONS, ext) {
 			output = fmt.Sprintf("<audio controls src=\"/%s\"></audio>", p)
 		} else {
 			output = fmt.Sprintf("[%s](/%s)", mdName, p)
@@ -163,16 +112,6 @@ func uploadFileHandler(r Request) Output {
 	}
 
 	return PlainText(output)
-}
-
-func containString(slice []string, str string) bool {
-	for k := range slice {
-		if slice[k] == str {
-			return true
-		}
-	}
-
-	return false
 }
 
 func filterChars(str string, exclude string) string {

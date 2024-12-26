@@ -11,9 +11,6 @@ type Command interface {
 	Name() string
 	// Attrs a map of attributes to their values
 	Attrs() map[template.HTMLAttr]any
-	// Widget a HTML snippet to embed in the page that include any needed
-	// assets, HTML, JS the command needs
-	Widget() template.HTML
 }
 
 var commands = []func(Page) []Command{}
