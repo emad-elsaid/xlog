@@ -18,6 +18,7 @@ func (PageRename) Icon() string { return "fa-solid fa-i-cursor" }
 func (PageRename) Name() string { return "Rename" }
 func (f PageRename) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
+		"href":      "/+/file/rename?page=" + url.QueryEscape(f.page.Name()),
 		"hx-get":    "/+/file/rename?page=" + url.QueryEscape(f.page.Name()),
 		"hx-target": "body",
 		"hx-swap":   "beforeend",

@@ -16,6 +16,7 @@ func (PageDelete) Icon() string { return "fa-solid fa-trash" }
 func (PageDelete) Name() string { return "Delete" }
 func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
+		"href":       "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
 		"hx-delete":  "/+/file/delete?page=" + url.QueryEscape(f.page.Name()),
 		"hx-confirm": "Are you sure?",
 	}
