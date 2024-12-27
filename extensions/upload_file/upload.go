@@ -18,8 +18,10 @@ func (u Upload) Attrs() map[template.HTMLAttr]any {
 	link := fmt.Sprintf("/+/upload-file/form?page=%s", url.PathEscape(u.p.Name()))
 
 	return map[template.HTMLAttr]any{
-		"href":    link,
-		"hx-post": link,
+		"href":      link,
+		"hx-post":   link,
+		"hx-target": "body",
+		"hx-swap":   "beforeend",
 	}
 }
 

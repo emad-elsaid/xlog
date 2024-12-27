@@ -97,6 +97,7 @@ func (l action) Attrs() map[template.HTMLAttr]any {
 
 	return map[template.HTMLAttr]any{
 		method: fmt.Sprintf("/+/star/%s", url.PathEscape(l.page.Name())),
+		"href": fmt.Sprintf("/+/star/%s", url.PathEscape(l.page.Name())),
 	}
 }
 
