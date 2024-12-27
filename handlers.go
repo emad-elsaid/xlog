@@ -81,18 +81,23 @@ func getPageHandler(r Request) Output {
 	}
 
 	if !page.Exists() {
+		// if it's a directory get back to home page
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
 			return Redirect(Config.Index)
 		}
+
+		// if it's a static file serve it
 		if output, err := staticHandler(r); err == nil {
 			return output
 		}
 
+		// if it's readonly mode quit now
 		if Config.Readonly {
 			return NotFound("can't find page")
 		}
 
-		// Allow extensions to handle the event
+		// Allow extensions to handle this page if it's not readonly mode like
+		// opening an editor or something
 		Trigger(PageNotFound, page)
 
 		return NotFound("Page does not exist")
