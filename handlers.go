@@ -36,15 +36,15 @@ func Start(ctx context.Context) {
 		Listen(PageDeleted, clearPagesCache)
 	}
 
-	initExtensions()
-
-	Get("/{$}", rootHandler)
-	Get("/{page...}", getPageHandler)
-
 	if err := os.Chdir(Config.Source); err != nil {
 		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
 		os.Exit(1)
 	}
+
+	initExtensions()
+
+	Get("/{$}", rootHandler)
+	Get("/{page...}", getPageHandler)
 
 	if len(Config.Build) > 0 {
 		if err := build(Config.Build); err != nil {
