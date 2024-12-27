@@ -48,32 +48,31 @@ type searchResult struct {
 	Line string
 }
 
-func search(ctx context.Context, keyword string) []searchResult {
-	results := []searchResult{}
+func search(ctx context.Context, keyword string) []*searchResult {
+	results := []*searchResult{}
 	if len(keyword) < MIN_SEARCH_KEYWORD {
 		return results
 	}
 
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
-	EachPage(ctx, func(p Page) {
+	return MapPage(ctx, func(p Page) *searchResult {
 		match := reg.FindString(p.Name())
 		if len(match) > 0 {
-			results = append(results, searchResult{
+			return &searchResult{
 				Page: p.Name(),
 				Line: "Matches the file name",
-			})
-			return
+			}
 		}
 
 		match = reg.FindString(string(p.Content()))
 		if len(match) > 0 {
-			results = append(results, searchResult{
+			return &searchResult{
 				Page: p.Name(),
 				Line: match,
-			})
+			}
 		}
-	})
 
-	return results
+		return nil
+	})
 }

@@ -47,7 +47,7 @@ func Start(ctx context.Context) {
 	}
 
 	if len(Config.Build) > 0 {
-		if err := buildStaticSite(Config.Build); err != nil {
+		if err := build(Config.Build); err != nil {
 			slog.Error("Failed to build static pages", "error", err)
 			os.Exit(1)
 		}

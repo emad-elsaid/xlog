@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"context"
+	"reflect"
 	"regexp"
 	"runtime"
 	"sync"
@@ -61,30 +62,9 @@ func EachPage(ctx context.Context, f func(Page)) {
 
 var concurrency = runtime.NumCPU() * 4
 
-// EachPageCon Similar to EachPage but iterates concurrently
-func EachPageCon(ctx context.Context, f func(Page)) {
-	if pages == nil {
-		populatePagesCache(ctx)
-	}
-
-	grp, ctx := errgroup.WithContext(ctx)
-	grp.SetLimit(concurrency)
-
-	currentPages := pages
-	for _, p := range currentPages {
-		select {
-		case <-ctx.Done():
-			break
-		default:
-			grp.Go(func() (err error) { f(p); return })
-		}
-	}
-
-	grp.Wait()
-}
-
-// MapPageCon Similar to EachPage but iterates concurrently
-func MapPageCon[T any](ctx context.Context, f func(Page) T) []T {
+// MapPage Similar to EachPage but iterates concurrently and accumulates
+// returns in a slice
+func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	if pages == nil {
 		populatePagesCache(ctx)
 	}
@@ -103,7 +83,7 @@ func MapPageCon[T any](ctx context.Context, f func(Page) T) []T {
 		default:
 			grp.Go(func() (err error) {
 				val := f(p)
-				if any(val) == nil {
+				if isNil(val) {
 					return
 				}
 
@@ -119,6 +99,20 @@ func MapPageCon[T any](ctx context.Context, f func(Page) T) []T {
 	grp.Wait()
 
 	return output
+}
+
+// From https://stackoverflow.com/a/77341451/22401486
+func isNil[T any](t T) bool {
+	v := reflect.ValueOf(t)
+	kind := v.Kind()
+	// Must be one of these types to be nillable
+	return (kind == reflect.Ptr ||
+		kind == reflect.Interface ||
+		kind == reflect.Slice ||
+		kind == reflect.Map ||
+		kind == reflect.Chan ||
+		kind == reflect.Func) &&
+		v.IsNil()
 }
 
 func clearPagesCache(p Page) (err error) {

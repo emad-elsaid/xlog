@@ -120,8 +120,7 @@ func tagsHandler(r Request) Output {
 	tags := map[string][]Page{}
 	var lck sync.Mutex
 
-	EachPageCon(context.Background(), func(a Page) {
-
+	MapPage(context.Background(), func(a Page) bool {
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
@@ -143,6 +142,8 @@ func tagsHandler(r Request) Output {
 			}
 			lck.Unlock()
 		}
+
+		return true
 	})
 
 	return Render("tags", Locals{
@@ -161,7 +162,7 @@ func tagHandler(r Request) Output {
 }
 
 func tagPages(ctx context.Context, keyword string) []Page {
-	return MapPageCon(ctx, func(p Page) Page {
+	return MapPage(ctx, func(p Page) Page {
 		if p.Name() == Config.Index {
 			return nil
 		}
@@ -190,7 +191,7 @@ func relatedPages(p Page) template.HTML {
 		hashtags[strings.ToLower(string(v.value))] = true
 	}
 
-	pages := MapPageCon(context.Background(), func(rp Page) Page {
+	pages := MapPage(context.Background(), func(rp Page) Page {
 		if rp.Name() == p.Name() {
 			return nil
 		}

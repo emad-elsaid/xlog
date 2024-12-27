@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
+	"strings"
 
 	. "github.com/emad-elsaid/xlog"
 )
@@ -24,13 +25,13 @@ func (Sitemap) Init() {
 }
 
 func handler(r Request) Output {
-	output := `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`
+	output := []string{`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`}
 
-	EachPage(r.Context(), func(p Page) {
-		output += fmt.Sprintf("<url><loc>https://%s/%s</loc></url>", SITEMAP_DOMAIN, url.PathEscape(p.Name()))
-	})
+	output = append(output, MapPage(r.Context(), func(p Page) string {
+		return fmt.Sprintf("<url><loc>https://%s/%s</loc></url>", SITEMAP_DOMAIN, url.PathEscape(p.Name()))
+	})...)
 
-	output += `</urlset>`
+	output = append(output, `</urlset>`)
 
-	return PlainText(output)
+	return PlainText(strings.Join(output, "\n"))
 }

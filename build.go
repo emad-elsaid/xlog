@@ -3,6 +3,7 @@ package xlog
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -30,7 +31,7 @@ func RegisterBuildPage(p string, encloseInDir bool) {
 	}
 }
 
-func buildStaticSite(dest string) error {
+func build(dest string) error {
 	srv := server()
 
 	// building Index separately
@@ -45,7 +46,7 @@ func buildStaticSite(dest string) error {
 		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", Config.Index, "error", err)
 	}
 
-	EachPageCon(context.Background(), func(p Page) {
+	errs := MapPage(context.Background(), func(p Page) error {
 		err := buildRoute(
 			srv,
 			"/"+p.Name(),
@@ -54,9 +55,15 @@ func buildStaticSite(dest string) error {
 		)
 
 		if err != nil {
-			slog.Error("Failed to process", "page", p.Name(), "error", err)
+			return fmt.Errorf("Failed to process page: %s, error: %w", p.Name(), err)
 		}
+
+		return nil
 	})
+
+	if err := errors.Join(errs...); err != nil {
+		slog.Error(err.Error())
+	}
 
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html

@@ -17,7 +17,7 @@ func dateHandler(r Request) Output {
 		return BadRequest(err.Error())
 	}
 
-	pages := MapPageCon(r.Context(), func(p Page) Page {
+	pages := MapPage(r.Context(), func(p Page) Page {
 		_, tree := p.AST()
 		allDates := FindAllInAST[*DateNode](tree)
 		for _, d := range allDates {

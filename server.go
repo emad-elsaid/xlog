@@ -48,7 +48,6 @@ func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
 		}
 
 		middlewares = append(middlewares,
-			methodOverrideHandler,
 			csrf.Protect(sessionSecret, crsfOpts...))
 	}
 
@@ -164,19 +163,6 @@ func Render(path string, data Locals) Output {
 	}
 }
 
-// Derived from Gorilla middleware https://github.com/gorilla/handlers/blob/v1.5.1/handlers.go#L134
-func methodOverrideHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w Response, r Request) {
-		if r.Method == "POST" {
-			om := r.FormValue("_method")
-			if om == "PUT" || om == "PATCH" || om == "DELETE" {
-				r.Method = om
-			}
-		}
-		h.ServeHTTP(w, r)
-	})
-}
-
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w Response, r Request) {
 		start := time.Now()
@@ -193,9 +179,7 @@ func Cache(out Output) Output {
 	}
 }
 
-type funcStringer struct {
-	any
-}
+type funcStringer struct{ any }
 
 func (f funcStringer) String() string {
 	const xlogPrefix = "emad-elsaid/xlog/"
