@@ -30,5 +30,6 @@ func UploadForm(r xlog.Request) xlog.Output {
 
 	return xlog.Render("upload", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
+		"csrf":   xlog.CSRF(r),
 	})
 }

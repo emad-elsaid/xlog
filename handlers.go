@@ -97,7 +97,6 @@ func getPageHandler(r Request) Output {
 
 	return Render("view", Locals{
 		"page":       page,
-		"csrf":       CSRF(r),
-		"csrf_token": csrf.Token(r),
+		"csrf": csrf.Token(r),
 	})
 }

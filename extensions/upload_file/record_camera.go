@@ -30,5 +30,6 @@ func RecordCameraForm(r xlog.Request) xlog.Output {
 
 	return xlog.Render("record-camera", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
+		"csrf":   xlog.CSRF(r),
 	})
 }

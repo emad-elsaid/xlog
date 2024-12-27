@@ -28,5 +28,6 @@ func ScreenshotForm(r xlog.Request) xlog.Output {
 
 	return xlog.Render("screenshot", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
+		"csrf":   xlog.CSRF(r),
 	})
 }

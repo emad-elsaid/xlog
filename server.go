@@ -17,8 +17,8 @@ import (
 
 var (
 	router = http.NewServeMux()
-	// a function that renders CSRF hidden input field
-	CSRF = csrf.TemplateField
+	// a function that returns the CSRF token
+	CSRF = csrf.Token
 )
 
 type (

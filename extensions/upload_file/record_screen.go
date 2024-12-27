@@ -28,5 +28,6 @@ func RecordScreenForm(r xlog.Request) xlog.Output {
 
 	return xlog.Render("record-screen", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
+		"csrf":   xlog.CSRF(r),
 	})
 }

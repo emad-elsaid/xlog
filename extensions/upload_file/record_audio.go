@@ -30,5 +30,6 @@ func RecordAudioForm(r xlog.Request) xlog.Output {
 
 	return xlog.Render("record-audio", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
+		"csrf":   xlog.CSRF(r),
 	})
 }

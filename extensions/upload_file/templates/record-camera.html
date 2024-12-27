@@ -18,7 +18,7 @@
      function uploadFile(file) {
          var data = new FormData()
          data.append('file', file)
-         data.append('csrf', document.querySelector('input[name=csrf]').value);
+         data.append('csrf', '{{.csrf}}');
          var params = {method: 'POST', body: data};
 
          fetch('{{ .action }}', params).then(resp => resp.text()).then(text => {
