@@ -31,9 +31,11 @@
 </div>
 
 <div class="view">
-  {{- widgets "before_view" .page -}}
-  {{.content}}
-  {{- widgets "after_view" .page -}}
+  {{- with .page -}}
+    {{- widgets "before_view" . -}}
+    {{- .Render -}}
+    {{- widgets "after_view" . -}}
+  {{- end -}}
 </div>
 
 {{ template "footer" . }}

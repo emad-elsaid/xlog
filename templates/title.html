@@ -1,3 +1,9 @@
 {{- if ne .config.Index .page.Name -}}
-<div dir="auto" class="title is-1 has-text-weight-bold">{{ .title }}</div>
+<div dir="auto" class="title is-1 has-text-weight-bold">
+  {{- if .page -}}
+    {{- .page.Emoji -}} {{- .page.Name -}}
+  {{- else -}}
+    {{- .title -}}
+  {{- end -}}
+</div>
 {{- end -}}

@@ -96,9 +96,7 @@ func getPageHandler(r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"title":      page.Emoji() + " " + page.Name(),
 		"page":       page,
-		"content":    page.Render(),
 		"csrf":       CSRF(r),
 		"csrf_token": csrf.Token(r),
 	})
