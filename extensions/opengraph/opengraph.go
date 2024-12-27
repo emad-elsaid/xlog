@@ -90,6 +90,10 @@ func opengraphTags(p Page) template.HTML {
 }
 
 func rawText(source []byte, n ast.Node, limit int) string {
+	if source == nil || n == nil {
+		return ""
+	}
+
 	out := ""
 	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {

@@ -49,6 +49,10 @@ var MarkdownConverter = sync.OnceValue(func() goldmark.Markdown {
 // searching for a node of a specific type can be used to find first image,
 // link, paragraph...etc
 func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
+	if n == nil {
+		return
+	}
+
 	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if found, ok = n.(t); ok {
 			return ast.WalkStop, nil
@@ -62,6 +66,10 @@ func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 
 // Extract all nodes of a specific type from the AST
 func FindAllInAST[t ast.Node](n ast.Node) (a []t) {
+	if n == nil {
+		return
+	}
+
 	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
