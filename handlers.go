@@ -17,11 +17,19 @@ import (
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
+
+	// Setup logger
 	level := slogor.SetLevel(slog.LevelDebug)
 	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
 	handler := slogor.NewHandler(os.Stderr, level, timeFmt)
 	logger := slog.New(handler)
 	slog.SetDefault(logger)
+
+	// if a static site is going to be built then lets also turn on read only
+	// mode
+	if len(Config.Build) > 0 {
+		Config.Readonly = true
+	}
 
 	if !Config.Readonly {
 		Listen(PageChanged, clearPagesCache)
@@ -39,8 +47,6 @@ func Start(ctx context.Context) {
 	}
 
 	if len(Config.Build) > 0 {
-		Config.Readonly = true
-
 		if err := buildStaticSite(Config.Build); err != nil {
 			slog.Error("Failed to build static pages", "error", err)
 			os.Exit(1)
@@ -53,11 +59,8 @@ func Start(ctx context.Context) {
 	slog.Info("Starting server", "address", Config.BindAddress)
 
 	go func() {
-		select {
-		case <-ctx.Done():
-			srv.Close()
-			return
-		}
+		<-ctx.Done()
+		srv.Close()
 	}()
 
 	srv.ListenAndServe()
@@ -96,7 +99,7 @@ func getPageHandler(r Request) Output {
 	}
 
 	return Render("view", Locals{
-		"page":       page,
+		"page": page,
 		"csrf": csrf.Token(r),
 	})
 }
