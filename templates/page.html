@@ -1,30 +1,28 @@
 {{ template "header" . }}
 
-<div class="columns subtitle is-size-7">
+<div class="columns content is-small">
 
-  {{ with properties .page }}
+  {{- with properties .page -}}
   <div class="column">
-    <span class="icon-text">
-      {{ range . }}
-      <span class="icon"> <i class="{{.Icon}}"></i> </span>
-      <span>{{.Name}}: {{.Value}}</span>
-      {{ end }}
-    </span>
+    {{- range . -}}
+    <span class="icon"> <i class="{{.Icon}}"></i> </span>
+    <span>{{.Name}}: {{.Value}}</span>
+    {{- end -}}
   </div>
-  {{ end }}
+  {{- end -}}
 
-  {{ with quick_commands .page }}
+  {{- with quick_commands .page -}}
   <div class="column is-narrow">
 
-    {{ range . }}
+    {{- range . -}}
     <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
       <span class="icon"><i class="{{.Icon}}"></i></span>
       <span>{{.Name}}</span>
     </a>
-    {{ end }}
+    {{- end -}}
 
   </div>
-  {{ end }}
+  {{- end -}}
 
 </div>
 

@@ -7,9 +7,7 @@
     <link rel="icon" href="/public/logo.png">
     <link rel="stylesheet" href="/public/style.css">
     <title>
-      {{- with .page -}}
-        {{- .Emoji -}} {{- .Name -}}
-      {{- end -}} |
+      {{- with .page }}{{ .Emoji }} {{ .Name }} | {{ end -}}
       {{.config.Sitename}}
     </title>
     {{- with .page }} {{ widgets "head" . }} {{ end }}
@@ -19,7 +17,15 @@
 
     <div class="container is-max-desktop px-3" dir="auto">
       {{- template "navbar" . -}}
-      {{ template "title" . }}
+
+      {{- if ne .config.Index .page.Name -}}
+      <div dir="auto" class="title is-1 has-text-weight-bold">
+        {{- with .page -}}
+        {{- .Emoji }} {{ .Name -}}
+        {{- end -}}
+      </div>
+      {{- end -}}
+
       <div class="content pb-5">
       {{- end -}}
       {{ define "footer" }}

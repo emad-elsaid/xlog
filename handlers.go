@@ -103,7 +103,7 @@ func getPageHandler(r Request) Output {
 		return NotFound("Page does not exist")
 	}
 
-	return Render("view", Locals{
+	return Render("page", Locals{
 		"page": page,
 		"csrf": csrf.Token(r),
 	})
