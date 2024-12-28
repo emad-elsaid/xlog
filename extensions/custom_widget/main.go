@@ -12,9 +12,9 @@ import (
 var head_file, before_view_file, after_view_file string
 
 func init() {
-	flag.StringVar(&head_file, "custom_head", "", "path to a file it's content will be included in every page <head> tag")
-	flag.StringVar(&before_view_file, "custom_before_view", "", "path to a file it's content will be included in every page BEFORE the content of the page")
-	flag.StringVar(&after_view_file, "custom_after_view", "", "path to a file it's content will be included in every page AFTER the content of the page")
+	flag.StringVar(&head_file, "custom.head", "", "path to a file it's content will be included in every page <head> tag")
+	flag.StringVar(&before_view_file, "custom.before_view", "", "path to a file it's content will be included in every page BEFORE the content of the page")
+	flag.StringVar(&after_view_file, "custom.after_view", "", "path to a file it's content will be included in every page AFTER the content of the page")
 
 	RegisterExtension(CustomWidget{})
 }

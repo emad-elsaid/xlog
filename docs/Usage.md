@@ -18,13 +18,11 @@ Usage of xlog:
     	Build all pages as static site in this directory
   -csrf-cookie string
     	CSRF cookie name (default "xlog_csrf")
-  -custom_after_view string
+  -custom.after_view string
     	path to a file it's content will be included in every page AFTER the content of the page
-  -custom_before_view string
+  -custom.before_view string
     	path to a file it's content will be included in every page BEFORE the content of the page
-  -custom_css string
-    	Custom CSS file path
-  -custom_head string
+  -custom.head string
     	path to a file it's content will be included in every page <head> tag
   -disabled-extensions string
     	disable list of extensions by name, comma separated
