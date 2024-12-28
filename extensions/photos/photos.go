@@ -263,7 +263,7 @@ func photoHandler(r xlog.Request) xlog.Output {
 	}
 
 	return xlog.Render("photo", xlog.Locals{
+		"page":  xlog.DynamicPage{NameVal: photo.Name()},
 		"photo": photo,
-		"title": photo.Name(),
 	})
 }

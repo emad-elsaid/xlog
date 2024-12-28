@@ -147,8 +147,8 @@ func tagsHandler(r Request) Output {
 	})
 
 	return Render("tags", Locals{
-		"title": "Hashtags",
-		"tags":  tags,
+		"page": DynamicPage{NameVal: "Hashtags"},
+		"tags": tags,
 	})
 }
 
@@ -156,7 +156,7 @@ func tagHandler(r Request) Output {
 	tag := r.PathValue("tag")
 
 	return Render("tag", Locals{
-		"title": "#" + tag,
+		"page":  DynamicPage{NameVal: "#" + tag},
 		"pages": tagPages(r.Context(), tag),
 	})
 }

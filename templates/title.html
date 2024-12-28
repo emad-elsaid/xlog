@@ -1,9 +1,7 @@
 {{- if ne .config.Index .page.Name -}}
 <div dir="auto" class="title is-1 has-text-weight-bold">
-  {{- if .page -}}
-    {{- .page.Emoji -}} {{- .page.Name -}}
-  {{- else -}}
-    {{- .title -}}
+  {{- with .page -}}
+    {{- .Emoji -}} {{- .Name -}}
   {{- end -}}
 </div>
 {{- end -}}

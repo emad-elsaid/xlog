@@ -169,3 +169,23 @@ func (p *page) clearCache() {
 	p.ast = nil
 	p.lastUpdate = time.Time{}
 }
+
+// DynamicPage implement Page interface and allow extensions to define a page to
+// be passed to templates without having underlying file on desk
+type DynamicPage struct {
+	NameVal  string
+	EmojiVal string
+	RenderFn func() template.HTML
+}
+
+func (d DynamicPage) Name() string          { return d.NameVal }
+func (d DynamicPage) Render() template.HTML { return d.RenderFn() }
+func (d DynamicPage) Emoji() string         { return d.EmojiVal }
+
+func (DynamicPage) FileName() string        { return "" }
+func (DynamicPage) Exists() bool            { return false }
+func (DynamicPage) Content() Markdown       { return "" }
+func (DynamicPage) Delete() bool            { return false }
+func (DynamicPage) Write(Markdown) bool     { return false }
+func (DynamicPage) ModTime() time.Time      { return time.Time{} }
+func (DynamicPage) AST() ([]byte, ast.Node) { return nil, nil }

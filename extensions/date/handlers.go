@@ -30,7 +30,7 @@ func dateHandler(r Request) Output {
 	})
 
 	return Render("date", Locals{
-		"title": date.Format("2 January 2006"),
+		"page":  DynamicPage{NameVal: date.Format("2 January 2006")},
 		"pages": pages,
 	})
 }

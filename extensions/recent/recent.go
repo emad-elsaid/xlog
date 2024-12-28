@@ -32,7 +32,7 @@ func recentHandler(r Request) Output {
 	sort.Sort(rp)
 
 	return Render("recent", Locals{
-		"title": "Recent",
+		"page":  DynamicPage{NameVal: "Recent"},
 		"pages": rp,
 	})
 }

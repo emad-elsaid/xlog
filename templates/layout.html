@@ -7,14 +7,12 @@
     <link rel="icon" href="/public/logo.png">
     <link rel="stylesheet" href="/public/style.css">
     <title>
-      {{- if .page -}}
-        {{- .page.Emoji -}} {{- .page.Name -}}
-      {{- else -}}
-        {{- .title -}}
-      {{- end -}}
-      | {{.config.Sitename}}
+      {{- with .page -}}
+        {{- .Emoji -}} {{- .Name -}}
+      {{- end -}} |
+      {{.config.Sitename}}
     </title>
-    {{- if .page }} {{ widgets "head" .page }} {{ end }}
+    {{- with .page }} {{ widgets "head" . }} {{ end }}
   </head>
   <body>
     {{- template "commands" . -}}
