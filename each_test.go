@@ -12,3 +12,8 @@ func TestIsIgnoredPath(t *testing.T) {
 	assert.False(t, IsIgnoredPath("index.md"))
 	assert.False(t, IsIgnoredPath("something/something"))
 }
+
+func TestIsNil(t *testing.T) {
+	assert.True(t, isNil[Page](nil))
+	assert.True(t, isNil[*Page](nil))
+}
