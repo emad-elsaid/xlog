@@ -22,6 +22,9 @@ func IgnorePath(r *regexp.Regexp) {
 	ignoredPaths = append(ignoredPaths, r)
 }
 
+// IsIgnoredPath checks if a file path should be ignored according to the list
+// of ignored paths. page source implementations can use it to ignore files from
+// their sources
 func IsIgnoredPath(d string) bool {
 	for _, v := range ignoredPaths {
 		if v.MatchString(d) {

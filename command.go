@@ -2,8 +2,11 @@ package xlog
 
 import "html/template"
 
-// Command define a command that a user can invoke in view or edit page on a
-// Page.
+// Command defines a structure used for 3 categories of lists:
+// 1. Commands for Ctrl+K actions menu
+// 2. Quick commands displayed in the default template at the top right of the page
+// 3. Links displayed in the navigation bar
+// The template decides where and how to display commands. it can choose to use them in a different way than the default template
 type Command interface {
 	// Icon returns the Fontawesome icon class name for the Command
 	Icon() string
@@ -20,9 +23,10 @@ func RegisterCommand(c func(Page) []Command) {
 	commands = append(commands, c)
 }
 
-// Commands return the list of commands for a page. it executes all functions
-// registered with RegisterCommand and collect all results in one slice. result
-// can be passed to the view to render the commands list
+// Commands return the list of commands for a page. when a page is displayed it
+// executes all functions registered with RegisterCommand and collect all
+// results in one slice. result can be passed to the view to render the commands
+// list
 func Commands(p Page) []Command {
 	cmds := []Command{}
 	for c := range commands {
