@@ -151,7 +151,7 @@ func getUrlMeta(url string) (*Meta, error) {
 	}
 
 	resp, err := http.Get(url)
-	if err != nil {
+	if resp == nil || err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()

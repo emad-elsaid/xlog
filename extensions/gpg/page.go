@@ -102,7 +102,7 @@ func (p *page) AST() ([]byte, ast.Node) {
 }
 func (p *page) Emoji() string {
 	_, tree := p.AST()
-	if e, ok := xlog.FindInAST[*emojiAst.Emoji](tree); ok {
+	if e, ok := xlog.FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
 		return string(e.Value.Unicode)
 	}
 
