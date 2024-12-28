@@ -31,10 +31,8 @@
     <div class="navbar-end">
       <div class="navbar-item">
 
-        {{- if .page -}}
-        {{- with widgets "search" .page -}}
-        {{ . }}
-        {{- end -}}
+        {{- with .page -}}
+        {{- widgets "search" . -}}
         {{- end -}}
 
       </div>

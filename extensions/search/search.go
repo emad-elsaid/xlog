@@ -28,6 +28,7 @@ func (Search) Init() {
 		return
 	}
 
+	RequireHTMX()
 	Get(`/+/search`, searchHandler)
 	RegisterWidget("search", 0, searchWidget)
 	RegisterTemplate(templates, "templates")

@@ -1,6 +1,17 @@
 <div class="field has-addons">
   <div class="control is-expanded">
-    <input type="text" id="newPage" list="searchResults" class="input" placeholder="New/Search..." onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value } else { search(this.value); }" autocomplete="off"/>
+    <input type="text"
+           id="newPage"
+           name="q"
+           hx-get="/+/search"
+           hx-trigger="keyup delay:0.2s"
+           hx-target="next"
+           list="searchResults"
+           class="input"
+           placeholder="New/Search..."
+           onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value }"
+           autocomplete="off"
+    />
     <datalist id="searchResults"></datalist>
   </div>
   <div class="control">
@@ -11,38 +22,14 @@
 </div>
 
 <script type="application/javascript">
- document.addEventListener('keydown', function(event) {
-     const e = event || window.event;
-     if ( e.key === 'o' && (e.ctrlKey || e.metaKey ) ) {
-         e.preventDefault();
-         document.getElementById("newPage").focus();
-     }
- });
-
  document.addEventListener('selectionchange', function() {
      let selection = window.getSelection();
      let text = selection.toString();
 
      if( text.length == 0 ) { return; }
-     if( selection.anchorNode.className == 'control' ) { return; }
+     // Ignore selection in the input itself
+     if( selection.anchorNode.className == 'control is-expanded' ) { return; }
 
      document.getElementById('newPage').value = text;
  })
-
- function search(keyword) {
-     let results = document.getElementById("searchResults");
-     if (keyword.length == 0) {
-         results.innerHTML = "";
-         return;
-     }
-
-     fetch("/+/search?q="+encodeURIComponent(keyword), {
-         method: 'GET',
-         cache: 'no-cache'
-     }).then(function(resp) {
-         return resp.text();
-     }).then(function(body) {
-         results.innerHTML = body;
-     });
- }
 </script>
