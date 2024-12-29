@@ -10,7 +10,7 @@ import (
 
 const decryptableExt = ".pgp"
 
-func quickCommands(p xlog.Page) []xlog.Command {
+func commands(p xlog.Page) []xlog.Command {
 	if len(gpgId) == 0 {
 		return nil
 	}
