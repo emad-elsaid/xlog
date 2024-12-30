@@ -11,6 +11,10 @@ import (
 const decryptableExt = ".pgp"
 
 func commands(p xlog.Page) []xlog.Command {
+	if !p.Exists() {
+		return nil
+	}
+
 	if len(gpgId) == 0 {
 		return nil
 	}

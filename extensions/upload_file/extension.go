@@ -43,6 +43,10 @@ func (UploadFile) Init() {
 
 	RequireHTMX()
 	RegisterCommand(func(p Page) []Command {
+		if !p.Exists() {
+			return nil
+		}
+
 		return []Command{
 			Upload{p: p},
 			Screenshot{p: p},
