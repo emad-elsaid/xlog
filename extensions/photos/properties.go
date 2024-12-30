@@ -41,7 +41,7 @@ func properties(p xlog.Page) []xlog.Property {
 	if !t.IsZero() {
 		props = append(props, Property{
 			IconVal: "fa-regular fa-calendar",
-			NameVal: "Capture time",
+			NameVal: "capture time",
 			Val:     fmt.Sprintf("%s %d %s %d", t.Weekday(), t.Day(), t.Month(), t.Year()),
 		})
 	}
@@ -49,7 +49,7 @@ func properties(p xlog.Page) []xlog.Property {
 	if m, err := e.Get(exif.Make); err == nil {
 		props = append(props, Property{
 			IconVal: "fa-solid fa-camera-retro",
-			NameVal: "Camera make",
+			NameVal: "camera make",
 			Val:     str(m),
 		})
 	}
@@ -57,7 +57,7 @@ func properties(p xlog.Page) []xlog.Property {
 	if c, err := e.Get(exif.Model); err == nil {
 		props = append(props, Property{
 			IconVal: "fa-solid fa-camera-retro",
-			NameVal: "Camera model",
+			NameVal: "camera model",
 			Val:     str(c),
 		})
 	}
@@ -65,7 +65,7 @@ func properties(p xlog.Page) []xlog.Property {
 	if m, err := e.Get(exif.LensMake); err == nil {
 		props = append(props, Property{
 			IconVal: "fa-solid fa-camera-retro",
-			NameVal: "Lens make",
+			NameVal: "lens make",
 			Val:     str(m),
 		})
 	}
@@ -73,7 +73,7 @@ func properties(p xlog.Page) []xlog.Property {
 	if m, err := e.Get(exif.LensModel); err == nil {
 		props = append(props, Property{
 			IconVal: "fa-solid fa-camera-retro",
-			NameVal: "Lens model",
+			NameVal: "lens model",
 			Val:     str(m),
 		})
 	}
@@ -83,7 +83,7 @@ func properties(p xlog.Page) []xlog.Property {
 		if err == nil {
 			props = append(props, Property{
 				IconVal: "fa-solid fa-camera-retro",
-				NameVal: "Focal Length",
+				NameVal: "focal Length",
 				Val:     fmt.Sprintf("%dmm", nom/denom),
 			})
 		}
@@ -94,7 +94,7 @@ func properties(p xlog.Page) []xlog.Property {
 		if err == nil {
 			props = append(props, Property{
 				IconVal: "fa-solid fa-camera-retro",
-				NameVal: "Aperture",
+				NameVal: "aperture",
 				Val:     fmt.Sprintf("f/%.1f", float32(nom)/float32(denom)),
 			})
 		}
@@ -113,7 +113,7 @@ func properties(p xlog.Page) []xlog.Property {
 		if err == nil {
 			props = append(props, Property{
 				IconVal: "fa-solid fa-camera-retro",
-				NameVal: "Shutter speed",
+				NameVal: "shutter speed",
 				Val:     fmt.Sprintf("1/%.0fs", math.Pow(2, float64(snom)/float64(sdenom))),
 			})
 		}
