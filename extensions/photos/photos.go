@@ -12,13 +12,14 @@ import (
 	"image/png"
 	_ "image/png"
 	"io/fs"
-	"math"
 	"os"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/yuin/goldmark/ast"
 
 	"github.com/emad-elsaid/types"
 	"github.com/emad-elsaid/xlog"
@@ -43,6 +44,7 @@ func (Photos) Name() string { return "photos" }
 func (Photos) Init() {
 	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode})
 	xlog.RegisterTemplate(templates, "templates")
+	xlog.RegisterProperty(properties)
 	xlog.Get(`/+/photos/thumbnail/{path...}`, resizeHandler)
 	xlog.Get(`/+/photos/photo/{path...}`, photoHandler)
 }
@@ -61,90 +63,16 @@ func (p *Photo) Name() string {
 	return base[:len(base)-len(ext)]
 }
 
-func (p *Photo) Camera() string {
-	out := ""
-
-	make, err := p.Exif.Get(exif.Make)
-	if err == nil {
-		out, _ = make.StringVal()
-	}
-
-	camModel, err := p.Exif.Get(exif.Model)
-	if err == nil {
-		str, _ := camModel.StringVal()
-		out += " " + str
-	}
-
-	return out
-}
-
-func (p *Photo) FocalLength() string {
-	focal, err := p.Exif.Get(exif.FocalLength)
-	if err != nil {
-		return ""
-	}
-
-	nom, denom, err := focal.Rat2(0)
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("%dmm", nom/denom)
-}
-
-func (p *Photo) Aperture() string {
-	aperture, err := p.Exif.Get(exif.ApertureValue)
-	if err != nil {
-		return ""
-	}
-
-	anom, adenom, err := aperture.Rat2(0)
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("f/%.1f", float32(anom)/float32(adenom))
-}
-
-func (p *Photo) ShutterSpeed() string {
-	shutter, err := p.Exif.Get(exif.ShutterSpeedValue)
-	if err != nil {
-		return ""
-	}
-
-	snom, sdenom, err := shutter.Rat2(0)
-	if err != nil {
-		return ""
-	}
-
-	return fmt.Sprintf("1/%.0fs", math.Pow(2, float64(snom)/float64(sdenom)))
-}
-
-func (p *Photo) ISO() string {
-	iso, err := p.Exif.Get(exif.ISOSpeedRatings)
-	if err != nil {
-		return ""
-	}
-
-	return iso.String()
-}
-
-func (p *Photo) Lens() string {
-	output := ""
-	make, err := p.Exif.Get(exif.LensMake)
-	if err == nil {
-		output, _ = make.StringVal()
-	}
-
-	model, err := p.Exif.Get(exif.LensModel)
-	if err == nil {
-		val, err := model.StringVal()
-		if err == nil {
-			output += val
-		}
-	}
-
-	return output
+func (*Photo) Emoji() string            { return "" }
+func (*Photo) FileName() string         { return "" }
+func (*Photo) Exists() bool             { return false }
+func (*Photo) Content() xlog.Markdown   { return "" }
+func (*Photo) Delete() bool             { return false }
+func (*Photo) Write(xlog.Markdown) bool { return false }
+func (*Photo) ModTime() time.Time       { return time.Time{} }
+func (*Photo) AST() ([]byte, ast.Node)  { return nil, nil }
+func (p *Photo) Render() template.HTML {
+	return xlog.Partial("photo", xlog.Locals{"photo": p})
 }
 
 func NewPhoto(path string) (*Photo, error) {
@@ -262,8 +190,7 @@ func photoHandler(r xlog.Request) xlog.Output {
 		return xlog.InternalServerError(err)
 	}
 
-	return xlog.Render("photo", xlog.Locals{
-		"page":  xlog.DynamicPage{NameVal: photo.Name()},
-		"photo": photo,
+	return xlog.Render("page", xlog.Locals{
+		"page": photo,
 	})
 }

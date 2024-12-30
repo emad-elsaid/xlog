@@ -33,5 +33,9 @@ func (FileOps) Init() {
 }
 
 func commands(p Page) []Command {
+	if len(p.FileName()) == 0 {
+		return nil
+	}
+
 	return []Command{PageDelete{p}, PageRename{p}}
 }

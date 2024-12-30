@@ -40,6 +40,10 @@ func (a lastUpdateProp) Name() string { return "Modified" }
 func (a lastUpdateProp) Value() any   { return ago(a.page.ModTime()) }
 
 func defaultProps(p Page) []Property {
+	if p.ModTime().IsZero() {
+		return nil
+	}
+
 	return []Property{
 		lastUpdateProp{p},
 	}

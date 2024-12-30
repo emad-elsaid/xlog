@@ -1,25 +1,62 @@
 {{ template "header" . }}
 
+{{- with properties .page -}}
+<div class="modal" id="properties-dialog">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+
+    <header class="modal-card-head">
+      <div class="modal-card-title">Page Properties</div>
+      <button class="delete" aria-label="close" onclick="document.getElementById('properties-dialog').classList.remove('is-active')"></button>
+    </header>
+
+    <section class="modal-card-body">
+      <table class="table is-hoverable is-striped is-fullwidth">
+        {{ range . }}
+        <tr>
+          <th>
+            <span class="icon"><i class="{{.Icon}}"></i></span>
+            {{.Name}}
+          </th>
+          <td>{{.Value}}</td>
+        </tr>
+        {{end}}
+      </table>
+    </section>
+  </div>
+</div>
+{{- end -}}
+
 <div class="columns content is-small">
 
-  {{- with properties .page -}}
   <div class="column">
-    {{- range . -}}
-    <span class="icon"> <i class="{{.Icon}}"></i> </span>
-    <span>{{.Name}}: {{.Value}}</span>
-    {{- end -}}
+    <span class="icon-text">
+      {{ if not .page.ModTime.IsZero }}
+      <span class="icon"> <i class="fa-solid fa-clock"></i> </span>
+      <span>Modified: {{ago .page.ModTime}}</span>
+      {{ end }}
+
+      {{- with properties .page -}}
+      <a class="icon-text" href="#" onclick="document.getElementById('properties-dialog').classList.add('is-active')">
+        <span class="icon"> <i class="fa-solid fa-info"></i> </span>
+        <span>Properties</span>
+      </a>
+      {{- end -}}
+    </span>
+
   </div>
-  {{- end -}}
 
   {{- with quick_commands .page -}}
   <div class="column is-narrow">
 
-    {{- range . -}}
-    <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
-      <span class="icon"><i class="{{.Icon}}"></i></span>
-      <span>{{.Name}}</span>
-    </a>
-    {{- end -}}
+    <span class="icon-text">
+      {{- range . -}}
+      <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
+        <span class="icon"><i class="{{.Icon}}"></i></span>
+        <span>{{.Name}}</span>
+      </a>
+      {{- end -}}
+    </span>
 
   </div>
   {{- end -}}

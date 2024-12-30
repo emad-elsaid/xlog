@@ -1,33 +1,3 @@
-{{ template "header" . }}
-
-{{ with .photo }}
 <center>
-  <img src="/{{.Original}}" class="my-3">
+  <img src="/{{.photo.Original}}">
 </center>
-
-{{ if .Exif }}
-<p class="my-1">
-
-  <i class="fa-regular fa-calendar"></i> {{ .Time.Weekday }} {{.Time.Day}} {{.Time.Month}} {{.Time.Year}}
-
-  {{ if or .Camera .Lens }}
-    <br>
-    <i class="fa-solid fa-camera-retro"></i>
-    {{ with .Camera }} {{.}} {{ end }}
-    {{ with .Lens }} + {{.}} {{ end }}
-  {{ end }}
-
-  {{ if or .FocalLength .Aperture .ISO .ShutterSpeed }}
-    <br>
-    <i class="fa-solid fa-sliders"></i>
-    {{ with .FocalLength }} {{.}} {{ end }}
-    {{ with .Aperture }} {{.}} {{ end }}
-    {{ with .ISO }} ISO {{.}} {{end}}
-    {{ with .ShutterSpeed }} {{.}} {{ end }}
-  {{ end }}
-
-</p>
-{{ end }}
-
-{{ end }}
-{{ template "footer" . }}

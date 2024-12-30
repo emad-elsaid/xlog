@@ -27,6 +27,10 @@ func (Github) Init() {
 }
 
 func quickCommands(p Page) []Command {
+	if len(p.FileName()) == 0 {
+		return nil
+	}
+
 	return []Command{editOnGithub{page: p}}
 }
 

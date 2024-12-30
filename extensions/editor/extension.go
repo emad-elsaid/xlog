@@ -77,9 +77,11 @@ func editorHandler(r xlog.Request) xlog.Output {
 }
 
 func links(p xlog.Page) []xlog.Command {
-	return []xlog.Command{
-		editButton{page: p},
+	if len(p.FileName()) == 0 {
+		return nil
 	}
+
+	return []xlog.Command{editButton{page: p}}
 }
 
 type editButton struct {
