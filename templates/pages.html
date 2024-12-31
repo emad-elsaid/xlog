@@ -1,7 +1,10 @@
 <ul>
   {{- range . -}}
   <li>
-    <a href="/{{.Name}}" dir="auto">{{ .Emoji }} {{ .Name }}</a>
+    <a href="/{{.Name}}" dir="auto">{{ .Emoji }}
+      {{ $props := properties . }}
+      {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+    </a>
     <time class="has-text-grey is-size-7">{{ ago .ModTime }}</time>
   </li>
   {{- end -}}

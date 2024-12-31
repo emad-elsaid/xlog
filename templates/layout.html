@@ -7,7 +7,12 @@
     <link rel="icon" href="/public/logo.png">
     <link rel="stylesheet" href="/public/style.css">
     <title>
-      {{- with .page }}{{ .Emoji }} {{ .Name }} | {{ end -}}
+      {{ $props := properties .page }}
+      {{- with .page -}}
+      {{ .Emoji }}
+      {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+      |
+      {{- end -}}
       {{.config.Sitename}}
     </title>
     {{- with .page }} {{ widgets "head" . }} {{ end }}
@@ -21,7 +26,8 @@
       {{- if ne .config.Index .page.Name -}}
       <div dir="auto" class="title is-1 has-text-weight-bold">
         {{- with .page -}}
-        {{- .Emoji }} {{ .Name -}}
+        {{- .Emoji }}
+        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
         {{- end -}}
       </div>
       {{- end -}}
