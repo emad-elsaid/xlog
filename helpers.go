@@ -16,6 +16,7 @@ var helpers = template.FuncMap{
 	"widgets":        RenderWidget,
 	"commands":       Commands,
 	"quick_commands": QuickCommands,
+	"isFontAwesome":  IsFontAwesome,
 	"includeJS":      includeJS,
 	"scripts":        scripts,
 }
@@ -126,4 +127,8 @@ func scripts() template.HTML {
 	}
 
 	return template.HTML(b.String())
+}
+
+func IsFontAwesome(i string) bool {
+	return strings.HasPrefix(i, "fa")
 }

@@ -29,23 +29,31 @@ func (Search) Init() {
 	}
 
 	RequireHTMX()
-	Get(`/+/search`, searchHandler)
+	Get(`/+/search`, searchFormHandler)
+	Get(`/+/search-result`, searchResultHandler)
 	RegisterWidget("search", 0, searchWidget)
 	RegisterTemplate(templates, "templates")
 }
 
 func searchWidget(Page) template.HTML {
-	return Partial("search-widget", nil)
+	return Partial("search", nil)
 }
 
-func searchHandler(r Request) Output {
-	return Render("search-datalist", Locals{
+func searchFormHandler(r Request) Output {
+	return Render("search-form", Locals{
+		"page":    DynamicPage{NameVal: "Create"},
+		"results": search(r.Context(), r.FormValue("q")),
+	})
+}
+
+func searchResultHandler(r Request) Output {
+	return Render("search-result", Locals{
 		"results": search(r.Context(), r.FormValue("q")),
 	})
 }
 
 type searchResult struct {
-	Page string
+	Page Page
 	Line string
 }
 
@@ -61,7 +69,7 @@ func search(ctx context.Context, keyword string) []*searchResult {
 		match := reg.FindString(p.Name())
 		if len(match) > 0 {
 			return &searchResult{
-				Page: p.Name(),
+				Page: p,
 				Line: "Matches the file name",
 			}
 		}
@@ -69,7 +77,7 @@ func search(ctx context.Context, keyword string) []*searchResult {
 		match = reg.FindString(string(p.Content()))
 		if len(match) > 0 {
 			return &searchResult{
-				Page: p.Name(),
+				Page: p,
 				Line: match,
 			}
 		}

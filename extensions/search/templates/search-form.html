@@ -1,18 +1,18 @@
+{{ template "header" . }}
 <div class="field has-addons">
   <div class="control is-expanded">
     <input type="text"
            id="newPage"
            name="q"
-           hx-get="/+/search"
+           hx-get="/+/search-result"
            hx-trigger="keyup delay:0.2s"
-           hx-target="next"
-           list="searchResults"
+           hx-target="#searchResults"
            class="input"
            placeholder="New/Search..."
            onkeyup="if(event.keyCode == 13){ document.location.pathname = this.value }"
            autocomplete="off"
+           autofocus
     />
-    <datalist id="searchResults"></datalist>
   </div>
   <div class="control">
     <a class="button" onclick="document.location.pathname = document.getElementById('newPage').value">
@@ -21,15 +21,8 @@
   </div>
 </div>
 
-<script type="application/javascript">
- document.addEventListener('selectionchange', function() {
-     let selection = window.getSelection();
-     let text = selection.toString();
+<aside class="menu">
+  <div class="menu-list" id="searchResults"></div>
+</aside>
 
-     if( text.length == 0 ) { return; }
-     // Ignore selection in the input itself
-     if( selection.anchorNode.className == 'control is-expanded' ) { return; }
-
-     document.getElementById('newPage').value = text;
- })
-</script>
+{{ template "footer" . }}

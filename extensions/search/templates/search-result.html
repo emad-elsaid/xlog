@@ -1,0 +1,14 @@
+{{ range .results }}
+<div>
+  <a href="/{{.Page.Name}}">
+    <strong class="is-block mb-1">
+      {{ with .Page }}
+      {{.Emoji}}
+      {{ $props := properties . }}
+      {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+      {{ end }}
+    </strong>
+    {{.Line}}
+  </a>
+</div>
+{{ end }}

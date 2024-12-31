@@ -22,6 +22,11 @@
       {{- if .page }}
       {{- range $i, $a := links .page -}}
       <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="navbar-item">
+        {{ with .Icon }}
+        <span class="icon">
+          {{ if isFontAwesome . }}<i class="{{.}}"></i> {{ else }} {{.}} {{ end }}
+        </span>
+        {{ end }}
         <span>{{.Name}}</span>
       </a>
       {{- end -}}
