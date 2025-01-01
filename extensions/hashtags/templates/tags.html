@@ -4,7 +4,7 @@
 
   {{ range $tag, $pages := .tags }}
   <h1>
-    <a href="/+/tag/{{$tag}}"> {{$tag}} </a>
+    <a href="/+/tag/{{$tag}}" class="is-capitalized"> {{$tag}} </a>
   </h1>
   {{ template "pages" $pages }}
   {{ end }}
