@@ -1,11 +1,14 @@
-<ul>
-  {{- range . -}}
-  <li>
-    <a href="/{{.Name}}" dir="auto">{{ .Emoji }}
+<aside class="menu" dir="auto">
+  <div class="menu-list" dir="auto">
+    {{- range . -}}
+    <a href="/{{.Name}}" dir="auto">
+      <span class="is-block">
+      {{ .Emoji }}
       {{ $props := properties . }}
-      {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
-    </a>
-    <time class="has-text-grey is-size-7">{{ ago .ModTime }}</time>
-  </li>
-  {{- end -}}
-</ul>
+        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+      </span>
+      <time class="has-text-grey is-size-7">{{ ago .ModTime }}</time>
+      </a>
+    {{- end -}}
+  </div>
+</aside>
