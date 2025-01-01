@@ -9,10 +9,12 @@
     <title>
       {{ $props := properties .page }}
       {{- with .page -}}
-      {{ .Emoji }}
-      {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
-      |
+        {{- if ne .Name $.config.Index -}}
+        {{ .Emoji }}
+        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+        |
       {{ end -}}
+      {{- end -}}
       {{.config.Sitename}}
     </title>
     {{- with .page }} {{ widgets "head" . }} {{ end }}
