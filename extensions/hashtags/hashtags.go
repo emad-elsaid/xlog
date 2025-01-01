@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"strings"
 	"sync"
+	"unicode"
+	"unicode/utf8"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
@@ -72,23 +74,32 @@ func (h *HashTag) Trigger() []byte {
 }
 
 func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
-	line, _ := block.PeekLine()
-	if len(line) < 1 {
+	l, _ := block.PeekLine()
+	if len(l) < 1 {
 		return nil
 	}
-	i := 1
-	for ; i < len(line); i++ {
-		c := line[i]
-		if !(util.IsAlphaNumeric(c) || c == '_' || c == '-') {
+
+	var line string = string(l)
+
+	var i int
+	for ui, c := range line {
+		if ui == 0 {
+			i += utf8.RuneLen(c)
+			continue
+		}
+
+		if !(unicode.In(c, unicode.Letter, unicode.Number, unicode.Dash) || c == '_') || unicode.IsSpace(c) {
 			break
 		}
+
+		i += utf8.RuneLen(c)
 	}
 	if i > len(line) || i == 1 {
 		return nil
 	}
 	block.Advance(i)
 	tag := line[1:i]
-	return &HashTag{value: tag}
+	return &HashTag{value: []byte(tag)}
 }
 
 func (h *HashTag) Dump(source []byte, level int) {
