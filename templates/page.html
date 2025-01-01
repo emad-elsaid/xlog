@@ -1,6 +1,8 @@
 {{ template "header" . }}
 
-{{- with properties .page -}}
+{{- $props := properties .page -}}
+
+{{- with $props -}}
 <div class="modal" id="properties-dialog">
   <div class="modal-background"></div>
   <div class="modal-card">
@@ -31,17 +33,17 @@
 
   <div class="column">
     <span class="icon-text">
-      {{ if not .page.ModTime.IsZero }}
-      <span class="icon"> <i class="fa-solid fa-clock"></i> </span>
-      <span>Modified: {{ago .page.ModTime}}</span>
-      {{ end }}
-
-      {{- with properties .page -}}
+      {{- with $props -}}
       <a class="icon-text" href="#" onclick="document.getElementById('properties-dialog').classList.add('is-active')">
         <span class="icon"> <i class="fa-solid fa-info"></i> </span>
         <span>Properties</span>
       </a>
       {{- end -}}
+
+      {{ if not .page.ModTime.IsZero }}
+      <span class="icon"> <i class="fa-solid fa-clock"></i> </span>
+      <span>Modified: {{ago .page.ModTime}}</span>
+      {{ end }}
     </span>
 
   </div>
