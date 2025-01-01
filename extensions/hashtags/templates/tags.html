@@ -4,10 +4,7 @@
 
   {{ range $tag, $pages := .tags }}
   <h1>
-    <a href="/+/tag/{{$tag}}" class="icon-text">
-      <span class="icon"><i class="fa-solid fa-hashtag"></i></span>
-      <span>{{$tag}} ({{ len $pages }})</span>
-    </a>
+    <a href="/+/tag/{{$tag}}"> {{$tag}} </a>
   </h1>
   {{ template "pages" $pages }}
   {{ end }}
