@@ -11,6 +11,7 @@
  }, 300);
  window.addEventListener('load', function() {
      const scrollPosition = sessionStorage.getItem('scrollPosition');
+     const scrollPosition = sessionStorage.removeItem('scrollPosition');
      if (scrollPosition !== null) {
          window.scrollTo(0, parseInt(scrollPosition, 10));
      }
