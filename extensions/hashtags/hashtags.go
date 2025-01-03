@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"slices"
 	"strings"
 	"sync"
 	"unicode"
@@ -131,7 +132,7 @@ func tagsHandler(r Request) Output {
 	tags := map[string][]Page{}
 	var lck sync.Mutex
 
-	MapPage(context.Background(), func(a Page) bool {
+	MapPage(r.Context(), func(a Page) bool {
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
@@ -226,6 +227,9 @@ func relatedPages(p Page) template.HTML {
 func hashtagPages(hashtag Markdown) template.HTML {
 	hashtag_value := strings.Trim(string(hashtag), "# \n")
 	pages := tagPages(context.Background(), hashtag_value)
+	slices.SortFunc(pages, func(a, b Page) int {
+		return int(b.ModTime().Unix() - a.ModTime().Unix())
+	})
 	output := Partial("hashtag-pages", Locals{"pages": pages})
 	return template.HTML(output)
 }
