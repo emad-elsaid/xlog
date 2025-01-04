@@ -51,14 +51,27 @@
   {{- with quick_commands .page -}}
   <div class="column is-narrow">
 
-    <span class="icon-text">
-      {{- range . -}}
-      <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
-        <span class="icon"><i class="{{.Icon}}"></i></span>
-        <span>{{.Name}}</span>
-      </a>
-      {{- end -}}
-    </span>
+    <div class="dropdown is-right is-hoverable">
+      <div class="dropdown-trigger">
+        <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+          <span class="icon">
+            <i class="fa-solid fa-ellipsis"></i>
+          </span>
+        </button>
+      </div>
+      <div class="dropdown-menu" id="dropdown-menu" role="menu">
+        <div class="dropdown-content">
+
+          {{- range . -}}
+          <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="dropdown-item">
+            <span class="icon"><i class="{{.Icon}}"></i></span>
+            <span>{{.Name}}</span>
+          </a>
+          {{- end -}}
+
+        </div>
+      </div>
+    </div>
 
   </div>
   {{- end -}}
