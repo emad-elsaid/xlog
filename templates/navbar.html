@@ -19,7 +19,6 @@
 
   <div id="navbarMenu" class="navbar-menu">
     <div class="navbar-start">
-      {{- if .page }}
       {{- range $i, $a := links .page -}}
       <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="navbar-item">
         {{ with .Icon }}
@@ -29,7 +28,6 @@
         {{ end }}
         <span>{{.Name}}</span>
       </a>
-      {{- end -}}
       {{- end }}
     </div>
 
