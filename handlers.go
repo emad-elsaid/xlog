@@ -3,6 +3,7 @@ package xlog
 import (
 	"context"
 	"flag"
+	"html/template"
 	"log/slog"
 	"os"
 	"runtime"
@@ -100,7 +101,15 @@ func getPageHandler(r Request) Output {
 		// opening an editor or something
 		Trigger(PageNotFound, page)
 
-		return NotFound("Page does not exist")
+		page = DynamicPage{
+			NameVal:  page.Name(),
+			EmojiVal: "",
+			RenderFn: func() template.HTML {
+				str := "Page doesn't exist, Editor is invoked for you to create this page"
+
+				return template.HTML(str)
+			},
+		}
 	}
 
 	return Render("page", Locals{
