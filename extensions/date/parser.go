@@ -2,6 +2,7 @@ package date
 
 import (
 	"time"
+	"unicode"
 
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
@@ -59,7 +60,9 @@ func (s *dateParser) Parse(parent ast.Node, reader text.Reader, pc parser.Contex
 
 	space := len(l)
 	for i, b := range l {
-		if b == ' ' {
+		if !unicode.In(rune(b), unicode.Digit, unicode.Letter, unicode.Dash) &&
+			b != '/' &&
+			b != '\\' {
 			space = i
 			break
 		}
