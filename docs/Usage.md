@@ -1,8 +1,6 @@
 ```
-xlog --help
-
 Usage of xlog:
--activitypub.domain string
+  -activitypub.domain string
     	domain used for activitypub stream absolute URLs
   -activitypub.icon string
     	the path to the activitypub profile icon. mastodon use it as profile picture for example. (default "/public/logo.png")
@@ -16,6 +14,8 @@ Usage of xlog:
     	IP and port to bind the web server to (default "127.0.0.1:3000")
   -build string
     	Build all pages as static site in this directory
+  -codestyle string
+    	code highlighting style name from the list supported by https://pkg.go.dev/github.com/alecthomas/chroma/v2/styles (default "dracula")
   -csrf-cookie string
     	CSRF cookie name (default "xlog_csrf")
   -custom.after_view string
@@ -28,6 +28,8 @@ Usage of xlog:
     	disable list of extensions by name, comma separated
   -disqus string
     	Disqus domain name for example: xlog-emadelsaid.disqus.com
+  -editor string
+    	command to use to open pages for editing (default "emacsclient -n -a emacs")
   -github.url string
     	Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs
   -gpg string
