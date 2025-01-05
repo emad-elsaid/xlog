@@ -20,9 +20,9 @@
   <div id="navbarMenu" class="navbar-menu">
     <div class="navbar-start">
       {{- range $i, $a := links .page -}}
-      <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="navbar-item">
+      <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="navbar-item icon-text">
         {{ with .Icon }}
-        <span class="icon">
+        <span class="icon is-small">
           {{ if isFontAwesome . }}<i class="{{.}}"></i> {{ else }} {{.}} {{ end }}
         </span>
         {{ end }}

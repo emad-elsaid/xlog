@@ -31,50 +31,52 @@
 
 <div class="columns content is-small">
 
+  {{ if not .page.ModTime.IsZero }}
   <div class="column">
     <span class="icon-text">
+      <span class="icon"> <i class="fa-solid fa-clock"></i> </span>
+      <span>Modified: {{ago .page.ModTime}}</span>
+    </span>
+  </div>
+  {{ end }}
+
+  <div class="column is-narrow">
+    <div class="buttons">
+
       {{- with $props -}}
-      <a class="icon-text" href="#" onclick="document.getElementById('properties-dialog').classList.add('is-active')">
-        <span class="icon"> <i class="fa-solid fa-info"></i> </span>
-        <span>Properties</span>
+      <a class="button is-small" href="#" onclick="document.getElementById('properties-dialog').classList.add('is-active')" title="Page properties">
+        <span class="icon">
+          <i class="fa-solid fa-info"></i>
+        </span>
       </a>
       {{- end -}}
 
-      {{ if not .page.ModTime.IsZero }}
-      <span class="icon"> <i class="fa-solid fa-clock"></i> </span>
-      <span>Modified: {{ago .page.ModTime}}</span>
-      {{ end }}
-    </span>
+      {{- with quick_commands .page -}}
+      <div class="dropdown is-right is-hoverable">
+        <div class="dropdown-trigger">
+          <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
+            <span class="icon">
+              <i class="fa-solid fa-ellipsis"></i>
+            </span>
+          </button>
+        </div>
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+          <div class="dropdown-content">
 
-  </div>
+            {{- range . -}}
+            <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="dropdown-item">
+              <span class="icon"><i class="{{.Icon}}"></i></span>
+              <span>{{.Name}}</span>
+            </a>
+            {{- end -}}
 
-  {{- with quick_commands .page -}}
-  <div class="column is-narrow">
-
-    <div class="dropdown is-right is-hoverable">
-      <div class="dropdown-trigger">
-        <button class="button is-small" aria-haspopup="true" aria-controls="dropdown-menu">
-          <span class="icon">
-            <i class="fa-solid fa-ellipsis"></i>
-          </span>
-        </button>
-      </div>
-      <div class="dropdown-menu" id="dropdown-menu" role="menu">
-        <div class="dropdown-content">
-
-          {{- range . -}}
-          <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="dropdown-item">
-            <span class="icon"><i class="{{.Icon}}"></i></span>
-            <span>{{.Name}}</span>
-          </a>
-          {{- end -}}
-
+          </div>
         </div>
       </div>
-    </div>
+      {{- end -}}
 
+    </div>
   </div>
-  {{- end -}}
 
 </div>
 
