@@ -123,7 +123,7 @@ func includeJS(f string) template.HTML {
 func scripts() template.HTML {
 	var b strings.Builder
 	for _, f := range js {
-		fmt.Fprintf(&b, `<script src="%s"></script>`, f)
+		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
 	}
 
 	return template.HTML(b.String())
