@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine as builder
+FROM golang:1.23-alpine as builder
 
 WORKDIR /app
 COPY go.mod ./
@@ -8,7 +8,6 @@ COPY ./ ./
 RUN go build -o xlog ./cmd/xlog
 
 FROM alpine as final
-COPY --from=builder /app/xlog /app/xlog
+COPY --from=builder /app/xlog /bin/xlog
 
-ENTRYPOINT ["/app/xlog"]
-CMD ["-bind", "0.0.0.0:3000", "-source", "/files"]
+CMD ["xlog", "-bind", "0.0.0.0:3000", "-source", "/files"]
