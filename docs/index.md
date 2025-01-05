@@ -28,17 +28,9 @@ xlog
 
 - Serves any file from current directory
 - Any markdown is rendered to HTML format
-- Supports Github flavor markdown
+- Light and Dark theme depending on device preference
+- Supports Github flavor markdown (Emojis, Todo lists, MermaidJS, MathJax)
 - Full **Features Test** page
-
-|                                                                    |                                                                                                    |
-|--------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| ![](/screenshot/ctrl-k.gif)                                        | ![](/screenshot/emojis.gif)                                                                        |
-| Has a list of tools defined by extensions. triggered with `Ctrl+K` | Supports Emojis, The first Emoji is considered the icon of the page and displayed beside the title |
-| ![](/screenshot/darkmode.gif)                                      | ![](/screenshot/todo.gif)                                                                          |
-| Dark theme and Light theme                                         | Support Todo lists, Shows task list (Done/Total tasks) beside page link                            |
-| ![](/screenshot/math.gif)                                          | ![](/screenshot/autopair.gif)                                                                      |
-| Support MathJax format                                             | Autopair parenthesis/brackets                                                                      |
 
 # Usecases
 
