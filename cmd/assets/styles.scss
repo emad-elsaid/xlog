@@ -20,6 +20,10 @@
 @import "~@fortawesome/fontawesome-free/scss/solid";
 @import "~@fortawesome/fontawesome-free/scss/brands";
 
+@view-transition {
+    navigation: auto;
+}
+
 .view {
 
     // codeblocks border radius
@@ -31,6 +35,7 @@
         display: block;
         margin-right: auto;
         margin-left: auto;
+        view-transition-name: banner-image;
     }
     @for $i from 1 through 6 {
         h#{$i} {

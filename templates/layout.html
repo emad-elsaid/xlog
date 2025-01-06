@@ -26,7 +26,7 @@
       {{- template "navbar" . -}}
 
       {{- if ne .config.Index .page.Name -}}
-      <div dir="auto" class="title is-1 has-text-weight-bold">
+      <div dir="auto" class="title is-1 has-text-weight-bold" style="view-transition-name: page-title;">
         {{- with .page -}}
         {{- .Emoji }}
         {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
