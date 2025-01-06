@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"slices"
+	"path/filepath"
 	"strings"
 
 	"github.com/emad-elsaid/xlog"
@@ -42,14 +42,14 @@ func newPage(p xlog.Page) error {
 	return nil
 }
 
-var ignoredPages = []string{"favicon.ico"}
-
 func openEditor(page xlog.Page) {
 	if page == nil {
 		return
 	}
 
-	if slices.Contains(ignoredPages, page.Name()) {
+	// if it's like a .ico, .jpeg, .so...etc ignore it, it's not a page we
+	// should create, maybe just a static file that's missing
+	if ext := len(filepath.Ext(page.Name())); ext > 0 && ext <= 4 {
 		return
 	}
 

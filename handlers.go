@@ -105,7 +105,7 @@ func getPageHandler(r Request) Output {
 			NameVal:  page.Name(),
 			EmojiVal: "",
 			RenderFn: func() template.HTML {
-				str := "Page doesn't exist, Editor is invoked for you to create this page"
+				str := "Page doesn't exist"
 
 				return template.HTML(str)
 			},
