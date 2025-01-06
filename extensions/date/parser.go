@@ -59,10 +59,21 @@ func (s *dateParser) Parse(parent ast.Node, reader text.Reader, pc parser.Contex
 	}
 
 	space := len(l)
+	separators := 0
 	for i, b := range l {
 		if !unicode.In(rune(b), unicode.Digit, unicode.Letter, unicode.Dash) &&
 			b != '/' &&
 			b != '\\' {
+			space = i
+			break
+		}
+
+		// keep track of how many separators
+		if unicode.In(rune(b), unicode.Dash) || b == '/' || b == '\\' {
+			separators++
+		}
+
+		if separators > 2 {
 			space = i
 			break
 		}
