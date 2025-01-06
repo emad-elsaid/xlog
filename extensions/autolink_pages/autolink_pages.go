@@ -19,20 +19,32 @@ import (
 //go:embed templates
 var templates embed.FS
 
-type fileInfoByNameLength []Page
+type NormalizedPage struct {
+	page           Page
+	normalizedName string
+}
 
-func (a fileInfoByNameLength) Len() int           { return len(a) }
-func (a fileInfoByNameLength) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a fileInfoByNameLength) Less(i, j int) bool { return len(a[i].Name()) > len(a[j].Name()) }
+type fileInfoByNameLength []NormalizedPage
 
-var autolinkPages []Page
+func (a fileInfoByNameLength) Len() int      { return len(a) }
+func (a fileInfoByNameLength) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a fileInfoByNameLength) Less(i, j int) bool {
+	return len(a[i].normalizedName) > len(a[j].normalizedName)
+}
+
+var autolinkPages []NormalizedPage
 var autolinkPage_lck sync.Mutex
 
 func UpdatePagesList(Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 
-	ps := Pages(context.Background())
+	ps := MapPage(context.Background(), func(p Page) NormalizedPage {
+		return NormalizedPage{
+			page:           p,
+			normalizedName: strings.ToLower(p.Name()),
+		}
+	})
 	sort.Sort(fileInfoByNameLength(ps))
 	autolinkPages = ps
 	return
