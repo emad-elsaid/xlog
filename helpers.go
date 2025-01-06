@@ -111,7 +111,7 @@ func RegisterJS(f string) {
 
 // RequireHTMX registes HTML library, this helps include one version of HTMX
 func RequireHTMX() {
-	RegisterJS("https://unpkg.com/htmx.org@2.0.4")
+	RegisterJS("/public/htmx.min.js")
 }
 
 func includeJS(f string) template.HTML {
