@@ -86,6 +86,10 @@ var mathBlockInfoKey = parser.NewContextKey()
 
 func (b *mathJaxBlockParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {
 	line, _ := reader.PeekLine()
+	if line == nil {
+		return nil, parser.NoChildren
+	}
+
 	pos := pc.BlockOffset()
 	if pos == -1 {
 		return nil, parser.NoChildren
@@ -106,6 +110,10 @@ func (b *mathJaxBlockParser) Open(parent ast.Node, reader text.Reader, pc parser
 
 func (b *mathJaxBlockParser) Continue(node ast.Node, reader text.Reader, pc parser.Context) parser.State {
 	line, segment := reader.PeekLine()
+	if line == nil {
+		return parser.NoChildren
+	}
+
 	data := pc.Get(mathBlockInfoKey).(*mathBlockData)
 	w, pos := util.IndentWidth(line, 0)
 	if w < 4 {

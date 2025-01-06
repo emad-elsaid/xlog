@@ -48,7 +48,7 @@ func opengraphTags(p Page) template.HTML {
 
 	var image string
 	src, tree := p.AST()
-	if imageAST, ok := FindInAST[*ast.Image](tree); ok {
+	if imageAST, ok := FindInAST[*ast.Image](tree); ok && imageAST != nil {
 		image = "https://" + domain + string(imageAST.Destination)
 	}
 

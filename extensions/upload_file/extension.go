@@ -72,13 +72,13 @@ func uploadFileHandler(r Request) Output {
 	fileName := r.FormValue("page")
 
 	page := NewPage(fileName)
-	if fileName != "" && !page.Exists() {
-		return Redirect("/" + page.Name() + "/edit")
+	if page == nil || (fileName != "" && !page.Exists()) {
+		return NotFound("page not found")
 	}
 
 	var output string
 	f, h, _ := r.FormFile("file")
-	if f != nil {
+	if f != nil && h != nil {
 		defer f.Close()
 		c, _ := io.ReadAll(f)
 		ext := strings.ToLower(path.Ext(h.Filename))

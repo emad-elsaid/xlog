@@ -55,6 +55,10 @@ func (s starredPage) Attrs() map[template.HTMLAttr]any {
 
 func starredPages(p Page) []Command {
 	pages := NewPage(STARRED_PAGES)
+	if pages == nil {
+		return nil
+	}
+
 	content := strings.TrimSpace(string(pages.Content()))
 	if content == "" {
 		return nil
@@ -108,11 +112,16 @@ func starAction(p Page) []Command {
 
 func starHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
-	if !page.Exists() {
+
+	if page == nil || !page.Exists() {
 		return Redirect("/")
 	}
 
 	starred_pages := NewPage(STARRED_PAGES)
+	if starred_pages == nil {
+		return Redirect("/")
+	}
+
 	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
 	starred_pages.Write(Markdown(new_content))
 
@@ -124,11 +133,15 @@ func starHandler(r Request) Output {
 
 func unstarHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
-	if !page.Exists() {
+	if page == nil || !page.Exists() {
 		return Redirect("/")
 	}
 
 	starred_pages := NewPage(STARRED_PAGES)
+	if starred_pages == nil {
+		return Redirect("/")
+	}
+
 	content := strings.Split(strings.TrimSpace(string(starred_pages.Content())), "\n")
 	new_content := ""
 	for _, v := range content {
@@ -146,6 +159,10 @@ func unstarHandler(r Request) Output {
 
 func isStarred(p Page) bool {
 	starred_page := NewPage(STARRED_PAGES)
+	if starred_page == nil {
+		return false
+	}
+
 	for _, k := range strings.Split(string(starred_page.Content()), "\n") {
 		if strings.TrimSpace(k) == p.Name() {
 			return true

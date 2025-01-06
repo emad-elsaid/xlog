@@ -12,8 +12,8 @@ var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)
 
 func toggleHandler(r Request) Output {
 	page := NewPage(r.FormValue("page"))
-	if !page.Exists() {
-		return NotFound(fmt.Sprintf("page: %s not found", page.Name()))
+	if page == nil || !page.Exists() {
+		return NotFound(fmt.Sprintf("page: %s not found", r.FormValue("page")))
 	}
 
 	pos, err := strconv.ParseInt(r.FormValue("pos"), 10, 64)
