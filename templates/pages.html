@@ -1,14 +1,21 @@
 <aside class="menu" dir="auto">
   <div class="menu-list" dir="auto">
     {{- range . -}}
-    <a href="/{{.Name}}" dir="auto">
+
+    <a href="/{{.Name}}" dir="auto" class="is-clearfix">
+
+      {{ with banner . }}
+      <img src="{{.}}" class="mr-3 is-pulled-left" style="display: block; border-radius: 0.5em; object-fit: cover; object-position: 0 50%; max-height: 3em; width: 6em;" />
+      {{ end }}
+
       <span class="is-block">
         {{ .Emoji }}
         {{ $props := properties . }}
         {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
       </span>
       <time class="has-text-grey is-size-7" dir="auto">{{ ago .ModTime }}</time>
-      </a>
+    </a>
+
     {{- end -}}
   </div>
 </aside>

@@ -7,6 +7,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/yuin/goldmark/ast"
+	gast "github.com/yuin/goldmark/ast"
 )
 
 var helpers = template.FuncMap{
@@ -19,6 +22,7 @@ var helpers = template.FuncMap{
 	"isFontAwesome":  IsFontAwesome,
 	"includeJS":      includeJS,
 	"scripts":        scripts,
+	"banner":         Banner,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
@@ -131,4 +135,28 @@ func scripts() template.HTML {
 
 func IsFontAwesome(i string) bool {
 	return strings.HasPrefix(i, "fa")
+}
+
+func Banner(p Page) string {
+	_, a := p.AST()
+	if a == nil {
+		return ""
+	}
+
+	paragraph := a.FirstChild()
+	if paragraph == nil || paragraph.Kind() != gast.KindParagraph {
+		return ""
+	}
+
+	img := paragraph.FirstChild()
+	if img == nil || img.Kind() != gast.KindImage {
+		return ""
+	}
+
+	image, ok := img.(*ast.Image)
+	if !ok {
+		return ""
+	}
+
+	return string(image.Destination)
 }
