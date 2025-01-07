@@ -5,7 +5,7 @@
     <a href="/{{.Name}}" dir="auto" class="is-clearfix">
 
       {{ with banner . }}
-      <img src="{{.}}" class="mr-3 is-pulled-left" style="display: block; border-radius: 0.5em; object-fit: cover; object-position: 0 50%; max-height: 3em; width: 6em;" />
+      <img src="{{.}}" loading="lazy" class="mr-3 is-pulled-left" style="display: block; border-radius: 0.5em; object-fit: cover; object-position: 0 50%; max-height: 3em; width: 6em;"/>
       {{ end }}
 
       <span class="is-block">
