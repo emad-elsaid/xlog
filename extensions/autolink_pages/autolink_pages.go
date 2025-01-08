@@ -24,7 +24,7 @@ type NormalizedPage struct {
 	normalizedName string
 }
 
-type fileInfoByNameLength []NormalizedPage
+type fileInfoByNameLength []*NormalizedPage
 
 func (a fileInfoByNameLength) Len() int      { return len(a) }
 func (a fileInfoByNameLength) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
@@ -32,15 +32,15 @@ func (a fileInfoByNameLength) Less(i, j int) bool {
 	return len(a[i].normalizedName) > len(a[j].normalizedName)
 }
 
-var autolinkPages []NormalizedPage
+var autolinkPages []*NormalizedPage
 var autolinkPage_lck sync.Mutex
 
 func UpdatePagesList(Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 
-	ps := MapPage(context.Background(), func(p Page) NormalizedPage {
-		return NormalizedPage{
+	ps := MapPage(context.Background(), func(p Page) *NormalizedPage {
+		return &NormalizedPage{
 			page:           p,
 			normalizedName: strings.ToLower(p.Name()),
 		}
