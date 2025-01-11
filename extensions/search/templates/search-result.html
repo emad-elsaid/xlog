@@ -3,7 +3,7 @@
   <a href="/{{.Page.Name}}">
     <strong class="is-block mb-1">
       {{ with .Page }}
-      {{.Emoji}}
+      {{ emoji . }}
       {{ $props := properties . }}
       {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
       {{ end }}

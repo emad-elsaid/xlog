@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	"github.com/yuin/goldmark/ast"
 	gast "github.com/yuin/goldmark/ast"
 )
@@ -23,6 +24,7 @@ var helpers = template.FuncMap{
 	"includeJS":      includeJS,
 	"scripts":        scripts,
 	"banner":         Banner,
+	"emoji":          Emoji,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
@@ -159,4 +161,13 @@ func Banner(p Page) string {
 	}
 
 	return string(image.Destination)
+}
+
+func Emoji(p Page) string {
+	_, tree := p.AST()
+	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
+		return string(e.Value.Unicode)
+	}
+
+	return ""
 }

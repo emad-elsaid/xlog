@@ -9,7 +9,7 @@
       {{ end }}
 
       <span class="is-block">
-        {{ .Emoji }}
+        {{ emoji . }}
         {{ $props := properties . }}
         {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
       </span>

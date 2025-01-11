@@ -10,7 +10,7 @@
       {{ $props := properties .page }}
       {{- with .page -}}
         {{- if ne .Name $.config.Index -}}
-        {{ .Emoji }}
+        {{ emoji . }}
         {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
         |
       {{ end -}}
@@ -28,7 +28,7 @@
       {{- if ne .config.Index .page.Name -}}
       <div dir="auto" class="title is-1 has-text-weight-bold" style="view-transition-name: page-title;">
         {{- with .page -}}
-        {{- .Emoji }}
+        {{- emoji . }}
         {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
         {{- end -}}
       </div>

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/emad-elsaid/xlog"
-	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
 )
@@ -99,12 +98,4 @@ func (p *page) AST() ([]byte, ast.Node) {
 	}
 
 	return []byte(src), p.ast
-}
-func (p *page) Emoji() string {
-	_, tree := p.AST()
-	if e, ok := xlog.FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
-		return string(e.Value.Unicode)
-	}
-
-	return ""
 }

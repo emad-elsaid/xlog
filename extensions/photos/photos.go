@@ -63,7 +63,6 @@ func (p *Photo) Name() string {
 	return base[:len(base)-len(ext)]
 }
 
-func (*Photo) Emoji() string            { return "" }
 func (*Photo) FileName() string         { return "" }
 func (*Photo) Exists() bool             { return false }
 func (*Photo) Content() xlog.Markdown   { return "" }

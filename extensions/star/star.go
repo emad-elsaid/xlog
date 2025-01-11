@@ -40,10 +40,10 @@ type starredPage struct {
 }
 
 func (s starredPage) Icon() string {
-	if s.Emoji() == "" {
+	if e := Emoji(s); e == "" {
 		return "fa-solid fa-star"
 	} else {
-		return s.Emoji()
+		return e
 	}
 }
 

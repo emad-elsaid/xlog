@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	emojiAst "github.com/yuin/goldmark-emoji/ast"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/text"
 )
@@ -44,8 +43,6 @@ type Page interface {
 	// parts of the page. for example the following "Emoji" function uses it to
 	// extract the first emoji.
 	AST() ([]byte, ast.Node)
-	// Returns the first emoji of the page.
-	Emoji() string
 }
 
 type page struct {
@@ -155,15 +152,6 @@ func (p *page) AST() (source []byte, tree ast.Node) {
 	return []byte(content), p.ast
 }
 
-func (p *page) Emoji() string {
-	_, tree := p.AST()
-	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
-		return string(e.Value.Unicode)
-	}
-
-	return ""
-}
-
 func (p *page) clearCache() {
 	p.content = nil
 	p.ast = nil
@@ -174,7 +162,6 @@ func (p *page) clearCache() {
 // be passed to templates without having underlying file on desk
 type DynamicPage struct {
 	NameVal  string
-	EmojiVal string
 	RenderFn func() template.HTML
 }
 
@@ -186,7 +173,6 @@ func (DynamicPage) Write(Markdown) bool     { return false }
 func (DynamicPage) ModTime() time.Time      { return time.Time{} }
 func (DynamicPage) AST() ([]byte, ast.Node) { return nil, nil }
 func (d DynamicPage) Name() string          { return d.NameVal }
-func (d DynamicPage) Emoji() string         { return d.EmojiVal }
 func (d DynamicPage) Render() template.HTML {
 	if d.RenderFn != nil {
 		return d.RenderFn()

@@ -102,8 +102,7 @@ func getPageHandler(r Request) Output {
 		Trigger(PageNotFound, page)
 
 		page = DynamicPage{
-			NameVal:  page.Name(),
-			EmojiVal: "",
+			NameVal: page.Name(),
 			RenderFn: func() template.HTML {
 				str := "Page doesn't exist"
 
