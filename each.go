@@ -74,8 +74,7 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(concurrency)
 
-	currentPages := pages
-	output := make([]T, 0, len(currentPages))
+	output := make([]T, 0, len(pages))
 	ch := make(chan T, concurrency)
 	done := make(chan bool)
 
@@ -86,7 +85,7 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 		done <- true
 	}()
 
-	for _, p := range currentPages {
+	for _, p := range pages {
 		select {
 		case <-ctx.Done():
 			break
