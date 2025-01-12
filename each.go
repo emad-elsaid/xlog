@@ -124,7 +124,7 @@ func clearPagesCache(p Page) (err error) {
 }
 
 func populatePagesCache(ctx context.Context) {
-	pages = []Page{}
+	pages = make([]Page, 0, 1000)
 	for _, s := range sources {
 		select {
 		case <-ctx.Done():
