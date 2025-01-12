@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
-	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -77,7 +76,15 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 
 	currentPages := pages
 	output := make([]T, 0, len(currentPages))
-	var outputLck sync.Mutex
+	ch := make(chan T, concurrency)
+	done := make(chan bool)
+
+	go func() {
+		for v := range ch {
+			output = append(output, v)
+		}
+		done <- true
+	}()
 
 	for _, p := range currentPages {
 		select {
@@ -90,9 +97,7 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 					return
 				}
 
-				outputLck.Lock()
-				output = append(output, val)
-				outputLck.Unlock()
+				ch <- val
 
 				return
 			})
@@ -100,6 +105,8 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	}
 
 	grp.Wait()
+	close(ch)
+	<-done
 
 	return output
 }
