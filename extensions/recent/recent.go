@@ -3,7 +3,8 @@ package recent
 import (
 	"embed"
 	"html/template"
-	"sort"
+	"slices"
+	"strings"
 
 	_ "embed"
 
@@ -28,20 +29,20 @@ func (Recent) Init() {
 }
 
 func recentHandler(r Request) Output {
-	var rp recentPages = Pages(r.Context())
-	sort.Sort(rp)
+	rp := Pages(r.Context())
+	slices.SortFunc(rp, func(a, b Page) int {
+		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+			return modtime
+		}
+
+		return strings.Compare(a.Name(), b.Name())
+	})
 
 	return Render("recent", Locals{
 		"page":  DynamicPage{NameVal: "Recent"},
 		"pages": rp,
 	})
 }
-
-type recentPages []Page
-
-func (a recentPages) Len() int           { return len(a) }
-func (a recentPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a recentPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }
 
 type links struct{}
 

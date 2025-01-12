@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"html/template"
 	"net/url"
-	"sort"
+	"slices"
+	"strings"
 	"time"
 
 	. "github.com/emad-elsaid/xlog"
@@ -91,8 +92,12 @@ func feed(r Request) Output {
 	}
 
 	pages := Pages(r.Context())
-	sort.Slice(pages, func(i, j int) bool {
-		return pages[i].ModTime().After(pages[j].ModTime())
+	slices.SortFunc(pages, func(a, b Page) int {
+		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+			return modtime
+		}
+
+		return strings.Compare(a.Name(), b.Name())
 	})
 
 	if len(pages) > limit {

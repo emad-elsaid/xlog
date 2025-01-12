@@ -225,9 +225,15 @@ func relatedPages(p Page) template.HTML {
 func hashtagPages(hashtag Markdown) template.HTML {
 	hashtag_value := strings.Trim(string(hashtag), "# \n")
 	pages := tagPages(context.Background(), hashtag_value)
+
 	slices.SortFunc(pages, func(a, b Page) int {
-		return int(b.ModTime().Unix() - a.ModTime().Unix())
+		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+			return modtime
+		}
+
+		return strings.Compare(a.Name(), b.Name())
 	})
+
 	output := Partial("hashtag-pages", Locals{"pages": pages})
 	return template.HTML(output)
 }

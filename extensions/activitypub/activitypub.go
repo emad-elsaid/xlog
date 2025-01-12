@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/url"
-	"sort"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	. "github.com/emad-elsaid/xlog"
@@ -222,14 +223,21 @@ func outboxPage(r Request) Output {
 	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
 	pageIndex--
 
-	var pages orderedPages = Pages(r.Context())
+	pages := Pages(r.Context())
 
 	if int(pageIndex) >= len(pages) || pageIndex < 0 {
 		return NotFound("page index is out of context")
 	}
 
 	var page Page
-	sort.Sort(pages)
+	slices.SortFunc(pages, func(a, b Page) int {
+		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+			return modtime
+		}
+
+		return strings.Compare(a.Name(), b.Name())
+	})
+
 	page = pages[pageIndex]
 
 	var u url.URL
@@ -266,9 +274,3 @@ func outboxPage(r Request) Output {
 		},
 	)
 }
-
-type orderedPages []Page
-
-func (a orderedPages) Len() int           { return len(a) }
-func (a orderedPages) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a orderedPages) Less(i, j int) bool { return a[i].ModTime().After(a[j].ModTime()) }

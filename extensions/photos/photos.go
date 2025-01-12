@@ -15,7 +15,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -133,8 +133,8 @@ func photosShortcode(input xlog.Markdown) template.HTML {
 		return template.HTML(err.Error())
 	}
 
-	sort.Slice(photos, func(i, j int) bool {
-		return photos[i].Time.After(photos[j].Time)
+	slices.SortFunc(photos, func(i, j *Photo) int {
+		return j.Time.Compare(i.Time)
 	})
 
 	return xlog.Partial("photos", xlog.Locals{
