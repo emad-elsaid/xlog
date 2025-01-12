@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/alecthomas/chroma/v2 v2.13.0
 	github.com/gorilla/csrf v1.7.2
-	github.com/yuin/goldmark v1.7.0
+	github.com/yuin/goldmark v1.7.8
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 )
 
