@@ -132,7 +132,7 @@ func tagsHandler(r Request) Output {
 	tags := map[string][]Page{}
 	var lck sync.Mutex
 
-	MapPage(r.Context(), func(a Page) bool {
+	EachPage(r.Context(), func(a Page) {
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
@@ -154,8 +154,6 @@ func tagsHandler(r Request) Output {
 			}
 			lck.Unlock()
 		}
-
-		return true
 	})
 
 	return Render("tags", Locals{
