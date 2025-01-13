@@ -10,6 +10,7 @@ import (
 	"sync"
 	"unicode"
 	"unicode/utf8"
+	"unique"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
@@ -63,7 +64,8 @@ func (l link) Attrs() map[template.HTMLAttr]any {
 
 type HashTag struct {
 	ast.BaseInline
-	value []byte
+	value  []byte
+	unique unique.Handle[string]
 }
 
 func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
@@ -100,7 +102,10 @@ func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) a
 	}
 	block.Advance(i)
 	tag := line[1:i]
-	return &HashTag{value: []byte(tag)}
+	return &HashTag{
+		value:  []byte(tag),
+		unique: unique.Make(strings.ToLower(tag)),
+	}
 }
 
 func (h *HashTag) Dump(source []byte, level int) {
@@ -171,7 +176,9 @@ func tagHandler(r Request) Output {
 	})
 }
 
-func tagPages(ctx context.Context, keyword string) []Page {
+func tagPages(ctx context.Context, hashtag string) []Page {
+	uniqHandle := unique.Make(strings.ToLower(hashtag))
+
 	return MapPage(ctx, func(p Page) Page {
 		if p.Name() == Config.Index {
 			return nil
@@ -180,7 +187,7 @@ func tagPages(ctx context.Context, keyword string) []Page {
 		_, tree := p.AST()
 		tags := FindAllInAST[*HashTag](tree)
 		for _, t := range tags {
-			if strings.EqualFold(string(t.value), keyword) {
+			if uniqHandle == t.unique {
 				return p
 			}
 		}
@@ -196,9 +203,9 @@ func relatedPages(p Page) template.HTML {
 
 	_, tree := p.AST()
 	found_hashtags := FindAllInAST[*HashTag](tree)
-	hashtags := map[string]bool{}
+	hashtags := map[unique.Handle[string]]bool{}
 	for _, v := range found_hashtags {
-		hashtags[strings.ToLower(string(v.value))] = true
+		hashtags[v.unique] = true
 	}
 
 	pages := MapPage(context.Background(), func(rp Page) Page {
@@ -209,7 +216,7 @@ func relatedPages(p Page) template.HTML {
 		_, tree := rp.AST()
 		page_hashtags := FindAllInAST[*HashTag](tree)
 		for _, h := range page_hashtags {
-			if _, ok := hashtags[strings.ToLower(string(h.value))]; ok {
+			if _, ok := hashtags[h.unique]; ok {
 				return rp
 			}
 		}
