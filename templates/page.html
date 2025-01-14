@@ -88,4 +88,11 @@
   {{- end -}}
 </div>
 
+<script>
+ document.querySelectorAll('.view table').forEach(t => {
+     t.classList.add('table', 'is-bordered', 'is-striped', 'is-hoverable', 'is-fullwidth')
+ })
+</script>
+
+
 {{ template "footer" . }}
