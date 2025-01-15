@@ -1,26 +1,17 @@
-<div class="card my-5">
-  <header class="card-header">
-    <p class="card-header-title">
-      <strong><a href="{{.url}}">{{.title}}</a></strong>
-    </p>
-  </header>
+<div>
+  <a href="{{.url}}">
+    <img src="{{.image}}" loading="lazy" class="mr-3 is-pulled-left" style="display: block; border-radius: 0.5em; object-fit: cover; object-position: 0 50%; max-height: 10em; width: 10em;"/>
 
-  {{ if and .image .description }}
-  <div class="card-content">
+    <strong style="display:block;overflow: hidden;
+                   text-overflow: ellipsis;
+                   display: -webkit-box;
+                   -webkit-line-clamp: 1; /* number of lines to show */
+                   line-clamp: 1;
+                   -webkit-box-orient: vertical;">
+        {{.title}}
+    </strong>
+  </a>
+  {{.description}}
 
-    <div class="media">
-
-      <div class="media-left">
-        <figure class="image is-128x128"><img src="{{.image}}"></figure>
-      </div>
-
-      <div class="media-content">{{.description}}</div>
-    </div>
-
-  </div>
-  {{ end }}
-
-  <div class="card-footer">
-    <a class="card-footer-item" href="{{.url}}">{{.url}}</a>
-  </div>
+  <div class="is-clearfix"></div>
 </div>

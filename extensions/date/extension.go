@@ -16,7 +16,12 @@ type Date struct{}
 func (Date) Name() string { return "date" }
 func (Date) Init() {
 	RegisterTemplate(templates, "templates")
+	RegisterLink(links)
+	RegisterBuildPage(`/+/calendar`, true)
+
 	Get(`/+/date/{date}`, dateHandler)
+	Get(`/+/calendar`, calendarHandler)
+
 	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&dateParser{}, 999),
 	))

@@ -1,0 +1,39 @@
+{{ template "header" . }}
+{{ $year := 0 }}
+{{ $month := 0 }}
+{{ $day := 0 }}
+
+<aside class="menu" dir="auto">
+  <div class="menu-list" dir="auto">
+    {{ range .calendar }}
+    {{ if ne $year .Time.Year }}
+    <h1>{{ .Time.Year }}</h1>
+    {{ $year = .Time.Year }}
+    {{ $month = 0 }}
+    {{ $day = 0 }}
+    {{ end }}
+
+    {{ if ne $month .Time.Month }}
+    {{ if ne $day .Time.Day }}
+    <h2>{{ .Time.Day }} {{ .Time.Month }}</h2>
+    {{ $month = .Time.Month }}
+    {{ $day = .Time.Day }}
+    {{ end }}
+    {{ end }}
+
+    {{ with .Page }}
+
+    <a href="/{{.Name}}" dir="auto" class="is-clearfix">
+      <span class="is-block">
+        {{ emoji . }}
+        {{ $props := properties . }}
+        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+      </span>
+    </a>
+
+    {{ end }}
+
+    {{ end }}
+  </div>
+</aside>
+{{ template "footer" . }}
