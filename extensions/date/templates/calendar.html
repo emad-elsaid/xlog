@@ -44,7 +44,9 @@
       {{range .}}
       <td>
         {{if .}}
-        <span class="tag">{{.Date.Day}}</span>
+        <a href="/+/date/{{printf "%d-%d-%d" .Date.Day .Date.Month .Date.Year}}">
+          <span class="tag">{{.Date.Day}}</span>
+        </a>
 
         {{ if .Pages }}
         <aside class="menu" dir="auto">
@@ -53,9 +55,9 @@
             {{range .Pages}}
             <a href="/{{.Name}}" dir="auto">
               <span class="page">
-              {{ emoji . }}
-              {{ $props := properties . }}
-              {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+                {{ emoji . }}
+                {{ $props := properties . }}
+                {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
               </span>
             </a>
             {{end}}
@@ -72,6 +74,10 @@
   </tbody>
 </table>
 {{end}}
+{{else}}
+<div class="notification is-info">
+  There are no posts that contains dates yet...
+</div>
 {{end}}
 
 {{ template "footer" . }}
