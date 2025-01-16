@@ -1,39 +1,77 @@
 {{ template "header" . }}
-{{ $year := 0 }}
-{{ $month := 0 }}
-{{ $day := 0 }}
+<style>
+.calendar{
+    td,th {
+        width: calc(100%/7);
+    }
+    td{
+        height: 8em;
+        overflow: hidden;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    a .page{
+        font-size: 0.7em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+ }
+</style>
 
-<aside class="menu" dir="auto">
-  <div class="menu-list" dir="auto">
-    {{ range .calendar }}
-    {{ if ne $year .Time.Year }}
-    <h1>{{ .Time.Year }}</h1>
-    {{ $year = .Time.Year }}
-    {{ $month = 0 }}
-    {{ $day = 0 }}
-    {{ end }}
+{{range .calendar}}
+<h1>{{.Year}}</h1>
+{{range .Months}}
+<h2>{{.Name}}</h2>
+<table class="calendar table is-bordered is-fullwidth is-hoverable">
+  <thead>
+    <tr>
+      <th>Sun</th>
+      <th>Mon</th>
+      <th>Tue</th>
+      <th>Wed</th>
+      <th>Thu</th>
+      <th>Fri</th>
+      <th>Sat</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .Days}}
+    <tr>
+      {{range .}}
+      <td>
+        {{if .}}
+        <span class="tag">{{.Date.Day}}</span>
 
-    {{ if ne $month .Time.Month }}
-    {{ if ne $day .Time.Day }}
-    <h2>{{ .Time.Day }} {{ .Time.Month }}</h2>
-    {{ $month = .Time.Month }}
-    {{ $day = .Time.Day }}
-    {{ end }}
-    {{ end }}
+        {{ if .Pages }}
+        <aside class="menu" dir="auto">
+          <div class="menu-list" dir="auto">
 
-    {{ with .Page }}
+            {{range .Pages}}
+            <a href="/{{.Name}}" dir="auto">
+              <span class="page">
+              {{ emoji . }}
+              {{ $props := properties . }}
+              {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+              </span>
+            </a>
+            {{end}}
 
-    <a href="/{{.Name}}" dir="auto" class="is-clearfix">
-      <span class="is-block">
-        {{ emoji . }}
-        {{ $props := properties . }}
-        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
-      </span>
-    </a>
+          </div>
+        </aside>
+        {{end}}
 
-    {{ end }}
+        {{end}}
+      </td>
+      {{end}}
+    </tr>
+    {{end}}
+  </tbody>
+</table>
+{{end}}
+{{end}}
 
-    {{ end }}
-  </div>
-</aside>
 {{ template "footer" . }}
