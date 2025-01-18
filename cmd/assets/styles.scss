@@ -52,6 +52,7 @@
     a[href^="http"]::after{
         display: inline-block;
         content: "\f08e";
+        font-weight: 900;
         font-family: "Font Awesome 6 Free";
         font-size: 0.6em;
         margin: 0 0.4em;
