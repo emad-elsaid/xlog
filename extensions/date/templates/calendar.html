@@ -44,9 +44,14 @@
       {{range .}}
       <td>
         {{if .}}
+
+        {{ if .Pages }}
         <a href="/+/date/{{printf "%d-%d-%d" .Date.Day .Date.Month .Date.Year}}">
           <span class="tag">{{.Date.Day}}</span>
         </a>
+        {{else}}
+        <span class="tag">{{.Date.Day}}</span>
+        {{end}}
 
         {{ if .Pages }}
         <aside class="menu" dir="auto">

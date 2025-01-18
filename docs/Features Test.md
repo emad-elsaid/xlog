@@ -38,6 +38,14 @@ Computer science is the study of computation, automation, and information. Compu
 | Inline [MathJax](https://www.mathjax.org/) with | `$`                          | $ax^2 + bx + c = 0$                            |
 | Inline [MathJax](https://www.mathjax.org/) with | `$$`                         | $$ax^2 + bx + c = 0$$                          |
 
+# Date
+* Dates are recognized in your markdown without extra syntax. for example `1-January-2023` shows as a link 1-January-2023
+* Dates become links to a page that lists all pages with this date. For example the date in the previous line links to a page that has a list of all pages mentioning 1st of Jan 2023.
+* The navigation bar has a link to "Calendar" which shows all months that include pages with dates.
+
+So you can create a page every day like a diary or agenda, write the date in it and it'll show up in the calendar.
+Also you can use a date as due date for a todo, and you can check the calendar for upcoming due dates.
+
 
 # Blocks
 
@@ -75,6 +83,94 @@ https://xlog.emadelsaid.com/public/logo.png
 
 https://www.emadelsaid.com/Why%20I%20became%20a%20software%20developer/
 
+## Custom blocks 
+* xlog `extensions/blocks/templates` has a set of blocks 
+* file names represent the block name, and the file content is a Go template that will be executed with the block content parsed as YAML 
+
+For example `extensions/blocks/templates/book.html` represents a blocks `book` 
+<pre>
+```book
+title: The food of the gods
+author: H. G. Wells
+image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
+```
+</pre>
+
+Parses the content as YAML and is passed to the `book.html` file rendering the block to : 
+
+```book
+title: The food of the gods
+author: H. G. Wells
+image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
+```
+
+Authors:
+
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+
+
+The previous list each one of them is a block that looks like the following: 
+<pre>
+```person
+name: Emad Elsaid
+image: https://www.emadelsaid.com/public/logo.png
+website: https://www.emadelsaid.com
+byline: Developer, Youtuber and casual gamer
+```
+</pre>
+
+Or a Github user. which requires just the name 
+<pre>
+```github-user
+name: emad-elsaid
+```
+</pre>
+
+or one-liner. as only one line is needed
+```
+/github-user name: emad-elsaid
+```
+
+/github-user name: emad-elsaid
+
+/github-user name: emad-elsaid
+
+/github-user name: emad-elsaid
 
 # Unordered Lists
 
@@ -134,13 +230,6 @@ gantt
     section Another
     Task in sec      :2014-01-12  , 12d
     another task      : 24d
-```
-
-Books cover 
-```book
-title: The food of the gods
-author: H. G. Wells
-image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
 ```
 
 Embed another page, header-particles in this case
