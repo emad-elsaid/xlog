@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/fs"
 	"log/slog"
+	"os"
 	"path"
 	"strings"
 )
@@ -32,6 +33,10 @@ func compileTemplates() {
 	// add default templates before everything else
 	sub, _ := fs.Sub(defaultTemplates, "templates")
 	templatesFSs = append([]fs.FS{sub}, templatesFSs...)
+	// add theme directory after everything else to allow user to override any template
+	if _, err := os.Stat("theme"); err == nil {
+		templatesFSs = append(templatesFSs, os.DirFS("theme"))
+	}
 
 	templates = template.New("")
 	for _, tfs := range templatesFSs {

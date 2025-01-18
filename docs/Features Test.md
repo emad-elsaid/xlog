@@ -9,6 +9,15 @@ Computer science is the study of computation, automation, and information. Compu
 * Disqus comments
 * Encrypt files with GPG
 
+# Custom theme
+To override any xlog template :
+* Create a `theme` directory inside your knowledge base directory
+* Create a file with the same name of the template you need to override with the new template
+* Running xlog will load all template files then read `theme` to override any previously defined theme
+
+For example, xlog has templates defined inside `templates/` one of them is `pages.html` which display a list of pages. to override it you can: 
+* Create file `theme/pages.html` with the new Go template content.
+
 # Banner Image
 * If the page starts with an image it'll be used as a banner
 
