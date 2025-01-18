@@ -42,7 +42,8 @@ type Photos struct{}
 
 func (Photos) Name() string { return "photos" }
 func (Photos) Init() {
-	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode})
+	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode("photos")})
+	shortcode.RegisterShortCode("photos-grid", shortcode.ShortCode{Render: photosShortcode("photos-grid")})
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.RegisterProperty(properties)
 	xlog.Get(`/+/photos/thumbnail/{path...}`, resizeHandler)
@@ -105,41 +106,43 @@ func NewPhoto(path string) (*Photo, error) {
 	}, nil
 }
 
-func photosShortcode(input xlog.Markdown) template.HTML {
-	p := strings.TrimSpace(string(input))
+func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
+	return func(input xlog.Markdown) template.HTML {
+		p := strings.TrimSpace(string(input))
 
-	photos := []*Photo{}
+		photos := []*Photo{}
 
-	err := filepath.WalkDir(p, func(file string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.Type().IsRegular() && supportedExt.Include(strings.ToLower(path.Ext(file))) {
-			photo, err := NewPhoto(file)
+		err := filepath.WalkDir(p, func(file string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
 
-			xlog.RegisterBuildPage(photo.Thumbnail, false)
-			xlog.RegisterBuildPage(photo.Page, true)
-			photos = append(photos, photo)
+			if d.Type().IsRegular() && supportedExt.Include(strings.ToLower(path.Ext(file))) {
+				photo, err := NewPhoto(file)
+				if err != nil {
+					return err
+				}
+
+				xlog.RegisterBuildPage(photo.Thumbnail, false)
+				xlog.RegisterBuildPage(photo.Page, true)
+				photos = append(photos, photo)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return template.HTML(err.Error())
 		}
 
-		return nil
-	})
+		slices.SortFunc(photos, func(i, j *Photo) int {
+			return j.Time.Compare(i.Time)
+		})
 
-	if err != nil {
-		return template.HTML(err.Error())
+		return xlog.Partial(tpl, xlog.Locals{
+			"photos": photos,
+		})
 	}
-
-	slices.SortFunc(photos, func(i, j *Photo) int {
-		return j.Time.Compare(i.Time)
-	})
-
-	return xlog.Partial("photos", xlog.Locals{
-		"photos": photos,
-	})
 }
 
 func resizeHandler(r xlog.Request) xlog.Output {
