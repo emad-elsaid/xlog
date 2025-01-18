@@ -72,6 +72,24 @@ You can help Xlog in many ways:
 - Improve the core codebase
 - Package it for different operating systems or different Linux distribution
 
+# Contributors
+
+/github-user name: juanolon
+
+/github-user name: m4salah
+
+/github-user name: ProvoK
+
+/github-user name: scroot
+
+/github-user name: disconnect3d
+
+/github-user name: mohamed-zezo
+
+/github-user name: aradwann
+
+/github-user name: aaelsay3d
+
 # :people_holding_hands: Community
 
 - :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
