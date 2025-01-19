@@ -1,6 +1,6 @@
 :vhs: Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML. It focuses on enriching markdown files and surfacing implicit links between pages.
 
-![](/public/logo.png)
+![](/public/logo.svg)
 
 Xlog allows you to create knowledgebase using any method you are familiar with:
 * Weblog (Blog): Xlog allows you to write articles in markdown format with huge variety of automatic improvements such as auto linking text to other articles
