@@ -1,0 +1,49 @@
+{{ define "toc-item" }}
+<li>
+  <a href="#{{ printf "%s" .ID}}">{{ printf "%s" .Title}}</a>
+  {{ with .Items }}
+  <ul class="menu-list">
+    {{ range . }}
+    {{ template "toc-item" . }}
+    {{ end }}
+  </ul>
+  {{ end }}
+</li>
+{{ end }}
+
+{{ with .tree.Items }}
+<style>
+ .table-of-contents{
+     position: relative;
+
+     #table-of-contents-list{
+         position: absolute;
+         top: 0;
+         left: 100%;
+         padding-left: 1em;
+         white-space: nowrap;
+
+         ul{
+             list-style: none;
+             margin: 0;
+             li a {
+                 max-width: 20em;
+                 overflow: hidden;
+                 text-overflow: ellipsis;
+             }
+         }
+     }
+ }
+</style>
+
+<aside class="menu is-hidden-touch table-of-contents">
+  <div id="table-of-contents-list">
+    <p class="menu-label">TABLE OF CONTENTS</p>
+    <ul class="menu-list">
+      {{ range . }}
+      {{ template "toc-item" . }}
+      {{ end }}
+    </ul>
+  </div>
+</aside>
+{{ end }}
