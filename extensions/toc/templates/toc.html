@@ -14,7 +14,8 @@
 {{ with .tree.Items }}
 <style>
  .table-of-contents{
-     position: relative;
+     position: sticky;
+     top: 8em;
 
      #table-of-contents-list{
          position: absolute;
@@ -35,6 +36,45 @@
      }
  }
 </style>
+
+<script>
+ document.addEventListener("DOMContentLoaded", () => {
+     const links = document.querySelectorAll("#table-of-contents-list a");
+     const headings = document.querySelectorAll("h1");
+
+     const updateActiveLink = () => {
+         let activeLink = null;
+         let activeRect = null;
+         let lastOut = null;
+
+         headings.forEach((heading, index) => {
+             const rect = heading.getBoundingClientRect();
+             let inViewPort = rect.top >= 0 && rect.top < window.innerHeight;
+             let beforeActive = activeRect == null || rect.top < activeRect.top;
+             if (inViewPort && beforeActive) {
+                 activeLink = links[index];
+                 activeRect = rect;
+             }
+
+             let beforeViewPort = rect.top < 0;
+             if(beforeViewPort){
+                 lastOut = links[index];
+             }
+         });
+
+         links.forEach((link) => link.classList.remove("is-active"));
+         if (activeLink) {
+             activeLink.classList.add("is-active");
+         }else if(lastOut) {
+             lastOut.classList.add("is-active");
+         }
+     };
+
+     window.addEventListener("scroll", updateActiveLink);
+     updateActiveLink();
+ });
+</script>
+
 
 <aside class="menu is-hidden-touch table-of-contents">
   <div id="table-of-contents-list">
