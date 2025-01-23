@@ -9,22 +9,22 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@master
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+  # create-release:
+  #   name: Create Release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@master
+  #     - name: Create Release
+  #       id: create_release
+  #       uses: actions/create-release@latest
+  #       with:
+  #         tag_name: ${{ github.ref }}
+  #         release_name: ${{ github.ref }}
+  #         draft: false
+  #         prerelease: false
   releases-matrix:
-    needs: create-release
+    # needs: create-release
     name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
