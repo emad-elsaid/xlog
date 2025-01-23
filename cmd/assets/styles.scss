@@ -57,7 +57,7 @@
         font-size: 0.6em;
         margin: 0 0.4em;
     }
-    &>p:first-child img:only-child {
+    &>p:first-of-type img:only-child {
         border-radius: 0.5em;
         object-fit: cover;
         object-position: 0 50%;
