@@ -86,7 +86,13 @@ func opengraphTags(p Page) template.HTML {
 		escape(title),
 	)
 
-	return template.HTML(ogTags + twitterTags)
+	metaTags := fmt.Sprintf(`
+    <meta name="description" content="%s">
+`,
+		escape(firstParagraph),
+	)
+
+	return template.HTML(ogTags + twitterTags + metaTags)
 }
 
 func rawText(source []byte, n ast.Node, limit int) string {
