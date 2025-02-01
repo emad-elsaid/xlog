@@ -106,6 +106,10 @@ func (l action) Attrs() map[template.HTMLAttr]any {
 }
 
 func starAction(p Page) []Command {
+	if !p.Exists() {
+		return nil
+	}
+
 	starred := isStarred(p)
 	return []Command{action{starred: starred, page: p}}
 }

@@ -1,10 +1,4 @@
-{{- $commands := "" }}
-
-{{- if .page }}
-{{- $commands = commands .page }}
-{{- end }}
-
-{{- if $commands }}
+{{- with commands .page }}
 <div class="modal" id="commands-modal">
   <div class="modal-background"></div>
 
@@ -16,7 +10,7 @@
     </div>
     <aside class="menu p-1" style="max-height: 30em; overflow-y: auto;">
       <ul class="menu-list">
-        {{- range $commands -}}
+        {{- range . -}}
         <li>
           <a {{ range $k, $v := .Attrs }}{{$k}}="{{$v}}" {{end}} class="icon-text">
             <span class="icon"><i class="{{.Icon}}"></i></span>
