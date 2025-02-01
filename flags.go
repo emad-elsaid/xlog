@@ -14,6 +14,7 @@ type Configuration struct {
 	NotFoundPage       string // name of the index page markdown file
 	BindAddress        string // bind address for the server
 	ServeInsecure      bool   // should the server use https for cookie
+	Theme              string // empty switches between light/dark. setting it forces a theme
 	CodeStyle          string
 	CsrfCookieName     string
 	DisabledExtensions string
@@ -37,4 +38,5 @@ func init() {
 	flag.StringVar(&Config.CsrfCookieName, "csrf-cookie", "xlog_csrf", "CSRF cookie name")
 	flag.StringVar(&Config.DisabledExtensions, "disabled-extensions", "", "disable list of extensions by name, comma separated")
 	flag.StringVar(&Config.CodeStyle, "codestyle", "dracula", "code highlighting style name from the list supported by https://pkg.go.dev/github.com/alecthomas/chroma/v2/styles")
+	flag.StringVar(&Config.Theme, "theme", "", "bulma theme to use. (light, dark). empty value means system preference is used")
 }
