@@ -60,6 +60,8 @@ Usage of xlog:
     	Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
     	Directory that will act as a storage (default "/home/emad/code/xlog")
+  -theme string
+    	bulma theme to use. (light, dark). empty value means system preference is used
   -twitter.username string
     	user twitter account @handle. including the @
 ```
