@@ -120,122 +120,90 @@
      }
  }
 
- function initializeTableQueries() {
-     // Find all tables in the document
-     const tables = document.getElementsByTagName('table');
+const template = `
+<div class="mb-4">
+  <div class="field">
+    <div class="control is-expanded">
+      <textarea class="textarea" rows="5" placeholder="Enter SQL query. the following table name is input..."></textarea>
+    </div>
+    <div class="control">
+      <button class="button mt-2">Run Query</button>
+    </div>
+  </div>
+  <div class="help is-danger mt-2"></div>
+</div>
+`;
 
-     Array.from(tables).forEach((table, index) => {
-         // Create container for query controls
-         const container = document.createElement('div');
-         container.className = 'field has-addons';
+function initializeTableQueries() {
+    const tables = document.getElementsByTagName('table');
 
-         // Create input control wrapper
-         const inputControl = document.createElement('div');
-         inputControl.className = 'control is-expanded';
+    Array.from(tables).forEach((table) => {
+        // Create template element and parse HTML
+        const templateEl = document.createElement('template');
+        templateEl.innerHTML = template.trim();
 
-         // Create input field
-         const input = document.createElement('input');
-         input.type = 'text';
-         input.className = 'input';
-         input.placeholder = `Enter SQL query. the following table name is ${tableName}...`;
+        // Clone the template content
+        const queryInterface = templateEl.content.cloneNode(true);
 
-         // Create button control wrapper
-         const buttonControl = document.createElement('div');
-         buttonControl.className = 'control';
+        // Get references to elements
+        const wrapper = queryInterface.querySelector('.mb-4');
+        const input = queryInterface.querySelector('.textarea');
+        const button = queryInterface.querySelector('.button');
+        const errorContainer = queryInterface.querySelector('.help');
 
-         // Create query button
-         const button = document.createElement('button');
-         button.className = 'button';
-         button.textContent = 'Run Query';
+        let resultTable = null;
 
-         // Create error message container
-         const errorContainer = document.createElement('div');
-         errorContainer.className = 'help is-danger mt-2';
+        // Add input event listener
+        input.addEventListener('input', (e) => {
+            if (e.target.value.trim() === '') {
+                table.style.display = '';
+                if (resultTable) {
+                    resultTable.remove();
+                    resultTable = null;
+                }
+                errorContainer.textContent = '';
+            }
+        });
 
-         // Assemble the components
-         inputControl.appendChild(input);
-         buttonControl.appendChild(button);
-         container.appendChild(inputControl);
-         container.appendChild(buttonControl);
+        // Add button click listener
+        button.addEventListener('click', async () => {
+            const sqlQuery = input.value.trim();
 
-         // Create a wrapper div for the whole component
-         const wrapper = document.createElement('div');
-         wrapper.className = 'mb-4';
-         wrapper.appendChild(container);
-         wrapper.appendChild(errorContainer);
+            if (sqlQuery === '') {
+                errorContainer.textContent = 'Please enter a SQL query';
+                return;
+            }
 
-         // Insert wrapper before table
-         table.parentNode.insertBefore(wrapper, table);
+            try {
+                button.classList.add('is-loading');
 
-         // Keep track of the result table if created
-         let resultTable = null;
+                if (resultTable) {
+                    resultTable.remove();
+                }
 
-         // Add event listener for input changes
-         input.addEventListener('input', (e) => {
-             if (e.target.value.trim() === '') {
-                 // Show original table
-                 table.style.display = '';
+                resultTable = await query(table, sqlQuery);
+                table.style.display = 'none';
+                wrapper.after(resultTable);
+                errorContainer.textContent = '';
 
-                 // Remove result table if it exists
-                 if (resultTable) {
-                     resultTable.remove();
-                     resultTable = null;
-                 }
+            } catch (error) {
+                errorContainer.textContent = `Error: ${error.message}`;
+                console.error('Query error:', error);
 
-                 // Clear error message
-                 errorContainer.textContent = '';
-             }
-         });
+                table.style.display = '';
+                if (resultTable) {
+                    resultTable.remove();
+                    resultTable = null;
+                }
+            } finally {
+                button.classList.remove('is-loading');
+            }
+        });
 
-         // Add event listener for button click
-         button.addEventListener('click', async () => {
-             const sqlQuery = input.value.trim();
-
-             if (sqlQuery === '') {
-                 errorContainer.textContent = 'Please enter a SQL query';
-                 return;
-             }
-
-             try {
-                 // Show loading state
-                 button.classList.add('is-loading');
-
-                 // Remove previous result table if it exists
-                 if (resultTable) {
-                     resultTable.remove();
-                 }
-
-                 // Execute query
-                 resultTable = await query(table, sqlQuery);
-
-                 // Hide original table
-                 table.style.display = 'none';
-
-                 // Insert result table after the wrapper
-                 wrapper.after(resultTable);
-
-                 // Clear error message
-                 errorContainer.textContent = '';
-
-             } catch (error) {
-                 errorContainer.textContent = `Error: ${error.message}`;
-                 console.error('Query error:', error);
-
-                 // Show original table
-                 table.style.display = '';
-
-                 // Remove result table if it exists
-                 if (resultTable) {
-                     resultTable.remove();
-                     resultTable = null;
-                 }
-             } finally {
-                 // Remove loading state
-                 button.classList.remove('is-loading');
-             }
-         });
-     });
- }
+        // Insert the query interface before the table
+        table.parentNode.insertBefore(queryInterface, table);
+    });
+}
 
  // Initialize when DOM is ready
  if (document.readyState === 'loading') {
