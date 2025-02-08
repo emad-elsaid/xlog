@@ -24,6 +24,10 @@
     navigation: auto;
 }
 
+.navbar-item {
+    border-radius: var(--bulma-radius);
+}
+
 .view {
 
     // codeblocks border radius
