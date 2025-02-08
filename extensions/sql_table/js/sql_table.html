@@ -1,0 +1,218 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+
+<script>
+ const tableName = 'input';
+
+ async function query(tableElement, sqlQuery) {
+     // First, convert HTML table to array of objects
+     function tableToJson(table) {
+         const headers = [...table.querySelectorAll('th')].map(th => th.textContent.trim());
+         const rows = [...table.querySelectorAll('tr')].slice(1);
+
+         return rows.map(row => {
+             const cells = [...row.querySelectorAll('td')];
+             return headers.reduce((obj, header, i) => {
+                 obj[header] = cells[i] ? cells[i].innerHTML.trim() : null;
+                 return obj;
+             }, {});
+         });
+     }
+
+     // Convert result back to HTML table
+     function createResultTable(results) {
+         const table = document.createElement('table');
+
+         // Copy class attribute from input table
+         if (tableElement.hasAttribute('class')) {
+             table.setAttribute('class', tableElement.getAttribute('class'));
+         }
+
+         // Create header row if we have results
+         if (results.length > 0) {
+             const thead = document.createElement('thead');
+             const headerRow = document.createElement('tr');
+
+             Object.keys(results[0]).forEach(key => {
+                 const th = document.createElement('th');
+                 th.innerHTML = key;
+                 headerRow.appendChild(th);
+             });
+
+             thead.appendChild(headerRow);
+             table.appendChild(thead);
+         }
+
+         // Create data rows
+         const tbody = document.createElement('tbody');
+         results.forEach(row => {
+             const tr = document.createElement('tr');
+             Object.values(row).forEach(value => {
+                 const td = document.createElement('td');
+                 td.innerHTML = value;
+                 tr.appendChild(td);
+             });
+             tbody.appendChild(tr);
+         });
+
+         table.appendChild(tbody);
+         return table;
+     }
+
+
+     try {
+         // Initialize SQL.js
+         const SQL = await initSqlJs({
+             locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+         });
+
+         // Create a database
+         const db = new SQL.Database();
+
+         // Convert table to JSON
+         const data = tableToJson(tableElement);
+
+         // Create table and insert data
+         if (data.length > 0) {
+             // Generate CREATE TABLE statement
+             const columns = Object.keys(data[0])
+                                   .map(col => `"${col}" TEXT`)
+                                   .join(', ');
+
+             db.run(`CREATE TABLE ${tableName} (${columns})`);
+
+             // Insert data
+             data.forEach(row => {
+                 const columns = Object.keys(row).map(col => `"${col}"`).join(', ');
+                 const values = Object.values(row).map(val => `'${val}'`).join(', ');
+                 db.run(`INSERT INTO ${tableName} (${columns}) VALUES (${values})`);
+             });
+
+             // Execute query
+             const results = db.exec(sqlQuery);
+
+             // Convert results to array of objects
+             if (results.length > 0) {
+                 const columns = results[0].columns;
+                 const rows = results[0].values.map(row => {
+                     return columns.reduce((obj, col, i) => {
+                         obj[col] = row[i];
+                         return obj;
+                     }, {});
+                 });
+
+                 // Convert to HTML table and return
+                 return createResultTable(rows);
+             }
+         }
+
+         // Return empty table if no results
+         return createResultTable([]);
+
+     } catch (error) {
+         console.error('Error executing query:', error);
+         const errorTable = document.createElement('table');
+         // Copy class attribute from input table
+         if (tableElement.hasAttribute('class')) {
+             errorTable.setAttribute('class', tableElement.getAttribute('class'));
+         }
+         errorTable.innerHTML = `<tr><td>Error executing query: ${error.message}</td></tr>`;
+         return errorTable;
+     }
+ }
+
+const template = `
+<div class="mb-4">
+  <div class="field">
+    <div class="control is-expanded">
+      <textarea class="textarea" rows="5" placeholder="Enter SQL query. the following table name is input..."></textarea>
+    </div>
+    <div class="control">
+      <button class="button mt-2">Run Query</button>
+    </div>
+  </div>
+  <div class="help is-danger mt-2"></div>
+</div>
+`;
+
+function initializeTableQueries() {
+    const tables = document.getElementsByTagName('table');
+
+    Array.from(tables).forEach((table) => {
+        if(table.querySelectorAll('tbody tr').length < sqlTableThreshold){
+            return
+        }
+
+        // Create template element and parse HTML
+        const templateEl = document.createElement('template');
+        templateEl.innerHTML = template.trim();
+
+        // Clone the template content
+        const queryInterface = templateEl.content.cloneNode(true);
+
+        // Get references to elements
+        const wrapper = queryInterface.querySelector('.mb-4');
+        const input = queryInterface.querySelector('.textarea');
+        const button = queryInterface.querySelector('.button');
+        const errorContainer = queryInterface.querySelector('.help');
+
+        let resultTable = null;
+
+        // Add input event listener
+        input.addEventListener('input', (e) => {
+            if (e.target.value.trim() === '') {
+                table.style.display = '';
+                if (resultTable) {
+                    resultTable.remove();
+                    resultTable = null;
+                }
+                errorContainer.textContent = '';
+            }
+        });
+
+        // Add button click listener
+        button.addEventListener('click', async () => {
+            const sqlQuery = input.value.trim();
+
+            if (sqlQuery === '') {
+                errorContainer.textContent = 'Please enter a SQL query';
+                return;
+            }
+
+            try {
+                button.classList.add('is-loading');
+
+                if (resultTable) {
+                    resultTable.remove();
+                }
+
+                resultTable = await query(table, sqlQuery);
+                table.style.display = 'none';
+                wrapper.after(resultTable);
+                errorContainer.textContent = '';
+
+            } catch (error) {
+                errorContainer.textContent = `Error: ${error.message}`;
+                console.error('Query error:', error);
+
+                table.style.display = '';
+                if (resultTable) {
+                    resultTable.remove();
+                    resultTable = null;
+                }
+            } finally {
+                button.classList.remove('is-loading');
+            }
+        });
+
+        // Insert the query interface before the table
+        table.parentNode.insertBefore(queryInterface, table);
+    });
+}
+
+ // Initialize when DOM is ready
+ if (document.readyState === 'loading') {
+     document.addEventListener('DOMContentLoaded', initializeTableQueries);
+ } else {
+     initializeTableQueries();
+ }
+</script>

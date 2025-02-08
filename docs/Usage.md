@@ -60,6 +60,8 @@ Usage of xlog:
     	Site name is the name that appears on the header beside the logo and in the title tag (default "XLOG")
   -source string
     	Directory that will act as a storage (default "/home/emad/code/xlog")
+  -sql-table.threshold int
+    	If a table rows is more than this threshold it'll allow users to query it with SQL (default 100)
   -theme string
     	bulma theme to use. (light, dark). empty value means system preference is used
   -twitter.username string
