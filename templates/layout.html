@@ -21,9 +21,9 @@
   </head>
   <body>
     {{- template "commands" . -}}
+    {{- template "navbar" . -}}
 
     <div class="container is-max-desktop px-3" dir="auto">
-      {{- template "navbar" . -}}
 
       {{- if ne .config.Index .page.Name -}}
       <div dir="auto" class="title is-1 has-text-weight-bold" style="view-transition-name: page-title;">
