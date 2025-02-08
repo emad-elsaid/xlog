@@ -138,6 +138,10 @@ function initializeTableQueries() {
     const tables = document.getElementsByTagName('table');
 
     Array.from(tables).forEach((table) => {
+        if(table.querySelectorAll('tbody tr').length < sqlTableThreshold){
+            return
+        }
+
         // Create template element and parse HTML
         const templateEl = document.createElement('template');
         templateEl.innerHTML = template.trim();
