@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"path"
 	"slices"
 	"strings"
 	"time"
@@ -160,7 +161,17 @@ func Banner(p Page) string {
 		return ""
 	}
 
-	return string(image.Destination)
+	dest := string(image.Destination)
+	if len(dest) == 0 || dest == "#" {
+		return ""
+	}
+
+	if !(path.IsAbs(dest) || strings.HasPrefix(dest, "http")) {
+		d := path.Dir(p.FileName())
+		dest = path.Join("/", d, dest)
+	}
+
+	return dest
 }
 
 func Emoji(p Page) string {
