@@ -42,7 +42,7 @@ func UpdatePagesList(Page) (err error) {
 	ps := MapPage(context.Background(), func(p Page) *NormalizedPage {
 		return &NormalizedPage{
 			page:           p,
-			normalizedName: strings.ToLower(p.Name()),
+			normalizedName: path.Base(strings.ToLower(p.Name())),
 		}
 	})
 	sort.Sort(fileInfoByNameLength(ps))

@@ -82,7 +82,7 @@ $$
 
 ## Image using `![alt](url)`:
 
-![Logo](/public/logo.png)
+![Logo](/docs/public/logo.png)
 
 ## Auto-convert image URL to an image
 
@@ -101,7 +101,7 @@ For example `extensions/blocks/templates/book.html` represents a blocks `book`
 ```book
 title: The food of the gods
 author: H. G. Wells
-image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
+image: /docs/public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
 ```
 </pre>
 
@@ -110,7 +110,7 @@ Parses the content as YAML and is passed to the `book.html` file rendering the b
 ```book
 title: The food of the gods
 author: H. G. Wells
-image: /public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
+image: /docs/public/d32ac848ea161f9b384ed2ed81d657e3f150bcd3aa355a75741b95c76b873898.avif
 ```
 
 Authors:
@@ -200,14 +200,14 @@ or one-liner. as only one line is needed
 
 # Images in one paragraph rendered in columns
 
-![Logo](/public/logo.png)
-![Logo](/public/logo.png)
-![Logo](/public/logo.png)
+![Logo](/docs/public/logo.png)
+![Logo](/docs/public/logo.png)
+![Logo](/docs/public/logo.png)
 
-![Logo](/public/logo.png)
-![Logo](/public/logo.png)
-![Logo](/public/logo.png)
-![Logo](/public/logo.png)
+![Logo](/docs/public/logo.png)
+![Logo](/docs/public/logo.png)
+![Logo](/docs/public/logo.png)
+![Logo](/docs/public/logo.png)
 
 # Shortcode
 

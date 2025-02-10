@@ -26,6 +26,8 @@ var helpers = template.FuncMap{
 	"scripts":        scripts,
 	"banner":         Banner,
 	"emoji":          Emoji,
+	"base":           path.Base,
+	"dir":            path.Dir,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
