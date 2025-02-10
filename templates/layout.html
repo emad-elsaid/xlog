@@ -18,6 +18,12 @@
       {{.config.Sitename}}
     </title>
     {{- with .page }} {{ widgets "head" . }} {{ end }}
+
+    {{- with .page -}}
+    {{- if ne .Name $.config.Index -}}
+    {{ with emoji . }}{{ template "emoji-favicon" . }}{{ end }}
+    {{- end -}}
+    {{- end -}}
   </head>
   <body>
     {{- template "commands" . -}}
