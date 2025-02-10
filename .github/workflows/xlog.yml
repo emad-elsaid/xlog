@@ -37,11 +37,11 @@ jobs:
           check-latest: true
 
       - name: Build
-        working-directory: ./docs
         run: |
           go run ../cmd/xlog \
           --build . \
           --sitename "Xlog" \
+          --theme "light" \
           --html=true \
           --sitemap.domain=xlog.emadelsaid.com \
           --rss.domain xlog.emadelsaid.com \
