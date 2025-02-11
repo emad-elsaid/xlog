@@ -82,7 +82,7 @@ $$
 
 ## Image using `![alt](url)`:
 
-![Logo](/docs/public/logo.png)
+![Logo](/public/logo.png)
 
 ## Auto-convert image URL to an image
 
@@ -200,14 +200,14 @@ or one-liner. as only one line is needed
 
 # Images in one paragraph rendered in columns
 
-![Logo](/docs/public/logo.png)
-![Logo](/docs/public/logo.png)
-![Logo](/docs/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
 
-![Logo](/docs/public/logo.png)
-![Logo](/docs/public/logo.png)
-![Logo](/docs/public/logo.png)
-![Logo](/docs/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
+![Logo](/public/logo.png)
 
 # Shortcode
 
