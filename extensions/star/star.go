@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"path"
 	"regexp"
 	"strings"
 
@@ -49,8 +50,12 @@ func (s starredPage) Icon() string {
 
 func (s starredPage) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
-		"href": "/" + s.Name(),
+		"href": "/" + s.Page.Name(),
 	}
+}
+
+func (s starredPage) Name() string {
+	return path.Base(s.Page.Name())
 }
 
 func starredPages(p Page) []Command {
