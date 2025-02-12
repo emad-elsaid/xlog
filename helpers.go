@@ -26,6 +26,8 @@ var helpers = template.FuncMap{
 	"scripts":        scripts,
 	"banner":         Banner,
 	"emoji":          Emoji,
+	"base":           path.Base,
+	"dir":            dir,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
@@ -181,4 +183,14 @@ func Emoji(p Page) string {
 	}
 
 	return ""
+}
+
+func dir(s string) string {
+	v := path.Dir(s)
+
+	if v == "." {
+		return ""
+	}
+
+	return v
 }

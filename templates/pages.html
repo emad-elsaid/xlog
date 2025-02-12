@@ -11,7 +11,11 @@
       <span class="is-block">
         {{ emoji . }}
         {{ $props := properties . }}
-        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+        {{ with $props.title }}
+          {{ .Value }}
+        {{ else }}
+          {{ base .Name }}
+        {{ end }}
       </span>
       <time class="has-text-grey is-size-7" dir="auto">{{ ago .ModTime }}</time>
     </a>

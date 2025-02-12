@@ -35,7 +35,12 @@
       <div dir="auto" class="title is-1 has-text-weight-bold" style="view-transition-name: page-title;">
         {{- with .page -}}
         {{- emoji . }}
-        {{ with $props.title }} {{ .Value }} {{ else }} {{ .Name }} {{ end }}
+        {{ with $props.title }}
+          {{ .Value }}
+        {{ else }}
+          {{ with dir .Name }}<p class="subtitle">{{.}}</p>{{ end }}
+          {{ base .Name }}
+        {{ end }}
         {{- end -}}
       </div>
       {{- end -}}

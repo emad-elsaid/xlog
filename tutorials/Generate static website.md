@@ -1,3 +1,5 @@
+#tutorial
+
 Xlog CLI allow for generating static website from source directory. this is how this website is generated.
 
 To generate a static website using Xlog use the `--build` flag with a path as destination for example:

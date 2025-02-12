@@ -1,3 +1,5 @@
+#tutorial
+
 * Xlog doesn't require custom structure for your markdown files
 * Default main file name is `index.md` and can be overriden with `--index` flag
 

@@ -1,3 +1,5 @@
+#tutorial
+
 Xlog ships with a CLI that includes the core and all official extensions. There are cases where you need custom set of extensions:
 
 * Maybe you need only the core features without any extension
