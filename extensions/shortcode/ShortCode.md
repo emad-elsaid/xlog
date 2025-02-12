@@ -1,3 +1,5 @@
+#extension
+
 Xlog extension **shortcode** includes couple default blocks
 
 # /alert
