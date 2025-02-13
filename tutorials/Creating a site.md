@@ -1,3 +1,5 @@
+![](/docs/public/website.png)
+
 #tutorial
 
 * Xlog doesn't require custom structure for your markdown files

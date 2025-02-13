@@ -61,16 +61,7 @@ xlog
 
 # :bulb: Tutorials
 
-- Hello world extension
-- Create your own digital garden on Github
-
-# Contributing
-
-You can help Xlog in many ways:
-
-- Create a new extension
-- Improve the core codebase
-- Package it for different operating systems or different Linux distribution
+/hashtag-pages-grid tutorial
 
 # Contributors
 
@@ -90,12 +81,19 @@ You can help Xlog in many ways:
 
 /github-user name: aaelsay3d
 
+# Contributing
+
+You can help Xlog in many ways:
+
+- Create a new extension
+- Improve the core codebase
+- Package it for different operating systems or different Linux distribution
+
 # :people_holding_hands: Community
 
 - :left_speech_bubble: [Discussing ideas](https://github.com/emad-elsaid/xlog/discussions)
 - :beetle: [Reporting issues](https://github.com/emad-elsaid/xlog/issues)
-- :keyboard: [Contributors](https://github.com/emad-elsaid/xlog/graphs/contributors)
-- Github
+- :keyboard: Github
 
 # License
 

@@ -1,3 +1,5 @@
+![](/docs/public/sprout.png)
+
 #tutorial
 
 # Create a Repository

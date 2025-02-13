@@ -1,0 +1,28 @@
+<aside class="grid is-col-min-10" dir="auto">
+
+  {{- range . -}}
+  <div class="cell" dir="auto">
+
+    <a href="/{{.Name}}" dir="auto">
+      {{ with banner . }}
+      <img src="{{.}}" loading="lazy" class="mb-3 is-block" style="border-radius: 0.5em; object-fit: cover; object-position: 0 50%; height: 8em; width: 100%;"/>
+      {{ else }}
+      <div class="notification mb-3" style="border-radius: 0.5em; object-fit: cover; object-position: 0 50%; height: 8em; width: 100%;"></div>
+      {{ end }}
+
+      <span class="is-block">
+        {{ emoji . }}
+        {{ $props := properties . }}
+        {{ with $props.title }}
+        {{ .Value }}
+        {{ else }}
+        {{ base .Name }}
+        {{ end }}
+      </span>
+      <time class="has-text-grey is-size-7" dir="auto">{{ ago .ModTime }}</time>
+    </a>
+
+  </div>
+  {{- end -}}
+
+</aside>
