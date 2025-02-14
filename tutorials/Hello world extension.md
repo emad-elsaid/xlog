@@ -1,3 +1,7 @@
+![](/docs/public/puzzle.png)
+
+#tutorial
+
 By the end of this tutorial you'll learn:
 
 * Creating a new extension

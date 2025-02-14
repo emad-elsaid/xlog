@@ -1,2 +1,0 @@
-Github
-Creating a site
