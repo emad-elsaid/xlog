@@ -60,6 +60,10 @@ xlog
 
 /hashtag-pages-grid tutorial
 
+# 🧩 Extensions
+
+/hashtag-pages-grid extension
+
 # Contributors
 
 /github-user name: juanolon
