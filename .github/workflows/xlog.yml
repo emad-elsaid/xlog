@@ -38,7 +38,7 @@ jobs:
 
       - name: Build
         run: |
-          go run ../cmd/xlog \
+          go run ./cmd/xlog \
           --build . \
           --sitename "Xlog" \
           --theme "light" \
