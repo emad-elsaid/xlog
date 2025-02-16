@@ -18,6 +18,11 @@ func RegisterExtension(e Extension) {
 }
 
 func initExtensions() {
+	if Config.DisabledExtensions == "all" {
+		slog.Info("extensions", "disabled", "all")
+		return
+	}
+
 	disabled := strings.Split(Config.DisabledExtensions, ",")
 	disabledNames := []string{} // because the user can input wrong extension name
 	enabledNames := []string{}

@@ -36,7 +36,7 @@ func init() {
 	flag.StringVar(&Config.BindAddress, "bind", "127.0.0.1:3000", "IP and port to bind the web server to")
 	flag.BoolVar(&Config.ServeInsecure, "serve-insecure", false, "Accept http connections and forward crsf cookie over non secure connections")
 	flag.StringVar(&Config.CsrfCookieName, "csrf-cookie", "xlog_csrf", "CSRF cookie name")
-	flag.StringVar(&Config.DisabledExtensions, "disabled-extensions", "", "disable list of extensions by name, comma separated")
+	flag.StringVar(&Config.DisabledExtensions, "disabled-extensions", "", "disable list of extensions by name, comma separated, `all` will disable all extensions")
 	flag.StringVar(&Config.CodeStyle, "codestyle", "dracula", "code highlighting style name from the list supported by https://pkg.go.dev/github.com/alecthomas/chroma/v2/styles")
 	flag.StringVar(&Config.Theme, "theme", "", "bulma theme to use. (light, dark). empty value means system preference is used")
 }
