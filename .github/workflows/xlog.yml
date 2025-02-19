@@ -43,6 +43,7 @@ jobs:
           --sitename "Xlog" \
           --theme "light" \
           --notfoundpage "docs/404" \
+          --custom.head=docs/header.html \
           --sitemap.domain=xlog.emadelsaid.com \
           --rss.domain xlog.emadelsaid.com \
           --activitypub.domain=xlog.emadelsaid.com \
