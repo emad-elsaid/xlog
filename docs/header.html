@@ -1,0 +1,97 @@
+<style>
+ .navbar {
+     --bulma-navbar-background-color: rgba(255, 255, 255, 0);
+     backdrop-filter: blur(10px);
+ }
+</style>
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+     let allowedPaths = ['/', '/index']
+     if(!allowedPaths.includes(document.location.pathname)){
+         return
+     }
+
+     // Create and inject canvas
+     const canvas = document.createElement('canvas');
+     const ctx = canvas.getContext('2d');
+     document.body.prepend(canvas);
+
+     // Set canvas size
+     function resizeCanvas() {
+         canvas.width = window.innerWidth;
+         canvas.height = 500; // Height of the background effect
+     }
+     resizeCanvas();
+     window.addEventListener('resize', resizeCanvas);
+
+     // Style canvas
+     canvas.style.position = 'absolute';
+     canvas.style.top = '0';
+     canvas.style.left = '0';
+     canvas.style.zIndex = '-1';
+
+     // Blob class
+     class Blob {
+         constructor() {
+             this.x = Math.random() * canvas.width;
+             this.y = Math.random() * canvas.height;
+             this.radius = 30 + Math.random() * 100;
+             this.dx = (Math.random() - 0.5) * 2;
+             this.dy = (Math.random() - 0.5) * 2;
+             this.gray = 100 + Math.floor(Math.random() * 100); // Random grey value
+         }
+
+         update() {
+             this.x += this.dx;
+             this.y += this.dy;
+
+             // Bounce off edges
+             if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
+             if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
+         }
+
+         draw() {
+             ctx.beginPath();
+             const gradient = ctx.createRadialGradient(
+                 this.x, this.y, 0,
+                 this.x, this.y, this.radius
+             );
+             gradient.addColorStop(0, `rgba(${this.gray}, ${this.gray}, ${this.gray}, 0.6)`);
+             gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+             ctx.fillStyle = gradient;
+             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+             ctx.fill();
+         }
+     }
+
+     // Create blobs
+     const blobs = Array.from({ length: 30 }, () => new Blob());
+
+     // Animation loop
+     function animate() {
+         // Create gradient from top to bottom
+         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+         gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+         gradient.addColorStop(1, 'rgba(255, 255, 255, 1)');
+
+         // Clear canvas with gradient
+         ctx.fillStyle = 'white';
+         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+         // Update and draw blobs
+         blobs.forEach(blob => {
+             blob.update();
+             blob.draw();
+         });
+
+
+         ctx.fillStyle = gradient;
+         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+         requestAnimationFrame(animate);
+     }
+
+     // Start animation
+     animate();
+ });
+</script>
