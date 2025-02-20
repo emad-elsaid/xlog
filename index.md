@@ -1,4 +1,6 @@
-:vhs: Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML. It focuses on enriching markdown files and surfacing implicit links between pages.
+The world's most extensive framework for building digital gardens
+
+:vhs: Xlog is one of the most complete and extensive static site generator for digital gardens and knowledge bases. Being written in Go makes it the fastest in its class. Xlog focuses on enriching markdown files and surfacing implicit links between pages.
 
 ![](/public/logo.svg)
 
