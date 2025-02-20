@@ -1,0 +1,7 @@
+<section class="hero mb-5 {{with .size}}is-{{.}}{{end}} {{with .style}}is-{{.}}{{end}}">
+  <div class="hero-body has-text-centered">
+    {{with .image }}<img src="{{.}}">{{end}}
+    <p class="title mb-4">{{.title}}</p>
+    <p class="subtitle">{{.subtitle}}</p>
+  </div>
+</section>

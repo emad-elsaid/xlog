@@ -1,2 +1,2 @@
 docs/Github
-docs/Creating a site
+tutorials/Creating a site
