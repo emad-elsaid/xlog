@@ -11,12 +11,12 @@ XLog
 # Documentation
 
 * [Documentation](https://xlog.emadelsaid.com/)
-* [Installation](https://xlog.emadelsaid.com/Installation/)
-* [Usage](https://xlog.emadelsaid.com/Usage/)
-* [Generating static site](https://xlog.emadelsaid.com/Creating%20a%20site)
-* [Overriding Assets](https://xlog.emadelsaid.com/Assets)
-* [Extensions](https://xlog.emadelsaid.com/extensions/)
-* [Writing Your Own Extension](https://xlog.emadelsaid.com/Hello%20world%20extension/)
+* [Installation](https://xlog.emadelsaid.com/docs/Installation/)
+* [Usage](https://xlog.emadelsaid.com/docs/Usage/)
+* [Generating static site](https://xlog.emadelsaid.com/docs/Creating%20a%20site)
+* [Overriding Assets](https://xlog.emadelsaid.com/docs/Assets)
+* [Extensions](https://xlog.emadelsaid.com/docs/extensions/)
+* [Writing Your Own Extension](https://xlog.emadelsaid.com/tutorials/Hello%20world%20extension/)
 
 # License
 
