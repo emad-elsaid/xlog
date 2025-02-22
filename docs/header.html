@@ -30,6 +30,15 @@
      canvas.style.left = '0';
      canvas.style.zIndex = '-1';
 
+     // Function to generate pastel colors
+     function getPastelColor() {
+         // Generate higher base values for lighter colors
+         const r = 180 + Math.floor(Math.random() * 75); // 180-255
+         const g = 180 + Math.floor(Math.random() * 75); // 180-255
+         const b = 180 + Math.floor(Math.random() * 75); // 180-255
+         return [r, g, b];
+     }
+
      // Blob class
      class Blob {
          constructor() {
@@ -38,7 +47,7 @@
              this.radius = 30 + Math.random() * 100;
              this.dx = (Math.random() - 0.5) * 2;
              this.dy = (Math.random() - 0.5) * 2;
-             this.gray = 100 + Math.floor(Math.random() * 100); // Random grey value
+             this.color = getPastelColor(); // Store color as RGB array
          }
 
          update() {
@@ -56,8 +65,10 @@
                  this.x, this.y, 0,
                  this.x, this.y, this.radius
              );
-             gradient.addColorStop(0, `rgba(${this.gray}, ${this.gray}, ${this.gray}, 0.6)`);
-             gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+             const [r, g, b] = this.color;
+             gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.8)`);
+             gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, 0.8)`);
+             gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
              ctx.fillStyle = gradient;
              ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
              ctx.fill();
@@ -83,7 +94,6 @@
              blob.update();
              blob.draw();
          });
-
 
          ctx.fillStyle = gradient;
          ctx.fillRect(0, 0, canvas.width, canvas.height);
