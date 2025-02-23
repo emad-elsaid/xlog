@@ -1,5 +1,5 @@
 ```hero
-image: /public/logo.svg
+image: /public/logo.png
 title: The world's most extensive framework for building digital gardens
 subtitle: Xlog is one of the most complete static site generator for digital gardens and knowledge bases. Written in Go makes it the fastest in its class. Xlog focuses on enriching markdown files and surfacing implicit links between pages.
 ```
