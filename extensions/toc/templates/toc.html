@@ -1,6 +1,6 @@
 {{ define "toc-item" }}
 <li>
-  <a href="#{{ printf "%s" .ID}}">{{ printf "%s" .Title}}</a>
+  <a href="#{{ printf "%s" .ID}}">{{ printf "%s" .Title | raw }}</a>
   {{ with .Items }}
   <ul class="menu-list">
     {{ range . }}
