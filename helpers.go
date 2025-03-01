@@ -28,6 +28,7 @@ var helpers = template.FuncMap{
 	"emoji":          Emoji,
 	"base":           path.Base,
 	"dir":            dir,
+	"raw":            raw,
 }
 
 var ErrHelperRegistered = errors.New("Helper already registered")
@@ -193,4 +194,9 @@ func dir(s string) string {
 	}
 
 	return v
+}
+
+// raw a helper to output input string as safe HTML
+func raw(i string) template.HTML {
+	return template.HTML(i)
 }
