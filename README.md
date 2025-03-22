@@ -13,7 +13,7 @@ XLog
 * [Documentation](https://xlog.emadelsaid.com/)
 * [Installation](https://xlog.emadelsaid.com/docs/Installation/)
 * [Usage](https://xlog.emadelsaid.com/docs/Usage/)
-* [Generating static site](https://xlog.emadelsaid.com/docs/Creating%20a%20site)
+* [Generating static site](https://xlog.emadelsaid.com/tutorials/Creating%20a%20site)
 * [Overriding Assets](https://xlog.emadelsaid.com/docs/Assets)
 * [Extensions](https://xlog.emadelsaid.com/docs/extensions/)
 * [Writing Your Own Extension](https://xlog.emadelsaid.com/tutorials/Hello%20world%20extension/)
