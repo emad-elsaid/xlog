@@ -8,16 +8,16 @@ import (
 type Configuration struct {
 	Source             string // path to markdown files directory
 	Build              string // path to write built files
-	Readonly           bool   // is xlog in readonly mode
 	Sitename           string // name of knowledgebase
 	Index              string // name of the index page markdown file
 	NotFoundPage       string // name of the index page markdown file
 	BindAddress        string // bind address for the server
-	ServeInsecure      bool   // should the server use https for cookie
 	Theme              string // empty switches between light/dark. setting it forces a theme
 	CodeStyle          string
 	CsrfCookieName     string
 	DisabledExtensions string
+	Readonly           bool // is xlog in readonly mode
+	ServeInsecure      bool // should the server use https for cookie
 }
 
 var Config Configuration
