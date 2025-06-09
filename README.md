@@ -21,7 +21,3 @@ XLog
 # License
 
 Xlog is released under [MIT license](LICENSE)
-
-# Logo
-
-[Cassette tape icons created by Good Ware - Flaticon](https://www.flaticon.com/free-icons/cassette-tape)
