@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/alecthomas/chroma/v2 v2.13.0
 	github.com/gorilla/csrf v1.7.3
-	github.com/yuin/goldmark v1.7.8
+	github.com/yuin/goldmark v1.7.12
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 )
 
@@ -23,7 +23,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/yuin/goldmark-meta v1.1.0
 	gitlab.com/greyxor/slogor v1.5.2
-	go.abhg.dev/goldmark/toc v0.10.0
+	go.abhg.dev/goldmark/toc v0.12.0
 	golang.org/x/sync v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -51,5 +51,5 @@ require (
 require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
-	github.com/yuin/goldmark-emoji v1.0.2
+	github.com/yuin/goldmark-emoji v1.0.6
 )
