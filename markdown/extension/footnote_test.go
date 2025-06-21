@@ -13,7 +13,7 @@ import (
 )
 
 func TestFootnote(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -21,7 +21,7 @@ func TestFootnote(t *testing.T) {
 			Footnote,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/footnote.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/footnote.txt", t, testutil.ParseCliCaseArg()...)
 }
 
 type footnoteID struct {
@@ -32,7 +32,7 @@ func (a *footnoteID) Transform(node *gast.Document, reader text.Reader, pc parse
 }
 
 func TestFootnoteOptions(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -49,7 +49,7 @@ func TestFootnoteOptions(t *testing.T) {
 	)
 
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
 			Description: "Footnote with options",
@@ -80,7 +80,7 @@ Another one.[^2]
 		t,
 	)
 
-	markdown = markdown.New(
+	md = markdown.New(
 		markdown.WithParserOptions(
 			parser.WithASTTransformers(
 				util.Prioritized(&footnoteID{}, 100),
@@ -108,7 +108,7 @@ Another one.[^2]
 	)
 
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          2,
 			Description: "Footnote with an id prefix function",

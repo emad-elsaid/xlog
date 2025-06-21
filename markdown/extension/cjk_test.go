@@ -9,13 +9,13 @@ import (
 )
 
 func TestEscapedSpace(t *testing.T) {
-	markdown := markdown.New(markdown.WithRendererOptions(
+	md := markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	))
 	no := 1
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Without spaces around an emphasis started with east asian punctuations, it is not interpreted as an emphasis(as defined in CommonMark spec)",
@@ -27,7 +27,7 @@ func TestEscapedSpace(t *testing.T) {
 
 	no = 2
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "With spaces around an emphasis started with east asian punctuations, it is interpreted as an emphasis(but remains unnecessary spaces)",
@@ -38,7 +38,7 @@ func TestEscapedSpace(t *testing.T) {
 	)
 
 	// Enables EscapedSpace
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	),
@@ -47,7 +47,7 @@ func TestEscapedSpace(t *testing.T) {
 
 	no = 3
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "With spaces around an emphasis started with east asian punctuations,it is interpreted as an emphasis",
@@ -60,7 +60,7 @@ func TestEscapedSpace(t *testing.T) {
 	// ' ' triggers Linkify extension inline parser.
 	// Escaped spaces should not trigger the inline parser.
 
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	),
@@ -72,7 +72,7 @@ func TestEscapedSpace(t *testing.T) {
 
 	no = 4
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Escaped space and linkfy extension",
@@ -84,13 +84,13 @@ func TestEscapedSpace(t *testing.T) {
 }
 
 func TestEastAsianLineBreaks(t *testing.T) {
-	markdown := markdown.New(markdown.WithRendererOptions(
+	md := markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	))
 	no := 1
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks are rendered as a newline, so some asian users will see it as an unnecessary space",
@@ -102,7 +102,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	// Enables EastAsianLineBreaks
 
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	),
@@ -111,7 +111,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 2
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between east asian wide characters are ignored",
@@ -123,7 +123,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 3
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between western characters are rendered as a newline",
@@ -135,7 +135,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 4
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between a western character and an east asian wide character are rendered as a newline",
@@ -147,7 +147,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 5
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between an east asian wide character and a western character are rendered as a newline",
@@ -158,7 +158,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 
 	// WithHardWraps take precedence over WithEastAsianLineBreaks
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithHardWraps(),
 		html.WithXHTML(),
 		html.WithUnsafe(),
@@ -167,7 +167,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 	no = 6
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "WithHardWraps take precedence over WithEastAsianLineBreaks",
@@ -178,7 +178,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 
 	// Tests with EastAsianLineBreaksStyleSimple
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	),
@@ -189,7 +189,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 	no = 7
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "WithEastAsianLineBreaks and linkfy extension",
@@ -200,7 +200,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 	no = 8
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between east asian wide characters or punctuations are ignored",
@@ -211,7 +211,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 	no = 9
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between an east asian wide character and a western character are ignored",
@@ -222,7 +222,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 
 	// Tests with EastAsianLineBreaksCSS3Draft
-	markdown = markdown.New(markdown.WithRendererOptions(
+	md = markdown.New(markdown.WithRendererOptions(
 		html.WithXHTML(),
 		html.WithUnsafe(),
 	),
@@ -232,7 +232,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 	)
 	no = 10
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between a western character and an east asian wide character are ignored",
@@ -244,7 +244,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 11
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between an east asian wide character and a western character are ignored",
@@ -256,7 +256,7 @@ func TestEastAsianLineBreaks(t *testing.T) {
 
 	no = 12
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          no,
 			Description: "Soft line breaks between an east asian wide character and a western character are ignored",

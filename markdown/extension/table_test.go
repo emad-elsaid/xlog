@@ -14,7 +14,7 @@ import (
 )
 
 func TestTable(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 			html.WithXHTML(),
@@ -23,11 +23,11 @@ func TestTable(t *testing.T) {
 			Table,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/table.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/table.txt", t, testutil.ParseCliCaseArg()...)
 }
 
 func TestTableWithAlignDefault(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -39,7 +39,7 @@ func TestTableWithAlignDefault(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
 			Description: "Cell with TableCellAlignDefault and XHTML should be rendered as an align attribute",
@@ -66,7 +66,7 @@ bar | baz
 		t,
 	)
 
-	markdown = markdown.New(
+	md = markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -77,7 +77,7 @@ bar | baz
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          2,
 			Description: "Cell with TableCellAlignDefault and HTML5 should be rendered as a style attribute",
@@ -106,7 +106,7 @@ bar | baz
 }
 
 func TestTableWithAlignAttribute(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -118,7 +118,7 @@ func TestTableWithAlignAttribute(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
 			Description: "Cell with TableCellAlignAttribute and XHTML should be rendered as an align attribute",
@@ -145,7 +145,7 @@ bar | baz
 		t,
 	)
 
-	markdown = markdown.New(
+	md = markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -156,7 +156,7 @@ bar | baz
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          2,
 			Description: "Cell with TableCellAlignAttribute and HTML5 should be rendered as an align attribute",
@@ -193,7 +193,7 @@ func (a *tableStyleTransformer) Transform(node *ast.Document, reader text.Reader
 }
 
 func TestTableWithAlignStyle(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -205,7 +205,7 @@ func TestTableWithAlignStyle(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
 			Description: "Cell with TableCellAlignStyle and XHTML should be rendered as a style attribute",
@@ -232,7 +232,7 @@ bar | baz
 		t,
 	)
 
-	markdown = markdown.New(
+	md = markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -243,7 +243,7 @@ bar | baz
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          2,
 			Description: "Cell with TableCellAlignStyle and HTML5 should be rendered as a style attribute",
@@ -270,10 +270,10 @@ bar | baz
 		t,
 	)
 
-	markdown = markdown.New(
+	md = markdown.New(
 		markdown.WithParserOptions(
 			parser.WithASTTransformers(
-				util.Prioritized(&tableStyleTransformer{}, 0),
+				util.Prioritized(&tableStyleTransformer{}, 100),
 			),
 		),
 		markdown.WithRendererOptions(
@@ -287,7 +287,7 @@ bar | baz
 	)
 
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          3,
 			Description: "Styled cell should not be broken the style by the alignments",
@@ -316,7 +316,7 @@ bar | baz
 }
 
 func TestTableWithAlignNone(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -328,10 +328,48 @@ func TestTableWithAlignNone(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
-			Description: "Cell with TableCellAlignStyle and XHTML should not be rendered",
+			Description: "Cell with TableCellAlignNone and XHTML should not be rendered",
+			Markdown: `
+| abc | defghi |
+:-: | -----------:
+bar | baz
+`,
+			Expected: `<table>
+<thead>
+<tr>
+<th>abc</th>
+<th>defghi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bar</td>
+<td>baz</td>
+</tr>
+</tbody>
+</table>`,
+		},
+		t,
+	)
+
+	md = markdown.New(
+		markdown.WithRendererOptions(
+			html.WithUnsafe(),
+		),
+		markdown.WithExtensions(
+			NewTable(
+				WithTableCellAlignMethod(TableCellAlignNone),
+			),
+		),
+	)
+	testutil.DoTestCase(
+		md,
+		testutil.MarkdownTestCase{
+			No:          2,
+			Description: "Cell with TableCellAlignNone and HTML5 should not be rendered",
 			Markdown: `
 | abc | defghi |
 :-: | -----------:
@@ -357,7 +395,7 @@ bar | baz
 }
 
 func TestTableFuzzedPanics(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -367,9 +405,35 @@ func TestTableFuzzedPanics(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:          1,
+			Description: "This should not panic",
+			Markdown:    "* 0\n-|\n\t0",
+			Expected: `<ul>
+<li>
+<table>
+<thead>
+<tr>
+<th>0</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>`,
+		},
+		t,
+	)
+
+	testutil.DoTestCase(
+		md,
+		testutil.MarkdownTestCase{
+			No:          2,
 			Description: "This should not panic",
 			Markdown:    "* 0\n-|\n\t0",
 			Expected: `<ul>
