@@ -2,16 +2,6 @@ module github.com/emad-elsaid/xlog
 
 go 1.24
 
-replace github.com/emad-elsaid/xlog/markdown => ./markdown
-
-replace github.com/emad-elsaid/xlog/markdown-highlighting/v2 => ./markdown-highlighting/v2
-
-replace github.com/emad-elsaid/xlog/markdown-meta => ./markdown-meta
-
-replace github.com/emad-elsaid/xlog/markdown-emoji => ./markdown-emoji
-
-replace github.com/emad-elsaid/xlog/markdown-toc => ./markdown-toc
-
 require (
 	github.com/alecthomas/chroma/v2 v2.13.0
 	github.com/gorilla/csrf v1.7.3
@@ -25,7 +15,6 @@ require (
 require (
 	github.com/emad-elsaid/memoize v0.0.0-20241119212339-a0b57858a452
 	github.com/emad-elsaid/types v0.0.4
-	github.com/emad-elsaid/xlog/markdown-highlighting/v2 v2.0.0-00010101000000-000000000000
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/rjeczalik/notify v0.9.3

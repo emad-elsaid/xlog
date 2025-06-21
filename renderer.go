@@ -6,7 +6,7 @@ import (
 	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/emad-elsaid/xlog/markdown"
 	emoji "github.com/emad-elsaid/xlog/markdown-emoji"
-	highlighting "github.com/emad-elsaid/xlog/markdown-highlighting/v2"
+	highlighting "github.com/emad-elsaid/xlog/markdown-highlighting"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/extension"
 	"github.com/emad-elsaid/xlog/markdown/parser"
