@@ -1,0 +1,28 @@
+# 2023/09/11 05:07:48.217912 [TestInspect_rapid] [rapid] draw levels: []int{5, 5, 3}
+# 2023/09/11 05:07:48.218098 [TestInspect_rapid] 
+# 	Error Trace:	inspect_test.go:263
+# 	            				engine.go:368
+# 	            				engine.go:377
+# 	            				engine.go:203
+# 	            				engine.go:118
+# 	            				inspect_test.go:241
+# 	Error:      	Not equal: 
+# 	            	expected: 5
+# 	            	actual  : 3
+# 	Test:       	TestInspect_rapid
+# 	Messages:   	number of items in TOC does not match number of headings in document for headings at levels: [5 5 3]
+# 
+v0.4.8#11432231941130037350
+0x1a2114dbb9dddc
+0xace527c94949d
+0x1971bf7670446a
+0x4
+0x8525d57e698fe
+0x124700ca6cd931
+0x15703ea2934efe
+0x4
+0x7ea3fc979834b
+0x17be3bd12902a7
+0x1a32d19baee9a6
+0x2
+0x19d8bf33c52c7

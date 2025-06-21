@@ -4,29 +4,27 @@ import (
 	"sync"
 
 	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
-	"github.com/alecthomas/chroma/v2/styles"
-	"github.com/yuin/goldmark"
-	emoji "github.com/yuin/goldmark-emoji"
-
-	highlighting "github.com/yuin/goldmark-highlighting/v2"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
+	"github.com/emad-elsaid/xlog/markdown"
+	emoji "github.com/emad-elsaid/xlog/markdown-emoji"
+	highlighting "github.com/emad-elsaid/xlog/markdown-highlighting/v2"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/extension"
+	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/renderer/html"
 )
 
 // The instance of markdown renderer. this is what takes the page content and
 // converts it to HTML. it defines what features to use from goldmark and what
 // options to turn on
-var MarkdownConverter = sync.OnceValue(func() goldmark.Markdown {
-	return goldmark.New(
-		goldmark.WithExtensions(
+var MarkdownConverter = sync.OnceValue(func() markdown.Markdown {
+	return markdown.New(
+		markdown.WithExtensions(
 			extension.GFM,
 			extension.DefinitionList,
 			extension.Footnote,
 			extension.Typographer,
 			highlighting.NewHighlighting(
-				highlighting.WithCustomStyle(styles.Get(Config.CodeStyle)),
+				highlighting.WithStyle(Config.CodeStyle),
 				highlighting.WithFormatOptions(
 					chroma_html.WithLineNumbers(true),
 				),
@@ -34,11 +32,11 @@ var MarkdownConverter = sync.OnceValue(func() goldmark.Markdown {
 			emoji.Emoji,
 		),
 
-		goldmark.WithParserOptions(
+		markdown.WithParserOptions(
 			parser.WithAutoHeadingID(),
 		),
 
-		goldmark.WithRendererOptions(
+		markdown.WithRendererOptions(
 			html.WithHardWraps(),
 			html.WithUnsafe(),
 		),

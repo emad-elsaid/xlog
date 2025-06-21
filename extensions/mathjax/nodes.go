@@ -1,8 +1,8 @@
 package mathjax
 
 import (
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 type InlineMath struct {

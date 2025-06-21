@@ -2,8 +2,8 @@ package todo
 
 import (
 	. "github.com/emad-elsaid/xlog"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 func init() {

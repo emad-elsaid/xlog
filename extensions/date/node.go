@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/yuin/goldmark/ast"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
 var KindDate = ast.NewNodeKind("Date")

@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yuin/goldmark/ast"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 
 	"github.com/emad-elsaid/types"
 	"github.com/emad-elsaid/xlog"

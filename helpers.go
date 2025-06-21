@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	emojiAst "github.com/yuin/goldmark-emoji/ast"
-	"github.com/yuin/goldmark/ast"
-	gast "github.com/yuin/goldmark/ast"
+	emojiAst "github.com/emad-elsaid/xlog/markdown-emoji/ast"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	gast "github.com/emad-elsaid/xlog/markdown/ast"
 )
 
 var helpers = template.FuncMap{

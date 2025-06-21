@@ -2,7 +2,7 @@ package frontmatter
 
 import (
 	"github.com/emad-elsaid/xlog"
-	meta "github.com/yuin/goldmark-meta"
+	meta "github.com/emad-elsaid/xlog/markdown-meta"
 )
 
 func init() {

@@ -5,7 +5,7 @@ import (
 	"html/template"
 
 	"github.com/emad-elsaid/xlog"
-	gtoc "go.abhg.dev/goldmark/toc"
+	gtoc "github.com/emad-elsaid/xlog/markdown-toc"
 )
 
 //go:embed templates

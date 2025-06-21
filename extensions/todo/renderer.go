@@ -5,10 +5,10 @@ import (
 	"html/template"
 
 	. "github.com/emad-elsaid/xlog"
-	"github.com/yuin/goldmark/ast"
-	east "github.com/yuin/goldmark/extension/ast"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	east "github.com/emad-elsaid/xlog/markdown/extension/ast"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 type TaskCheckBoxHTMLRenderer struct{}

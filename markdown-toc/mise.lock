@@ -1,0 +1,18 @@
+[tools."aqua:golangci/golangci-lint"]
+version = "2.1.2"
+backend = "aqua:golangci/golangci-lint"
+
+[tools."aqua:golangci/golangci-lint".checksums]
+"golangci-lint-2.1.2-darwin-arm64.tar.gz" = "sha256:1cff60651d7c95a4248fa72f0dd020bffed1d2dc4dd8c2c77aee89a0731fa615"
+
+[tools.go]
+version = "1.24.1"
+backend = "core:go"
+
+[tools."ubi:abhinav/doc2go"]
+version = "0.8.1"
+backend = "ubi:abhinav/doc2go"
+
+[tools."ubi:miniscruff/changie"]
+version = "1.21.1"
+backend = "ubi:miniscruff/changie"

@@ -9,7 +9,7 @@ import (
 
 	. "github.com/emad-elsaid/xlog"
 
-	"github.com/yuin/goldmark/ast"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
 var domain string

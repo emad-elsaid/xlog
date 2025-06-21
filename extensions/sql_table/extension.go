@@ -8,7 +8,7 @@ import (
 
 	"github.com/emad-elsaid/types"
 	"github.com/emad-elsaid/xlog"
-	east "github.com/yuin/goldmark/extension/ast"
+	east "github.com/emad-elsaid/xlog/markdown/extension/ast"
 )
 
 //go:embed js

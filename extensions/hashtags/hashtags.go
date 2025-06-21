@@ -14,11 +14,11 @@ import (
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/text"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
+	"github.com/emad-elsaid/xlog/markdown/text"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 //go:embed templates

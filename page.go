@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/text"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
 // Markdown is used instead of string to make sure it's clear the string is markdown string
