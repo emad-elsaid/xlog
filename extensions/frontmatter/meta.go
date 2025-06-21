@@ -2,7 +2,7 @@
 //
 // This extension parses YAML metadata blocks and store metadata to a
 // parser.Context.
-package meta
+package frontmatter
 
 import (
 	"bytes"

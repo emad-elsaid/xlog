@@ -2,7 +2,6 @@ package frontmatter
 
 import (
 	"github.com/emad-elsaid/xlog"
-	meta "github.com/emad-elsaid/xlog/markdown-meta"
 )
 
 func init() {
@@ -13,8 +12,8 @@ type Frontmatter struct{}
 
 func (Frontmatter) Name() string { return "frontmatter" }
 func (Frontmatter) Init() {
-	m := meta.New(
-		meta.WithStoresInDocument(),
+	m := New(
+		WithStoresInDocument(),
 	)
 
 	m.Extend(xlog.MarkdownConverter())
