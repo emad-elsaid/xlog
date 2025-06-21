@@ -1,15 +1,14 @@
-package toc_test
+package toc
 
 import (
 	"bytes"
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/parser"
-	"github.com/emad-elsaid/xlog/markdown-toc"
-	"gopkg.in/yaml.v3"
+	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v2"
 )
 
 func TestIntegration(t *testing.T) {
@@ -39,7 +38,7 @@ func TestIntegration(t *testing.T) {
 			t.Parallel()
 
 			md := markdown.New(
-				markdown.WithExtensions(&toc.Extender{
+				markdown.WithExtensions(&Extender{
 					Title:      tt.Title,
 					TitleDepth: tt.TitleDepth,
 					MinDepth:   tt.MinDepth,

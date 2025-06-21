@@ -1,4 +1,4 @@
-package toc_test
+package toc
 
 import (
 	"os"
@@ -6,7 +6,6 @@ import (
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/text"
-	"github.com/emad-elsaid/xlog/markdown-toc"
 )
 
 func Example() {
@@ -38,7 +37,7 @@ Bye
 
 	// Inspect the parsed Markdown document to find headers and build a
 	// tree for the table of contents.
-	tree, err := toc.Inspect(doc, src)
+	tree, err := Inspect(doc, src)
 	if err != nil {
 		panic(err)
 	}
@@ -49,7 +48,7 @@ Bye
 	}
 
 	// Render the tree as-is into a Markdown list.
-	treeList := toc.RenderList(tree)
+	treeList := RenderList(tree)
 
 	// Render the Markdown list into HTML.
 	if err := markdown.Renderer().Render(os.Stdout, src, treeList); err != nil {

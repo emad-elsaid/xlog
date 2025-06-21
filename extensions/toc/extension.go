@@ -5,7 +5,6 @@ import (
 	"html/template"
 
 	"github.com/emad-elsaid/xlog"
-	gtoc "github.com/emad-elsaid/xlog/markdown-toc"
 )
 
 //go:embed templates
@@ -19,11 +18,11 @@ type Extension struct{}
 
 func (Extension) Name() string { return "toc" }
 func (Extension) Init() {
-	xlog.RegisterWidget(xlog.WidgetBeforeView, 0, TOC)
+	xlog.RegisterWidget(xlog.WidgetBeforeView, 0, tocWidget)
 	xlog.RegisterTemplate(templates, "templates")
 }
 
-func TOC(p xlog.Page) template.HTML {
+func tocWidget(p xlog.Page) template.HTML {
 	if p == nil {
 		return ""
 	}
@@ -33,7 +32,7 @@ func TOC(p xlog.Page) template.HTML {
 		return ""
 	}
 
-	tree, err := gtoc.Inspect(doc, src, gtoc.MaxDepth(1))
+	tree, err := Inspect(doc, src, MaxDepth(1))
 	if err != nil {
 		return ""
 	}
