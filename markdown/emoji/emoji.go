@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/emad-elsaid/xlog/markdown"
-	east "github.com/emad-elsaid/xlog/markdown-emoji/ast"
-	"github.com/emad-elsaid/xlog/markdown-emoji/definition"
 	"github.com/emad-elsaid/xlog/markdown/ast"
+	east "github.com/emad-elsaid/xlog/markdown/emoji/ast"
+	"github.com/emad-elsaid/xlog/markdown/emoji/definition"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
@@ -209,13 +209,13 @@ func WithRendererFunc(f RendererFunc) Option {
 	return &withRendererFunc{f}
 }
 
-type emojiParser struct {
+type giantEmojiParser struct {
 	ParserConfig
 }
 
 // NewParser returns a new parser.InlineParser that can parse emoji expressions.
 func NewParser(opts ...ParserOption) parser.InlineParser {
-	p := &emojiParser{
+	p := &giantEmojiParser{
 		ParserConfig: ParserConfig{
 			Emojis: definition.Github(),
 		},
@@ -226,11 +226,11 @@ func NewParser(opts ...ParserOption) parser.InlineParser {
 	return p
 }
 
-func (s *emojiParser) Trigger() []byte {
+func (s *giantEmojiParser) Trigger() []byte {
 	return []byte{':'}
 }
 
-func (s *emojiParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
+func (s *giantEmojiParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	line, _ := block.PeekLine()
 	if len(line) < 1 {
 		return nil

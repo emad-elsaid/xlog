@@ -5,17 +5,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emad-elsaid/xlog/markdown"
-	east "github.com/emad-elsaid/xlog/markdown-emoji/ast"
-	"github.com/emad-elsaid/xlog/markdown-emoji/definition"
+	md "github.com/emad-elsaid/xlog/markdown"
+	east "github.com/emad-elsaid/xlog/markdown/emoji/ast"
+	"github.com/emad-elsaid/xlog/markdown/emoji/definition"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
 	"github.com/emad-elsaid/xlog/markdown/testutil"
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 func TestOptions(t *testing.T) {
-	markdown := markdown.New(
-		markdown.WithExtensions(
+	markdown := md.New(
+		md.WithExtensions(
 			Emoji,
 		),
 	)
@@ -33,8 +33,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithRenderingMethod(Twemoji),
 			),
@@ -53,13 +53,13 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithRenderingMethod(Twemoji),
 			),
 		),
-		markdown.WithRendererOptions(
+		md.WithRendererOptions(
 			html.WithXHTML(),
 		),
 	)
@@ -76,8 +76,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithRenderingMethod(Twemoji),
 				WithTwemojiTemplate(`<img class="myclass" draggable="false" alt="%[1]s" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/36x36/%[2]s.png"%[3]s>`),
@@ -97,8 +97,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(definition.NewEmojis(definition.NewEmoji(
 					"Standing man",
@@ -121,8 +121,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(
 					definition.Github(
@@ -151,8 +151,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(
 					definition.NewEmojis(
@@ -180,8 +180,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithRenderingMethod(Unicode),
 			),
@@ -200,8 +200,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(
 					definition.NewEmojis(
@@ -225,8 +225,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(
 					definition.NewEmojis(
@@ -250,8 +250,8 @@ func TestOptions(t *testing.T) {
 		`),
 	}, t)
 
-	markdown = markdown.New(
-		markdown.WithExtensions(
+	markdown = md.New(
+		md.WithExtensions(
 			New(
 				WithEmojis(
 					definition.NewEmojis(

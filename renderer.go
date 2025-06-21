@@ -3,11 +3,9 @@ package xlog
 import (
 	"sync"
 
-	chroma_html "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/emad-elsaid/xlog/markdown"
-	emoji "github.com/emad-elsaid/xlog/markdown-emoji"
-	highlighting "github.com/emad-elsaid/xlog/markdown-highlighting"
 	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/emoji"
 	"github.com/emad-elsaid/xlog/markdown/extension"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
@@ -23,12 +21,6 @@ var MarkdownConverter = sync.OnceValue(func() markdown.Markdown {
 			extension.DefinitionList,
 			extension.Footnote,
 			extension.Typographer,
-			highlighting.NewHighlighting(
-				highlighting.WithStyle(Config.CodeStyle),
-				highlighting.WithFormatOptions(
-					chroma_html.WithLineNumbers(true),
-				),
-			),
 			emoji.Emoji,
 		),
 

@@ -4,11 +4,11 @@ package ast
 import (
 	"fmt"
 
-	"github.com/emad-elsaid/xlog/markdown-emoji/definition"
 	gast "github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/emoji/definition"
 )
 
-// Emoji represents an inline emoji.
+// A Emoji struct represents a emoji of GitHub emoji.
 type Emoji struct {
 	gast.BaseInline
 
