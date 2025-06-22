@@ -865,7 +865,7 @@ type BufWriter interface {
 // A PrioritizedValue struct holds pair of an arbitrary value and a priority.
 type PrioritizedValue struct {
 	// Value is an arbitrary value that you want to prioritize.
-	Value interface{}
+	Value any
 	// Priority is a priority of the value.
 	Priority int
 }
@@ -881,7 +881,7 @@ func (s PrioritizedSlice) Sort() {
 }
 
 // Remove removes the given value from this slice.
-func (s PrioritizedSlice) Remove(v interface{}) PrioritizedSlice {
+func (s PrioritizedSlice) Remove(v any) PrioritizedSlice {
 	i := 0
 	found := false
 	for ; i < len(s); i++ {
@@ -897,7 +897,7 @@ func (s PrioritizedSlice) Remove(v interface{}) PrioritizedSlice {
 }
 
 // Prioritized returns a new PrioritizedValue.
-func Prioritized(v interface{}, priority int) PrioritizedValue {
+func Prioritized(v any, priority int) PrioritizedValue {
 	return PrioritizedValue{v, priority}
 }
 

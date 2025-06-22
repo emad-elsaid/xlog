@@ -28,11 +28,11 @@ import (
 type ImmutableAttributes interface {
 	// Get returns (value, true) if an attribute associated with given
 	// name exists, otherwise (nil, false)
-	Get(name []byte) (interface{}, bool)
+	Get(name []byte) (any, bool)
 
 	// GetString returns (value, true) if an attribute associated with given
 	// name exists, otherwise (nil, false)
-	GetString(name string) (interface{}, bool)
+	GetString(name string) (any, bool)
 
 	// All returns all attributes.
 	All() []ast.Attribute
@@ -42,11 +42,11 @@ type immutableAttributes struct {
 	n ast.Node
 }
 
-func (a *immutableAttributes) Get(name []byte) (interface{}, bool) {
+func (a *immutableAttributes) Get(name []byte) (any, bool) {
 	return a.n.Attribute(name)
 }
 
-func (a *immutableAttributes) GetString(name string) (interface{}, bool) {
+func (a *immutableAttributes) GetString(name string) (any, bool) {
 	return a.n.AttributeString(name)
 }
 
@@ -149,7 +149,7 @@ func NewConfig() Config {
 }
 
 // SetOption implements renderer.SetOptioner.
-func (c *Config) SetOption(name renderer.OptionName, value interface{}) {
+func (c *Config) SetOption(name renderer.OptionName, value any) {
 	switch name {
 	case optStyle:
 		c.Style = value.(string)
@@ -429,7 +429,7 @@ func (r *HTMLRenderer) renderFencedCodeBlock(w util.BufWriter, source []byte, no
 			}
 		}
 		if linesAttr, hasLinesAttr := attrs.Get(highlightLinesAttrName); hasLinesAttr {
-			if lines, ok := linesAttr.([]interface{}); ok {
+			if lines, ok := linesAttr.([]any); ok {
 				var hlRanges [][2]int
 				for _, l := range lines {
 					if ln, ok := l.(float64); ok {

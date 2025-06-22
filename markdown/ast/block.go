@@ -48,7 +48,7 @@ func (b *BaseBlock) SetLines(v *textm.Segments) {
 type Document struct {
 	BaseBlock
 
-	meta map[string]interface{}
+	meta map[string]any
 }
 
 // KindDocument is a NodeKind of the Document node.
@@ -75,17 +75,17 @@ func (n *Document) OwnerDocument() *Document {
 }
 
 // Meta returns metadata of this document.
-func (n *Document) Meta() map[string]interface{} {
+func (n *Document) Meta() map[string]any {
 	if n.meta == nil {
-		n.meta = map[string]interface{}{}
+		n.meta = map[string]any{}
 	}
 	return n.meta
 }
 
 // SetMeta sets given metadata to this document.
-func (n *Document) SetMeta(meta map[string]interface{}) {
+func (n *Document) SetMeta(meta map[string]any) {
 	if n.meta == nil {
-		n.meta = map[string]interface{}{}
+		n.meta = map[string]any{}
 	}
 	for k, v := range meta {
 		n.meta[k] = v
@@ -93,9 +93,9 @@ func (n *Document) SetMeta(meta map[string]interface{}) {
 }
 
 // AddMeta adds given metadata to this document.
-func (n *Document) AddMeta(key string, value interface{}) {
+func (n *Document) AddMeta(key string, value any) {
 	if n.meta == nil {
-		n.meta = map[string]interface{}{}
+		n.meta = map[string]any{}
 	}
 	n.meta[key] = value
 }

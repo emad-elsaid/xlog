@@ -18,7 +18,7 @@ const (
 
 var skipListParserKey = NewContextKey()
 var emptyListItemWithBlankLines = NewContextKey()
-var listItemFlagValue interface{} = true
+var listItemFlagValue any = true
 
 // Same as
 // `^(([ ]*)([\-\*\+]))(\s+.*)?\n?$`.FindSubmatchIndex or

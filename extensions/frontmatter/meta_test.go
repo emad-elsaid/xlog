@@ -46,7 +46,7 @@ Tags:
 	if buf.String() != "<h1>Hello goldmark-meta</h1>\n" {
 		t.Errorf("should render '<h1>Hello goldmark-meta</h1>', but '%s'", buf.String())
 	}
-	tags, ok := metaData["Tags"].([]interface{})
+	tags, ok := metaData["Tags"].([]any)
 	if !ok {
 		t.Error("Tags not found in meta data or is not a slice")
 	}
@@ -232,7 +232,7 @@ Tags:
 	if s != "goldmark-meta" {
 		t.Errorf("Title must be %s, but got %v", "goldmark-meta", s)
 	}
-	tags, ok := metaData["Tags"].([]interface{})
+	tags, ok := metaData["Tags"].([]any)
 	if !ok {
 		t.Error("Tags not found in meta data or is not a slice")
 	}

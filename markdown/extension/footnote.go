@@ -272,9 +272,9 @@ func (a *footnoteASTTransformer) Transform(node *gast.Document, reader text.Read
 // FootnoteConfig holds configuration values for the footnote extension.
 //
 // Link* and Backlink* configurations have some variables:
-// Occurrences of “^^” in the string will be replaced by the
+// Occurrences of "^^" in the string will be replaced by the
 // corresponding footnote number in the HTML output.
-// Occurrences of “%%” will be replaced by a number for the
+// Occurrences of "%%" will be replaced by a number for the
 // reference (footnotes can have multiple references).
 type FootnoteConfig struct {
 	html.Config
@@ -321,7 +321,7 @@ func NewFootnoteConfig() FootnoteConfig {
 }
 
 // SetOption implements renderer.SetOptioner.
-func (c *FootnoteConfig) SetOption(name renderer.OptionName, value interface{}) {
+func (c *FootnoteConfig) SetOption(name renderer.OptionName, value any) {
 	switch name {
 	case optFootnoteIDPrefixFunction:
 		c.IDPrefixFunction = value.(func(gast.Node) []byte)

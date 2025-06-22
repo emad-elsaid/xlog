@@ -30,7 +30,7 @@ type ParserConfig struct {
 const optEmojis parser.OptionName = "EmojiEmojis"
 
 // SetOption implements parser.SetOptioner
-func (c *ParserConfig) SetOption(name parser.OptionName, value interface{}) {
+func (c *ParserConfig) SetOption(name parser.OptionName, value any) {
 	switch name {
 	case optEmojis:
 		c.Emojis = value.(definition.Emojis)
@@ -112,7 +112,7 @@ type RendererConfig struct {
 const DefaultTwemojiTemplate = `<img class="emoji" draggable="false" alt="%[1]s" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/%[2]s.png"%[3]s>`
 
 // SetOption implements renderer.SetOptioner.
-func (c *RendererConfig) SetOption(name renderer.OptionName, value interface{}) {
+func (c *RendererConfig) SetOption(name renderer.OptionName, value any) {
 	switch name {
 	case optRenderingMethod:
 		c.Method = value.(RenderingMethod)
