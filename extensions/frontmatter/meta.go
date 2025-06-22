@@ -1,4 +1,4 @@
-// package meta is a extension for the goldmark(http://github.com/emad-elsaid/xlog/markdown).
+// package meta is a extension for the goldmark that's vendored in xlog.
 //
 // This extension parses YAML metadata blocks and store metadata to a
 // parser.Context.

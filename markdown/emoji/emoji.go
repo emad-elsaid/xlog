@@ -1,4 +1,4 @@
-// package emoji is a extension for the goldmark(http://github.com/emad-elsaid/xlog/markdown).
+// package emoji is a extension for the goldmark
 package emoji
 
 import (

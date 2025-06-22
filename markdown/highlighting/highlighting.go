@@ -1,4 +1,4 @@
-// package highlighting is a extension for the goldmark(http://github.com/emad-elsaid/xlog/markdown).
+// package highlighting is a extension for the goldmark
 //
 // This extension adds syntax-highlighting to the fenced code blocks using
 // chroma(https://github.com/alecthomas/chroma).
