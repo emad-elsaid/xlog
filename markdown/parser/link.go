@@ -115,8 +115,8 @@ func NewLinkParser() InlineParser {
 	return defaultLinkParser
 }
 
-func (s *linkParser) Trigger() []byte {
-	return []byte{'!', '[', ']'}
+func (s *linkParser) Trigger() []rune {
+	return []rune{'!', '[', ']'}
 }
 
 var linkBottom = NewContextKey()

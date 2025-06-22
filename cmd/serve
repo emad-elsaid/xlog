@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+go run ./cmd/xlog \
+--sitename "Xlog" \
+--theme "light" \
+--notfoundpage "docs/404" \
+--custom.head=docs/header.html \
+--sitemap.domain=xlog.emadelsaid.com \
+--rss.domain xlog.emadelsaid.com \
+--activitypub.domain=xlog.emadelsaid.com \
+--activitypub.username=app \
+--activitypub.summary="Xlog is a static site generator for digital gardening written in Go. It serves markdown files as HTML and allows editing files online. It focuses on enriching markdown files and surfacing implicit links between pages." \
+--og.domain xlog.emadelsaid.com \
+--github.url https://github.com/emad-elsaid/xlog/edit/master

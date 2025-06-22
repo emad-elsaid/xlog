@@ -74,8 +74,8 @@ func NewATXHeadingParser(opts ...HeadingOption) BlockParser {
 	return p
 }
 
-func (b *atxHeadingParser) Trigger() []byte {
-	return []byte{'#'}
+func (b *atxHeadingParser) Trigger() []rune {
+	return []rune{'#'}
 }
 
 func (b *atxHeadingParser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {

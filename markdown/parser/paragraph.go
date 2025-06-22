@@ -17,7 +17,7 @@ func NewParagraphParser() BlockParser {
 	return defaultParagraphParser
 }
 
-func (b *paragraphParser) Trigger() []byte {
+func (b *paragraphParser) Trigger() []rune {
 	return nil
 }
 

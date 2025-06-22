@@ -32,8 +32,8 @@ func NewEmphasisParser() InlineParser {
 	return defaultEmphasisParser
 }
 
-func (s *emphasisParser) Trigger() []byte {
-	return []byte{'*', '_'}
+func (s *emphasisParser) Trigger() []rune {
+	return []rune{'*', '_'}
 }
 
 func (s *emphasisParser) Parse(parent ast.Node, block text.Reader, pc Context) ast.Node {

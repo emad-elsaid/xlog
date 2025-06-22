@@ -12,9 +12,9 @@ import (
 
 type pageLinkParser struct{}
 
-func (*pageLinkParser) Trigger() []byte {
+func (s *pageLinkParser) Trigger() []rune {
 	// ' ' indicates any white spaces and a line head
-	return []byte{' ', '*', '_', '~', '('}
+	return []rune{' ', '*', '_', '~', '('}
 }
 
 func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {

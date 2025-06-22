@@ -17,8 +17,8 @@ func NewAutoLinkParser() InlineParser {
 	return defaultAutoLinkParser
 }
 
-func (s *autoLinkParser) Trigger() []byte {
-	return []byte{'<'}
+func (s *autoLinkParser) Trigger() []rune {
+	return []rune{'<'}
 }
 
 func (s *autoLinkParser) Parse(parent ast.Node, block text.Reader, pc Context) ast.Node {

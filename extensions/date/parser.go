@@ -11,8 +11,8 @@ import (
 
 type dateParser struct{}
 
-func (s *dateParser) Trigger() []byte {
-	return []byte{' '}
+func (s *dateParser) Trigger() []rune {
+	return []rune{' '}
 }
 
 var (

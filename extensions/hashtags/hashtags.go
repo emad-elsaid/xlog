@@ -235,8 +235,8 @@ func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(KindHashTag, renderHashtag)
 }
 
-func (h *HashTag) Trigger() []byte {
-	return []byte{'#'}
+func (h *HashTag) Trigger() []rune {
+	return []rune{'#'}
 }
 
 func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {

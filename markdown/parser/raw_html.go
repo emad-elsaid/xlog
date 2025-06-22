@@ -20,8 +20,8 @@ func NewRawHTMLParser() InlineParser {
 	return defaultRawHTMLParser
 }
 
-func (s *rawHTMLParser) Trigger() []byte {
-	return []byte{'<'}
+func (s *rawHTMLParser) Trigger() []rune {
+	return []rune{'<'}
 }
 
 func (s *rawHTMLParser) Parse(parent ast.Node, block text.Reader, pc Context) ast.Node {

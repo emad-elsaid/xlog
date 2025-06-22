@@ -18,7 +18,7 @@ func NewCodeBlockParser() BlockParser {
 	return defaultCodeBlockParser
 }
 
-func (b *codeBlockParser) Trigger() []byte {
+func (b *codeBlockParser) Trigger() []rune {
 	return nil
 }
 

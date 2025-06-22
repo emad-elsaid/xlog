@@ -16,8 +16,8 @@ func NewCodeSpanParser() InlineParser {
 	return defaultCodeSpanParser
 }
 
-func (s *codeSpanParser) Trigger() []byte {
-	return []byte{'`'}
+func (s *codeSpanParser) Trigger() []rune {
+	return []rune{'`'}
 }
 
 func (s *codeSpanParser) Parse(parent ast.Node, block text.Reader, pc Context) ast.Node {

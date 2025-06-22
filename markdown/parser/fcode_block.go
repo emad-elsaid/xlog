@@ -28,8 +28,8 @@ type fenceData struct {
 
 var fencedCodeBlockInfoKey = NewContextKey()
 
-func (b *fencedCodeBlockParser) Trigger() []byte {
-	return []byte{'~', '`'}
+func (b *fencedCodeBlockParser) Trigger() []rune {
+	return []rune{'`', '~'}
 }
 
 func (b *fencedCodeBlockParser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {
@@ -65,7 +65,6 @@ func (b *fencedCodeBlockParser) Open(parent ast.Node, reader text.Reader, pc Con
 	node := ast.NewFencedCodeBlock(info)
 	pc.Set(fencedCodeBlockInfoKey, &fenceData{fenceChar, findent, oFenceLength, node})
 	return node, NoChildren
-
 }
 
 func (b *fencedCodeBlockParser) Continue(node ast.Node, reader text.Reader, pc Context) State {

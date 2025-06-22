@@ -106,8 +106,8 @@ func NewHTMLBlockParser() BlockParser {
 	return defaultHTMLBlockParser
 }
 
-func (b *htmlBlockParser) Trigger() []byte {
-	return []byte{'<'}
+func (b *htmlBlockParser) Trigger() []rune {
+	return []rune{'<'}
 }
 
 func (b *htmlBlockParser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {

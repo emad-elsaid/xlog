@@ -27,8 +27,8 @@ func NewTaskCheckBoxParser() parser.InlineParser {
 	return defaultTaskCheckBoxParser
 }
 
-func (s *taskCheckBoxParser) Trigger() []byte {
-	return []byte{'['}
+func (s *taskCheckBoxParser) Trigger() []rune {
+	return []rune{'['}
 }
 
 func (s *taskCheckBoxParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {

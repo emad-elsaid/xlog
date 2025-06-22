@@ -39,8 +39,8 @@ func NewStrikethroughParser() parser.InlineParser {
 	return defaultStrikethroughParser
 }
 
-func (s *strikethroughParser) Trigger() []byte {
-	return []byte{'~'}
+func (s *strikethroughParser) Trigger() []rune {
+	return []rune{'~'}
 }
 
 func (s *strikethroughParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {
