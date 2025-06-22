@@ -3,9 +3,9 @@ package shortcode
 import (
 	"strings"
 
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
 const trigger = '/'

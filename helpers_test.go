@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"github.com/yuin/goldmark/text"
+	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
 func TestBanner(t *testing.T) {

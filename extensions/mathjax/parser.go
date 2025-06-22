@@ -4,10 +4,10 @@ package mathjax
 // https://github.com/litao91/goldmark-mathjax
 
 import (
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/text"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/text"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 type inlineMathParser struct{}

@@ -1,0 +1,313 @@
+- desc: no headers
+  give: |
+    No headers.
+  want: |
+    <p>No headers.</p>
+
+- desc: single
+  give: |
+    # Hello
+
+    World
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#hello">Hello</a></li>
+    </ul>
+    <h1 id="hello">Hello</h1>
+    <p>World</p>
+
+- desc: multiple levels
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#foo">Foo</a><ul>
+    <li>
+    <a href="#bar">Bar</a></li>
+    </ul>
+    </li>
+    <li>
+    <a href="#baz">Baz</a><ul>
+    <li>
+    <ul>
+    <li>
+    <a href="#qux">Qux</a></li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>
+
+- desc: with slash
+  give: |
+    # Foo\-Bar
+
+    ## Bar\-Baz
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#foo-bar">Foo-Bar</a><ul>
+    <li>
+    <a href="#bar-baz">Bar-Baz</a></li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo-bar">Foo-Bar</h1>
+    <h2 id="bar-baz">Bar-Baz</h2>
+
+- desc: escaped slash
+  give: |
+    # Foo\\\-Bar
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#foo-bar">Foo\-Bar</a></li>
+    </ul>
+    <h1 id="foo-bar">Foo\-Bar</h1>
+
+- desc: formatted
+  give: |
+    # **Formatted** `header`
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#formatted-header">Formatted header</a></li>
+    </ul>
+    <h1 id="formatted-header"><strong>Formatted</strong> <code>header</code></h1>
+
+- desc: title change
+  title: Contents
+  give: |
+    # Hello
+
+    World
+  want: |
+    <h1 id="contents">Contents</h1>
+    <ul>
+    <li>
+    <a href="#hello">Hello</a></li>
+    </ul>
+    <h1 id="hello">Hello</h1>
+    <p>World</p>
+
+- desc: maxDepth
+  maxDepth: 1
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#foo">Foo</a></li>
+    <li>
+    <a href="#baz">Baz</a></li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>
+- desc: minDepth
+  minDepth: 3
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <ul>
+    <li>
+    <ul>
+    <li>
+    <a href="#qux">Qux</a></li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>
+
+- desc: list id
+  listID: my-toc
+  give: |
+    # Hello
+
+    # World
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul id="my-toc">
+    <li>
+    <a href="#hello">Hello</a></li>
+    <li>
+    <a href="#world">World</a></li>
+    </ul>
+    <h1 id="hello">Hello</h1>
+    <h1 id="world">World</h1>
+
+# From https://github.com/abhinav/goldmark-toc/issues/42
+- desc: compact single
+  compact: true
+  give: |
+    ### h3
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#h3">h3</a></li>
+    </ul>
+    <h3 id="h3">h3</h3>
+
+- desc: compact multiple
+  compact: true
+  give: |
+    # h1
+    ### h3
+  want: |
+    <h1 id="table-of-contents">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#h1">h1</a><ul>
+    <li>
+    <a href="#h3">h3</a></li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="h1">h1</h1>
+    <h3 id="h3">h3</h3>
+
+- desc: custom title ID
+  titleID: toc-title
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h1 id="toc-title">Table of Contents</h1>
+    <ul>
+    <li>
+    <a href="#foo">Foo</a><ul>
+    <li>
+    <a href="#bar">Bar</a></li>
+    </ul>
+    </li>
+    <li>
+    <a href="#baz">Baz</a><ul>
+    <li>
+    <ul>
+    <li>
+    <a href="#qux">Qux</a></li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>
+
+# From: https://github.com/abhinav/goldmark-toc/issues/61
+- desc: custom title depth of 2
+  titleDepth: 2
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h2 id="table-of-contents">Table of Contents</h2>
+    <ul>
+    <li>
+    <a href="#foo">Foo</a><ul>
+    <li>
+    <a href="#bar">Bar</a></li>
+    </ul>
+    </li>
+    <li>
+    <a href="#baz">Baz</a><ul>
+    <li>
+    <ul>
+    <li>
+    <a href="#qux">Qux</a></li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>
+
+- desc: title depth > 6
+  titleDepth: 7
+  give: |
+    # Foo
+
+    ## Bar
+
+    # Baz
+
+    ### Qux
+  want: |
+    <h6 id="table-of-contents">Table of Contents</h6>
+    <ul>
+    <li>
+    <a href="#foo">Foo</a><ul>
+    <li>
+    <a href="#bar">Bar</a></li>
+    </ul>
+    </li>
+    <li>
+    <a href="#baz">Baz</a><ul>
+    <li>
+    <ul>
+    <li>
+    <a href="#qux">Qux</a></li>
+    </ul>
+    </li>
+    </ul>
+    </li>
+    </ul>
+    <h1 id="foo">Foo</h1>
+    <h2 id="bar">Bar</h2>
+    <h1 id="baz">Baz</h1>
+    <h3 id="qux">Qux</h3>

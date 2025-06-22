@@ -4,9 +4,9 @@ import (
 	"bytes"
 
 	. "github.com/emad-elsaid/xlog"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
+	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
+	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 func init() {

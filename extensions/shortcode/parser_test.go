@@ -7,6 +7,7 @@ import (
 
 	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
+	"github.com/emad-elsaid/xlog/markdown"
 )
 
 func TestShortCode(t *testing.T) {
@@ -54,13 +55,19 @@ func TestShortCode(t *testing.T) {
 		},
 	}
 
+	md := markdown.New(
+		markdown.WithExtensions(
+			&shortcode.ShortCodeEx{},
+		),
+	)
+
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
 			handler := func(xlog.Markdown) template.HTML { return template.HTML(tc.handlerOutput) }
 			shortcode.RegisterShortCode("test", shortcode.ShortCode{Render: handler, Default: ""})
 
 			output := bytes.NewBufferString("")
-			xlog.MarkdownConverter().Convert([]byte(tc.input), output)
+			md.Convert([]byte(tc.input), output)
 			if output.String() != tc.output {
 				t.Errorf("input: %s\nexpected: %s\noutput: %s", tc.input, tc.output, output.String())
 			}

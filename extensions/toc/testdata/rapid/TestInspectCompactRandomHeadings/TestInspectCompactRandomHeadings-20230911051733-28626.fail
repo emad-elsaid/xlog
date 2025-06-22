@@ -1,0 +1,68 @@
+# 2023/09/11 05:17:33.722915 [TestInspectCompactRandomHeadings] [rapid] draw levels: []int{2, 5, 6, 2, 1, 3, 1, 4, 3, 2}
+# 2023/09/11 05:17:33.723216 [TestInspectCompactRandomHeadings] 
+# 	Error Trace:	inspect_test.go:308
+# 	            				engine.go:368
+# 	            				engine.go:377
+# 	            				engine.go:203
+# 	            				engine.go:118
+# 	            				inspect_test.go:279
+# 	Error:      	Not equal: 
+# 	            	expected: 10
+# 	            	actual  : 11
+# 	Test:       	TestInspectCompactRandomHeadings
+# 	Messages:   	number of items in TOC does not match the number of headings in document:
+# 	            	## Heading 0
+# 	            	##### Heading 1
+# 	            	###### Heading 2
+# 	            	## Heading 3
+# 	            	# Heading 4
+# 	            	### Heading 5
+# 	            	# Heading 6
+# 	            	#### Heading 7
+# 	            	### Heading 8
+# 	            	## Heading 9
+# 
+v0.4.8#15085304404995422177
+0x19e69db68bc036
+0x24b2760ec7eea
+0x361cf0f89a682
+0x1
+0x114bbf838dcdca
+0xa99b52221b8f2
+0xaa728ac0c3547
+0x4
+0xc319bcd62bde9
+0x1619b1a7f18de4
+0x1f3f0819edfced
+0xffffffffffffffff
+0xf33d03ec7011b
+0xe7a41614a516f
+0x11f801679f14d
+0x1
+0x1e0c62b0aef7f3
+0x1083214304416c
+0x15c0d0227625e1
+0x7
+0x0
+0x93b9472e87f78
+0x18d7fd4765e191
+0xa2002bbe747c1
+0x2
+0xf90b18698fc9b
+0x88c2784cdf072
+0x1d89327185965b
+0x0
+0x1cd1834e693805
+0x1ca752d0b81d79
+0x1aaf49eefd05f7
+0x6
+0x3
+0x13e6badd851116
+0x1566b82ad6e58b
+0x1e1087cd9c9328
+0x2
+0x19fd0c5ddd4b5f
+0x11063d20c9ab63
+0xe15850039e3cb
+0x1
+0x2921518ffb8f7

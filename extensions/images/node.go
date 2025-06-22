@@ -1,6 +1,6 @@
 package images
 
-import "github.com/yuin/goldmark/ast"
+import "github.com/emad-elsaid/xlog/markdown/ast"
 
 var KindColumns = ast.NewNodeKind("ImagesColumns")
 

@@ -1,0 +1,44 @@
+[env]
+GOBIN = "{{ config_root }}/bin"
+_.path = ["{{ config_root }}/bin"]
+
+[tools]
+"ubi:abhinav/doc2go" = "latest"
+"aqua:golangci/golangci-lint" = "latest"
+"ubi:miniscruff/changie" = "latest"
+go = "latest"
+
+[tasks.build]
+run = "go build ./..."
+description = "Build the project"
+
+[tasks.test]
+description = "Run tests"
+run = "go test -race ./..."
+
+[tasks.cover]
+description = "Run tests with coverage"
+run = [
+    "go test -race -coverprofile=cover.out -coverpkg=./... ./...",
+    "go tool cover -html=cover.out -o cover.html"
+]
+
+[tasks.lint]
+description = "Run all linters"
+depends = ["lint:*"]
+
+[tasks."lint:tidy"]
+description = "Ensure go.mod is tidy"
+run = "go mod tidy -diff"
+
+[tasks."lint:golangci"]
+description = "Run golangci-lint"
+run = "golangci-lint run"
+
+[tasks."release:prepare"]
+description = "Prepare a release"
+run = [
+  "changie batch {{arg(name='version')}}",
+  "changie merge",
+]
+
