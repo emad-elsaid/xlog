@@ -22,8 +22,8 @@ func NewDefinitionListParser() parser.BlockParser {
 	return defaultDefinitionListParser
 }
 
-func (b *definitionListParser) Trigger() []rune {
-	return []rune{':'}
+func (b *definitionListParser) Trigger() []byte {
+	return []byte{':'}
 }
 
 func (b *definitionListParser) Open(parent gast.Node, reader text.Reader, pc parser.Context) (gast.Node, parser.State) {
@@ -109,8 +109,8 @@ func NewDefinitionDescriptionParser() parser.BlockParser {
 	return defaultDefinitionDescriptionParser
 }
 
-func (b *definitionDescriptionParser) Trigger() []rune {
-	return []rune{':'}
+func (b *definitionDescriptionParser) Trigger() []byte {
+	return []byte{':'}
 }
 
 func (b *definitionDescriptionParser) Open(

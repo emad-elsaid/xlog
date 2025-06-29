@@ -155,9 +155,9 @@ func NewLinkifyParser(opts ...LinkifyOption) parser.InlineParser {
 	return p
 }
 
-func (s *linkifyParser) Trigger() []rune {
+func (s *linkifyParser) Trigger() []byte {
 	// ' ' indicates any white spaces and a line head
-	return []rune{' ', '*', '_', '~', '('}
+	return []byte{' ', '*', '_', '~', '('}
 }
 
 var (

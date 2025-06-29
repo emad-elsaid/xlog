@@ -39,8 +39,8 @@ func (b *blockquoteParser) process(reader text.Reader) bool {
 	return true
 }
 
-func (b *blockquoteParser) Trigger() []rune {
-	return []rune{'>'}
+func (b *blockquoteParser) Trigger() []byte {
+	return []byte{'>'}
 }
 
 func (b *blockquoteParser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {

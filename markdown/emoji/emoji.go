@@ -226,8 +226,8 @@ func NewParser(opts ...ParserOption) parser.InlineParser {
 	return p
 }
 
-func (s *giantEmojiParser) Trigger() []rune {
-	return []rune{':'}
+func (s *giantEmojiParser) Trigger() []byte {
+	return []byte{':'}
 }
 
 func (s *giantEmojiParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {

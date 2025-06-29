@@ -12,8 +12,8 @@ const trigger = '/'
 
 type shortCodeParser struct{}
 
-func (s *shortCodeParser) Trigger() []rune {
-	return []rune{trigger}
+func (s *shortCodeParser) Trigger() []byte {
+	return []byte{trigger}
 }
 
 func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Context) (ast.Node, parser.State) {

@@ -491,7 +491,7 @@ type BlockParser interface {
 	// Trigger returns a list of characters that triggers Parse method of
 	// this parser.
 	// If Trigger returns a nil, Open will be called with any lines.
-	Trigger() []rune
+	Trigger() []byte
 
 	// Open parses the current line and returns a result of parsing.
 	//
@@ -535,7 +535,7 @@ type InlineParser interface {
 	// Trigger characters must be a punctuation or a halfspace.
 	// Halfspaces triggers this parser when character is any spaces characters or
 	// a head of line
-	Trigger() []rune
+	Trigger() []byte
 
 	// Parse parse the given block into an inline node.
 	//

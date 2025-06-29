@@ -17,8 +17,8 @@ func NewListItemParser() BlockParser {
 	return defaultListItemParser
 }
 
-func (b *listItemParser) Trigger() []rune {
-	return []rune{'-', '+', '*', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
+func (b *listItemParser) Trigger() []byte {
+	return []byte{'-', '+', '*', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}
 }
 
 func (b *listItemParser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {

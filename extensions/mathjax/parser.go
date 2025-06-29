@@ -12,9 +12,7 @@ import (
 
 type inlineMathParser struct{}
 
-func (s *inlineMathParser) Trigger() []rune {
-	return []rune{'$'}
-}
+func (s *inlineMathParser) Trigger() []byte { return []byte{'$'} }
 
 func (s *inlineMathParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	line, startSegment := block.PeekLine()
@@ -142,4 +140,4 @@ func (b *mathJaxBlockParser) Close(node ast.Node, reader text.Reader, pc parser.
 
 func (b *mathJaxBlockParser) CanInterruptParagraph() bool { return true }
 func (b *mathJaxBlockParser) CanAcceptIndentedLine() bool { return false }
-func (b *mathJaxBlockParser) Trigger() []rune             { return nil }
+func (b *mathJaxBlockParser) Trigger() []byte             { return nil }

@@ -159,8 +159,8 @@ func NewTypographerParser(opts ...TypographerOption) parser.InlineParser {
 	return p
 }
 
-func (s *typographerParser) Trigger() []rune {
-	return []rune{'\'', '"', '-', '.', ',', '<', '>', '*', '['}
+func (s *typographerParser) Trigger() []byte {
+	return []byte{'\'', '"', '-', '.', ',', '<', '>', '*', '['}
 }
 
 func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {

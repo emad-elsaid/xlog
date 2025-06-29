@@ -29,8 +29,8 @@ func NewFootnoteBlockParser() parser.BlockParser {
 	return defaultFootnoteBlockParser
 }
 
-func (b *footnoteBlockParser) Trigger() []rune {
-	return []rune{'['}
+func (b *footnoteBlockParser) Trigger() []byte {
+	return []byte{'['}
 }
 
 func (b *footnoteBlockParser) Open(parent gast.Node, reader text.Reader, pc parser.Context) (gast.Node, parser.State) {
@@ -116,10 +116,10 @@ func NewFootnoteParser() parser.InlineParser {
 	return defaultFootnoteParser
 }
 
-func (s *footnoteParser) Trigger() []rune {
+func (s *footnoteParser) Trigger() []byte {
 	// footnote syntax probably conflict with the image syntax.
 	// So we need trigger this parser with '!'.
-	return []rune{'!', '['}
+	return []byte{'!', '['}
 }
 
 func (s *footnoteParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {

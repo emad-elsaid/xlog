@@ -45,8 +45,8 @@ func isThematicBreak(line []byte, offset int) bool {
 	return count > 2
 }
 
-func (b *thematicBreakPraser) Trigger() []rune {
-	return []rune{'*', '_', '-'}
+func (b *thematicBreakPraser) Trigger() []byte {
+	return []byte{'-', '*', '_'}
 }
 
 func (b *thematicBreakPraser) Open(parent ast.Node, reader text.Reader, pc Context) (ast.Node, State) {
