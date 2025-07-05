@@ -117,10 +117,7 @@ func (p *page) preProcessedContent() Markdown {
 }
 
 func (p *page) Delete() bool {
-	defer func() {
-		app := GetApp()
-		app.Trigger(PageDeleted, p)
-	}()
+	defer GetApp().Trigger(PageDeleted, p)
 
 	p.clearCache()
 
@@ -135,10 +132,7 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content Markdown) bool {
-	defer func() {
-		app := GetApp()
-		app.Trigger(PageChanged, p)
-	}()
+	defer GetApp().Trigger(PageChanged, p)
 
 	p.clearCache()
 	name := p.FileName()

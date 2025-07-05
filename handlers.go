@@ -32,8 +32,8 @@ func (app *App) Start(ctx context.Context) {
 	}
 
 	if !app.config.Readonly {
-		app.Listen(PageChanged, func(p Page) error { app.clearPagesCache(p); return nil })
-		app.Listen(PageDeleted, func(p Page) error { app.clearPagesCache(p); return nil })
+		app.Listen(PageChanged, app.clearPagesCache)
+		app.Listen(PageDeleted, app.clearPagesCache)
 	}
 
 	if err := os.Chdir(app.config.Source); err != nil {

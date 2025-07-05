@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
-	"path"
 	"regexp"
 	"runtime"
 )
@@ -98,37 +97,13 @@ func init() {
 	globalApp.initDefaultHelpers()
 }
 
-// initDefaultHelpers initializes the default helper functions
-func (app *App) initDefaultHelpers() {
-	app.helpers = template.FuncMap{
-		"ago":            app.ago,
-		"properties":     app.Properties,
-		"links":          app.Links,
-		"widgets":        app.RenderWidget,
-		"commands":       app.Commands,
-		"quick_commands": app.QuickCommands,
-		"isFontAwesome":  app.IsFontAwesome,
-		"includeJS":      app.includeJS,
-		"scripts":        app.scripts,
-		"banner":         app.Banner,
-		"emoji":          app.Emoji,
-		"base":           path.Base,
-		"dir":            app.dir,
-		"raw":            app.raw,
-	}
-}
-
-// RegisterPageSource registers a page source
-func (app *App) RegisterPageSource(p PageSource) {
-	app.sources = append([]PageSource{p}, app.sources...)
-}
-
 // GetConfig returns the application configuration
 func (app *App) GetConfig() *Configuration {
 	return app.config
 }
 
 // clearPagesCache clears the pages cache
-func (app *App) clearPagesCache(p Page) {
+func (app *App) clearPagesCache(p Page) error {
 	app.pages = nil
+	return nil
 }

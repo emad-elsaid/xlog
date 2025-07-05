@@ -24,7 +24,7 @@ func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 
 func (f PageDelete) Handler(r Request) Output {
 	name := r.FormValue("page")
-	page := NewPage(name)
+	page := GetApp().NewPage(name)
 	if page == nil || !page.Exists() {
 		slog.Error("Can't delete page", "page", page, "name", name)
 	} else {

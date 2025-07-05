@@ -15,6 +15,26 @@ import (
 
 var ErrHelperRegistered = errors.New("Helper already registered")
 
+// initDefaultHelpers initializes the default helper functions
+func (app *App) initDefaultHelpers() {
+	app.helpers = template.FuncMap{
+		"ago":            app.ago,
+		"properties":     app.Properties,
+		"links":          app.Links,
+		"widgets":        app.RenderWidget,
+		"commands":       app.Commands,
+		"quick_commands": app.QuickCommands,
+		"isFontAwesome":  app.IsFontAwesome,
+		"includeJS":      app.includeJS,
+		"scripts":        app.scripts,
+		"banner":         app.Banner,
+		"emoji":          app.Emoji,
+		"base":           path.Base,
+		"dir":            app.dir,
+		"raw":            app.raw,
+	}
+}
+
 // RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
 // starts as compiling templates happened right before starting the http server.
@@ -91,19 +111,19 @@ func (app *App) ago(t time.Time) string {
 
 // RegisterJS registers a JavaScript file to be included in the page
 func (app *App) RegisterJS(f string) {
-	app.includeJS(f)
+	if !slices.Contains(app.js, f) {
+		app.js = append(app.js, f)
+	}
 }
 
 // RequireHTMX registers HTMX library
 func (app *App) RequireHTMX() {
-	app.includeJS("/public/htmx.min.js")
+	app.RegisterJS("/public/htmx.min.js")
 }
 
 // includeJS adds a JavaScript library URL/path
 func (app *App) includeJS(f string) template.HTML {
-	if !slices.Contains(app.js, f) {
-		app.js = append(app.js, f)
-	}
+	app.includeJS(f)
 	return ""
 }
 

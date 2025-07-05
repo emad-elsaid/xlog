@@ -11,12 +11,7 @@ type PageSource interface {
 	Each(context.Context, func(Page))
 }
 
-func NewPage(name string) (p Page) {
-	app := GetApp()
-	return app.NewPage(name)
-}
-
-func RegisterPageSource(p PageSource) {
-	app := GetApp()
-	app.RegisterPageSource(p)
+// RegisterPageSource registers a page source
+func (app *App) RegisterPageSource(p PageSource) {
+	app.sources = append([]PageSource{p}, app.sources...)
 }
