@@ -7,19 +7,16 @@ package xlog
 // at the end the last preprocessor output is then rendered to HTML
 type Preprocessor func(Markdown) Markdown
 
-// List of registered preprocessor functions
-var preprocessors = []Preprocessor{}
-
 // RegisterPreprocessor registers a Preprocessor function. extensions should use this function to
 // register a preprocessor.
-func RegisterPreprocessor(f Preprocessor) { preprocessors = append(preprocessors, f) }
+func RegisterPreprocessor(f Preprocessor) {
+	app := GetApp()
+	app.RegisterPreprocessor(f)
+}
 
 // This function take the page content and pass it through all registered
 // preprocessors and return the last preprocessor output to the caller
 func PreProcess(content Markdown) Markdown {
-	for _, v := range preprocessors {
-		content = v(content)
-	}
-
-	return content
+	app := GetApp()
+	return app.PreProcess(content)
 }

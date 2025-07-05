@@ -11,21 +11,12 @@ type PageSource interface {
 	Each(context.Context, func(Page))
 }
 
-var sources = []PageSource{
-	newMarkdownFS("."),
-}
-
 func NewPage(name string) (p Page) {
-	for i := range sources {
-		p = sources[i].Page(name)
-		if p != nil && p.Exists() {
-			return
-		}
-	}
-
-	return
+	app := GetApp()
+	return app.NewPage(name)
 }
 
 func RegisterPageSource(p PageSource) {
-	sources = append([]PageSource{p}, sources...)
+	app := GetApp()
+	app.RegisterPageSource(p)
 }

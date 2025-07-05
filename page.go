@@ -94,7 +94,8 @@ func (p *page) preProcessedContent() Markdown {
 
 	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()
-		c = PreProcess(c)
+		app := GetApp()
+		c = app.PreProcess(c)
 		p.content = &c
 		p.lastUpdate = modtime
 	}
@@ -103,7 +104,10 @@ func (p *page) preProcessedContent() Markdown {
 }
 
 func (p *page) Delete() bool {
-	defer Trigger(PageDeleted, p)
+	defer func() {
+		app := GetApp()
+		app.Trigger(PageDeleted, p)
+	}()
 
 	p.clearCache()
 
@@ -118,7 +122,10 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content Markdown) bool {
-	defer Trigger(PageChanged, p)
+	defer func() {
+		app := GetApp()
+		app.Trigger(PageChanged, p)
+	}()
 
 	p.clearCache()
 	name := p.FileName()

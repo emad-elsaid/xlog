@@ -3,9 +3,6 @@ package xlog
 import (
 	"embed"
 	"io/fs"
-	"net/http"
-	"os"
-	"path"
 )
 
 // return file that exists in one of the FS structs.
@@ -29,6 +26,11 @@ var assets embed.FS
 
 var staticDirs = []fs.FS{assets}
 
+// GetAssets returns the embedded assets filesystem
+func GetAssets() embed.FS {
+	return assets
+}
+
 // RegisterStaticDir adds a filesystem to the filesystems list scanned for files
 // when serving static files. can be used to add a directory of CSS or JS files
 // by extensions
@@ -37,25 +39,6 @@ func RegisterStaticDir(f fs.FS) {
 }
 
 func staticHandler(r Request) (Output, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	staticFSs := http.FS(
-		priorityFS(
-			append(staticDirs, os.DirFS(wd)),
-		),
-	)
-
-	server := http.FileServer(staticFSs)
-
-	cleanPath := path.Clean(r.URL.Path)
-
-	if f, err := staticFSs.Open(cleanPath); err != nil {
-		return nil, err
-	} else {
-		f.Close()
-		return Cache(server.ServeHTTP), nil
-	}
+	app := GetApp()
+	return app.staticHandler(r)
 }

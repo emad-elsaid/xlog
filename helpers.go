@@ -14,36 +14,14 @@ import (
 	emojiAst "github.com/emad-elsaid/xlog/markdown/emoji/ast"
 )
 
-var helpers = template.FuncMap{
-	"ago":            ago,
-	"properties":     Properties,
-	"links":          Links,
-	"widgets":        RenderWidget,
-	"commands":       Commands,
-	"quick_commands": QuickCommands,
-	"isFontAwesome":  IsFontAwesome,
-	"includeJS":      includeJS,
-	"scripts":        scripts,
-	"banner":         Banner,
-	"emoji":          Emoji,
-	"base":           path.Base,
-	"dir":            dir,
-	"raw":            raw,
-}
-
 var ErrHelperRegistered = errors.New("Helper already registered")
 
 // RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
 // starts as compiling templates happened right before starting the http server.
 func RegisterHelper(name string, f any) error {
-	if _, ok := helpers[name]; ok {
-		return ErrHelperRegistered
-	}
-
-	helpers[name] = f
-
-	return nil
+	app := GetApp()
+	return app.RegisterHelper(name, f)
 }
 
 // A function that takes time.duration and return a string representation of the

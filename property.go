@@ -11,7 +11,7 @@ type Property interface {
 	Value() any
 }
 
-var propsSources = []func(Page) []Property{defaultProps}
+var propsSources = []func(Page) []Property{DefaultProps}
 
 // RegisterProperty registers a function that returns a set of properties for
 // the page
@@ -37,9 +37,12 @@ type lastUpdateProp struct{ page Page }
 
 func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }
 func (a lastUpdateProp) Name() string { return "modified" }
-func (a lastUpdateProp) Value() any   { return ago(a.page.ModTime()) }
+func (a lastUpdateProp) Value() any {
+	app := GetApp()
+	return app.ago(a.page.ModTime())
+}
 
-func defaultProps(p Page) []Property {
+func DefaultProps(p Page) []Property {
 	if p.ModTime().IsZero() {
 		return nil
 	}

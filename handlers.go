@@ -2,69 +2,17 @@ package xlog
 
 import (
 	"context"
-	"flag"
 	"html/template"
-	"log/slog"
 	"os"
-	"runtime"
-	"time"
 
 	"github.com/gorilla/csrf"
-	"gitlab.com/greyxor/slogor"
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server
 func Start(ctx context.Context) {
-	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
-	flag.Parse()
-
-	// Setup logger
-	level := slogor.SetLevel(slog.LevelDebug)
-	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
-	handler := slogor.NewHandler(os.Stderr, level, timeFmt)
-	logger := slog.New(handler)
-	slog.SetDefault(logger)
-
-	// if a static site is going to be built then lets also turn on read only
-	// mode
-	if len(Config.Build) > 0 {
-		Config.Readonly = true
-	}
-
-	if !Config.Readonly {
-		Listen(PageChanged, clearPagesCache)
-		Listen(PageDeleted, clearPagesCache)
-	}
-
-	if err := os.Chdir(Config.Source); err != nil {
-		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
-		os.Exit(1)
-	}
-
-	initExtensions()
-
-	Get("/{$}", rootHandler)
-	Get("/{page...}", getPageHandler)
-
-	if len(Config.Build) > 0 {
-		if err := build(Config.Build); err != nil {
-			slog.Error("Failed to build static pages", "error", err)
-			os.Exit(1)
-		}
-
-		return
-	}
-
-	srv := server()
-	slog.Info("Starting server", "address", Config.BindAddress)
-
-	go func() {
-		<-ctx.Done()
-		srv.Close()
-	}()
-
-	srv.ListenAndServe()
+	app := GetApp()
+	app.Start(ctx)
 }
 
 // Redirect to `/index` to render the index page.

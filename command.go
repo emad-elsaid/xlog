@@ -16,11 +16,10 @@ type Command interface {
 	Attrs() map[template.HTMLAttr]any
 }
 
-var commands = []func(Page) []Command{}
-
 // RegisterCommand registers a new command
 func RegisterCommand(c func(Page) []Command) {
-	commands = append(commands, c)
+	app := GetApp()
+	app.RegisterCommand(c)
 }
 
 // Commands return the list of commands for a page. when a page is displayed it
@@ -28,46 +27,33 @@ func RegisterCommand(c func(Page) []Command) {
 // results in one slice. result can be passed to the view to render the commands
 // list
 func Commands(p Page) []Command {
-	cmds := []Command{}
-	for c := range commands {
-		cmds = append(cmds, commands[c](p)...)
-	}
-
-	return cmds
+	app := GetApp()
+	return app.Commands(p)
 }
 
-var quickCommands = []func(Page) []Command{}
-
 func RegisterQuickCommand(c func(Page) []Command) {
-	quickCommands = append(quickCommands, c)
+	app := GetApp()
+	app.RegisterQuickCommand(c)
 }
 
 // QuickCommands return the list of QuickCommands for a page. it executes all functions
 // registered with RegisterQuickCommand and collect all results in one slice. result
 // can be passed to the view to render the Quick commands list
 func QuickCommands(p Page) []Command {
-	cmds := []Command{}
-	for c := range quickCommands {
-		cmds = append(cmds, quickCommands[c](p)...)
-	}
-
-	return cmds
+	app := GetApp()
+	return app.QuickCommands(p)
 }
-
-var links = []func(Page) []Command{}
 
 // Register a new links function, should return a list of Links
 func RegisterLink(l func(Page) []Command) {
-	links = append(links, l)
+	app := GetApp()
+	app.RegisterLink(l)
 }
 
 // Links returns a list of links for a Page. it executes all functions
 // registered with RegisterLink and collect them in one slice. Can be passed to
 // the view to render in the footer for example.
 func Links(p Page) []Command {
-	lnks := []Command{}
-	for l := range links {
-		lnks = append(lnks, links[l](p)...)
-	}
-	return lnks
+	app := GetApp()
+	return app.Links(p)
 }
