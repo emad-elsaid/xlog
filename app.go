@@ -1,21 +1,13 @@
 package xlog
 
 import (
-	"crypto/rand"
 	"embed"
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"io/fs"
-	"log/slog"
 	"net/http"
-	"os"
 	"path"
 	"regexp"
 	"runtime"
-	"time"
-
-	"github.com/gorilla/csrf"
 )
 
 // Property represent a piece of information about the current page such as last
@@ -213,84 +205,9 @@ func (app *App) initDefaultHelpers() {
 	}
 }
 
-// server creates and configures the HTTP server
-func (app *App) server() *http.Server {
-	app.compileTemplates()
-	var handler http.Handler = app.router
-	for _, v := range app.defaultMiddlewares() {
-		handler = v(handler)
-	}
-
-	return &http.Server{
-		Handler:      handler,
-		Addr:         app.config.BindAddress,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-}
-
-// defaultMiddlewares returns the default middleware stack
-func (app *App) defaultMiddlewares() []func(http.Handler) http.Handler {
-	var middlewares []func(http.Handler) http.Handler
-
-	if !app.config.Readonly {
-		crsfOpts := []csrf.Option{
-			csrf.Path("/"),
-			csrf.FieldName("csrf"),
-			csrf.CookieName(app.config.CsrfCookieName),
-			csrf.Secure(!app.config.ServeInsecure),
-		}
-
-		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
-		if len(sessionSecret) == 0 {
-			sessionSecret = make([]byte, 128)
-			rand.Read(sessionSecret)
-		}
-
-		app.csrfProtect = csrf.Protect(sessionSecret, crsfOpts...)
-		middlewares = append(middlewares, app.csrfProtect)
-	}
-
-	middlewares = append(middlewares, app.requestLoggerHandler)
-
-	return middlewares
-}
-
-// Get registers a GET route
-func (app *App) Get(path string, handler HandlerFunc) {
-	app.router.HandleFunc("GET "+path, app.handlerFuncToHttpHandler(handler))
-}
-
-// Post registers a POST route
-func (app *App) Post(path string, handler HandlerFunc) {
-	app.router.HandleFunc("POST "+path, app.handlerFuncToHttpHandler(handler))
-}
-
-// Delete registers a DELETE route
-func (app *App) Delete(path string, handler HandlerFunc) {
-	app.router.HandleFunc("DELETE "+path, app.handlerFuncToHttpHandler(handler))
-}
-
-// HandlerFunc is the type of an HTTP handler function + returns output function.
-// Request is an alias of *http.Request for shorter handler declaration
-// Response is an alias http.ResponseWriter for shorter handler declaration
-// Output is an alias of http.HandlerFunc as output is expected from defined http handlers
-// Locals is a map of string to any value used for template rendering
-
-func (app *App) handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
-	return func(w Response, r Request) {
-		handler(r)(w, r)
-	}
-}
-
 // RegisterPageSource registers a page source
 func (app *App) RegisterPageSource(p PageSource) {
 	app.sources = append([]PageSource{p}, app.sources...)
-}
-
-// RequireHTMX registers HTMX library
-func (app *App) RequireHTMX() {
-	app.includeJS("/public/htmx.min.js")
 }
 
 // GetConfig returns the application configuration
@@ -303,88 +220,9 @@ func (app *App) GetRouter() *http.ServeMux {
 	return app.router
 }
 
-// requestLoggerHandler logs HTTP requests
-func (app *App) requestLoggerHandler(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w Response, r Request) {
-		start := time.Now()
-		h.ServeHTTP(w, r)
-		slog.Info(r.Method+" "+r.URL.Path, "time", time.Since(start))
-	})
-}
-
 // clearPagesCache clears the pages cache
 func (app *App) clearPagesCache(p Page) {
 	app.pages = nil
-}
-
-// Redirect returns a redirect response
-func (app *App) Redirect(url string) Output {
-	return func(w Response, r Request) {
-		http.Redirect(w, r, url, http.StatusFound)
-	}
-}
-
-// NoContent returns a no content response
-func (app *App) NoContent() Output {
-	return func(w Response, r Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}
-}
-
-// NotFound returns a not found response
-func (app *App) NotFound(msg string) Output {
-	return func(w Response, r Request) {
-		http.Error(w, msg, http.StatusNotFound)
-	}
-}
-
-// Render returns a rendered template response
-func (app *App) Render(path string, data Locals) Output {
-	return func(w Response, r Request) {
-		fmt.Fprint(w, app.Partial(path, data))
-	}
-}
-
-// BadRequest returns a bad request response
-func (app *App) BadRequest(msg string) Output {
-	return func(w Response, r Request) {
-		http.Error(w, msg, http.StatusBadRequest)
-	}
-}
-
-// InternalServerError returns an internal server error response
-func (app *App) InternalServerError(err error) Output {
-	return func(w Response, r Request) {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-// PlainText returns a plain text response
-func (app *App) PlainText(text string) Output {
-	return func(w Response, r Request) {
-		w.Write([]byte(text))
-	}
-}
-
-// JsonResponse returns a JSON response
-func (app *App) JsonResponse(a any) Output {
-	return func(w Response, r Request) {
-		b, err := json.Marshal(a)
-		if err != nil {
-			w.Write([]byte(err.Error()))
-			return
-		}
-
-		w.Write(b)
-	}
-}
-
-// Cache wraps Output and adds header to instruct the browser to cache the output
-func (app *App) Cache(out Output) Output {
-	return func(w Response, r Request) {
-		w.Header().Add("Cache-Control", "max-age=604800")
-		out(w, r)
-	}
 }
 
 // NewPage creates a new page

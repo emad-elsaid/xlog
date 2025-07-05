@@ -15,9 +15,10 @@ import (
 
 var ErrHelperRegistered = errors.New("Helper already registered")
 
-// RegisterHelper registers a new helper function
+// RegisterHelper registers a new helper function. all helpers are used when compiling
+// templates. so registering helpers function must happen before the server
+// starts as compiling templates happened right before starting the http server.
 func (app *App) RegisterHelper(name string, f any) error {
-
 	if _, ok := app.helpers[name]; ok {
 		return ErrHelperRegistered
 	}
@@ -26,7 +27,11 @@ func (app *App) RegisterHelper(name string, f any) error {
 	return nil
 }
 
-// Helper methods that need to be implemented
+// A function that takes time.duration and return a string representation of the
+// duration in human readable way such as "3 seconds ago". "5 hours 30 minutes
+// ago". The precision of this function is 2. which means it returns the largest
+// unit of time possible and the next one after it. for example days + hours, or
+// Hours + minutes or Minutes + seconds...etc
 func (app *App) ago(t time.Time) string {
 	if app.config.Readonly {
 		return t.Format("Monday 2 January 2006")
@@ -84,14 +89,18 @@ func (app *App) ago(t time.Time) string {
 	return o.String()
 }
 
-// IsFontAwesome checks if an icon is a FontAwesome icon
-func (app *App) IsFontAwesome(i string) bool {
-	return strings.HasPrefix(i, "fa")
+// RegisterJS registers a JavaScript file to be included in the page
+func (app *App) RegisterJS(f string) {
+	app.includeJS(f)
+}
+
+// RequireHTMX registers HTMX library
+func (app *App) RequireHTMX() {
+	app.includeJS("/public/htmx.min.js")
 }
 
 // includeJS adds a JavaScript library URL/path
 func (app *App) includeJS(f string) template.HTML {
-
 	if !slices.Contains(app.js, f) {
 		app.js = append(app.js, f)
 	}
@@ -100,12 +109,16 @@ func (app *App) includeJS(f string) template.HTML {
 
 // scripts returns the HTML for all registered JavaScript files
 func (app *App) scripts() template.HTML {
-
 	var b strings.Builder
 	for _, f := range app.js {
 		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
 	}
 	return template.HTML(b.String())
+}
+
+// IsFontAwesome checks if an icon is a FontAwesome icon
+func (app *App) IsFontAwesome(i string) bool {
+	return strings.HasPrefix(i, "fa")
 }
 
 // Banner returns the banner image for a page

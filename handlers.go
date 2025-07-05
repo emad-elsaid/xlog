@@ -60,7 +60,7 @@ func (app *App) Start(ctx context.Context) {
 
 	go func() {
 		<-ctx.Done()
-		srv.Close()
+		srv.Shutdown(context.Background())
 	}()
 
 	srv.ListenAndServe()
