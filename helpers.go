@@ -5,23 +5,30 @@ import (
 	"fmt"
 	"html/template"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
-	gast "github.com/emad-elsaid/xlog/markdown/ast"
 	emojiAst "github.com/emad-elsaid/xlog/markdown/emoji/ast"
 )
 
 var ErrHelperRegistered = errors.New("Helper already registered")
 
-// A function that takes time.duration and return a string representation of the
-// duration in human readable way such as "3 seconds ago". "5 hours 30 minutes
-// ago". The precision of this function is 2. which means it returns the largest
-// unit of time possible and the next one after it. for example days + hours, or
-// Hours + minutes or Minutes + seconds...etc
-func ago(t time.Time) string {
-	if Config.Readonly {
+// RegisterHelper registers a new helper function
+func (app *App) RegisterHelper(name string, f any) error {
+
+	if _, ok := app.helpers[name]; ok {
+		return ErrHelperRegistered
+	}
+
+	app.helpers[name] = f
+	return nil
+}
+
+// Helper methods that need to be implemented
+func (app *App) ago(t time.Time) string {
+	if app.config.Readonly {
 		return t.Format("Monday 2 January 2006")
 	}
 
@@ -77,23 +84,44 @@ func ago(t time.Time) string {
 	return o.String()
 }
 
-func IsFontAwesome(i string) bool {
+// IsFontAwesome checks if an icon is a FontAwesome icon
+func (app *App) IsFontAwesome(i string) bool {
 	return strings.HasPrefix(i, "fa")
 }
 
-func Banner(p Page) string {
+// includeJS adds a JavaScript library URL/path
+func (app *App) includeJS(f string) template.HTML {
+
+	if !slices.Contains(app.js, f) {
+		app.js = append(app.js, f)
+	}
+	return ""
+}
+
+// scripts returns the HTML for all registered JavaScript files
+func (app *App) scripts() template.HTML {
+
+	var b strings.Builder
+	for _, f := range app.js {
+		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
+	}
+	return template.HTML(b.String())
+}
+
+// Banner returns the banner image for a page
+func (app *App) Banner(p Page) string {
 	_, a := p.AST()
 	if a == nil {
 		return ""
 	}
 
 	paragraph := a.FirstChild()
-	if paragraph == nil || paragraph.Kind() != gast.KindParagraph {
+	if paragraph == nil || paragraph.Kind() != ast.KindParagraph {
 		return ""
 	}
 
 	img := paragraph.FirstChild()
-	if img == nil || img.Kind() != gast.KindImage {
+	if img == nil || img.Kind() != ast.KindImage {
 		return ""
 	}
 
@@ -115,26 +143,25 @@ func Banner(p Page) string {
 	return dest
 }
 
-func Emoji(p Page) string {
+// Emoji returns the emoji for a page
+func (app *App) Emoji(p Page) string {
 	_, tree := p.AST()
 	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
 		return string(e.Value.Unicode)
 	}
-
 	return ""
 }
 
-func dir(s string) string {
+// dir returns the directory name
+func (app *App) dir(s string) string {
 	v := path.Dir(s)
-
 	if v == "." {
 		return ""
 	}
-
 	return v
 }
 
-// raw a helper to output input string as safe HTML
-func raw(i string) template.HTML {
+// raw returns safe HTML
+func (app *App) raw(i string) template.HTML {
 	return template.HTML(i)
 }

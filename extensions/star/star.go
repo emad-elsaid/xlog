@@ -43,7 +43,8 @@ type starredPage struct {
 }
 
 func (s starredPage) Icon() string {
-	if e := Emoji(s); e == "" {
+	app := GetApp()
+	if e := app.Emoji(s); e == "" {
 		return "fa-solid fa-star"
 	} else {
 		return e
