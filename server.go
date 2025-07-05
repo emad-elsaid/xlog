@@ -78,24 +78,6 @@ func (app *App) defaultMiddlewares() []func(http.Handler) http.Handler {
 	return middlewares
 }
 
-// Get registers a GET route
-func (app *App) Get(path string, handler HandlerFunc) {
-	slog.Info("GET", "path", path, "func", funcStringer{handler})
-	app.router.HandleFunc("GET "+path, app.handlerFuncToHttpHandler(handler))
-}
-
-// Post registers a POST route
-func (app *App) Post(path string, handler HandlerFunc) {
-	slog.Info("POST", "path", path, "func", funcStringer{handler})
-	app.router.HandleFunc("POST "+path, app.handlerFuncToHttpHandler(handler))
-}
-
-// Delete registers a DELETE route
-func (app *App) Delete(path string, handler HandlerFunc) {
-	slog.Info("DELETE", "path", path, "func", funcStringer{handler})
-	app.router.HandleFunc("DELETE "+path, app.handlerFuncToHttpHandler(handler))
-}
-
 func (app *App) handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	return func(w Response, r Request) {
 		handler(r)(w, r)
@@ -154,6 +136,24 @@ func (app *App) JsonResponse(a any) Output {
 
 		w.Write(b)
 	}
+}
+
+// Get registers a GET route
+func (app *App) Get(path string, handler HandlerFunc) {
+	slog.Info("GET", "path", path, "func", funcStringer{handler})
+	app.router.HandleFunc("GET "+path, app.handlerFuncToHttpHandler(handler))
+}
+
+// Post registers a POST route
+func (app *App) Post(path string, handler HandlerFunc) {
+	slog.Info("POST", "path", path, "func", funcStringer{handler})
+	app.router.HandleFunc("POST "+path, app.handlerFuncToHttpHandler(handler))
+}
+
+// Delete registers a DELETE route
+func (app *App) Delete(path string, handler HandlerFunc) {
+	slog.Info("DELETE", "path", path, "func", funcStringer{handler})
+	app.router.HandleFunc("DELETE "+path, app.handlerFuncToHttpHandler(handler))
 }
 
 // Render returns an output function that renders partial with data and writes it as response

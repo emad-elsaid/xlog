@@ -6,6 +6,27 @@ import (
 	"sort"
 )
 
+type (
+	// WidgetSpace used to represent a widgets spaces. it's used to register
+	// widgets to be injected in the view or edit pages
+	WidgetSpace string
+
+	// WidgetFunc a function that takes the current page and returns the widget.
+	// This can be used by extensions to define new widgets to be rendered in
+	// view or edit pages. the extension should define this func type and
+	// register it to be rendered in a specific widgetSpace such as before or
+	// after the page.
+	WidgetFunc func(Page) template.HTML
+)
+
+// List of widgets spaces that extensions can use to register a WidgetFunc to
+// inject content into.
+var (
+	WidgetAfterView  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
+	WidgetBeforeView WidgetSpace = "before_view" // widgets rendered before the content of the view page
+	WidgetHead       WidgetSpace = "head"        // widgets rendered in page <head> tag
+)
+
 // RegisterWidget registers a widget function
 func (app *App) RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
 
