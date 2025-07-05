@@ -128,25 +128,7 @@ func (app *App) GetConfig() *Configuration {
 	return app.config
 }
 
-// GetRouter returns the application router
-func (app *App) GetRouter() *http.ServeMux {
-	return app.router
-}
-
 // clearPagesCache clears the pages cache
 func (app *App) clearPagesCache(p Page) {
 	app.pages = nil
-}
-
-// NewPage creates a new page
-func (app *App) NewPage(name string) Page {
-
-	for i := range app.sources {
-		p := app.sources[i].Page(name)
-		if p != nil && p.Exists() {
-			return p
-		}
-	}
-
-	return &page{name: name}
 }
