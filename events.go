@@ -2,6 +2,19 @@ package xlog
 
 import "log/slog"
 
+// PageEvent represents different events that can occur with a page
+type PageEvent int
+
+// PageEventHandler is a function that handles a page event
+type PageEventHandler func(Page) error
+
+// List of page events
+const (
+	PageChanged PageEvent = iota
+	PageDeleted
+	PageNotFound // user requested a page that's not found
+)
+
 // Listen registers an event handler
 func (app *App) Listen(e PageEvent, h PageEventHandler) {
 

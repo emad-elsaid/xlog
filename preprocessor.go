@@ -1,5 +1,9 @@
 package xlog
 
+// Preprocessor is a function that takes the whole page content and returns a
+// modified version of the content
+type Preprocessor func(Markdown) Markdown
+
 // RegisterPreprocessor registers a preprocessor function
 func (app *App) RegisterPreprocessor(f Preprocessor) {
 	app.preprocessors = append(app.preprocessors, f)

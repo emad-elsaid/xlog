@@ -10,76 +10,8 @@ import (
 	"runtime"
 )
 
-// Property represent a piece of information about the current page such as last
-// update time, number of versions, number of words, reading time...etc
-type Property interface {
-	// Icon returns the fontawesome icon class name or emoji
-	Icon() string
-	// Name returns the name of the property
-	Name() string
-	// Value returns the value of the property
-	Value() any
-}
-
-// PageEvent represents different events that can occur with a page
-type PageEvent int
-
-// PageEventHandler is a function that handles a page event
-type PageEventHandler func(Page) error
-
-// List of page events
-const (
-	PageChanged PageEvent = iota
-	PageDeleted
-	PageNotFound // user requested a page that's not found
-)
-
-// Extension represents a plugin that can be registered with the application
-type Extension interface {
-	Name() string
-	Init()
-}
-
-// Command defines a structure used for actions and links
-type Command interface {
-	// Icon returns the Fontawesome icon class name for the Command
-	Icon() string
-	// Name of the command. to be displayed in the list
-	Name() string
-	// Attrs a map of attributes to their values
-	Attrs() map[template.HTMLAttr]any
-}
-
-// Preprocessor is a function that takes the whole page content and returns a
-// modified version of the content
-type Preprocessor func(Markdown) Markdown
-
 //go:embed public
 var assets embed.FS
-
-// GetAssets returns the embedded assets filesystem
-func GetAssets() embed.FS {
-	return assets
-}
-
-// priorityFS returns file that exists in one of the FS structs.
-// Prioritizing the end of the slice over earlier FSs.
-type priorityFS []fs.FS
-
-func (p priorityFS) Open(name string) (fs.File, error) {
-	for i := len(p) - 1; i >= 0; i-- {
-		cf := p[i]
-		f, err := cf.Open(name)
-		if err == nil {
-			return f, err
-		}
-	}
-
-	return nil, fs.ErrNotExist
-}
-
-//go:embed templates
-var defaultTemplates embed.FS
 
 // App represents the main application instance that encapsulates all global state
 type App struct {
@@ -159,7 +91,7 @@ func init() {
 		extensionPage:         make(map[string]bool),
 		extensionPageEnclosed: make(map[string]bool),
 		buildPerms:            0744,
-		staticDirs:            []fs.FS{GetAssets()},
+		staticDirs:            []fs.FS{assets},
 	}
 
 	// Initialize default helpers

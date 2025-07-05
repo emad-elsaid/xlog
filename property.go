@@ -1,5 +1,16 @@
 package xlog
 
+// Property represent a piece of information about the current page such as last
+// update time, number of versions, number of words, reading time...etc
+type Property interface {
+	// Icon returns the fontawesome icon class name or emoji
+	Icon() string
+	// Name returns the name of the property
+	Name() string
+	// Value returns the value of the property
+	Value() any
+}
+
 // RegisterProperty registers a function that returns a set of properties for a page
 func (app *App) RegisterProperty(a func(Page) []Property) {
 	app.propsSources = append(app.propsSources, a)

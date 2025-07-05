@@ -7,6 +7,22 @@ import (
 	"path"
 )
 
+// priorityFS returns file that exists in one of the FS structs.
+// Prioritizing the end of the slice over earlier FSs.
+type priorityFS []fs.FS
+
+func (p priorityFS) Open(name string) (fs.File, error) {
+	for i := len(p) - 1; i >= 0; i-- {
+		cf := p[i]
+		f, err := cf.Open(name)
+		if err == nil {
+			return f, err
+		}
+	}
+
+	return nil, fs.ErrNotExist
+}
+
 // RegisterStaticDir adds a filesystem to the static files list
 func (app *App) RegisterStaticDir(f fs.FS) {
 	app.staticDirs = append(app.staticDirs, f)

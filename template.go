@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -10,6 +11,9 @@ import (
 	"path"
 	"strings"
 )
+
+//go:embed templates
+var defaultTemplates embed.FS
 
 // RegisterTemplate registers a filesystem that contains templates
 func (app *App) RegisterTemplate(t fs.FS, subDir string) {

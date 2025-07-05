@@ -90,7 +90,6 @@ func (app *App) build(buildDir string) error {
 		}
 	}
 
-	assets := GetAssets()
 	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err

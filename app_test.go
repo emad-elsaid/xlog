@@ -29,7 +29,7 @@ func newTestApp() *App {
 		extensionPage:         make(map[string]bool),
 		extensionPageEnclosed: make(map[string]bool),
 		buildPerms:            0744,
-		staticDirs:            []fs.FS{GetAssets()},
+		staticDirs:            []fs.FS{assets},
 	}
 }
 

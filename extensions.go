@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+// Extension represents a plugin that can be registered with the application
+type Extension interface {
+	Name() string
+	Init()
+}
+
 // RegisterExtension registers a new extension
 func (app *App) RegisterExtension(e Extension) {
 	app.extensions = append(app.extensions, e)

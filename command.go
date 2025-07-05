@@ -1,5 +1,17 @@
 package xlog
 
+import "html/template"
+
+// Command defines a structure used for actions and links
+type Command interface {
+	// Icon returns the Fontawesome icon class name for the Command
+	Icon() string
+	// Name of the command. to be displayed in the list
+	Name() string
+	// Attrs a map of attributes to their values
+	Attrs() map[template.HTMLAttr]any
+}
+
 // RegisterCommand registers a new command
 func (app *App) RegisterCommand(c func(Page) []Command) {
 	app.commands = append(app.commands, c)
