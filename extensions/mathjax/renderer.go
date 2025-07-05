@@ -27,6 +27,7 @@ MathJax = {
 <script type="text/javascript" src="/js/tex-chtml-full.js" async></script>`
 
 func registerBuildFiles() {
+	app := GetApp()
 	fs.WalkDir(js, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -36,7 +37,7 @@ func registerBuildFiles() {
 			return nil
 		}
 
-		RegisterBuildPage("/"+path, false)
+		app.RegisterBuildPage("/"+path, false)
 
 		return nil
 	})

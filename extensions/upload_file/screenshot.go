@@ -26,7 +26,8 @@ func (s Screenshot) Attrs() map[template.HTMLAttr]any {
 func ScreenshotForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
-	return xlog.Render("screenshot", map[string]any{
+	app := xlog.GetApp()
+	return app.Render("screenshot", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
 		"csrf":   xlog.CSRF(r),
 	})

@@ -19,20 +19,22 @@ var (
 )
 
 func init() {
-	RegisterExtension(Hotreload{})
+	app := GetApp()
+	app.RegisterExtension(Hotreload{})
 }
 
 type Hotreload struct{}
 
 func (Hotreload) Name() string { return "hotreload" }
 func (Hotreload) Init() {
-	if Config.Readonly {
+	app := GetApp()
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	Listen(PageChanged, NotifyPageChange)
-	Get(`/+/hotreload`, handleWebSocket)
-	RegisterWidget(WidgetAfterView, 0, clientWidget)
+	app.Listen(PageChanged, NotifyPageChange)
+	app.Get(`/+/hotreload`, handleWebSocket)
+	app.RegisterWidget(WidgetAfterView, 0, clientWidget)
 }
 
 func NotifyPageChange(p Page) error {
@@ -58,9 +60,10 @@ func NotifyPageChange(p Page) error {
 func handleWebSocket(r Request) Output {
 	return func(w Response, r Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
+		app := GetApp()
 		if err != nil {
 			slog.Error("Failed to upgrade", "error", err)
-			BadRequest(err.Error())(w, r)
+			app.BadRequest(err.Error())(w, r)
 		}
 
 		// keep connection open

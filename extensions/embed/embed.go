@@ -10,7 +10,8 @@ import (
 )
 
 func init() {
-	xlog.RegisterExtension(Embed{})
+	app := xlog.GetApp()
+	app.RegisterExtension(Embed{})
 }
 
 type Embed struct{}
@@ -21,7 +22,8 @@ func (Embed) Init() {
 }
 
 func embedShortcode(in xlog.Markdown) template.HTML {
-	p := xlog.NewPage(strings.TrimSpace(string(in)))
+	app := xlog.GetApp()
+	p := app.NewPage(strings.TrimSpace(string(in)))
 	if p == nil || !p.Exists() {
 		return template.HTML(fmt.Sprintf("Page: %s doesn't exist", in))
 	}

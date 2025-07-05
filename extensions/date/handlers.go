@@ -12,13 +12,14 @@ import (
 var templates embed.FS
 
 func dateHandler(r Request) Output {
+	app := GetApp()
 	dateV := r.PathValue("date")
 	date, err := time.Parse("2-1-2006", dateV)
 	if err != nil {
-		return BadRequest(err.Error())
+		return app.BadRequest(err.Error())
 	}
 
-	pages := MapPage(r.Context(), func(p Page) Page {
+	pages := MapPageGeneric(app, r.Context(), func(p Page) Page {
 		_, tree := p.AST()
 		allDates := FindAllInAST[*DateNode](tree)
 		for _, d := range allDates {
@@ -30,16 +31,17 @@ func dateHandler(r Request) Output {
 		return nil
 	})
 
-	return Render("date", Locals{
+	return app.Render("date", Locals{
 		"page":  DynamicPage{NameVal: date.Format("2 January 2006")},
 		"pages": pages,
 	})
 }
 
 func calendarHandler(r Request) Output {
+	app := GetApp()
 	calendar := []pair{}
 
-	EachPage(r.Context(), func(p Page) {
+	app.EachPage(r.Context(), func(p Page) {
 		_, ast := p.AST()
 		if ast == nil {
 			return
@@ -56,7 +58,7 @@ func calendarHandler(r Request) Output {
 		return int(b.Year) - int(a.Year)
 	})
 
-	return Render("calendar", Locals{
+	return app.Render("calendar", Locals{
 		"page":     DynamicPage{NameVal: "Calendar"},
 		"calendar": cal,
 	})

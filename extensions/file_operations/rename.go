@@ -26,18 +26,20 @@ func (f PageRename) Attrs() map[template.HTMLAttr]any {
 }
 
 func (f PageRename) Form(r Request) Output {
+	app := GetApp()
 	name := r.FormValue("page")
-	page := NewPage(name)
+	page := app.NewPage(name)
 
-	return Render("rename-form", map[string]any{
+	return app.Render("rename-form", map[string]any{
 		"page": page,
 	})
 }
 
 func (f PageRename) Handler(r Request) Output {
-	old := NewPage(r.FormValue("old"))
+	app := GetApp()
+	old := app.NewPage(r.FormValue("old"))
 	if old == nil || !old.Exists() {
-		return BadRequest("file doesn't exist")
+		return app.BadRequest("file doesn't exist")
 	}
 
 	ext := path.Ext(old.FileName())

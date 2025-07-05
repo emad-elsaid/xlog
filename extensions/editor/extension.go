@@ -19,21 +19,23 @@ var editor string
 func init() {
 	flag.StringVar(&editor, "editor", os.Getenv("EDITOR"), "command to use to open pages for editing")
 
-	xlog.RequireHTMX()
-	xlog.RegisterExtension(Editor{})
+	app := xlog.GetApp()
+	app.RequireHTMX()
+	app.RegisterExtension(Editor{})
 }
 
 type Editor struct{}
 
 func (Editor) Name() string { return "editor" }
 func (Editor) Init() {
-	if xlog.Config.Readonly {
+	app := xlog.GetApp()
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	xlog.RegisterQuickCommand(links)
-	xlog.Post(`/+/editor/{page...}`, editorHandler)
-	xlog.Listen(xlog.PageNotFound, newPage)
+	app.RegisterQuickCommand(links)
+	app.Post(`/+/editor/{page...}`, editorHandler)
+	app.Listen(xlog.PageNotFound, newPage)
 }
 
 func newPage(p xlog.Page) error {
@@ -68,12 +70,13 @@ func openEditor(page xlog.Page) {
 }
 
 func editorHandler(r xlog.Request) xlog.Output {
-	page := xlog.NewPage(r.PathValue("page"))
+	app := xlog.GetApp()
+	page := app.NewPage(r.PathValue("page"))
 	slog.Info("Editing page", "name", page)
 
 	openEditor(page)
 
-	return xlog.NoContent()
+	return app.NoContent()
 }
 
 func links(p xlog.Page) []xlog.Command {

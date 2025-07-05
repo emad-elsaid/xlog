@@ -31,14 +31,16 @@ var domain string
 
 func init() {
 	flag.StringVar(&domain, "disqus", "", "Disqus domain name for example: xlog-emadelsaid.disqus.com")
-	RegisterExtension(Disqus{})
+	app := GetApp()
+	app.RegisterExtension(Disqus{})
 }
 
 type Disqus struct{}
 
 func (Disqus) Name() string { return "disqus" }
 func (Disqus) Init() {
-	RegisterWidget(WidgetAfterView, 2, widget)
+	app := GetApp()
+	app.RegisterWidget(WidgetAfterView, 2, widget)
 }
 
 func widget(p Page) template.HTML {

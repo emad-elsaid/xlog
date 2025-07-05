@@ -19,11 +19,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/emad-elsaid/xlog/markdown/ast"
-
 	"github.com/emad-elsaid/types"
 	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/rwcarlsen/goexif/exif"
 	"golang.org/x/image/draw"
 	_ "golang.org/x/image/webp"
@@ -35,19 +34,21 @@ var templates embed.FS
 var supportedExt = types.Slice[string]{".jpg", ".jpeg", ".gif", ".png"}
 
 func init() {
-	xlog.RegisterExtension(Photos{})
+	app := xlog.GetApp()
+	app.RegisterExtension(Photos{})
 }
 
 type Photos struct{}
 
 func (Photos) Name() string { return "photos" }
 func (Photos) Init() {
+	app := xlog.GetApp()
 	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode("photos")})
 	shortcode.RegisterShortCode("photos-grid", shortcode.ShortCode{Render: photosShortcode("photos-grid")})
-	xlog.RegisterTemplate(templates, "templates")
-	xlog.RegisterProperty(properties)
-	xlog.Get(`/+/photos/thumbnail/{path...}`, resizeHandler)
-	xlog.Get(`/+/photos/photo/{path...}`, photoHandler)
+	app.RegisterTemplate(templates, "templates")
+	app.RegisterProperty(properties)
+	app.Get(`/+/photos/thumbnail/{path...}`, resizeHandler)
+	app.Get(`/+/photos/photo/{path...}`, photoHandler)
 }
 
 type Photo struct {
@@ -72,7 +73,8 @@ func (*Photo) Write(xlog.Markdown) bool { return false }
 func (*Photo) ModTime() time.Time       { return time.Time{} }
 func (*Photo) AST() ([]byte, ast.Node)  { return nil, nil }
 func (p *Photo) Render() template.HTML {
-	return xlog.Partial("photo", xlog.Locals{"photo": p})
+	app := xlog.GetApp()
+	return app.Partial("photo", xlog.Locals{"photo": p})
 }
 
 func NewPhoto(path string) (*Photo, error) {
@@ -123,8 +125,9 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 					return err
 				}
 
-				xlog.RegisterBuildPage(photo.Thumbnail, false)
-				xlog.RegisterBuildPage(photo.Page, true)
+				app := xlog.GetApp()
+				app.RegisterBuildPage(photo.Thumbnail, false)
+				app.RegisterBuildPage(photo.Page, true)
 				photos = append(photos, photo)
 			}
 
@@ -139,7 +142,8 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 			return j.Time.Compare(i.Time)
 		})
 
-		return xlog.Partial(tpl, xlog.Locals{
+		app := xlog.GetApp()
+		return app.Partial(tpl, xlog.Locals{
 			"photos": photos,
 		})
 	}
@@ -189,10 +193,12 @@ func photoHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 	photo, err := NewPhoto(photo_path)
 	if err != nil {
-		return xlog.InternalServerError(err)
+		app := xlog.GetApp()
+		return app.InternalServerError(err)
 	}
 
-	return xlog.Render("page", xlog.Locals{
+	app := xlog.GetApp()
+	return app.Render("page", xlog.Locals{
 		"page": photo,
 	})
 }

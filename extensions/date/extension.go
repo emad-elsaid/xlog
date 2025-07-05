@@ -8,19 +8,21 @@ import (
 )
 
 func init() {
-	RegisterExtension(Date{})
+	app := GetApp()
+	app.RegisterExtension(Date{})
 }
 
 type Date struct{}
 
 func (Date) Name() string { return "date" }
 func (Date) Init() {
-	RegisterTemplate(templates, "templates")
-	RegisterLink(links)
-	RegisterBuildPage(`/+/calendar`, true)
+	app := GetApp()
+	app.RegisterTemplate(templates, "templates")
+	app.RegisterLink(links)
+	app.RegisterBuildPage(`/+/calendar`, true)
 
-	Get(`/+/date/{date}`, dateHandler)
-	Get(`/+/calendar`, calendarHandler)
+	app.Get(`/+/date/{date}`, dateHandler)
+	app.Get(`/+/calendar`, calendarHandler)
 
 	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&dateParser{}, 999),

@@ -12,24 +12,26 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterExtension(FileOps{})
+	app := GetApp()
+	app.RegisterExtension(FileOps{})
 }
 
 type FileOps struct{}
 
 func (FileOps) Name() string { return "file-operations" }
 func (FileOps) Init() {
-	if Config.Readonly {
+	app := GetApp()
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	RequireHTMX()
-	RegisterCommand(commands)
-	RegisterQuickCommand(commands)
-	RegisterTemplate(templates, "templates")
-	Post(`/+/file/rename`, PageRename{}.Handler)
-	Get(`/+/file/rename`, PageRename{}.Form)
-	Delete(`/+/file/delete`, PageDelete{}.Handler)
+	app.RequireHTMX()
+	app.RegisterCommand(commands)
+	app.RegisterQuickCommand(commands)
+	app.RegisterTemplate(templates, "templates")
+	app.Post(`/+/file/rename`, PageRename{}.Handler)
+	app.Get(`/+/file/rename`, PageRename{}.Form)
+	app.Delete(`/+/file/delete`, PageDelete{}.Handler)
 }
 
 func commands(p Page) []Command {

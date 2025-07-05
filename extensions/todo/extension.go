@@ -7,7 +7,8 @@ import (
 )
 
 func init() {
-	RegisterExtension(TODO{})
+	app := GetApp()
+	app.RegisterExtension(TODO{})
 }
 
 type TODO struct{}
@@ -18,8 +19,9 @@ func (TODO) Init() {
 		util.Prioritized(&TaskCheckBoxHTMLRenderer{}, 0),
 	))
 
-	if !Config.Readonly {
-		RequireHTMX()
-		Post(`/+/todo`, toggleHandler)
+	app := GetApp()
+	if !app.GetConfig().Readonly {
+		app.RequireHTMX()
+		app.Post(`/+/todo`, toggleHandler)
 	}
 }

@@ -26,7 +26,8 @@ func (s *dateRenderer) render(w util.BufWriter, source []byte, n ast.Node, enter
 	}
 
 	path := fmt.Sprintf(`/+/date/%s`, node.time.Format("2-1-2006"))
-	RegisterBuildPage(path, true)
+	app := GetApp()
+	app.RegisterBuildPage(path, true)
 
 	fmt.Fprintf(w, ` <a href="%s" class="tag"><span class="icon"><i class="fa-regular fa-clock"></i></span><span>%s<span></a> `, path, node.time.Format("2 January 2006"))
 

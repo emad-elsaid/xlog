@@ -1,37 +1,68 @@
 package sitemap
 
 import (
+	"context"
+	"encoding/xml"
 	"flag"
 	"fmt"
-	"net/url"
-	"strings"
+	"time"
 
 	. "github.com/emad-elsaid/xlog"
 )
 
-var SITEMAP_DOMAIN string
+var domain string
 
 func init() {
-	flag.StringVar(&SITEMAP_DOMAIN, "sitemap.domain", "", "domain name without protocol or trailing / to use for sitemap loc")
-	RegisterExtension(Sitemap{})
+	flag.StringVar(&domain, "sitemap.domain", "", "domain name to be used for sitemap URLs")
+	app := GetApp()
+	app.RegisterExtension(Sitemap{})
 }
 
 type Sitemap struct{}
 
 func (Sitemap) Name() string { return "sitemap" }
 func (Sitemap) Init() {
-	Get(`/sitemap.xml`, handler)
-	RegisterBuildPage("/sitemap.xml", false)
+	app := GetApp()
+	app.RegisterBuildPage("/sitemap.xml", false)
+	app.Get("/sitemap.xml", sitemapHandler)
 }
 
-func handler(r Request) Output {
-	output := []string{`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`}
+func sitemapHandler(r Request) Output {
+	app := GetApp()
+	return app.Cache(func(w Response, r Request) {
+		w.Header().Set("Content-Type", "application/xml")
+		fmt.Fprint(w, generateSitemap(app, r.Context()))
+	})
+}
 
-	output = append(output, MapPage(r.Context(), func(p Page) string {
-		return fmt.Sprintf("<url><loc>https://%s/%s</loc></url>", SITEMAP_DOMAIN, url.PathEscape(p.Name()))
-	})...)
+func generateSitemap(app *App, ctx context.Context) string {
+	urlset := URLSet{
+		XML: "http://www.sitemaps.org/schemas/sitemap/0.9",
+	}
 
-	output = append(output, `</urlset>`)
+	app.EachPage(ctx, func(p Page) {
+		if p.Exists() {
+			urlset.URLs = append(urlset.URLs, URL{
+				Loc:        fmt.Sprintf("https://%s/%s", domain, p.Name()),
+				LastMod:    p.ModTime().Format(time.RFC3339),
+				ChangeFreq: "weekly",
+				Priority:   "0.5",
+			})
+		}
+	})
 
-	return PlainText(strings.Join(output, "\n"))
+	output, _ := xml.MarshalIndent(urlset, "", "  ")
+	return xml.Header + string(output)
+}
+
+type URLSet struct {
+	XML  string `xml:"xmlns,attr"`
+	URLs []URL  `xml:"url"`
+}
+
+type URL struct {
+	Loc        string `xml:"loc"`
+	LastMod    string `xml:"lastmod"`
+	ChangeFreq string `xml:"changefreq"`
+	Priority   string `xml:"priority"`
 }

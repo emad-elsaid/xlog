@@ -26,7 +26,8 @@ var pandoc_support bool
 func init() {
 	flag.BoolVar(&pandoc_support, "pandoc", false, "Use pandoc to render "+strings.Join(SUPPORTED_EXT, ", "))
 
-	xlog.RegisterExtension(pandoc{})
+	app := xlog.GetApp()
+	app.RegisterExtension(pandoc{})
 }
 
 type pandoc struct{}
@@ -34,7 +35,8 @@ type pandoc struct{}
 func (pandoc) Name() string { return "pandoc" }
 func (p pandoc) Init() {
 	if pandoc_support {
-		xlog.RegisterPageSource(&p)
+		app := xlog.GetApp()
+		app.RegisterPageSource(&p)
 	}
 }
 
@@ -125,7 +127,8 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) Delete() bool {
-	defer xlog.Trigger(xlog.PageDeleted, p)
+	app := xlog.GetApp()
+	defer app.Trigger(xlog.PageDeleted, p)
 
 	if p.Exists() {
 		err := os.Remove(p.FileName())
@@ -138,11 +141,12 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content xlog.Markdown) bool {
-	if xlog.Config.Readonly {
+	app := xlog.GetApp()
+	if app.GetConfig().Readonly {
 		return false
 	}
 
-	defer xlog.Trigger(xlog.PageChanged, p)
+	defer app.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)

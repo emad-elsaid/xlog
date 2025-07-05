@@ -9,7 +9,8 @@ import (
 )
 
 func init() {
-	RegisterExtension(ShortCodeEx{})
+	app := GetApp()
+	app.RegisterExtension(ShortCodeEx{})
 }
 
 type ShortCodeEx struct{}

@@ -10,7 +10,8 @@ import (
 )
 
 func init() {
-	RegisterExtension(AutoLink{})
+	app := GetApp()
+	app.RegisterExtension(AutoLink{})
 }
 
 type AutoLink struct{}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"embed"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -23,12 +24,102 @@ import (
 	"strings"
 	"time"
 
+	"iter"
+	"sort"
+
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	emojiAst "github.com/emad-elsaid/xlog/markdown/emoji/ast"
 	"github.com/gorilla/csrf"
 	"gitlab.com/greyxor/slogor"
 	"golang.org/x/sync/errgroup"
 )
+
+// Property represent a piece of information about the current page such as last
+// update time, number of versions, number of words, reading time...etc
+type Property interface {
+	// Icon returns the fontawesome icon class name or emoji
+	Icon() string
+	// Name returns the name of the property
+	Name() string
+	// Value returns the value of the property
+	Value() any
+}
+
+// PageEvent represents different events that can occur with a page
+type PageEvent int
+
+// PageEventHandler is a function that handles a page event
+type PageEventHandler func(Page) error
+
+// List of page events
+const (
+	PageChanged PageEvent = iota
+	PageDeleted
+	PageNotFound // user requested a page that's not found
+)
+
+// Extension represents a plugin that can be registered with the application
+type Extension interface {
+	Name() string
+	Init()
+}
+
+// Command defines a structure used for actions and links
+type Command interface {
+	// Icon returns the Fontawesome icon class name for the Command
+	Icon() string
+	// Name of the command. to be displayed in the list
+	Name() string
+	// Attrs a map of attributes to their values
+	Attrs() map[template.HTMLAttr]any
+}
+
+// Preprocessor is a function that takes the whole page content and returns a
+// modified version of the content
+type Preprocessor func(Markdown) Markdown
+
+// WidgetSpace used to represent a widgets spaces. it's used to register
+// widgets to be injected in the view or edit pages
+type WidgetSpace string
+
+// WidgetFunc a function that takes the current page and returns the widget.
+// This can be used by extensions to define new widgets to be rendered in
+// view or edit pages. the extension should define this func type and
+// register it to be rendered in a specific widgetSpace such as before or
+// after the page.
+type WidgetFunc func(Page) template.HTML
+
+// List of widgets spaces that extensions can use to register a WidgetFunc to
+// inject content into.
+var (
+	WidgetAfterView  WidgetSpace = "after_view"  // widgets rendered after the content of the view page
+	WidgetBeforeView WidgetSpace = "before_view" // widgets rendered before the content of the view page
+	WidgetHead       WidgetSpace = "head"        // widgets rendered in page <head> tag
+)
+
+//go:embed public
+var assets embed.FS
+
+// GetAssets returns the embedded assets filesystem
+func GetAssets() embed.FS {
+	return assets
+}
+
+// priorityFS returns file that exists in one of the FS structs.
+// Prioritizing the end of the slice over earlier FSs.
+type priorityFS []fs.FS
+
+func (p priorityFS) Open(name string) (fs.File, error) {
+	for i := len(p) - 1; i >= 0; i-- {
+		cf := p[i]
+		f, err := cf.Open(name)
+		if err == nil {
+			return f, err
+		}
+	}
+
+	return nil, fs.ErrNotExist
+}
 
 //go:embed templates
 var defaultTemplates embed.FS
@@ -301,6 +392,16 @@ func (app *App) RegisterPageSource(p PageSource) {
 // RegisterPreprocessor registers a preprocessor function
 func (app *App) RegisterPreprocessor(f Preprocessor) {
 	app.preprocessors = append(app.preprocessors, f)
+}
+
+// RegisterProperty registers a function that returns a set of properties for a page
+func (app *App) RegisterProperty(a func(Page) []Property) {
+	app.propsSources = append(app.propsSources, a)
+}
+
+// RequireHTMX registers HTMX library
+func (app *App) RequireHTMX() {
+	app.includeJS("/public/htmx.min.js")
 }
 
 // PreProcess processes content through all registered preprocessors
@@ -731,6 +832,48 @@ func (app *App) Render(path string, data Locals) Output {
 	}
 }
 
+// BadRequest returns a bad request response
+func (app *App) BadRequest(msg string) Output {
+	return func(w Response, r Request) {
+		http.Error(w, msg, http.StatusBadRequest)
+	}
+}
+
+// InternalServerError returns an internal server error response
+func (app *App) InternalServerError(err error) Output {
+	return func(w Response, r Request) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+// PlainText returns a plain text response
+func (app *App) PlainText(text string) Output {
+	return func(w Response, r Request) {
+		w.Write([]byte(text))
+	}
+}
+
+// JsonResponse returns a JSON response
+func (app *App) JsonResponse(a any) Output {
+	return func(w Response, r Request) {
+		b, err := json.Marshal(a)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
+
+		w.Write(b)
+	}
+}
+
+// Cache wraps Output and adds header to instruct the browser to cache the output
+func (app *App) Cache(out Output) Output {
+	return func(w Response, r Request) {
+		w.Header().Add("Cache-Control", "max-age=604800")
+		out(w, r)
+	}
+}
+
 // NewPage creates a new page
 func (app *App) NewPage(name string) Page {
 
@@ -790,7 +933,7 @@ func (app *App) staticHandler(r Request) (Output, error) {
 		return nil, err
 	} else {
 		f.Close()
-		return Cache(server.ServeHTTP), nil
+		return app.Cache(server.ServeHTTP), nil
 	}
 }
 
@@ -1053,4 +1196,54 @@ func isNil[T any](t T) bool {
 		kind == reflect.Chan ||
 		kind == reflect.Func) &&
 		v.IsNil()
+}
+
+type priorityItem[T any] struct {
+	Item     T
+	Priority float32
+}
+
+type priorityList[T any] struct {
+	items []priorityItem[T]
+}
+
+func (pl *priorityList[T]) Add(item T, priority float32) {
+	pl.items = append(pl.items, priorityItem[T]{Item: item, Priority: priority})
+	pl.sortByPriority()
+}
+
+func (pl *priorityList[T]) sortByPriority() {
+	sort.Slice(pl.items, func(i, j int) bool {
+		return pl.items[i].Priority < pl.items[j].Priority
+	})
+}
+
+// An iterator over all items
+func (pl *priorityList[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for _, v := range pl.items {
+			if !yield(v.Item) {
+				return
+			}
+		}
+	}
+}
+
+type lastUpdateProp struct{ page Page }
+
+func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }
+func (a lastUpdateProp) Name() string { return "modified" }
+func (a lastUpdateProp) Value() any {
+	app := GetApp()
+	return app.ago(a.page.ModTime())
+}
+
+func DefaultProps(p Page) []Property {
+	if p.ModTime().IsZero() {
+		return nil
+	}
+
+	return []Property{
+		lastUpdateProp{p},
+	}
 }

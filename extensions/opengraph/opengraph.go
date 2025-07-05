@@ -21,22 +21,25 @@ func init() {
 	flag.StringVar(&domain, "og.domain", "", "opengraph domain name to be used for meta tags of og:* and twitter:*")
 	flag.StringVar(&twitterUsername, "twitter.username", "", "user twitter account @handle. including the @")
 
-	RegisterExtension(Opengraph{})
+	app := GetApp()
+	app.RegisterExtension(Opengraph{})
 }
 
 type Opengraph struct{}
 
 func (Opengraph) Name() string { return "opengraph" }
 func (Opengraph) Init() {
-	RegisterWidget(WidgetHead, 1, opengraphTags)
+	app := GetApp()
+	app.RegisterWidget(WidgetHead, 1, opengraphTags)
 }
 
 func opengraphTags(p Page) template.HTML {
 	escape := template.JSEscapeString
+	app := GetApp()
 
 	title := p.Name()
-	if p.Name() == Config.Index {
-		title = Config.Sitename
+	if p.Name() == app.GetConfig().Index {
+		title = app.GetConfig().Sitename
 	}
 
 	var u url.URL
@@ -62,7 +65,7 @@ func opengraphTags(p Page) template.HTML {
     <meta property="og:url" content="%s" />
     <meta property="og:type" content="website" />
 `,
-		escape(Config.Sitename),
+		escape(app.GetConfig().Sitename),
 		escape(title),
 		escape(firstParagraph),
 		escape(image),

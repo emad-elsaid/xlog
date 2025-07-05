@@ -1,33 +1,31 @@
 package mermaid
 
 import (
-	"fmt"
+	"embed"
 	"html/template"
 
-	_ "embed"
-
 	. "github.com/emad-elsaid/xlog"
-	shortcode "github.com/emad-elsaid/xlog/extensions/shortcode"
 )
 
+//go:embed script.html
+var script string
+
+// Prevent unused import removal
+var _ = embed.FS{}
+
 func init() {
-	RegisterExtension(Mermaid{})
+	app := GetApp()
+	app.RegisterExtension(Mermaid{})
 }
 
 type Mermaid struct{}
 
 func (Mermaid) Name() string { return "mermaid" }
 func (Mermaid) Init() {
-	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
+	app := GetApp()
+	app.RegisterWidget(WidgetHead, 0, mermaidWidget)
 }
 
-//go:embed script.html
-var script string
-
-const pre = `<pre class="mermaid" style="background: transparent;text-align:center;">%s</pre>`
-
-func renderer(md Markdown) template.HTML {
-	html := fmt.Sprintf(pre, md)
-	return template.HTML(html + script)
-
+func mermaidWidget(Page) template.HTML {
+	return template.HTML(script)
 }

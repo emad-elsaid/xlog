@@ -31,7 +31,8 @@ func (p *page) Exists() bool {
 
 func (p *page) Render() template.HTML {
 	content := p.Content()
-	content = xlog.PreProcess(content)
+	app := xlog.GetApp()
+	content = app.PreProcess(content)
 	var buf bytes.Buffer
 	if err := xlog.MarkdownConverter().Convert([]byte(content), &buf); err != nil {
 		return template.HTML(err.Error())
@@ -60,7 +61,8 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) Delete() bool {
-	defer xlog.Trigger(xlog.PageDeleted, p)
+	app := xlog.GetApp()
+	defer app.Trigger(xlog.PageDeleted, p)
 
 	if p.Exists() {
 		err := os.Remove(p.FileName())
@@ -73,7 +75,8 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content xlog.Markdown) bool {
-	defer xlog.Trigger(xlog.PageChanged, p)
+	app := xlog.GetApp()
+	defer app.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)

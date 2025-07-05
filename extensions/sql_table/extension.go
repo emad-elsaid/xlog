@@ -18,7 +18,7 @@ var sqlTableThreshold int
 
 func init() {
 	flag.IntVar(&sqlTableThreshold, "sql-table.threshold", 100, "If a table rows is more than this threshold it'll allow users to query it with SQL")
-	xlog.RegisterExtension(Extension{})
+	xlog.GetApp().RegisterExtension(Extension{})
 }
 
 type Extension struct{}
@@ -28,7 +28,7 @@ func (Extension) Name() string {
 }
 
 func (Extension) Init() {
-	xlog.RegisterWidget(xlog.WidgetAfterView, 1, script)
+	xlog.GetApp().RegisterWidget(xlog.WidgetAfterView, 1, script)
 }
 
 func script(p xlog.Page) template.HTML {

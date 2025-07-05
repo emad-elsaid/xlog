@@ -12,7 +12,8 @@ var editUrl string
 
 func init() {
 	flag.StringVar(&editUrl, "github.url", "", "Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs")
-	RegisterExtension(Github{})
+	app := GetApp()
+	app.RegisterExtension(Github{})
 }
 
 type Github struct{}
@@ -23,7 +24,8 @@ func (Github) Init() {
 		return
 	}
 
-	RegisterQuickCommand(quickCommands)
+	app := GetApp()
+	app.RegisterQuickCommand(quickCommands)
 }
 
 func quickCommands(p Page) []Command {

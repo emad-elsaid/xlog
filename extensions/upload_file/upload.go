@@ -28,7 +28,8 @@ func (u Upload) Attrs() map[template.HTMLAttr]any {
 func UploadForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
-	return xlog.Render("upload", map[string]any{
+	app := xlog.GetApp()
+	return app.Render("upload", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
 		"csrf":   xlog.CSRF(r),
 	})

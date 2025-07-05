@@ -28,7 +28,8 @@ func (s RecordAudio) Attrs() map[template.HTMLAttr]any {
 func RecordAudioForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
-	return xlog.Render("record-audio", map[string]any{
+	app := xlog.GetApp()
+	return app.Render("record-audio", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
 		"csrf":   xlog.CSRF(r),
 	})

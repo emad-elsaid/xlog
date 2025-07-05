@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"path"
-	"slices"
 	"strings"
 	"time"
 
@@ -15,14 +14,6 @@ import (
 )
 
 var ErrHelperRegistered = errors.New("Helper already registered")
-
-// RegisterHelper registers a new helper function. all helpers are used when compiling
-// templates. so registering helpers function must happen before the server
-// starts as compiling templates happened right before starting the http server.
-func RegisterHelper(name string, f any) error {
-	app := GetApp()
-	return app.RegisterHelper(name, f)
-}
 
 // A function that takes time.duration and return a string representation of the
 // duration in human readable way such as "3 seconds ago". "5 hours 30 minutes
@@ -84,37 +75,6 @@ func ago(t time.Time) string {
 	o.WriteString("ago")
 
 	return o.String()
-}
-
-var js = []string{}
-
-// RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template
-func RegisterJS(f string) {
-	if slices.Contains(js, f) {
-		return
-	}
-
-	js = append(js, f)
-}
-
-// RequireHTMX registes HTML library, this helps include one version of HTMX
-func RequireHTMX() {
-	RegisterJS("/public/htmx.min.js")
-}
-
-func includeJS(f string) template.HTML {
-	RegisterJS(f)
-
-	return ""
-}
-
-func scripts() template.HTML {
-	var b strings.Builder
-	for _, f := range js {
-		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
-	}
-
-	return template.HTML(b.String())
 }
 
 func IsFontAwesome(i string) bool {

@@ -12,19 +12,21 @@ var gpgId string
 
 func init() {
 	flag.StringVar(&gpgId, "gpg", "", "PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off")
-	xlog.RegisterExtension(PGP{})
+	app := xlog.GetApp()
+	app.RegisterExtension(PGP{})
 }
 
 type PGP struct{}
 
 func (PGP) Name() string { return "pgp" }
 func (PGP) Init() {
-	xlog.RegisterPageSource(new(encryptedPages))
+	app := xlog.GetApp()
+	app.RegisterPageSource(new(encryptedPages))
 
-	if !xlog.Config.Readonly {
-		xlog.RegisterCommand(commands)
-		xlog.RequireHTMX()
-		xlog.Post(`/+/gpg/encrypt/{page...}`, encryptHandler)
-		xlog.Post(`/+/gpg/decrypt/{page...}`, decryptHandler)
+	if !app.GetConfig().Readonly {
+		app.RegisterCommand(commands)
+		app.RequireHTMX()
+		app.Post(`/+/gpg/encrypt/{page...}`, encryptHandler)
+		app.Post(`/+/gpg/decrypt/{page...}`, decryptHandler)
 	}
 }

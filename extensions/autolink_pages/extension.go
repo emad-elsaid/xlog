@@ -8,20 +8,22 @@ import (
 )
 
 func init() {
-	RegisterExtension(AutoLinkPages{})
+	app := GetApp()
+	app.RegisterExtension(AutoLinkPages{})
 }
 
 type AutoLinkPages struct{}
 
 func (AutoLinkPages) Name() string { return "autolink-pages" }
 func (AutoLinkPages) Init() {
-	if !Config.Readonly {
-		Listen(PageChanged, UpdatePagesList)
-		Listen(PageDeleted, UpdatePagesList)
+	app := GetApp()
+	if !app.GetConfig().Readonly {
+		app.Listen(PageChanged, UpdatePagesList)
+		app.Listen(PageDeleted, UpdatePagesList)
 	}
 
-	RegisterWidget(WidgetAfterView, 1, backlinksSection)
-	RegisterTemplate(templates, "templates")
+	app.RegisterWidget(WidgetAfterView, 1, backlinksSection)
+	app.RegisterTemplate(templates, "templates")
 	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&pageLinkParser{}, 999),
 	))

@@ -5,7 +5,8 @@ import (
 )
 
 func init() {
-	xlog.RegisterExtension(Frontmatter{})
+	app := xlog.GetApp()
+	app.RegisterExtension(Frontmatter{})
 }
 
 type Frontmatter struct{}
@@ -17,7 +18,8 @@ func (Frontmatter) Init() {
 	)
 
 	m.Extend(xlog.MarkdownConverter())
-	xlog.RegisterProperty(MetaProperties)
+	app := xlog.GetApp()
+	app.RegisterProperty(MetaProperties)
 }
 
 type MetaProperty struct {

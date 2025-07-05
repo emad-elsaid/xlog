@@ -11,21 +11,24 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterExtension(Manifest{})
+	app := GetApp()
+	app.RegisterExtension(Manifest{})
 }
 
 type Manifest struct{}
 
 func (Manifest) Name() string { return "manifest" }
 func (Manifest) Init() {
-	Get("/manifest.json", manifest)
-	RegisterBuildPage("/manifest.json", false)
-	RegisterWidget(WidgetHead, 1, head)
-	RegisterTemplate(templates, "templates")
+	app := GetApp()
+	app.Get("/manifest.json", manifest)
+	app.RegisterBuildPage("/manifest.json", false)
+	app.RegisterWidget(WidgetHead, 1, head)
+	app.RegisterTemplate(templates, "templates")
 }
 
 func manifest(r Request) Output {
-	return Cache(Render("manifest", Locals{"sitename": Config.Sitename}))
+	app := GetApp()
+	return app.Cache(app.Render("manifest", Locals{"sitename": app.GetConfig().Sitename}))
 }
 
 func head(Page) template.HTML {

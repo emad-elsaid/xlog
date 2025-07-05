@@ -28,7 +28,8 @@ func (s RecordCamera) Attrs() map[template.HTMLAttr]any {
 func RecordCameraForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
-	return xlog.Render("record-camera", map[string]any{
+	app := xlog.GetApp()
+	return app.Render("record-camera", map[string]any{
 		"action": "/+/upload-file?page=" + url.QueryEscape(name),
 		"csrf":   xlog.CSRF(r),
 	})

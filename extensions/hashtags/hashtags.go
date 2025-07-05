@@ -29,7 +29,8 @@ func init() {
 		pages: make(map[Page][]*HashTag),
 	}
 
-	RegisterExtension(&h)
+	app := GetApp()
+	app.RegisterExtension(&h)
 }
 
 type Hashtags struct {
@@ -39,17 +40,18 @@ type Hashtags struct {
 
 func (*Hashtags) Name() string { return "hashtags" }
 func (h *Hashtags) Init() {
-	Get(`/+/tags`, h.tagsHandler)
-	Get(`/+/tag/{tag}`, h.tagHandler)
-	RegisterWidget(WidgetAfterView, 1, h.relatedPages)
-	RegisterBuildPage("/+/tags", true)
-	RegisterLink(links)
-	RegisterTemplate(templates, "templates")
+	app := GetApp()
+	app.Get(`/+/tags`, h.tagsHandler)
+	app.Get(`/+/tag/{tag}`, h.tagHandler)
+	app.RegisterWidget(WidgetAfterView, 1, h.relatedPages)
+	app.RegisterBuildPage("/+/tags", true)
+	app.RegisterLink(links)
+	app.RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: h.hashtagPages})
 	shortcode.RegisterShortCode("hashtag-pages-grid", shortcode.ShortCode{Render: h.hashtagPagesGrid})
 
-	Listen(PageChanged, h.PageChanged)
-	Listen(PageDeleted, h.PageDeleted)
+	app.Listen(PageChanged, h.PageChanged)
+	app.Listen(PageDeleted, h.PageDeleted)
 
 	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
@@ -88,7 +90,8 @@ func (h *Hashtags) tagsHandler(r Request) Output {
 	tags := map[string][]Page{}
 	var lck sync.Mutex
 
-	EachPage(r.Context(), func(a Page) {
+	app := GetApp()
+	app.EachPage(r.Context(), func(a Page) {
 		set := map[string]bool{}
 		_, tree := a.AST()
 		hashes := FindAllInAST[*HashTag](tree)
@@ -112,25 +115,27 @@ func (h *Hashtags) tagsHandler(r Request) Output {
 		}
 	})
 
-	return Render("tags", Locals{
+	return app.Render("tags", Locals{
 		"page": DynamicPage{NameVal: "Hashtags"},
 		"tags": tags,
 	})
 }
 
 func (h *Hashtags) tagHandler(r Request) Output {
+	app := GetApp()
 	tag := r.PathValue("tag")
 
-	return Render("tag", Locals{
+	return app.Render("tag", Locals{
 		"page":  DynamicPage{NameVal: "#" + tag},
 		"pages": h.tagPages(r.Context(), tag),
 	})
 }
 
 func (h *Hashtags) tagPages(ctx context.Context, hashtag string) []Page {
+	app := GetApp()
 	uniqHandle := unique.Make(strings.ToLower(hashtag))
 
-	return MapPage(ctx, func(p Page) Page {
+	return MapPageGeneric(app, ctx, func(p Page) Page {
 		if p.Name() == Config.Index {
 			return nil
 		}
@@ -151,6 +156,7 @@ func (h *Hashtags) relatedPages(p Page) template.HTML {
 		return ""
 	}
 
+	app := GetApp()
 	_, tree := p.AST()
 	found_hashtags := FindAllInAST[*HashTag](tree)
 	hashtags := map[unique.Handle[string]]bool{}
@@ -158,7 +164,7 @@ func (h *Hashtags) relatedPages(p Page) template.HTML {
 		hashtags[v.unique] = true
 	}
 
-	pages := MapPage(context.Background(), func(rp Page) Page {
+	pages := MapPageGeneric(app, context.Background(), func(rp Page) Page {
 		if rp.Name() == p.Name() {
 			return nil
 		}
@@ -174,7 +180,7 @@ func (h *Hashtags) relatedPages(p Page) template.HTML {
 		return nil
 	})
 
-	return Partial("related-hashtags-pages", Locals{
+	return app.Partial("related-hashtags-pages", Locals{
 		"pages": pages,
 	})
 }
@@ -191,7 +197,8 @@ func (h *Hashtags) hashtagPages(hashtag Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := Partial("hashtag-pages", Locals{"pages": pages})
+	app := GetApp()
+	output := app.Partial("hashtag-pages", Locals{"pages": pages})
 	return template.HTML(output)
 }
 
@@ -207,7 +214,8 @@ func (h *Hashtags) hashtagPagesGrid(hashtag Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := Partial("hashtag-pages-grid", Locals{"pages": pages})
+	app := GetApp()
+	output := app.Partial("hashtag-pages-grid", Locals{"pages": pages})
 	return template.HTML(output)
 }
 
@@ -291,7 +299,8 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 
 	tag := n.(*HashTag)
 	fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag"><span class="icon"><i class="fa-solid fa-tag"></i></span><span>%s</span></a>`, tag.value, tag.value)
-	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
-	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", strings.ToLower(string(tag.value))), true)
+	app := GetApp()
+	app.RegisterBuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
+	app.RegisterBuildPage(fmt.Sprintf("/+/tag/%s", strings.ToLower(string(tag.value))), true)
 	return ast.WalkContinue, nil
 }
