@@ -46,7 +46,7 @@ func FuzzDefault(f *testing.F) {
 	if err != nil {
 		panic(err)
 	}
-	var testCases []map[string]interface{}
+	var testCases []map[string]any
 	if err := json.Unmarshal(bs, &testCases); err != nil {
 		panic(err)
 	}

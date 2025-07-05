@@ -34,7 +34,7 @@ func NewConfig() Config {
 }
 
 // SetOption implements renderer.NodeRenderer.SetOption.
-func (c *Config) SetOption(name renderer.OptionName, value interface{}) {
+func (c *Config) SetOption(name renderer.OptionName, value any) {
 	switch name {
 	case optHardWraps:
 		c.HardWraps = value.(bool)

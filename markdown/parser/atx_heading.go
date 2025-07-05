@@ -13,7 +13,7 @@ type HeadingConfig struct {
 }
 
 // SetOption implements SetOptioner.
-func (b *HeadingConfig) SetOption(name OptionName, _ interface{}) {
+func (b *HeadingConfig) SetOption(name OptionName, _ any) {
 	switch name {
 	case optAutoHeadingID:
 		b.AutoHeadingID = true

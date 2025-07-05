@@ -20,9 +20,9 @@ import (
 
 // TestingT is a subset of the functionality provided by testing.T.
 type TestingT interface {
-	Logf(string, ...interface{})
-	Skipf(string, ...interface{})
-	Errorf(string, ...interface{})
+	Logf(string, ...any)
+	Skipf(string, ...any)
+	Errorf(string, ...any)
 	FailNow()
 }
 

@@ -32,7 +32,7 @@ const (
 )
 
 // SetOption implements SetOptioner.
-func (c *LinkifyConfig) SetOption(name parser.OptionName, value interface{}) {
+func (c *LinkifyConfig) SetOption(name parser.OptionName, value any) {
 	switch name {
 	case optLinkifyAllowedProtocols:
 		c.AllowedProtocols = value.([][]byte)

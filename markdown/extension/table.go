@@ -68,7 +68,7 @@ func NewTableConfig() TableConfig {
 }
 
 // SetOption implements renderer.SetOptioner.
-func (c *TableConfig) SetOption(name renderer.OptionName, value interface{}) {
+func (c *TableConfig) SetOption(name renderer.OptionName, value any) {
 	switch name {
 	case optTableCellAlignMethod:
 		c.TableCellAlignMethod = value.(TableCellAlignMethod)
@@ -223,7 +223,7 @@ func (b *tableParagraphTransformer) parseRow(segment text.Segment,
 					if escapedCell == nil {
 						escapedCell = &escapedPipeCell{node, []int{}, false}
 						escapedList := pc.ComputeIfAbsent(escapedPipeCellListKey,
-							func() interface{} {
+							func() any {
 								return []*escapedPipeCell{}
 							}).([]*escapedPipeCell)
 						escapedList = append(escapedList, escapedCell)

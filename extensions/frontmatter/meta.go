@@ -19,7 +19,7 @@ import (
 )
 
 type data struct {
-	Map   map[string]interface{}
+	Map   map[string]any
 	Items yaml.MapSlice
 	Error error
 	Node  gast.Node
@@ -33,7 +33,7 @@ type Option interface {
 }
 
 // Get returns a YAML metadata.
-func Get(pc parser.Context) map[string]interface{} {
+func Get(pc parser.Context) map[string]any {
 	v := pc.Get(contextKey)
 	if v == nil {
 		return nil
@@ -44,7 +44,7 @@ func Get(pc parser.Context) map[string]interface{} {
 
 // TryGet tries to get a YAML metadata.
 // If there are YAML parsing errors, then nil and error are returned
-func TryGet(pc parser.Context) (map[string]interface{}, error) {
+func TryGet(pc parser.Context) (map[string]any, error) {
 	dtmp := pc.Get(contextKey)
 	if dtmp == nil {
 		return nil, nil
@@ -137,7 +137,7 @@ func (b *metaParser) Close(node gast.Node, reader text.Reader, pc parser.Context
 	}
 	d := &data{}
 	d.Node = node
-	meta := map[string]interface{}{}
+	meta := map[string]any{}
 	if err := yaml.Unmarshal(buf.Bytes(), &meta); err != nil {
 		d.Error = err
 	} else {
