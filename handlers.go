@@ -68,7 +68,7 @@ func (app *App) Start(ctx context.Context) {
 
 // rootHandler redirects to the index page
 func (app *App) rootHandler(r Request) Output {
-	return app.Redirect("/" + app.config.Index)
+	return Redirect("/" + app.config.Index)
 }
 
 // getPageHandler handles page requests
@@ -76,13 +76,13 @@ func (app *App) getPageHandler(r Request) Output {
 	page := app.NewPage(r.PathValue("page"))
 
 	if page == nil {
-		return app.NoContent()
+		return NoContent()
 	}
 
 	if !page.Exists() {
 		// if it's a directory get back to home page
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
-			return app.Redirect(app.config.Index)
+			return Redirect(app.config.Index)
 		}
 
 		// if it's a static file serve it
@@ -92,7 +92,7 @@ func (app *App) getPageHandler(r Request) Output {
 
 		// if it's readonly mode quit now
 		if app.config.Readonly {
-			return app.NotFound("can't find page")
+			return NotFound("can't find page")
 		}
 
 		// Allow extensions to handle this page if it's not readonly mode like

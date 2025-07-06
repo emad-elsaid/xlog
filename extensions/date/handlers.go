@@ -3,8 +3,10 @@ package date
 import (
 	"embed"
 	"slices"
+	"strconv"
 	"time"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -16,7 +18,7 @@ func dateHandler(r Request) Output {
 	dateV := r.PathValue("date")
 	date, err := time.Parse("2-1-2006", dateV)
 	if err != nil {
-		return app.BadRequest(err.Error())
+		return xlog.BadRequest(err.Error())
 	}
 
 	pages := MapPageGeneric(app, r.Context(), func(p Page) Page {

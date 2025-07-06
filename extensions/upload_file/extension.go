@@ -13,6 +13,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -76,7 +77,7 @@ func uploadFileHandler(r Request) Output {
 
 	page := app.NewPage(fileName)
 	if page == nil || (fileName != "" && !page.Exists()) {
-		return app.NotFound("page not found")
+		return xlog.NotFound("page not found")
 	}
 
 	var output string
@@ -92,13 +93,13 @@ func uploadFileHandler(r Request) Output {
 		os.Mkdir(PUBLIC_PATH, 0700)
 		out, err := os.Create(p)
 		if err != nil {
-			return app.InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
 		f.Seek(io.SeekStart, 0)
 		_, err = io.Copy(out, f)
 		if err != nil {
-			return app.InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
 		if slices.Contains(IMAGES_EXTENSIONS, ext) {
@@ -115,10 +116,10 @@ func uploadFileHandler(r Request) Output {
 	if fileName != "" && page.Exists() {
 		content := strings.TrimSpace(string(page.Content())) + "\n\n" + output + "\n"
 		page.Write(Markdown(content))
-		return app.Redirect("/" + page.Name())
+		return xlog.Redirect("/" + page.Name())
 	}
 
-	return app.PlainText(output)
+	return xlog.PlainText(output)
 }
 
 func filterChars(str string, exclude string) string {

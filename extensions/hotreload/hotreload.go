@@ -8,6 +8,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 	"github.com/gorilla/websocket"
 )
@@ -60,10 +61,9 @@ func NotifyPageChange(p Page) error {
 func handleWebSocket(r Request) Output {
 	return func(w Response, r Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
-		app := GetApp()
 		if err != nil {
 			slog.Error("Failed to upgrade", "error", err)
-			app.BadRequest(err.Error())(w, r)
+			xlog.BadRequest(err.Error())(w, r)
 		}
 
 		// keep connection open

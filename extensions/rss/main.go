@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -124,8 +125,8 @@ func feed(r Request) Output {
 
 	buff, err := xml.MarshalIndent(f, "", "    ")
 	if err != nil {
-		return app.InternalServerError(err)
+		return xlog.InternalServerError(err)
 	}
 
-	return app.PlainText(xml.Header + string(buff))
+	return xlog.PlainText(xml.Header + string(buff))
 }

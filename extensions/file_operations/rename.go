@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -39,7 +40,7 @@ func (f PageRename) Handler(r Request) Output {
 	app := GetApp()
 	old := app.NewPage(r.FormValue("old"))
 	if old == nil || !old.Exists() {
-		return app.BadRequest("file doesn't exist")
+		return xlog.BadRequest("file doesn't exist")
 	}
 
 	ext := path.Ext(old.FileName())

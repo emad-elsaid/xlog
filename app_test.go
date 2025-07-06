@@ -296,13 +296,11 @@ func TestJavaScriptHandling(t *testing.T) {
 
 // TestIsFontAwesome tests that IsFontAwesome function behavior is preserved
 func TestIsFontAwesome(t *testing.T) {
-	app := newTestApp()
-
-	require.True(t, app.IsFontAwesome("fa-solid"), "Expected 'fa-solid' to be FontAwesome")
-	require.True(t, app.IsFontAwesome("fa-regular"), "Expected 'fa-regular' to be FontAwesome")
-	require.True(t, app.IsFontAwesome("fa-brands"), "Expected 'fa-brands' to be FontAwesome")
-	require.False(t, app.IsFontAwesome("not-fa"), "Expected 'not-fa' to not be FontAwesome")
-	require.False(t, app.IsFontAwesome(""), "Expected empty string to not be FontAwesome")
+	require.True(t, IsFontAwesome("fa-solid"), "Expected 'fa-solid' to be FontAwesome")
+	require.True(t, IsFontAwesome("fa-regular"), "Expected 'fa-regular' to be FontAwesome")
+	require.True(t, IsFontAwesome("fa-brands"), "Expected 'fa-brands' to be FontAwesome")
+	require.False(t, IsFontAwesome("not-fa"), "Expected 'not-fa' to not be FontAwesome")
+	require.False(t, IsFontAwesome(""), "Expected empty string to not be FontAwesome")
 }
 
 // TestBannerApp tests that Banner function behavior is preserved
@@ -327,19 +325,17 @@ func TestEmoji(t *testing.T) {
 
 // TestDir tests that dir function behavior is preserved
 func TestDir(t *testing.T) {
-	app := newTestApp()
-	require.Equal(t, "", app.dir(""), "Expected empty string for empty path")
-	require.Equal(t, "", app.dir("."), "Expected empty string for '.'")
-	require.Equal(t, "", app.dir("file.txt"), "Expected empty string for 'file.txt'")
-	require.Equal(t, "dir", app.dir("dir/file.txt"), "Expected 'dir' for 'dir/file.txt'")
-	require.Equal(t, "a/b", app.dir("a/b/c.txt"), "Expected 'a/b' for 'a/b/c.txt'")
+	require.Equal(t, "", dir(""), "Expected empty string for empty path")
+	require.Equal(t, "", dir("."), "Expected empty string for '.'")
+	require.Equal(t, "", dir("file.txt"), "Expected empty string for 'file.txt'")
+	require.Equal(t, "dir", dir("dir/file.txt"), "Expected 'dir' for 'dir/file.txt'")
+	require.Equal(t, "a/b", dir("a/b/c.txt"), "Expected 'a/b' for 'a/b/c.txt'")
 }
 
 // TestRaw tests that raw function behavior is preserved
 func TestRaw(t *testing.T) {
-	app := newTestApp()
 	input := "<div>test</div>"
-	result := app.raw(input)
+	result := raw(input)
 	require.Equal(t, template.HTML(input), result, "Expected HTML to match input")
 }
 

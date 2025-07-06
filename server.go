@@ -85,48 +85,48 @@ func (app *App) handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 }
 
 // NotFound returns an output function that writes 404 NotFound to http response
-func (app *App) NotFound(msg string) Output {
+func NotFound(msg string) Output {
 	return func(w Response, r Request) {
 		http.Error(w, msg, http.StatusNotFound)
 	}
 }
 
 // BadRequest returns an output function that writes BadRequest http response
-func (app *App) BadRequest(msg string) Output {
+func BadRequest(msg string) Output {
 	return func(w Response, r Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 }
 
 // InternalServerError returns an output function that writes InternalServerError http response
-func (app *App) InternalServerError(err error) Output {
+func InternalServerError(err error) Output {
 	return func(w Response, r Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 // Redirect returns an output function that writes Found http response to provided URL
-func (app *App) Redirect(url string) Output {
+func Redirect(url string) Output {
 	return func(w Response, r Request) {
 		http.Redirect(w, r, url, http.StatusFound)
 	}
 }
 
 // NoContent returns an output function that writes NoContent http status
-func (app *App) NoContent() Output {
+func NoContent() Output {
 	return func(w Response, r Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
 // PlainText returns an output function that writes text to response writer
-func (app *App) PlainText(text string) Output {
+func PlainText(text string) Output {
 	return func(w Response, r Request) {
 		w.Write([]byte(text))
 	}
 }
 
-func (app *App) JsonResponse(a any) Output {
+func JsonResponse(a any) Output {
 	return func(w Response, r Request) {
 		b, err := json.Marshal(a)
 		if err != nil {

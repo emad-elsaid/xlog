@@ -11,6 +11,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -128,12 +129,12 @@ func starHandler(r Request) Output {
 	page := app.NewPage(r.PathValue("page"))
 
 	if page == nil || !page.Exists() {
-		return app.Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	starred_pages := app.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return app.Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
@@ -149,12 +150,12 @@ func unstarHandler(r Request) Output {
 	app := GetApp()
 	page := app.NewPage(r.PathValue("page"))
 	if page == nil || !page.Exists() {
-		return app.Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	starred_pages := app.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return app.Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	content := strings.Split(strings.TrimSpace(string(starred_pages.Content())), "\n")

@@ -24,14 +24,14 @@ func (app *App) initDefaultHelpers() {
 		"widgets":        app.RenderWidget,
 		"commands":       app.Commands,
 		"quick_commands": app.QuickCommands,
-		"isFontAwesome":  app.IsFontAwesome,
+		"isFontAwesome":  IsFontAwesome,
 		"includeJS":      app.includeJS,
 		"scripts":        app.scripts,
 		"banner":         app.Banner,
 		"emoji":          app.Emoji,
 		"base":           path.Base,
-		"dir":            app.dir,
-		"raw":            app.raw,
+		"dir":            dir,
+		"raw":            raw,
 	}
 }
 
@@ -137,8 +137,22 @@ func (app *App) scripts() template.HTML {
 }
 
 // IsFontAwesome checks if an icon is a FontAwesome icon
-func (app *App) IsFontAwesome(i string) bool {
+func IsFontAwesome(i string) bool {
 	return strings.HasPrefix(i, "fa")
+}
+
+// dir returns the directory name
+func dir(s string) string {
+	v := path.Dir(s)
+	if v == "." {
+		return ""
+	}
+	return v
+}
+
+// raw returns safe HTML
+func raw(i string) template.HTML {
+	return template.HTML(i)
 }
 
 // Banner returns the banner image for a page
@@ -183,18 +197,4 @@ func (app *App) Emoji(p Page) string {
 		return string(e.Value.Unicode)
 	}
 	return ""
-}
-
-// dir returns the directory name
-func (app *App) dir(s string) string {
-	v := path.Dir(s)
-	if v == "." {
-		return ""
-	}
-	return v
-}
-
-// raw returns safe HTML
-func (app *App) raw(i string) template.HTML {
-	return template.HTML(i)
 }

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -64,12 +65,11 @@ type webfingerResponse struct {
 }
 
 func webfinger(r Request) Output {
-	app := GetApp()
 	if domain == "" || username == "" {
-		return app.NoContent()
+		return xlog.NoContent()
 	}
 
-	return app.JsonResponse(
+	return xlog.JsonResponse(
 		webfingerResponse{
 			Subject: fmt.Sprintf("acct:%s@%s", username, domain),
 			Aliases: []string{
@@ -113,16 +113,15 @@ type profileResponse struct {
 }
 
 func profile(r Request) Output {
-	app := GetApp()
 	if domain == "" || username == "" {
-		return app.NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return app.NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
-	return app.JsonResponse(
+	return xlog.JsonResponse(
 		profileResponse{
 			Context:           "https://www.w3.org/ns/activitystreams",
 			ID:                fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
@@ -163,11 +162,11 @@ type outboxResponse struct {
 func outbox(r Request) Output {
 	app := GetApp()
 	if domain == "" || username == "" {
-		return app.NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return app.NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 	count := 0
 	app.EachPage(r.Context(), func(Page) {
@@ -175,7 +174,7 @@ func outbox(r Request) Output {
 		app.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
 	})
 
-	return app.JsonResponse(
+	return xlog.JsonResponse(
 		outboxResponse{
 			Context:    "https://www.w3.org/ns/activitystreams",
 			ID:         fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
@@ -219,11 +218,11 @@ type outboxPageObject struct {
 func outboxPage(r Request) Output {
 	app := GetApp()
 	if domain == "" || username == "" {
-		return app.NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return app.NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
 	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
@@ -232,7 +231,7 @@ func outboxPage(r Request) Output {
 	pages := app.Pages(r.Context())
 
 	if int(pageIndex) >= len(pages) || pageIndex < 0 {
-		return app.NotFound("page index is out of context")
+		return xlog.NotFound("page index is out of context")
 	}
 
 	var page Page
@@ -251,7 +250,7 @@ func outboxPage(r Request) Output {
 	u.Path = "/" + page.Name()
 	u.Host = domain
 
-	return app.JsonResponse(
+	return xlog.JsonResponse(
 		outboxPageResponse{
 			Context: "https://www.w3.org/ns/activitystreams",
 			ID:      fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex),

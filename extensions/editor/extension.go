@@ -76,7 +76,7 @@ func editorHandler(r xlog.Request) xlog.Output {
 
 	openEditor(page)
 
-	return app.NoContent()
+	return xlog.NoContent()
 }
 
 func links(p xlog.Page) []xlog.Command {

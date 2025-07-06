@@ -193,8 +193,7 @@ func photoHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 	photo, err := NewPhoto(photo_path)
 	if err != nil {
-		app := xlog.GetApp()
-		return app.InternalServerError(err)
+		return xlog.InternalServerError(err)
 	}
 
 	app := xlog.GetApp()
