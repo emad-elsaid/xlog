@@ -22,3 +22,8 @@ func TestIsIgnoredPathBehavior(t *testing.T) {
 	require.True(t, app.IsIgnoredPath("tempfile.txt"), "Expected 'tempfile.txt' to be ignored after registering custom pattern")
 	require.False(t, app.IsIgnoredPath("permanent"), "Expected 'permanent' to not be ignored")
 }
+
+func TestIsNil(t *testing.T) {
+	require.True(t, isNil[Page](nil))
+	require.True(t, isNil[*Page](nil))
+}
