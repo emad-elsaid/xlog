@@ -28,7 +28,7 @@ func (Extension) Name() string {
 }
 
 func (Extension) Init(app *xlog.App) {
-	xlog.GetApp().RegisterWidget(xlog.WidgetAfterView, 1, script)
+	app.RegisterWidget(xlog.WidgetAfterView, 1, script)
 }
 
 func script(p xlog.Page) template.HTML {
@@ -54,7 +54,7 @@ func script(p xlog.Page) template.HTML {
 	}
 
 	o, _ := js.ReadFile("js/sql_table.html")
-	o = append(o, []byte(fmt.Sprintf("<script>const sqlTableThreshold = %d</script>", sqlTableThreshold))...)
+	o = fmt.Appendf(o, "<script>const sqlTableThreshold = %d</script>", sqlTableThreshold)
 
 	return template.HTML(o)
 }
