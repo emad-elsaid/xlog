@@ -123,7 +123,7 @@ func (app *App) RequireHTMX() {
 
 // includeJS adds a JavaScript library URL/path
 func (app *App) includeJS(f string) template.HTML {
-	app.includeJS(f)
+	app.RegisterJS(f)
 	return ""
 }
 
