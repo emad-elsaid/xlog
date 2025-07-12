@@ -71,7 +71,7 @@ func search(ctx context.Context, keyword string) []*searchResult {
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
 	app := GetApp()
-	return MapPageGeneric(app, ctx, func(p Page) *searchResult {
+	return MapPage(app, ctx, func(p Page) *searchResult {
 		match := reg.FindString(p.Name())
 		if len(match) > 0 {
 			return &searchResult{

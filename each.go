@@ -65,8 +65,8 @@ func (app *App) MapPage(ctx context.Context, f func(Page) error) []error {
 	return errs
 }
 
-// MapPageGeneric maps over all pages with generic return type
-func MapPageGeneric[T any](app *App, ctx context.Context, f func(Page) T) []T {
+// MapPage maps over all pages with generic return type
+func MapPage[T any](app *App, ctx context.Context, f func(Page) T) []T {
 	if app.pages == nil {
 		app.populatePagesCache(ctx)
 	}

@@ -20,7 +20,7 @@ func dateHandler(r Request) Output {
 		return xlog.BadRequest(err.Error())
 	}
 
-	pages := MapPageGeneric(app, r.Context(), func(p Page) Page {
+	pages := MapPage(app, r.Context(), func(p Page) Page {
 		_, tree := p.AST()
 		allDates := FindAllInAST[*DateNode](tree)
 		for _, d := range allDates {

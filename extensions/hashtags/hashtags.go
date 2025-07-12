@@ -135,7 +135,7 @@ func (h *Hashtags) tagPages(ctx context.Context, hashtag string) []Page {
 	app := GetApp()
 	uniqHandle := unique.Make(strings.ToLower(hashtag))
 
-	return MapPageGeneric(app, ctx, func(p Page) Page {
+	return MapPage(app, ctx, func(p Page) Page {
 		if p.Name() == Config.Index {
 			return nil
 		}
@@ -164,7 +164,7 @@ func (h *Hashtags) relatedPages(p Page) template.HTML {
 		hashtags[v.unique] = true
 	}
 
-	pages := MapPageGeneric(app, context.Background(), func(rp Page) Page {
+	pages := MapPage(app, context.Background(), func(rp Page) Page {
 		if rp.Name() == p.Name() {
 			return nil
 		}
