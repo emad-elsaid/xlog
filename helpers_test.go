@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestAgoBehavior tests that ago function behavior is preserved
 func TestAgoBehavior(t *testing.T) {
 	app := newTestApp()
 
@@ -36,7 +35,6 @@ func TestAgoBehavior(t *testing.T) {
 	require.Contains(t, result, "1 day")
 }
 
-// TestIsFontAwesome tests that IsFontAwesome function behavior is preserved
 func TestIsFontAwesome(t *testing.T) {
 	require.True(t, IsFontAwesome("fa-solid"), "Expected 'fa-solid' to be FontAwesome")
 	require.True(t, IsFontAwesome("fa-regular"), "Expected 'fa-regular' to be FontAwesome")
@@ -45,7 +43,6 @@ func TestIsFontAwesome(t *testing.T) {
 	require.False(t, IsFontAwesome(""), "Expected empty string to not be FontAwesome")
 }
 
-// TestDir tests that dir function behavior is preserved
 func TestDir(t *testing.T) {
 	require.Equal(t, "", dir(""), "Expected empty string for empty path")
 	require.Equal(t, "", dir("."), "Expected empty string for '.'")
@@ -54,7 +51,6 @@ func TestDir(t *testing.T) {
 	require.Equal(t, "a/b", dir("a/b/c.txt"), "Expected 'a/b' for 'a/b/c.txt'")
 }
 
-// TestRaw tests that raw function behavior is preserved
 func TestRaw(t *testing.T) {
 	input := "<div>test</div>"
 	result := raw(input)

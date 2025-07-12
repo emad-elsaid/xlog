@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestIsIgnoredPathBehavior tests that IsIgnoredPath function behavior is preserved
 func TestIsIgnoredPathBehavior(t *testing.T) {
 	app := newTestApp()
 

@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestHelperRegistration tests that helper registration behavior is preserved
 func TestHelperRegistration(t *testing.T) {
 	app := newTestApp()
 	testHelper := func(s string) string {
@@ -22,7 +21,6 @@ func TestHelperRegistration(t *testing.T) {
 	require.ErrorIs(t, err, ErrHelperRegistered, "Expected ErrHelperRegistered")
 }
 
-// TestJavaScriptHandling tests that JavaScript handling behavior is preserved
 func TestJavaScriptHandling(t *testing.T) {
 	app := newTestApp()
 	app.js = []string{}

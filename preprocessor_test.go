@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestPreProcessBehavior tests that PreProcess function behavior is preserved
 func TestPreProcessBehavior(t *testing.T) {
 	app := newTestApp()
 	app.preprocessors = []Preprocessor{}

@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestRenderWidgetBehavior tests that RenderWidget function behavior is preserved
 func TestRenderWidgetBehavior(t *testing.T) {
 	app := newTestApp()
 	app.widgets = make(map[WidgetSpace]*priorityList[WidgetFunc])
@@ -35,7 +34,6 @@ func TestRenderWidgetBehavior(t *testing.T) {
 	require.Equal(t, template.HTML("<div>Second Widget</div><div>Test Widget</div>"), result)
 }
 
-// TestBannerApp tests that Banner function behavior is preserved
 func TestBannerApp(t *testing.T) {
 	app := newTestApp()
 	tcs := []struct {
@@ -103,7 +101,6 @@ func TestBannerApp(t *testing.T) {
 	}
 }
 
-// TestEmoji tests that Emoji function behavior is preserved
 func TestEmoji(t *testing.T) {
 	app := newTestApp()
 	testCases := []struct {

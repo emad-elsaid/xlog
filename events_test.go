@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestEventHandling tests that event handling behavior is preserved
 func TestEventHandling(t *testing.T) {
 	app := newTestApp()
 	app.pageEvents = make(map[PageEvent][]PageEventHandler)

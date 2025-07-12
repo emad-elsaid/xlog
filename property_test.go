@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestPropertiesBehavior tests that Properties function behavior is preserved
 func TestPropertiesBehavior(t *testing.T) {
 	app := newTestApp()
 

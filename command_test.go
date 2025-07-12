@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestCommandsBehavior tests that Commands function behavior is preserved
 func TestCommandsBehavior(t *testing.T) {
 	app := newTestApp()
 	app.commands = []func(Page) []Command{}
@@ -32,7 +31,6 @@ func TestCommandsBehavior(t *testing.T) {
 	require.Equal(t, "Test Command", commands[0].Name(), "Expected command name 'Test Command'")
 }
 
-// TestQuickCommandsBehavior tests that QuickCommands function behavior is preserved
 func TestQuickCommandsBehavior(t *testing.T) {
 	app := newTestApp()
 	app.quickCommands = []func(Page) []Command{}
@@ -57,7 +55,6 @@ func TestQuickCommandsBehavior(t *testing.T) {
 	require.Equal(t, "Quick Test", commands[0].Name(), "Expected quick command name 'Quick Test'")
 }
 
-// TestLinksBehavior tests that Links function behavior is preserved
 func TestLinksBehavior(t *testing.T) {
 	app := newTestApp()
 	app.links = []func(Page) []Command{}
