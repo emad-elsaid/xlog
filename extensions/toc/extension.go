@@ -18,8 +18,7 @@ func init() {
 type Extension struct{}
 
 func (Extension) Name() string { return "toc" }
-func (Extension) Init() {
-	app := xlog.GetApp()
+func (Extension) Init(app *xlog.App) {
 	app.RegisterWidget(xlog.WidgetBeforeView, 0, tocWidget)
 	app.RegisterTemplate(templates, "templates")
 }

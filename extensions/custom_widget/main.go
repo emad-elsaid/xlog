@@ -23,8 +23,7 @@ func init() {
 type CustomWidget struct{}
 
 func (CustomWidget) Name() string { return "custom-widget" }
-func (CustomWidget) Init() {
-	app := GetApp()
+func (CustomWidget) Init(app *App) {
 	if head_file != "" {
 		app.RegisterWidget(WidgetHead, 1, func(Page) template.HTML {
 			return readFile(head_file)

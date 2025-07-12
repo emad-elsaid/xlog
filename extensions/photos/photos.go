@@ -41,8 +41,7 @@ func init() {
 type Photos struct{}
 
 func (Photos) Name() string { return "photos" }
-func (Photos) Init() {
-	app := xlog.GetApp()
+func (Photos) Init(app *xlog.App) {
 	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode("photos")})
 	shortcode.RegisterShortCode("photos-grid", shortcode.ShortCode{Render: photosShortcode("photos-grid")})
 	app.RegisterTemplate(templates, "templates")

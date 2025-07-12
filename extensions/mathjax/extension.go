@@ -15,8 +15,7 @@ func init() {
 type Mathjax struct{}
 
 func (Mathjax) Name() string { return "mathjax" }
-func (Mathjax) Init() {
-	app := xlog.GetApp()
+func (Mathjax) Init(app *xlog.App) {
 	app.RegisterStaticDir(js)
 	registerBuildFiles()
 

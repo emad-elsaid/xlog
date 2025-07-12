@@ -24,7 +24,7 @@ func init() {
 type Search struct{}
 
 func (Search) Name() string { return "search" }
-func (Search) Init() {
+func (Search) Init(*App) {
 	app := GetApp()
 	if app.GetConfig().Readonly {
 		return

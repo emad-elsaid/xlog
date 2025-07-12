@@ -14,12 +14,11 @@ func init() {
 type TODO struct{}
 
 func (TODO) Name() string { return "todo" }
-func (TODO) Init() {
+func (TODO) Init(app *App) {
 	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&TaskCheckBoxHTMLRenderer{}, 0),
 	))
 
-	app := GetApp()
 	if !app.GetConfig().Readonly {
 		app.RequireHTMX()
 		app.Post(`/+/todo`, toggleHandler)

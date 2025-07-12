@@ -19,8 +19,7 @@ func init() {
 type PGP struct{}
 
 func (PGP) Name() string { return "pgp" }
-func (PGP) Init() {
-	app := xlog.GetApp()
+func (PGP) Init(app *xlog.App) {
 	app.RegisterPageSource(new(encryptedPages))
 
 	if !app.GetConfig().Readonly {

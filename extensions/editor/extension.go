@@ -27,8 +27,7 @@ func init() {
 type Editor struct{}
 
 func (Editor) Name() string { return "editor" }
-func (Editor) Init() {
-	app := xlog.GetApp()
+func (Editor) Init(app *xlog.App) {
 	if app.GetConfig().Readonly {
 		return
 	}

@@ -87,10 +87,11 @@ func MapPage[T any](app *App, ctx context.Context, f func(Page) T) []T {
 		done <- true
 	}()
 
+OUTER:
 	for _, p := range pages {
 		select {
 		case <-ctx.Done():
-			break
+			break OUTER
 		default:
 			grp.Go(func() (err error) {
 				val := f(p)

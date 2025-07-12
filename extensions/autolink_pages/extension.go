@@ -15,8 +15,7 @@ func init() {
 type AutoLinkPages struct{}
 
 func (AutoLinkPages) Name() string { return "autolink-pages" }
-func (AutoLinkPages) Init() {
-	app := GetApp()
+func (AutoLinkPages) Init(app *App) {
 	if !app.GetConfig().Readonly {
 		app.Listen(PageChanged, UpdatePagesList)
 		app.Listen(PageDeleted, UpdatePagesList)

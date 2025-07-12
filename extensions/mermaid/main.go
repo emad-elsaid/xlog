@@ -19,7 +19,7 @@ func init() {
 type Mermaid struct{}
 
 func (Mermaid) Name() string { return "mermaid" }
-func (Mermaid) Init() {
+func (Mermaid) Init(*App) {
 	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
 }
 

@@ -27,8 +27,7 @@ func init() {
 type Hotreload struct{}
 
 func (Hotreload) Name() string { return "hotreload" }
-func (Hotreload) Init() {
-	app := GetApp()
+func (Hotreload) Init(app *App) {
 	if app.GetConfig().Readonly {
 		return
 	}

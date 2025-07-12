@@ -20,8 +20,7 @@ func init() {
 type Sitemap struct{}
 
 func (Sitemap) Name() string { return "sitemap" }
-func (Sitemap) Init() {
-	app := GetApp()
+func (Sitemap) Init(app *App) {
 	app.Get(`/sitemap.xml`, handler)
 	app.RegisterBuildPage("/sitemap.xml", false)
 }

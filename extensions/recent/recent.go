@@ -23,8 +23,7 @@ func init() {
 type Recent struct{}
 
 func (Recent) Name() string { return "recent" }
-func (Recent) Init() {
-	app := xlog.GetApp()
+func (Recent) Init(app *xlog.App) {
 	app.Get(`/+/recent`, recentHandler)
 	app.RegisterBuildPage("/+/recent", true)
 	app.RegisterTemplate(templates, "templates")

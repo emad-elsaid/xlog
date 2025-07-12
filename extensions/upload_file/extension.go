@@ -38,8 +38,7 @@ func init() {
 type UploadFile struct{}
 
 func (UploadFile) Name() string { return "upload-file" }
-func (UploadFile) Init() {
-	app := GetApp()
+func (UploadFile) Init(app *xlog.App) {
 	if app.GetConfig().Readonly {
 		return
 	}
@@ -96,7 +95,7 @@ func uploadFileHandler(r Request) Output {
 			return xlog.InternalServerError(err)
 		}
 
-		f.Seek(io.SeekStart, 0)
+		f.Seek(0, io.SeekStart)
 		_, err = io.Copy(out, f)
 		if err != nil {
 			return xlog.InternalServerError(err)

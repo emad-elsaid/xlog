@@ -12,13 +12,12 @@ func init() {
 type Frontmatter struct{}
 
 func (Frontmatter) Name() string { return "frontmatter" }
-func (Frontmatter) Init() {
+func (Frontmatter) Init(app *xlog.App) {
 	m := New(
 		WithStoresInDocument(),
 	)
 
 	m.Extend(xlog.MarkdownConverter())
-	app := xlog.GetApp()
 	app.RegisterProperty(MetaProperties)
 }
 

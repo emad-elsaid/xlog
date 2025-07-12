@@ -39,8 +39,7 @@ type Hashtags struct {
 }
 
 func (*Hashtags) Name() string { return "hashtags" }
-func (h *Hashtags) Init() {
-	app := GetApp()
+func (h *Hashtags) Init(app *App) {
 	app.Get(`/+/tags`, h.tagsHandler)
 	app.Get(`/+/tag/{tag}`, h.tagHandler)
 	app.RegisterWidget(WidgetAfterView, 1, h.relatedPages)

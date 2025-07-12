@@ -18,8 +18,7 @@ func init() {
 type Manifest struct{}
 
 func (Manifest) Name() string { return "manifest" }
-func (Manifest) Init() {
-	app := GetApp()
+func (Manifest) Init(app *App) {
 	app.Get("/manifest.json", manifest)
 	app.RegisterBuildPage("/manifest.json", false)
 	app.RegisterWidget(WidgetHead, 1, head)

@@ -29,8 +29,7 @@ func init() {
 type HTML struct{}
 
 func (HTML) Name() string { return "html" }
-func (HTML) Init() {
-	app := xlog.GetApp()
+func (HTML) Init(app *xlog.App) {
 	if html_support {
 		app.RegisterPageSource(new(htmlSource))
 	}

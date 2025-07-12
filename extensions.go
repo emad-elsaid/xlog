@@ -9,7 +9,7 @@ import (
 // Extension represents a plugin that can be registered with the application
 type Extension interface {
 	Name() string
-	Init()
+	Init(*App)
 }
 
 // RegisterExtension registers a new extension
@@ -33,7 +33,7 @@ func (app *App) initExtensions() {
 			continue
 		}
 
-		app.extensions[i].Init()
+		app.extensions[i].Init(app)
 		enabledNames = append(enabledNames, app.extensions[i].Name())
 	}
 

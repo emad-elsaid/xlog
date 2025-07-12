@@ -27,7 +27,7 @@ func (Extension) Name() string {
 	return "sql_table"
 }
 
-func (Extension) Init() {
+func (Extension) Init(app *xlog.App) {
 	xlog.GetApp().RegisterWidget(xlog.WidgetAfterView, 1, script)
 }
 

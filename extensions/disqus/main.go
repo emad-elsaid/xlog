@@ -38,8 +38,7 @@ func init() {
 type Disqus struct{}
 
 func (Disqus) Name() string { return "disqus" }
-func (Disqus) Init() {
-	app := GetApp()
+func (Disqus) Init(app *App) {
 	app.RegisterWidget(WidgetAfterView, 2, widget)
 }
 

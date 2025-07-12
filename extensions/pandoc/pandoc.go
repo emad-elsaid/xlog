@@ -33,7 +33,7 @@ func init() {
 type pandoc struct{}
 
 func (pandoc) Name() string { return "pandoc" }
-func (p pandoc) Init() {
+func (p pandoc) Init(app *xlog.App) {
 	if pandoc_support {
 		app := xlog.GetApp()
 		app.RegisterPageSource(&p)

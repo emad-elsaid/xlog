@@ -17,7 +17,7 @@ func init() {
 type Embed struct{}
 
 func (Embed) Name() string { return "embed" }
-func (Embed) Init() {
+func (Embed) Init(_ *xlog.App) {
 	shortcode.RegisterShortCode("embed", shortcode.ShortCode{Render: embedShortcode})
 }
 

@@ -34,8 +34,7 @@ func init() {
 type ActivityPub struct{}
 
 func (ActivityPub) Name() string { return "activitypub" }
-func (ActivityPub) Init() {
-	app := GetApp()
+func (ActivityPub) Init(app *xlog.App) {
 	app.Get(`/.well-known/webfinger`, webfinger)
 	app.Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
 	app.Get(`/+/activitypub/{user}/outbox`, outbox)

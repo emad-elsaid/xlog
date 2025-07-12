@@ -28,8 +28,7 @@ func init() {
 type Opengraph struct{}
 
 func (Opengraph) Name() string { return "opengraph" }
-func (Opengraph) Init() {
-	app := GetApp()
+func (Opengraph) Init(app *App) {
 	app.RegisterWidget(WidgetHead, 1, opengraphTags)
 }
 

@@ -15,8 +15,7 @@ func init() {
 type Date struct{}
 
 func (Date) Name() string { return "date" }
-func (Date) Init() {
-	app := GetApp()
+func (Date) Init(app *App) {
 	app.RegisterTemplate(templates, "templates")
 	app.RegisterLink(links)
 	app.RegisterBuildPage(`/+/calendar`, true)

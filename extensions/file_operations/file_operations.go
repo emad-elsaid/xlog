@@ -19,8 +19,7 @@ func init() {
 type FileOps struct{}
 
 func (FileOps) Name() string { return "file-operations" }
-func (FileOps) Init() {
-	app := GetApp()
+func (FileOps) Init(app *App) {
 	if app.GetConfig().Readonly {
 		return
 	}

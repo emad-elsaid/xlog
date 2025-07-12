@@ -28,8 +28,7 @@ func init() {
 type LinkPreview struct{}
 
 func (LinkPreview) Name() string { return "link-preview" }
-func (LinkPreview) Init() {
-	app := xlog.GetApp()
+func (LinkPreview) Init(app *xlog.App) {
 	app.RegisterPreprocessor(imgUrlPreprocessor)
 	app.RegisterPreprocessor(tweetUrlPreprocessor)
 	app.RegisterPreprocessor(youtubeUrlPreprocessor)
@@ -193,9 +192,10 @@ func getUrlMeta(url string) (*Meta, error) {
 		name := strings.ToLower(n[1])
 		value := v[1]
 
-		if name == "description" || name == "og:description" {
+		switch name {
+		case "description", "og:description":
 			meta.Description = value
-		} else if name == "og:image" {
+		case "og:image":
 			meta.Image = value
 		}
 	}

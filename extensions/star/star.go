@@ -25,8 +25,7 @@ func init() {
 type Star struct{}
 
 func (Star) Name() string { return "star" }
-func (Star) Init() {
-	app := GetApp()
+func (Star) Init(app *xlog.App) {
 	app.RegisterLink(starredPages)
 	app.IgnorePath(regexp.MustCompile(`^starred\.md$`))
 

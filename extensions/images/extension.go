@@ -15,7 +15,7 @@ func init() {
 type Images struct{}
 
 func (Images) Name() string { return "images" }
-func (Images) Init() {
+func (Images) Init(app *App) {
 	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(columnizeImagesParagraph{}, 0),

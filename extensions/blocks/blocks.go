@@ -25,9 +25,8 @@ func init() {
 type Blocks struct{}
 
 func (Blocks) Name() string { return "blocks" }
-func (Blocks) Init() {
+func (Blocks) Init(app *xlog.App) {
 	RegisterShortCodes()
-	app := xlog.GetApp()
 	app.RegisterTemplate(templates, "templates")
 	app.RegisterStaticDir(public)
 	registerBuildFiles()

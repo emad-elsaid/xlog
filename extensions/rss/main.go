@@ -30,8 +30,7 @@ func init() {
 type RSS struct{}
 
 func (RSS) Name() string { return "rss" }
-func (RSS) Init() {
-	app := GetApp()
+func (RSS) Init(app *xlog.App) {
 	app.RegisterWidget(WidgetHead, 0, metaTag)
 	app.RegisterBuildPage("/+/feed.rss", false)
 	app.RegisterLink(links)

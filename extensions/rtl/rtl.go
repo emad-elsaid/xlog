@@ -17,7 +17,7 @@ func init() {
 type RTL struct{}
 
 func (RTL) Name() string { return "rtl" }
-func (RTL) Init() {
+func (RTL) Init(app *xlog.App) {
 	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(addDirAuto{}, 0),
