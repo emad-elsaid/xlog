@@ -14,15 +14,15 @@ import (
 )
 
 // build builds the static site
-func (app *App) build(buildDir string) error {
+func (app *App) build(dest string) error {
 	srv := app.server()
 
 	// building Index separately
 	err := app.buildRoute(
 		srv,
 		"/"+app.config.Index,
-		buildDir,
-		path.Join(buildDir, "index.html"),
+		dest,
+		path.Join(dest, "index.html"),
 	)
 
 	if err != nil {
@@ -33,8 +33,8 @@ func (app *App) build(buildDir string) error {
 		err := app.buildRoute(
 			srv,
 			"/"+p.Name(),
-			path.Join(buildDir, p.Name()),
-			path.Join(buildDir, p.Name(), "index.html"),
+			path.Join(dest, p.Name()),
+			path.Join(dest, p.Name(), "index.html"),
 		)
 
 		if err != nil {
@@ -50,9 +50,9 @@ func (app *App) build(buildDir string) error {
 
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
-	if in, err := os.Open(path.Join(buildDir, app.config.NotFoundPage, "index.html")); err == nil {
+	if in, err := os.Open(path.Join(dest, app.config.NotFoundPage, "index.html")); err == nil {
 		defer in.Close()
-		out, err := os.Create(path.Join(buildDir, "404.html"))
+		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {
 			slog.Error("Failed to open dest/404.html", "error", err)
 		}
@@ -68,8 +68,8 @@ func (app *App) build(buildDir string) error {
 		err := app.buildRoute(
 			srv,
 			route,
-			path.Join(buildDir, route),
-			path.Join(buildDir, route, "index.html"),
+			path.Join(dest, route),
+			path.Join(dest, route, "index.html"),
 		)
 
 		if err != nil {
@@ -81,8 +81,8 @@ func (app *App) build(buildDir string) error {
 		err := app.buildRoute(
 			srv,
 			route,
-			path.Join(buildDir, path.Dir(route)),
-			path.Join(buildDir, route),
+			path.Join(dest, path.Dir(route)),
+			path.Join(dest, route),
 		)
 
 		if err != nil {
@@ -95,7 +95,7 @@ func (app *App) build(buildDir string) error {
 			return err
 		}
 
-		destPath := path.Join(buildDir, p)
+		destPath := path.Join(dest, p)
 
 		if entry.IsDir() {
 			if err := os.MkdirAll(destPath, buildPerms); err != nil {
