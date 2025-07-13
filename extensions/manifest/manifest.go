@@ -11,8 +11,7 @@ import (
 var templates embed.FS
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Manifest{})
+	RegisterExtension(Manifest{})
 }
 
 type Manifest struct{}

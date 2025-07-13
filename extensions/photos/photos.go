@@ -34,8 +34,7 @@ var templates embed.FS
 var supportedExt = types.Slice[string]{".jpg", ".jpeg", ".gif", ".png"}
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Photos{})
+	xlog.RegisterExtension(Photos{})
 }
 
 type Photos struct{}

@@ -16,8 +16,7 @@ import (
 var templates embed.FS
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Recent{})
+	xlog.RegisterExtension(Recent{})
 }
 
 type Recent struct{}

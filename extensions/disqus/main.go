@@ -31,8 +31,7 @@ var domain string
 
 func init() {
 	flag.StringVar(&domain, "disqus", "", "Disqus domain name for example: xlog-emadelsaid.disqus.com")
-	app := GetApp()
-	app.RegisterExtension(Disqus{})
+	RegisterExtension(Disqus{})
 }
 
 type Disqus struct{}

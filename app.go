@@ -28,7 +28,6 @@ type App struct {
 	staticDirs   []fs.FS
 
 	// Extensions and plugins
-	extensions []Extension
 
 	// Widgets
 	widgets map[WidgetSpace]*priorityList[WidgetFunc]

@@ -21,8 +21,7 @@ func init() {
 	flag.StringVar(&domain, "og.domain", "", "opengraph domain name to be used for meta tags of og:* and twitter:*")
 	flag.StringVar(&twitterUsername, "twitter.username", "", "user twitter account @handle. including the @")
 
-	app := GetApp()
-	app.RegisterExtension(Opengraph{})
+	RegisterExtension(Opengraph{})
 }
 
 type Opengraph struct{}

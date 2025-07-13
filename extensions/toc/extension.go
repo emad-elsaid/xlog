@@ -11,8 +11,7 @@ import (
 var templates embed.FS
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Extension{})
+	xlog.RegisterExtension(Extension{})
 }
 
 type Extension struct{}

@@ -16,8 +16,7 @@ func init() {
 	flag.StringVar(&before_view_file, "custom.before_view", "", "path to a file it's content will be included in every page BEFORE the content of the page")
 	flag.StringVar(&after_view_file, "custom.after_view", "", "path to a file it's content will be included in every page AFTER the content of the page")
 
-	app := GetApp()
-	app.RegisterExtension(CustomWidget{})
+	RegisterExtension(CustomWidget{})
 }
 
 type CustomWidget struct{}

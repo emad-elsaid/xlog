@@ -7,8 +7,7 @@ import (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(TODO{})
+	RegisterExtension(TODO{})
 }
 
 type TODO struct{}

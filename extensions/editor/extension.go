@@ -21,7 +21,7 @@ func init() {
 
 	app := xlog.GetApp()
 	app.RequireHTMX()
-	app.RegisterExtension(Editor{})
+	xlog.RegisterExtension(Editor{})
 }
 
 type Editor struct{}

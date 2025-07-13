@@ -8,8 +8,7 @@ import (
 )
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Mathjax{})
+	xlog.RegisterExtension(Mathjax{})
 }
 
 type Mathjax struct{}

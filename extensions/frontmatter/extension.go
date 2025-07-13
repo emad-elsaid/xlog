@@ -5,8 +5,7 @@ import (
 )
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Frontmatter{})
+	xlog.RegisterExtension(Frontmatter{})
 }
 
 type Frontmatter struct{}

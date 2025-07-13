@@ -23,8 +23,7 @@ func init() {
 	flag.StringVar(&description, "rss.description", "", "RSS feed description")
 	flag.IntVar(&limit, "rss.limit", 30, "Limit the number of items in the RSS feed to this amount")
 
-	app := GetApp()
-	app.RegisterExtension(RSS{})
+	RegisterExtension(RSS{})
 }
 
 type RSS struct{}

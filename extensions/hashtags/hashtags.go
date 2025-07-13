@@ -29,8 +29,7 @@ func init() {
 		pages: make(map[Page][]*HashTag),
 	}
 
-	app := GetApp()
-	app.RegisterExtension(&h)
+	RegisterExtension(&h)
 }
 
 type Hashtags struct {

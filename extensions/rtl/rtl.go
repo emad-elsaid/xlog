@@ -10,8 +10,7 @@ import (
 )
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(RTL{})
+	xlog.RegisterExtension(RTL{})
 }
 
 type RTL struct{}

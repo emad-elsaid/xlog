@@ -12,9 +12,8 @@ import (
 var SITEMAP_DOMAIN string
 
 func init() {
-	app := GetApp()
 	flag.StringVar(&SITEMAP_DOMAIN, "sitemap.domain", "", "domain name without protocol or trailing / to use for sitemap loc")
-	app.RegisterExtension(new(Sitemap))
+	RegisterExtension(new(Sitemap))
 }
 
 type Sitemap struct {

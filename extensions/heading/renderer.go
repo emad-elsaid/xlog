@@ -11,8 +11,7 @@ import (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Heading{})
+	RegisterExtension(Heading{})
 }
 
 type Heading struct{}

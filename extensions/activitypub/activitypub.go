@@ -27,8 +27,7 @@ func init() {
 	flag.StringVar(&icon, "activitypub.icon", "/public/logo.png", "the path to the activitypub profile icon. mastodon use it as profile picture for example.")
 	flag.StringVar(&image, "activitypub.image", "/public/logo.png", "the path to the activitypub profile image. mastodon use it as profile cover for example.")
 
-	app := GetApp()
-	app.RegisterExtension(ActivityPub{})
+	RegisterExtension(ActivityPub{})
 }
 
 type ActivityPub struct{}

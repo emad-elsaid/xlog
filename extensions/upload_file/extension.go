@@ -31,8 +31,7 @@ var (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(UploadFile{})
+	RegisterExtension(UploadFile{})
 }
 
 type UploadFile struct{}

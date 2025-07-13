@@ -8,8 +8,7 @@ import (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Date{})
+	RegisterExtension(Date{})
 }
 
 type Date struct{}

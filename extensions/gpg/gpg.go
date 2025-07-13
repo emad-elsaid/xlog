@@ -12,8 +12,7 @@ var gpgId string
 
 func init() {
 	flag.StringVar(&gpgId, "gpg", "", "PGP key ID to decrypt and edit .md.pgp files using gpg. if empty encryption will be off")
-	app := xlog.GetApp()
-	app.RegisterExtension(PGP{})
+	xlog.RegisterExtension(PGP{})
 }
 
 type PGP struct{}

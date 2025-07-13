@@ -18,8 +18,7 @@ import (
 const STARRED_PAGES = "starred"
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Star{})
+	RegisterExtension(Star{})
 }
 
 type Star struct{}

@@ -20,8 +20,7 @@ var (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Hotreload{})
+	RegisterExtension(Hotreload{})
 }
 
 type Hotreload struct{}

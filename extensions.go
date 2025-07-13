@@ -12,9 +12,12 @@ type Extension interface {
 	Init(*App)
 }
 
+// Global variable to store all registered extensions
+var globalExtensions []Extension
+
 // RegisterExtension registers a new extension
-func (app *App) RegisterExtension(e Extension) {
-	app.extensions = append(app.extensions, e)
+func RegisterExtension(e Extension) {
+	globalExtensions = append(globalExtensions, e)
 }
 
 // initExtensions initializes all registered extensions
@@ -27,14 +30,14 @@ func (app *App) initExtensions() {
 	disabled := strings.Split(app.config.DisabledExtensions, ",")
 	disabledNames := []string{} // because the user can input wrong extension name
 	enabledNames := []string{}
-	for i := range app.extensions {
-		if slices.Contains(disabled, app.extensions[i].Name()) {
-			disabledNames = append(disabledNames, app.extensions[i].Name())
+	for i := range globalExtensions {
+		if slices.Contains(disabled, globalExtensions[i].Name()) {
+			disabledNames = append(disabledNames, globalExtensions[i].Name())
 			continue
 		}
 
-		app.extensions[i].Init(app)
-		enabledNames = append(enabledNames, app.extensions[i].Name())
+		globalExtensions[i].Init(app)
+		enabledNames = append(enabledNames, globalExtensions[i].Name())
 	}
 
 	slog.Info("extensions", "enabled", enabledNames, "disabled", disabled)

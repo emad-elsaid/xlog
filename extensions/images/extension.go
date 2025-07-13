@@ -8,8 +8,7 @@ import (
 )
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Images{})
+	RegisterExtension(Images{})
 }
 
 type Images struct{}

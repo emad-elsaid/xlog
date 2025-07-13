@@ -17,8 +17,7 @@ const MIN_SEARCH_KEYWORD = 3
 var templates embed.FS
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(Search{})
+	RegisterExtension(Search{})
 }
 
 type Search struct{}

@@ -18,8 +18,7 @@ var templates embed.FS
 var public embed.FS
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Blocks{})
+	xlog.RegisterExtension(Blocks{})
 }
 
 type Blocks struct{}

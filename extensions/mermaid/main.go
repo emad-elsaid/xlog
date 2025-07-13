@@ -12,8 +12,7 @@ import (
 )
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Mermaid{})
+	xlog.RegisterExtension(Mermaid{})
 }
 
 type Mermaid struct{}

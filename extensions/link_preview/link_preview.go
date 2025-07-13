@@ -21,8 +21,7 @@ import (
 var templates embed.FS
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(LinkPreview{})
+	xlog.RegisterExtension(LinkPreview{})
 }
 
 type LinkPreview struct{}

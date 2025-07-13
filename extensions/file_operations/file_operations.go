@@ -12,8 +12,7 @@ import (
 var templates embed.FS
 
 func init() {
-	app := GetApp()
-	app.RegisterExtension(FileOps{})
+	RegisterExtension(FileOps{})
 }
 
 type FileOps struct{}

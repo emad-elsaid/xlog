@@ -10,8 +10,7 @@ import (
 )
 
 func init() {
-	app := xlog.GetApp()
-	app.RegisterExtension(Embed{})
+	xlog.RegisterExtension(Embed{})
 }
 
 type Embed struct{}

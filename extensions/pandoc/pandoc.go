@@ -26,8 +26,7 @@ var pandoc_support bool
 func init() {
 	flag.BoolVar(&pandoc_support, "pandoc", false, "Use pandoc to render "+strings.Join(SUPPORTED_EXT, ", "))
 
-	app := xlog.GetApp()
-	app.RegisterExtension(pandoc{})
+	xlog.RegisterExtension(pandoc{})
 }
 
 type pandoc struct{}
