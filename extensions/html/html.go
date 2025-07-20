@@ -28,9 +28,9 @@ func init() {
 type HTML struct{}
 
 func (HTML) Name() string { return "html" }
-func (HTML) Init() {
+func (HTML) Init(app *xlog.App) {
 	if html_support {
-		xlog.RegisterPageSource(new(htmlSource))
+		app.RegisterPageSource(new(htmlSource))
 	}
 }
 
@@ -117,7 +117,7 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) Delete() bool {
-	defer xlog.Trigger(xlog.PageDeleted, p)
+	defer xlog.GetApp().Trigger(xlog.PageDeleted, p)
 
 	if p.Exists() {
 		err := os.Remove(p.FileName())
@@ -130,7 +130,7 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content xlog.Markdown) bool {
-	defer xlog.Trigger(xlog.PageChanged, p)
+	defer xlog.GetApp().Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
 	os.MkdirAll(filepath.Dir(name), 0700)

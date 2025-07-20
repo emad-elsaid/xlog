@@ -15,7 +15,7 @@ func init() {
 type ShortCodeEx struct{}
 
 func (s ShortCodeEx) Name() string { return "shortcode" }
-func (s ShortCodeEx) Init() {
+func (s ShortCodeEx) Init(app *App) {
 	s.Extend(MarkdownConverter())
 }
 

@@ -16,7 +16,7 @@ func init() {
 type AutoLink struct{}
 
 func (AutoLink) Name() string { return "autolink" }
-func (AutoLink) Init() {
+func (AutoLink) Init(*App) {
 	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&extension{}, -1),
 	))

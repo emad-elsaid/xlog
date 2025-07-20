@@ -24,12 +24,12 @@ func init() {
 type Blocks struct{}
 
 func (Blocks) Name() string { return "blocks" }
-func (Blocks) Init() {
+func (Blocks) Init(app *xlog.App) {
 	RegisterShortCodes()
-	xlog.RegisterTemplate(templates, "templates")
-	xlog.RegisterStaticDir(public)
+	app.RegisterTemplate(templates, "templates")
+	app.RegisterStaticDir(public)
 	registerBuildFiles()
-	xlog.RegisterWidget(xlog.WidgetHead, 0, style)
+	app.RegisterWidget(xlog.WidgetHead, 0, style)
 }
 
 func RegisterShortCodes() {
@@ -52,6 +52,7 @@ func RegisterShortCodes() {
 }
 
 func registerBuildFiles() {
+	app := xlog.GetApp()
 	fs.WalkDir(public, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -61,7 +62,7 @@ func registerBuildFiles() {
 			return nil
 		}
 
-		xlog.RegisterBuildPage("/"+path, false)
+		app.RegisterBuildPage("/"+path, false)
 
 		return nil
 	})
@@ -79,7 +80,8 @@ func block(tpl string) func(xlog.Markdown) template.HTML {
 			return template.HTML(err.Error())
 		}
 
-		output := xlog.Partial(tpl, xlog.Locals(b))
+		app := xlog.GetApp()
+		output := app.Partial(tpl, xlog.Locals(b))
 
 		return template.HTML(output)
 	}

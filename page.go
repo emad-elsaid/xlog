@@ -17,6 +17,19 @@ import (
 // Markdown is used instead of string to make sure it's clear the string is markdown string
 type Markdown string
 
+// NewPage creates a new page
+func (app *App) NewPage(name string) Page {
+
+	for i := range app.sources {
+		p := app.sources[i].Page(name)
+		if p != nil && p.Exists() {
+			return p
+		}
+	}
+
+	return &page{name: name}
+}
+
 // a Type that represent a page.
 type Page interface {
 	// Name returns page name without '.md' extension
@@ -94,7 +107,8 @@ func (p *page) preProcessedContent() Markdown {
 
 	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()
-		c = PreProcess(c)
+		app := GetApp()
+		c = app.PreProcess(c)
 		p.content = &c
 		p.lastUpdate = modtime
 	}
@@ -103,7 +117,7 @@ func (p *page) preProcessedContent() Markdown {
 }
 
 func (p *page) Delete() bool {
-	defer Trigger(PageDeleted, p)
+	defer GetApp().Trigger(PageDeleted, p)
 
 	p.clearCache()
 
@@ -118,7 +132,7 @@ func (p *page) Delete() bool {
 }
 
 func (p *page) Write(content Markdown) bool {
-	defer Trigger(PageChanged, p)
+	defer GetApp().Trigger(PageChanged, p)
 
 	p.clearCache()
 	name := p.FileName()

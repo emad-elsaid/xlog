@@ -18,12 +18,12 @@ func init() {
 type Github struct{}
 
 func (Github) Name() string { return "github" }
-func (Github) Init() {
+func (Github) Init(app *App) {
 	if len(editUrl) == 0 {
 		return
 	}
 
-	RegisterQuickCommand(quickCommands)
+	app.RegisterQuickCommand(quickCommands)
 }
 
 func quickCommands(p Page) []Command {

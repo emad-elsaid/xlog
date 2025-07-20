@@ -11,5 +11,6 @@ import (
 )
 
 func main() {
-	xlog.Start(context.Background())
+	app := xlog.GetApp()
+	app.Start(context.Background())
 }

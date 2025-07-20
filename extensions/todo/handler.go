@@ -5,25 +5,27 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
 var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)
 
 func toggleHandler(r Request) Output {
-	page := NewPage(r.FormValue("page"))
+	app := GetApp()
+	page := app.NewPage(r.FormValue("page"))
 	if page == nil || !page.Exists() {
-		return NotFound(fmt.Sprintf("page: %s not found", r.FormValue("page")))
+		return xlog.NotFound(fmt.Sprintf("page: %s not found", r.FormValue("page")))
 	}
 
-	pos, err := strconv.ParseInt(r.FormValue("pos"), 10, 64)
+	pos, err := strconv.Atoi(r.FormValue("pos"))
 	if err != nil {
-		return BadRequest("Pos value is incorrect, " + err.Error())
+		return xlog.BadRequest("Pos value is incorrect, " + err.Error())
 	}
 
 	content := string(page.Content())
 	if int(pos) >= len(content) {
-		return BadRequest("pos is longer than the content")
+		return xlog.BadRequest("pos is longer than the content")
 	}
 
 	replacement := "[ ] "
@@ -33,5 +35,5 @@ func toggleHandler(r Request) Output {
 
 	line := content[:pos] + taskListRegexp.ReplaceAllString(content[pos:], replacement)
 	page.Write(Markdown(line))
-	return NoContent()
+	return xlog.NoContent()
 }

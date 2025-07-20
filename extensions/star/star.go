@@ -11,6 +11,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -23,16 +24,16 @@ func init() {
 type Star struct{}
 
 func (Star) Name() string { return "star" }
-func (Star) Init() {
-	RegisterLink(starredPages)
-	IgnorePath(regexp.MustCompile(`^starred\.md$`))
+func (Star) Init(app *xlog.App) {
+	app.RegisterLink(starredPages)
+	app.IgnorePath(regexp.MustCompile(`^starred\.md$`))
 
-	if !Config.Readonly {
-		RequireHTMX()
-		RegisterCommand(starAction)
-		RegisterQuickCommand(starAction)
-		Post(`/+/star/{page...}`, starHandler)
-		Delete(`/+/star/{page...}`, unstarHandler)
+	if !app.GetConfig().Readonly {
+		app.RequireHTMX()
+		app.RegisterCommand(starAction)
+		app.RegisterQuickCommand(starAction)
+		app.Post(`/+/star/{page...}`, starHandler)
+		app.Delete(`/+/star/{page...}`, unstarHandler)
 	}
 }
 
@@ -41,7 +42,8 @@ type starredPage struct {
 }
 
 func (s starredPage) Icon() string {
-	if e := Emoji(s); e == "" {
+	app := GetApp()
+	if e := app.Emoji(s); e == "" {
 		return "fa-solid fa-star"
 	} else {
 		return e
@@ -59,7 +61,8 @@ func (s starredPage) Name() string {
 }
 
 func starredPages(p Page) []Command {
-	pages := NewPage(STARRED_PAGES)
+	app := GetApp()
+	pages := app.NewPage(STARRED_PAGES)
 	if pages == nil {
 		return nil
 	}
@@ -72,7 +75,7 @@ func starredPages(p Page) []Command {
 	list := strings.Split(content, "\n")
 	ps := make([]Command, 0, len(list))
 	for _, v := range list {
-		p := starredPage{NewPage(v)}
+		p := starredPage{app.NewPage(v)}
 		ps = append(ps, p)
 	}
 
@@ -120,15 +123,16 @@ func starAction(p Page) []Command {
 }
 
 func starHandler(r Request) Output {
-	page := NewPage(r.PathValue("page"))
+	app := GetApp()
+	page := app.NewPage(r.PathValue("page"))
 
 	if page == nil || !page.Exists() {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
-	starred_pages := NewPage(STARRED_PAGES)
+	starred_pages := app.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
@@ -141,14 +145,15 @@ func starHandler(r Request) Output {
 }
 
 func unstarHandler(r Request) Output {
-	page := NewPage(r.PathValue("page"))
+	app := GetApp()
+	page := app.NewPage(r.PathValue("page"))
 	if page == nil || !page.Exists() {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
-	starred_pages := NewPage(STARRED_PAGES)
+	starred_pages := app.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	content := strings.Split(strings.TrimSpace(string(starred_pages.Content())), "\n")
@@ -167,7 +172,8 @@ func unstarHandler(r Request) Output {
 }
 
 func isStarred(p Page) bool {
-	starred_page := NewPage(STARRED_PAGES)
+	app := GetApp()
+	starred_page := app.NewPage(STARRED_PAGES)
 	if starred_page == nil {
 		return false
 	}

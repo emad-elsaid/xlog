@@ -11,25 +11,20 @@ type Property interface {
 	Value() any
 }
 
-var propsSources = []func(Page) []Property{defaultProps}
-
-// RegisterProperty registers a function that returns a set of properties for
-// the page
-func RegisterProperty(a func(Page) []Property) {
-	propsSources = append(propsSources, a)
+// RegisterProperty registers a function that returns a set of properties for a page
+func (app *App) RegisterProperty(a func(Page) []Property) {
+	app.propsSources = append(app.propsSources, a)
 }
 
-// Properties return a list of properties for a page. It executes all functions
-// registered with RegisterProperty and collect results in one slice. Can be
-// passed to the view to render a page properties
-func Properties(p Page) map[string]Property {
+// Properties returns a list of properties for a page
+func (app *App) Properties(p Page) map[string]Property {
+
 	ps := map[string]Property{}
-	for _, source := range propsSources {
+	for _, source := range app.propsSources {
 		for _, pr := range source(p) {
 			ps[pr.Name()] = pr
 		}
 	}
-
 	return ps
 }
 
@@ -37,9 +32,12 @@ type lastUpdateProp struct{ page Page }
 
 func (a lastUpdateProp) Icon() string { return "fa-solid fa-clock" }
 func (a lastUpdateProp) Name() string { return "modified" }
-func (a lastUpdateProp) Value() any   { return ago(a.page.ModTime()) }
+func (a lastUpdateProp) Value() any {
+	app := GetApp()
+	return app.ago(a.page.ModTime())
+}
 
-func defaultProps(p Page) []Property {
+func DefaultProps(p Page) []Property {
 	if p.ModTime().IsZero() {
 		return nil
 	}

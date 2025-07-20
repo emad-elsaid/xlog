@@ -10,39 +10,40 @@ import (
 	"time"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
-	gast "github.com/emad-elsaid/xlog/markdown/ast"
 	emojiAst "github.com/emad-elsaid/xlog/markdown/emoji/ast"
 )
 
-var helpers = template.FuncMap{
-	"ago":            ago,
-	"properties":     Properties,
-	"links":          Links,
-	"widgets":        RenderWidget,
-	"commands":       Commands,
-	"quick_commands": QuickCommands,
-	"isFontAwesome":  IsFontAwesome,
-	"includeJS":      includeJS,
-	"scripts":        scripts,
-	"banner":         Banner,
-	"emoji":          Emoji,
-	"base":           path.Base,
-	"dir":            dir,
-	"raw":            raw,
-}
-
 var ErrHelperRegistered = errors.New("Helper already registered")
+
+// initDefaultHelpers initializes the default helper functions
+func (app *App) initDefaultHelpers() {
+	app.helpers = template.FuncMap{
+		"ago":            app.ago,
+		"properties":     app.Properties,
+		"links":          app.Links,
+		"widgets":        app.RenderWidget,
+		"commands":       app.Commands,
+		"quick_commands": app.QuickCommands,
+		"isFontAwesome":  IsFontAwesome,
+		"includeJS":      app.includeJS,
+		"scripts":        app.scripts,
+		"banner":         app.Banner,
+		"emoji":          app.Emoji,
+		"base":           path.Base,
+		"dir":            dir,
+		"raw":            raw,
+	}
+}
 
 // RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
 // starts as compiling templates happened right before starting the http server.
-func RegisterHelper(name string, f any) error {
-	if _, ok := helpers[name]; ok {
+func (app *App) RegisterHelper(name string, f any) error {
+	if _, ok := app.helpers[name]; ok {
 		return ErrHelperRegistered
 	}
 
-	helpers[name] = f
-
+	app.helpers[name] = f
 	return nil
 }
 
@@ -51,8 +52,8 @@ func RegisterHelper(name string, f any) error {
 // ago". The precision of this function is 2. which means it returns the largest
 // unit of time possible and the next one after it. for example days + hours, or
 // Hours + minutes or Minutes + seconds...etc
-func ago(t time.Time) string {
-	if Config.Readonly {
+func (app *App) ago(t time.Time) string {
+	if app.config.Readonly {
 		return t.Format("Monday 2 January 2006")
 	}
 
@@ -108,54 +109,66 @@ func ago(t time.Time) string {
 	return o.String()
 }
 
-var js = []string{}
-
-// RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template
-func RegisterJS(f string) {
-	if slices.Contains(js, f) {
-		return
+// RegisterJS registers a JavaScript file to be included in the page
+func (app *App) RegisterJS(f string) {
+	if !slices.Contains(app.js, f) {
+		app.js = append(app.js, f)
 	}
-
-	js = append(js, f)
 }
 
-// RequireHTMX registes HTML library, this helps include one version of HTMX
-func RequireHTMX() {
-	RegisterJS("/public/htmx.min.js")
+// RequireHTMX registers HTMX library
+func (app *App) RequireHTMX() {
+	app.RegisterJS("/public/htmx.min.js")
 }
 
-func includeJS(f string) template.HTML {
-	RegisterJS(f)
-
+// includeJS adds a JavaScript library URL/path
+func (app *App) includeJS(f string) template.HTML {
+	app.RegisterJS(f)
 	return ""
 }
 
-func scripts() template.HTML {
+// scripts returns the HTML for all registered JavaScript files
+func (app *App) scripts() template.HTML {
 	var b strings.Builder
-	for _, f := range js {
+	for _, f := range app.js {
 		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
 	}
-
 	return template.HTML(b.String())
 }
 
+// IsFontAwesome checks if an icon is a FontAwesome icon
 func IsFontAwesome(i string) bool {
 	return strings.HasPrefix(i, "fa")
 }
 
-func Banner(p Page) string {
+// dir returns the directory name
+func dir(s string) string {
+	v := path.Dir(s)
+	if v == "." {
+		return ""
+	}
+	return v
+}
+
+// raw returns safe HTML
+func raw(i string) template.HTML {
+	return template.HTML(i)
+}
+
+// Banner returns the banner image for a page
+func (app *App) Banner(p Page) string {
 	_, a := p.AST()
 	if a == nil {
 		return ""
 	}
 
 	paragraph := a.FirstChild()
-	if paragraph == nil || paragraph.Kind() != gast.KindParagraph {
+	if paragraph == nil || paragraph.Kind() != ast.KindParagraph {
 		return ""
 	}
 
 	img := paragraph.FirstChild()
-	if img == nil || img.Kind() != gast.KindImage {
+	if img == nil || img.Kind() != ast.KindImage {
 		return ""
 	}
 
@@ -177,26 +190,11 @@ func Banner(p Page) string {
 	return dest
 }
 
-func Emoji(p Page) string {
+// Emoji returns the emoji for a page
+func (app *App) Emoji(p Page) string {
 	_, tree := p.AST()
 	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
 		return string(e.Value.Unicode)
 	}
-
 	return ""
-}
-
-func dir(s string) string {
-	v := path.Dir(s)
-
-	if v == "." {
-		return ""
-	}
-
-	return v
-}
-
-// raw a helper to output input string as safe HTML
-func raw(i string) template.HTML {
-	return template.HTML(i)
 }

@@ -13,9 +13,8 @@ import (
 	"gitlab.com/greyxor/slogor"
 )
 
-// Define the catch all HTTP routes, parse CLI flags and take actions like
-// building the static pages and exit, or start the HTTP server
-func Start(ctx context.Context) {
+// Start initializes and starts the application
+func (app *App) Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
 
@@ -28,27 +27,27 @@ func Start(ctx context.Context) {
 
 	// if a static site is going to be built then lets also turn on read only
 	// mode
-	if len(Config.Build) > 0 {
-		Config.Readonly = true
+	if len(app.config.Build) > 0 {
+		app.config.Readonly = true
 	}
 
-	if !Config.Readonly {
-		Listen(PageChanged, clearPagesCache)
-		Listen(PageDeleted, clearPagesCache)
+	if !app.config.Readonly {
+		app.Listen(PageChanged, app.clearPagesCache)
+		app.Listen(PageDeleted, app.clearPagesCache)
 	}
 
-	if err := os.Chdir(Config.Source); err != nil {
-		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
+	if err := os.Chdir(app.config.Source); err != nil {
+		slog.Error("Failed to change dir to source", "error", err, "source", app.config.Source)
 		os.Exit(1)
 	}
 
-	initExtensions()
+	app.initExtensions()
 
-	Get("/{$}", rootHandler)
-	Get("/{page...}", getPageHandler)
+	app.Get("/{$}", app.rootHandler)
+	app.Get("/{page...}", app.getPageHandler)
 
-	if len(Config.Build) > 0 {
-		if err := build(Config.Build); err != nil {
+	if len(app.config.Build) > 0 {
+		if err := app.build(app.config.Build); err != nil {
 			slog.Error("Failed to build static pages", "error", err)
 			os.Exit(1)
 		}
@@ -56,26 +55,25 @@ func Start(ctx context.Context) {
 		return
 	}
 
-	srv := server()
-	slog.Info("Starting server", "address", Config.BindAddress)
+	srv := app.server()
+	slog.Info("Starting server", "address", app.config.BindAddress)
 
 	go func() {
 		<-ctx.Done()
-		srv.Close()
+		srv.Shutdown(context.Background())
 	}()
 
 	srv.ListenAndServe()
 }
 
-// Redirect to `/index` to render the index page.
-func rootHandler(r Request) Output {
-	return Redirect("/" + Config.Index)
+// rootHandler redirects to the index page
+func (app *App) rootHandler(r Request) Output {
+	return Redirect("/" + app.config.Index)
 }
 
-// Shows a page. the page name is the path itself. if the page doesn't exist it
-// redirect to edit page otherwise will render it to HTML
-func getPageHandler(r Request) Output {
-	page := NewPage(r.PathValue("page"))
+// getPageHandler handles page requests
+func (app *App) getPageHandler(r Request) Output {
+	page := app.NewPage(r.PathValue("page"))
 
 	if page == nil {
 		return NoContent()
@@ -84,34 +82,33 @@ func getPageHandler(r Request) Output {
 	if !page.Exists() {
 		// if it's a directory get back to home page
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
-			return Redirect(Config.Index)
+			return Redirect(app.config.Index)
 		}
 
 		// if it's a static file serve it
-		if output, err := staticHandler(r); err == nil {
+		if output, err := app.staticHandler(r); err == nil {
 			return output
 		}
 
 		// if it's readonly mode quit now
-		if Config.Readonly {
+		if app.config.Readonly {
 			return NotFound("can't find page")
 		}
 
 		// Allow extensions to handle this page if it's not readonly mode like
 		// opening an editor or something
-		Trigger(PageNotFound, page)
+		app.Trigger(PageNotFound, page)
 
 		page = DynamicPage{
 			NameVal: page.Name(),
 			RenderFn: func() template.HTML {
 				str := "Page doesn't exist"
-
 				return template.HTML(str)
 			},
 		}
 	}
 
-	return Render("page", Locals{
+	return app.Render("page", Locals{
 		"page": page,
 		"csrf": csrf.Token(r),
 	})

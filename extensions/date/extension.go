@@ -14,13 +14,13 @@ func init() {
 type Date struct{}
 
 func (Date) Name() string { return "date" }
-func (Date) Init() {
-	RegisterTemplate(templates, "templates")
-	RegisterLink(links)
-	RegisterBuildPage(`/+/calendar`, true)
+func (Date) Init(app *App) {
+	app.RegisterTemplate(templates, "templates")
+	app.RegisterLink(links)
+	app.RegisterBuildPage(`/+/calendar`, true)
 
-	Get(`/+/date/{date}`, dateHandler)
-	Get(`/+/calendar`, calendarHandler)
+	app.Get(`/+/date/{date}`, dateHandler)
+	app.Get(`/+/calendar`, calendarHandler)
 
 	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&dateParser{}, 999),

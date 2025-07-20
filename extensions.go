@@ -6,34 +6,38 @@ import (
 	"strings"
 )
 
+// Extension represents a plugin that can be registered with the application
 type Extension interface {
 	Name() string
-	Init()
+	Init(*App)
 }
 
-var extensions = []Extension{}
+// Global variable to store all registered extensions
+var globalExtensions []Extension
 
+// RegisterExtension registers a new extension
 func RegisterExtension(e Extension) {
-	extensions = append(extensions, e)
+	globalExtensions = append(globalExtensions, e)
 }
 
-func initExtensions() {
-	if Config.DisabledExtensions == "all" {
+// initExtensions initializes all registered extensions
+func (app *App) initExtensions() {
+	if app.config.DisabledExtensions == "all" {
 		slog.Info("extensions", "disabled", "all")
 		return
 	}
 
-	disabled := strings.Split(Config.DisabledExtensions, ",")
+	disabled := strings.Split(app.config.DisabledExtensions, ",")
 	disabledNames := []string{} // because the user can input wrong extension name
 	enabledNames := []string{}
-	for i := range extensions {
-		if slices.Contains(disabled, extensions[i].Name()) {
-			disabledNames = append(disabledNames, extensions[i].Name())
+	for i := range globalExtensions {
+		if slices.Contains(disabled, globalExtensions[i].Name()) {
+			disabledNames = append(disabledNames, globalExtensions[i].Name())
 			continue
 		}
 
-		extensions[i].Init()
-		enabledNames = append(enabledNames, extensions[i].Name())
+		globalExtensions[i].Init(app)
+		enabledNames = append(enabledNames, globalExtensions[i].Name())
 	}
 
 	slog.Info("extensions", "enabled", enabledNames, "disabled", disabled)

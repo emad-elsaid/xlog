@@ -8,6 +8,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 	"github.com/gorilla/websocket"
 )
@@ -25,14 +26,14 @@ func init() {
 type Hotreload struct{}
 
 func (Hotreload) Name() string { return "hotreload" }
-func (Hotreload) Init() {
-	if Config.Readonly {
+func (Hotreload) Init(app *App) {
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	Listen(PageChanged, NotifyPageChange)
-	Get(`/+/hotreload`, handleWebSocket)
-	RegisterWidget(WidgetAfterView, 0, clientWidget)
+	app.Listen(PageChanged, NotifyPageChange)
+	app.Get(`/+/hotreload`, handleWebSocket)
+	app.RegisterWidget(WidgetAfterView, 0, clientWidget)
 }
 
 func NotifyPageChange(p Page) error {
@@ -60,7 +61,7 @@ func handleWebSocket(r Request) Output {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			slog.Error("Failed to upgrade", "error", err)
-			BadRequest(err.Error())(w, r)
+			xlog.BadRequest(err.Error())(w, r)
 		}
 
 		// keep connection open

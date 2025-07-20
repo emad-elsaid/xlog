@@ -6,18 +6,19 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 	shortcode "github.com/emad-elsaid/xlog/extensions/shortcode"
 )
 
 func init() {
-	RegisterExtension(Mermaid{})
+	xlog.RegisterExtension(Mermaid{})
 }
 
 type Mermaid struct{}
 
 func (Mermaid) Name() string { return "mermaid" }
-func (Mermaid) Init() {
+func (Mermaid) Init(*App) {
 	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
 }
 

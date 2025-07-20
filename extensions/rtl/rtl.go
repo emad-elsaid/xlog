@@ -1,6 +1,7 @@
 package rtl
 
 import (
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
@@ -9,13 +10,13 @@ import (
 )
 
 func init() {
-	RegisterExtension(RTL{})
+	xlog.RegisterExtension(RTL{})
 }
 
 type RTL struct{}
 
 func (RTL) Name() string { return "rtl" }
-func (RTL) Init() {
+func (RTL) Init(app *xlog.App) {
 	MarkdownConverter().Parser().AddOptions(
 		parser.WithASTTransformers(
 			util.Prioritized(addDirAuto{}, 0),

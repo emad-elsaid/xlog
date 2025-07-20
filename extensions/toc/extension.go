@@ -17,9 +17,9 @@ func init() {
 type Extension struct{}
 
 func (Extension) Name() string { return "toc" }
-func (Extension) Init() {
-	xlog.RegisterWidget(xlog.WidgetBeforeView, 0, tocWidget)
-	xlog.RegisterTemplate(templates, "templates")
+func (Extension) Init(app *xlog.App) {
+	app.RegisterWidget(xlog.WidgetBeforeView, 0, tocWidget)
+	app.RegisterTemplate(templates, "templates")
 }
 
 func tocWidget(p xlog.Page) template.HTML {
@@ -41,5 +41,6 @@ func tocWidget(p xlog.Page) template.HTML {
 		return ""
 	}
 
-	return xlog.Partial("toc", xlog.Locals{"tree": tree})
+	app := xlog.GetApp()
+	return app.Partial("toc", xlog.Locals{"tree": tree})
 }

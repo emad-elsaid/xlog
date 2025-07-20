@@ -71,13 +71,14 @@ func newMarkdownFS(p string) *markdownFS {
 						continue
 					}
 
-					if IsIgnoredPath(relPath) {
+					app := GetApp()
+					if app.IsIgnoredPath(relPath) {
 						continue
 					}
 
 					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
-					Trigger(PageChanged, cp)
+					app.Trigger(PageChanged, cp)
 					m.cache.Remove(name)
 				case notify.Remove:
 					relPath, err := filepath.Rel(absPath, ei.Path())
@@ -90,13 +91,14 @@ func newMarkdownFS(p string) *markdownFS {
 						continue
 					}
 
-					if IsIgnoredPath(relPath) {
+					app := GetApp()
+					if app.IsIgnoredPath(relPath) {
 						continue
 					}
 
 					name := strings.TrimSuffix(relPath, ".md")
 					cp := m._page(name)
-					Trigger(PageDeleted, cp)
+					app.Trigger(PageDeleted, cp)
 					m.cache.Remove(name)
 				}
 			}
@@ -124,7 +126,8 @@ func (m *markdownFS) Page(name string) Page {
 
 func (m *markdownFS) Each(ctx context.Context, f func(Page)) {
 	filepath.WalkDir(m.path, func(name string, d fs.DirEntry, err error) error {
-		if name != "." && d.IsDir() && IsIgnoredPath(name) {
+		app := GetApp()
+		if name != "." && d.IsDir() && app.IsIgnoredPath(name) {
 			return fs.SkipDir
 		}
 

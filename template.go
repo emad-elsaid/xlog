@@ -14,32 +14,28 @@ import (
 
 //go:embed templates
 var defaultTemplates embed.FS
-var templates *template.Template
-var templatesFSs []fs.FS
 
-// RegisterTemplate registers a filesystem that contains templates, specifying subDir as
-// the subdirectory name that contains the templates. templates are registered
-// such that the latest registered directory override older ones. template file
-// extensions are signified by '.html' extension and the file path can
-// be used as template name without this extension
-func RegisterTemplate(t fs.FS, subDir string) {
+// RegisterTemplate registers a filesystem that contains templates
+func (app *App) RegisterTemplate(t fs.FS, subDir string) {
+
 	ts, _ := fs.Sub(t, subDir)
-	templatesFSs = append(templatesFSs, ts)
+	app.templatesFSs = append(app.templatesFSs, ts)
 }
 
-func compileTemplates() {
+// compileTemplates compiles all registered templates
+func (app *App) compileTemplates() {
 	const ext = ".html"
 
 	// add default templates before everything else
 	sub, _ := fs.Sub(defaultTemplates, "templates")
-	templatesFSs = append([]fs.FS{sub}, templatesFSs...)
+	app.templatesFSs = append([]fs.FS{sub}, app.templatesFSs...)
 	// add theme directory after everything else to allow user to override any template
 	if _, err := os.Stat("theme"); err == nil {
-		templatesFSs = append(templatesFSs, os.DirFS("theme"))
+		app.templatesFSs = append(app.templatesFSs, os.DirFS("theme"))
 	}
 
-	templates = template.New("")
-	for _, tfs := range templatesFSs {
+	app.templates = template.New("")
+	for _, tfs := range app.templatesFSs {
 		fs.WalkDir(tfs, ".", func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -55,7 +51,7 @@ func compileTemplates() {
 					return err
 				}
 
-				template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
+				template.Must(app.templates.New(name).Funcs(app.helpers).Parse(string(c)))
 			}
 
 			return nil
@@ -63,11 +59,9 @@ func compileTemplates() {
 	}
 }
 
-// Partial executes a template by it's path name. it passes data to the
-// template. returning the output of the template. in case of an error it will
-// return the error string as the output
-func Partial(path string, data Locals) template.HTML {
-	v := templates.Lookup(path)
+// Partial executes a template by it's path name
+func (app *App) Partial(path string, data Locals) template.HTML {
+	v := app.templates.Lookup(path)
 	if v == nil {
 		return template.HTML(fmt.Sprintf("template %s not found", path))
 	}
@@ -76,7 +70,7 @@ func Partial(path string, data Locals) template.HTML {
 		data = Locals{}
 	}
 
-	data["config"] = Config
+	data["config"] = app.config
 
 	w := bytes.NewBufferString("")
 

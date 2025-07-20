@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -28,11 +29,11 @@ func init() {
 type RSS struct{}
 
 func (RSS) Name() string { return "rss" }
-func (RSS) Init() {
-	RegisterWidget(WidgetHead, 0, metaTag)
-	RegisterBuildPage("/+/feed.rss", false)
-	RegisterLink(links)
-	Get(`/+/feed.rss`, feed)
+func (RSS) Init(app *xlog.App) {
+	app.RegisterWidget(WidgetHead, 0, metaTag)
+	app.RegisterBuildPage("/+/feed.rss", false)
+	app.RegisterLink(links)
+	app.Get(`/+/feed.rss`, feed)
 }
 
 type rssLink struct{}
@@ -50,8 +51,9 @@ func links(p Page) []Command {
 }
 
 func metaTag(p Page) template.HTML {
+	app := GetApp()
 	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
-	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(Config.Sitename)))
+	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(app.GetConfig().Sitename)))
 }
 
 type rss struct {
@@ -91,7 +93,8 @@ func feed(r Request) Output {
 		},
 	}
 
-	pages := Pages(r.Context())
+	app := GetApp()
+	pages := app.Pages(r.Context())
 	slices.SortFunc(pages, func(a, b Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
@@ -120,8 +123,8 @@ func feed(r Request) Output {
 
 	buff, err := xml.MarshalIndent(f, "", "    ")
 	if err != nil {
-		return InternalServerError(err)
+		return xlog.InternalServerError(err)
 	}
 
-	return PlainText(xml.Header + string(buff))
+	return xlog.PlainText(xml.Header + string(buff))
 }

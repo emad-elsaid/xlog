@@ -8,6 +8,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -15,21 +16,22 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterExtension(Recent{})
+	xlog.RegisterExtension(Recent{})
 }
 
 type Recent struct{}
 
 func (Recent) Name() string { return "recent" }
-func (Recent) Init() {
-	Get(`/+/recent`, recentHandler)
-	RegisterBuildPage("/+/recent", true)
-	RegisterTemplate(templates, "templates")
-	RegisterLink(func(Page) []Command { return []Command{links{}} })
+func (Recent) Init(app *xlog.App) {
+	app.Get(`/+/recent`, recentHandler)
+	app.RegisterBuildPage("/+/recent", true)
+	app.RegisterTemplate(templates, "templates")
+	app.RegisterLink(func(Page) []Command { return []Command{links{}} })
 }
 
 func recentHandler(r Request) Output {
-	rp := Pages(r.Context())
+	app := xlog.GetApp()
+	rp := app.Pages(r.Context())
 	slices.SortFunc(rp, func(a, b Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
@@ -38,7 +40,7 @@ func recentHandler(r Request) Output {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	return Render("recent", Locals{
+	return app.Render("recent", Locals{
 		"page":  DynamicPage{NameVal: "Recent"},
 		"pages": rp,
 	})

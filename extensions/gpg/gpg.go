@@ -18,13 +18,13 @@ func init() {
 type PGP struct{}
 
 func (PGP) Name() string { return "pgp" }
-func (PGP) Init() {
-	xlog.RegisterPageSource(new(encryptedPages))
+func (PGP) Init(app *xlog.App) {
+	app.RegisterPageSource(new(encryptedPages))
 
-	if !xlog.Config.Readonly {
-		xlog.RegisterCommand(commands)
-		xlog.RequireHTMX()
-		xlog.Post(`/+/gpg/encrypt/{page...}`, encryptHandler)
-		xlog.Post(`/+/gpg/decrypt/{page...}`, decryptHandler)
+	if !app.GetConfig().Readonly {
+		app.RegisterCommand(commands)
+		app.RequireHTMX()
+		app.Post(`/+/gpg/encrypt/{page...}`, encryptHandler)
+		app.Post(`/+/gpg/decrypt/{page...}`, decryptHandler)
 	}
 }

@@ -1,14 +1,13 @@
 package xlog
 
 import (
-	"embed"
 	"io/fs"
 	"net/http"
 	"os"
 	"path"
 )
 
-// return file that exists in one of the FS structs.
+// priorityFS returns file that exists in one of the FS structs.
 // Prioritizing the end of the slice over earlier FSs.
 type priorityFS []fs.FS
 
@@ -24,19 +23,13 @@ func (p priorityFS) Open(name string) (fs.File, error) {
 	return nil, fs.ErrNotExist
 }
 
-//go:embed public
-var assets embed.FS
-
-var staticDirs = []fs.FS{assets}
-
-// RegisterStaticDir adds a filesystem to the filesystems list scanned for files
-// when serving static files. can be used to add a directory of CSS or JS files
-// by extensions
-func RegisterStaticDir(f fs.FS) {
-	staticDirs = append(staticDirs, f)
+// RegisterStaticDir adds a filesystem to the static files list
+func (app *App) RegisterStaticDir(f fs.FS) {
+	app.staticDirs = append(app.staticDirs, f)
 }
 
-func staticHandler(r Request) (Output, error) {
+// staticHandler handles static file serving
+func (app *App) staticHandler(r Request) (Output, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, err
@@ -44,7 +37,7 @@ func staticHandler(r Request) (Output, error) {
 
 	staticFSs := http.FS(
 		priorityFS(
-			append(staticDirs, os.DirFS(wd)),
+			append(app.staticDirs, os.DirFS(wd)),
 		),
 	)
 
@@ -56,6 +49,6 @@ func staticHandler(r Request) (Output, error) {
 		return nil, err
 	} else {
 		f.Close()
-		return Cache(server.ServeHTTP), nil
+		return app.Cache(server.ServeHTTP), nil
 	}
 }

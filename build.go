@@ -11,43 +11,26 @@ import (
 	"net/http/httptest"
 	"os"
 	"path"
-
-	"github.com/emad-elsaid/types"
 )
 
-var extension_page = types.Map[string, bool]{}
-var extension_page_enclosed = types.Map[string, bool]{}
-var build_perms fs.FileMode = 0744
-
-// RegisterBuildPage registers a path of a page to export when building static version
-// of the knowledgebase. encloseInDir will write the output to p/index.html
-// instead instead of writing to p directly. that can help have paths with no
-// .html extension to be served with the exact name.
-func RegisterBuildPage(p string, encloseInDir bool) {
-	if encloseInDir {
-		extension_page_enclosed.Store(p, true)
-	} else {
-		extension_page.Store(p, true)
-	}
-}
-
-func build(dest string) error {
-	srv := server()
+// build builds the static site
+func (app *App) build(dest string) error {
+	srv := app.server()
 
 	// building Index separately
-	err := buildRoute(
+	err := app.buildRoute(
 		srv,
-		"/"+Config.Index,
+		"/"+app.config.Index,
 		dest,
 		path.Join(dest, "index.html"),
 	)
 
 	if err != nil {
-		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", Config.Index, "error", err)
+		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", app.config.Index, "error", err)
 	}
 
-	errs := MapPage(context.Background(), func(p Page) error {
-		err := buildRoute(
+	errs := app.MapPage(context.Background(), func(p Page) error {
+		err := app.buildRoute(
 			srv,
 			"/"+p.Name(),
 			path.Join(dest, p.Name()),
@@ -67,7 +50,7 @@ func build(dest string) error {
 
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
-	if in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html")); err == nil {
+	if in, err := os.Open(path.Join(dest, app.config.NotFoundPage, "index.html")); err == nil {
 		defer in.Close()
 		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {
@@ -77,8 +60,12 @@ func build(dest string) error {
 		io.Copy(out, in)
 	}
 
-	extension_page_enclosed.Range(func(route string, _ bool) bool {
-		err := buildRoute(
+	extensionPageEnclosed := app.extensionPageEnclosed
+	extensionPage := app.extensionPage
+	buildPerms := app.buildPerms
+
+	for route := range extensionPageEnclosed {
+		err := app.buildRoute(
 			srv,
 			route,
 			path.Join(dest, route),
@@ -88,12 +75,10 @@ func build(dest string) error {
 		if err != nil {
 			slog.Error("Failed to process extension page", "route", route, "error", err)
 		}
+	}
 
-		return true
-	})
-
-	extension_page.Range(func(route string, _ bool) bool {
-		err := buildRoute(
+	for route := range extensionPage {
+		err := app.buildRoute(
 			srv,
 			route,
 			path.Join(dest, path.Dir(route)),
@@ -103,9 +88,7 @@ func build(dest string) error {
 		if err != nil {
 			slog.Error("Failed to process extension page", "route", route, "error", err)
 		}
-
-		return true
-	})
+	}
 
 	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
@@ -115,7 +98,7 @@ func build(dest string) error {
 		destPath := path.Join(dest, p)
 
 		if entry.IsDir() {
-			if err := os.MkdirAll(destPath, build_perms); err != nil {
+			if err := os.MkdirAll(destPath, buildPerms); err != nil {
 				return err
 			}
 		} else if _, err := os.Stat(destPath); err == nil {
@@ -126,7 +109,7 @@ func build(dest string) error {
 				return err
 			}
 
-			if err := os.WriteFile(destPath, content, build_perms); err != nil {
+			if err := os.WriteFile(destPath, content, buildPerms); err != nil {
 				return err
 			}
 		}
@@ -135,7 +118,8 @@ func build(dest string) error {
 	})
 }
 
-func buildRoute(srv *http.Server, route, dir, file string) error {
+// buildRoute builds a single route
+func (app *App) buildRoute(srv *http.Server, route, dir, file string) error {
 	req, err := http.NewRequest(http.MethodGet, route, nil)
 	if err != nil {
 		return err
@@ -144,7 +128,7 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	rec := httptest.NewRecorder()
 	srv.Handler.ServeHTTP(rec, req)
 
-	if err := os.MkdirAll(dir, build_perms); err != nil {
+	if err := os.MkdirAll(dir, app.buildPerms); err != nil {
 		return err
 	}
 
@@ -158,5 +142,15 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	}
 	defer rec.Result().Body.Close()
 
-	return os.WriteFile(file, body, build_perms)
+	return os.WriteFile(file, body, app.buildPerms)
+}
+
+// RegisterBuildPage registers a build page
+func (app *App) RegisterBuildPage(p string, encloseInDir bool) {
+
+	if encloseInDir {
+		app.extensionPageEnclosed[p] = true
+	} else {
+		app.extensionPage[p] = true
+	}
 }

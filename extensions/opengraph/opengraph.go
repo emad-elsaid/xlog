@@ -27,16 +27,17 @@ func init() {
 type Opengraph struct{}
 
 func (Opengraph) Name() string { return "opengraph" }
-func (Opengraph) Init() {
-	RegisterWidget(WidgetHead, 1, opengraphTags)
+func (Opengraph) Init(app *App) {
+	app.RegisterWidget(WidgetHead, 1, opengraphTags)
 }
 
 func opengraphTags(p Page) template.HTML {
 	escape := template.JSEscapeString
+	app := GetApp()
 
 	title := p.Name()
-	if p.Name() == Config.Index {
-		title = Config.Sitename
+	if p.Name() == app.GetConfig().Index {
+		title = app.GetConfig().Sitename
 	}
 
 	var u url.URL
@@ -62,7 +63,7 @@ func opengraphTags(p Page) template.HTML {
     <meta property="og:url" content="%s" />
     <meta property="og:type" content="website" />
 `,
-		escape(Config.Sitename),
+		escape(app.GetConfig().Sitename),
 		escape(title),
 		escape(firstParagraph),
 		escape(image),

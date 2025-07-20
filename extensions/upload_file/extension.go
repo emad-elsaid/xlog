@@ -13,6 +13,7 @@ import (
 
 	_ "embed"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -36,13 +37,13 @@ func init() {
 type UploadFile struct{}
 
 func (UploadFile) Name() string { return "upload-file" }
-func (UploadFile) Init() {
-	if Config.Readonly {
+func (UploadFile) Init(app *xlog.App) {
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	RequireHTMX()
-	RegisterCommand(func(p Page) []Command {
+	app.RequireHTMX()
+	app.RegisterCommand(func(p Page) []Command {
 		if !p.Exists() {
 			return nil
 		}
@@ -56,24 +57,25 @@ func (UploadFile) Init() {
 		}
 	})
 
-	Post("/+/upload-file/form", UploadForm)
-	Post("/+/upload-file/screenshot-form", ScreenshotForm)
-	Post("/+/upload-file/record-screen-form", RecordScreenForm)
-	Post("/+/upload-file/record-camera-form", RecordCameraForm)
-	Post("/+/upload-file/record-audio-form", RecordAudioForm)
+	app.Post("/+/upload-file/form", UploadForm)
+	app.Post("/+/upload-file/screenshot-form", ScreenshotForm)
+	app.Post("/+/upload-file/record-screen-form", RecordScreenForm)
+	app.Post("/+/upload-file/record-camera-form", RecordCameraForm)
+	app.Post("/+/upload-file/record-audio-form", RecordAudioForm)
 
-	Post(`/+/upload-file`, uploadFileHandler)
-	RegisterTemplate(templates, "templates")
+	app.Post(`/+/upload-file`, uploadFileHandler)
+	app.RegisterTemplate(templates, "templates")
 }
 
 func uploadFileHandler(r Request) Output {
+	app := GetApp()
 	r.ParseMultipartForm(MAX_FILE_UPLOAD)
 
 	fileName := r.FormValue("page")
 
-	page := NewPage(fileName)
+	page := app.NewPage(fileName)
 	if page == nil || (fileName != "" && !page.Exists()) {
-		return NotFound("page not found")
+		return xlog.NotFound("page not found")
 	}
 
 	var output string
@@ -89,13 +91,13 @@ func uploadFileHandler(r Request) Output {
 		os.Mkdir(PUBLIC_PATH, 0700)
 		out, err := os.Create(p)
 		if err != nil {
-			return InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
-		f.Seek(io.SeekStart, 0)
+		f.Seek(0, io.SeekStart)
 		_, err = io.Copy(out, f)
 		if err != nil {
-			return InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
 		if slices.Contains(IMAGES_EXTENSIONS, ext) {
@@ -112,10 +114,10 @@ func uploadFileHandler(r Request) Output {
 	if fileName != "" && page.Exists() {
 		content := strings.TrimSpace(string(page.Content())) + "\n\n" + output + "\n"
 		page.Write(Markdown(content))
-		return Redirect("/" + page.Name())
+		return xlog.Redirect("/" + page.Name())
 	}
 
-	return PlainText(output)
+	return xlog.PlainText(output)
 }
 
 func filterChars(str string, exclude string) string {

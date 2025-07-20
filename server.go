@@ -16,7 +16,6 @@ import (
 )
 
 var (
-	router = http.NewServeMux()
 	// a function that returns the CSRF token
 	CSRF = csrf.Token
 )
@@ -32,13 +31,36 @@ type (
 	Locals map[string]any // passed to templates
 )
 
-func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
-	if !Config.Readonly {
+// HandlerFunc is the type of an HTTP handler function + returns output function.
+// it makes it easier to return the output directly instead of writing the output to w then return.
+type HandlerFunc func(Request) Output
+
+// server creates and configures the HTTP server
+func (app *App) server() *http.Server {
+	app.compileTemplates()
+	var handler http.Handler = app.router
+	for _, v := range app.defaultMiddlewares() {
+		handler = v(handler)
+	}
+
+	return &http.Server{
+		Handler:      handler,
+		Addr:         app.config.BindAddress,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+}
+
+// defaultMiddlewares returns the default middleware stack
+func (app *App) defaultMiddlewares() []func(http.Handler) http.Handler {
+	var middlewares []func(http.Handler) http.Handler
+
+	if !app.config.Readonly {
 		crsfOpts := []csrf.Option{
 			csrf.Path("/"),
 			csrf.FieldName("csrf"),
-			csrf.CookieName(Config.CsrfCookieName),
-			csrf.Secure(!Config.ServeInsecure),
+			csrf.CookieName(app.config.CsrfCookieName),
+			csrf.Secure(!app.config.ServeInsecure),
 		}
 
 		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
@@ -47,35 +69,16 @@ func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
 			rand.Read(sessionSecret)
 		}
 
-		middlewares = append(middlewares,
-			csrf.Protect(sessionSecret, crsfOpts...))
+		app.csrfProtect = csrf.Protect(sessionSecret, crsfOpts...)
+		middlewares = append(middlewares, app.csrfProtect)
 	}
 
-	middlewares = append(middlewares, requestLoggerHandler)
+	middlewares = append(middlewares, app.requestLoggerHandler)
 
-	return
+	return middlewares
 }
 
-func server() *http.Server {
-	compileTemplates()
-	var handler http.Handler = router
-	for _, v := range defaultMiddlewares() {
-		handler = v(handler)
-	}
-
-	return &http.Server{
-		Handler:      handler,
-		Addr:         Config.BindAddress,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-}
-
-// HandlerFunc is the type of an HTTP handler function + returns output function.
-// it makes it easier to return the output directly instead of writing the output to w then return.
-type HandlerFunc func(Request) Output
-
-func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
+func (app *App) handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	return func(w Response, r Request) {
 		handler(r)(w, r)
 	}
@@ -84,7 +87,7 @@ func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 // NotFound returns an output function that writes 404 NotFound to http response
 func NotFound(msg string) Output {
 	return func(w Response, r Request) {
-		http.Error(w, "", http.StatusNotFound)
+		http.Error(w, msg, http.StatusNotFound)
 	}
 }
 
@@ -135,35 +138,33 @@ func JsonResponse(a any) Output {
 	}
 }
 
-// Get defines a new route that gets executed when the request matches path and
-// method is http Get.
-func Get(path string, handler HandlerFunc) {
+// Get registers a GET route
+func (app *App) Get(path string, handler HandlerFunc) {
 	slog.Info("GET", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("GET "+path, handlerFuncToHttpHandler(handler))
+	app.router.HandleFunc("GET "+path, app.handlerFuncToHttpHandler(handler))
 }
 
-// Post defines a new route that gets executed when the request matches path and
-// method is http Post.
-func Post(path string, handler HandlerFunc) {
+// Post registers a POST route
+func (app *App) Post(path string, handler HandlerFunc) {
 	slog.Info("POST", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("POST "+path, handlerFuncToHttpHandler(handler))
+	app.router.HandleFunc("POST "+path, app.handlerFuncToHttpHandler(handler))
 }
 
-// Delete defines a new route that gets executed when the request matches path and
-// method is http Delete.
-func Delete(path string, handler HandlerFunc) {
+// Delete registers a DELETE route
+func (app *App) Delete(path string, handler HandlerFunc) {
 	slog.Info("DELETE", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
+	app.router.HandleFunc("DELETE "+path, app.handlerFuncToHttpHandler(handler))
 }
 
 // Render returns an output function that renders partial with data and writes it as response
-func Render(path string, data Locals) Output {
+func (app *App) Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
-		fmt.Fprint(w, Partial(path, data))
+		fmt.Fprint(w, app.Partial(path, data))
 	}
 }
 
-func requestLoggerHandler(h http.Handler) http.Handler {
+// requestLoggerHandler logs HTTP requests
+func (app *App) requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w Response, r Request) {
 		start := time.Now()
 		h.ServeHTTP(w, r)
@@ -172,7 +173,7 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 }
 
 // Cache wraps Output and adds header to instruct the browser to cache the output
-func Cache(out Output) Output {
+func (app *App) Cache(out Output) Output {
 	return func(w Response, r Request) {
 		w.Header().Add("Cache-Control", "max-age=604800")
 		out(w, r)

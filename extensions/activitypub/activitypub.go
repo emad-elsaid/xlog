@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -32,12 +33,12 @@ func init() {
 type ActivityPub struct{}
 
 func (ActivityPub) Name() string { return "activitypub" }
-func (ActivityPub) Init() {
-	Get(`/.well-known/webfinger`, webfinger)
-	Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
-	Get(`/+/activitypub/{user}/outbox`, outbox)
-	Get(`/+/activitypub/{user}`, profile)
-	RegisterWidget(WidgetHead, 1, meta)
+func (ActivityPub) Init(app *xlog.App) {
+	app.Get(`/.well-known/webfinger`, webfinger)
+	app.Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
+	app.Get(`/+/activitypub/{user}/outbox`, outbox)
+	app.Get(`/+/activitypub/{user}`, profile)
+	app.RegisterWidget(WidgetHead, 1, meta)
 }
 
 func meta(p Page) template.HTML {
@@ -45,9 +46,10 @@ func meta(p Page) template.HTML {
 		return ""
 	}
 
-	RegisterBuildPage("/.well-known/webfinger", false)
-	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s", username), true)
-	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox", username), true)
+	app := GetApp()
+	app.RegisterBuildPage("/.well-known/webfinger", false)
+	app.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s", username), true)
+	app.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox", username), true)
 
 	o := fmt.Sprintf(`<link href='https://%s/+/activitypub/@%s' rel='alternate' type='application/activity+json'>`, domain, username)
 
@@ -62,10 +64,10 @@ type webfingerResponse struct {
 
 func webfinger(r Request) Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		webfingerResponse{
 			Subject: fmt.Sprintf("acct:%s@%s", username, domain),
 			Aliases: []string{
@@ -110,14 +112,14 @@ type profileResponse struct {
 
 func profile(r Request) Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		profileResponse{
 			Context:           "https://www.w3.org/ns/activitystreams",
 			ID:                fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
@@ -156,21 +158,21 @@ type outboxResponse struct {
 }
 
 func outbox(r Request) Output {
+	app := GetApp()
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
-
 	count := 0
-	EachPage(r.Context(), func(Page) {
+	app.EachPage(r.Context(), func(Page) {
 		count += 1
-		RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
+		app.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
 	})
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		outboxResponse{
 			Context:    "https://www.w3.org/ns/activitystreams",
 			ID:         fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
@@ -212,21 +214,22 @@ type outboxPageObject struct {
 }
 
 func outboxPage(r Request) Output {
+	app := GetApp()
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
 	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
 	pageIndex--
 
-	pages := Pages(r.Context())
+	pages := app.Pages(r.Context())
 
 	if int(pageIndex) >= len(pages) || pageIndex < 0 {
-		return NotFound("page index is out of context")
+		return xlog.NotFound("page index is out of context")
 	}
 
 	var page Page
@@ -245,7 +248,7 @@ func outboxPage(r Request) Output {
 	u.Path = "/" + page.Name()
 	u.Host = domain
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		outboxPageResponse{
 			Context: "https://www.w3.org/ns/activitystreams",
 			ID:      fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex),

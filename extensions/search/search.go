@@ -23,31 +23,35 @@ func init() {
 type Search struct{}
 
 func (Search) Name() string { return "search" }
-func (Search) Init() {
-	if Config.Readonly {
+func (Search) Init(*App) {
+	app := GetApp()
+	if app.GetConfig().Readonly {
 		return
 	}
 
-	RequireHTMX()
-	Get(`/+/search`, searchFormHandler)
-	Get(`/+/search-result`, searchResultHandler)
-	RegisterWidget("search", 0, searchWidget)
-	RegisterTemplate(templates, "templates")
+	app.RequireHTMX()
+	app.Get(`/+/search`, searchFormHandler)
+	app.Get(`/+/search-result`, searchResultHandler)
+	app.RegisterWidget("search", 0, searchWidget)
+	app.RegisterTemplate(templates, "templates")
 }
 
 func searchWidget(Page) template.HTML {
-	return Partial("search", nil)
+	app := GetApp()
+	return app.Partial("search", nil)
 }
 
 func searchFormHandler(r Request) Output {
-	return Render("search-form", Locals{
+	app := GetApp()
+	return app.Render("search-form", Locals{
 		"page":    DynamicPage{NameVal: "Create"},
 		"results": search(r.Context(), r.FormValue("q")),
 	})
 }
 
 func searchResultHandler(r Request) Output {
-	return Render("search-result", Locals{
+	app := GetApp()
+	return app.Render("search-result", Locals{
 		"results": search(r.Context(), r.FormValue("q")),
 	})
 }
@@ -65,7 +69,8 @@ func search(ctx context.Context, keyword string) []*searchResult {
 
 	reg := regexp.MustCompile(`(?imU)^(.*` + regexp.QuoteMeta(keyword) + `.*)$`)
 
-	return MapPage(ctx, func(p Page) *searchResult {
+	app := GetApp()
+	return MapPage(app, ctx, func(p Page) *searchResult {
 		match := reg.FindString(p.Name())
 		if len(match) > 0 {
 			return &searchResult{

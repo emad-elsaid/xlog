@@ -2,11 +2,7 @@ package xlog
 
 import "html/template"
 
-// Command defines a structure used for 3 categories of lists:
-// 1. Commands for Ctrl+K actions menu
-// 2. Quick commands displayed in the default template at the top right of the page
-// 3. Links displayed in the navigation bar
-// The template decides where and how to display commands. it can choose to use them in a different way than the default template
+// Command defines a structure used for actions and links
 type Command interface {
 	// Icon returns the Fontawesome icon class name for the Command
 	Icon() string
@@ -16,58 +12,44 @@ type Command interface {
 	Attrs() map[template.HTMLAttr]any
 }
 
-var commands = []func(Page) []Command{}
-
 // RegisterCommand registers a new command
-func RegisterCommand(c func(Page) []Command) {
-	commands = append(commands, c)
+func (app *App) RegisterCommand(c func(Page) []Command) {
+	app.commands = append(app.commands, c)
 }
 
-// Commands return the list of commands for a page. when a page is displayed it
-// executes all functions registered with RegisterCommand and collect all
-// results in one slice. result can be passed to the view to render the commands
-// list
-func Commands(p Page) []Command {
+// Commands returns the list of commands for a page
+func (app *App) Commands(p Page) []Command {
 	cmds := []Command{}
-	for c := range commands {
-		cmds = append(cmds, commands[c](p)...)
+	for _, c := range app.commands {
+		cmds = append(cmds, c(p)...)
 	}
-
 	return cmds
 }
 
-var quickCommands = []func(Page) []Command{}
-
-func RegisterQuickCommand(c func(Page) []Command) {
-	quickCommands = append(quickCommands, c)
+// RegisterQuickCommand registers a new quick command
+func (app *App) RegisterQuickCommand(c func(Page) []Command) {
+	app.quickCommands = append(app.quickCommands, c)
 }
 
-// QuickCommands return the list of QuickCommands for a page. it executes all functions
-// registered with RegisterQuickCommand and collect all results in one slice. result
-// can be passed to the view to render the Quick commands list
-func QuickCommands(p Page) []Command {
-	cmds := []Command{}
-	for c := range quickCommands {
-		cmds = append(cmds, quickCommands[c](p)...)
-	}
+// RegisterLink registers a new link
+func (app *App) RegisterLink(l func(Page) []Command) {
+	app.links = append(app.links, l)
+}
 
+// QuickCommands returns the list of quick commands for a page
+func (app *App) QuickCommands(p Page) []Command {
+	cmds := []Command{}
+	for _, c := range app.quickCommands {
+		cmds = append(cmds, c(p)...)
+	}
 	return cmds
 }
 
-var links = []func(Page) []Command{}
-
-// Register a new links function, should return a list of Links
-func RegisterLink(l func(Page) []Command) {
-	links = append(links, l)
-}
-
-// Links returns a list of links for a Page. it executes all functions
-// registered with RegisterLink and collect them in one slice. Can be passed to
-// the view to render in the footer for example.
-func Links(p Page) []Command {
-	lnks := []Command{}
-	for l := range links {
-		lnks = append(lnks, links[l](p)...)
+// Links returns a list of links for a Page
+func (app *App) Links(p Page) []Command {
+	cmds := []Command{}
+	for _, l := range app.links {
+		cmds = append(cmds, l(p)...)
 	}
-	return lnks
+	return cmds
 }

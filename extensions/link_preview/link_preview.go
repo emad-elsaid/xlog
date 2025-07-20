@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/emad-elsaid/xlog"
 	. "github.com/emad-elsaid/xlog"
 )
 
@@ -20,20 +21,20 @@ import (
 var templates embed.FS
 
 func init() {
-	RegisterExtension(LinkPreview{})
+	xlog.RegisterExtension(LinkPreview{})
 }
 
 type LinkPreview struct{}
 
 func (LinkPreview) Name() string { return "link-preview" }
-func (LinkPreview) Init() {
-	RegisterPreprocessor(imgUrlPreprocessor)
-	RegisterPreprocessor(tweetUrlPreprocessor)
-	RegisterPreprocessor(youtubeUrlPreprocessor)
-	RegisterPreprocessor(fbUrlPreprocessor)
-	RegisterPreprocessor(giphyUrlPreprocessor)
-	RegisterPreprocessor(fallbackURLPreprocessor)
-	RegisterTemplate(templates, "templates")
+func (LinkPreview) Init(app *xlog.App) {
+	app.RegisterPreprocessor(imgUrlPreprocessor)
+	app.RegisterPreprocessor(tweetUrlPreprocessor)
+	app.RegisterPreprocessor(youtubeUrlPreprocessor)
+	app.RegisterPreprocessor(fbUrlPreprocessor)
+	app.RegisterPreprocessor(giphyUrlPreprocessor)
+	app.RegisterPreprocessor(fallbackURLPreprocessor)
+	app.RegisterTemplate(templates, "templates")
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/\S+\.(svg|jpg|jpeg|gif|png|webp))$`)
@@ -93,6 +94,7 @@ var (
 )
 
 func fallbackURLPreprocessor(c Markdown) Markdown {
+	app := xlog.GetApp()
 	output := fallbackUrlReg.ReplaceAllStringFunc(string(c), func(m string) string {
 		m, _ = url.PathUnescape(m)
 
@@ -116,7 +118,7 @@ func fallbackURLPreprocessor(c Markdown) Markdown {
 		}
 
 		var view string = string(
-			Partial("link-preview", Locals{
+			app.Partial("link-preview", Locals{
 				"url":         m,
 				"title":       title,
 				"description": meta.Description,
@@ -189,9 +191,10 @@ func getUrlMeta(url string) (*Meta, error) {
 		name := strings.ToLower(n[1])
 		value := v[1]
 
-		if name == "description" || name == "og:description" {
+		switch name {
+		case "description", "og:description":
 			meta.Description = value
-		} else if name == "og:image" {
+		case "og:image":
 			meta.Image = value
 		}
 	}

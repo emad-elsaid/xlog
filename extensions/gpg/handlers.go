@@ -13,7 +13,8 @@ var (
 )
 
 func encryptHandler(r xlog.Request) xlog.Output {
-	p := xlog.NewPage(r.PathValue("page"))
+	app := xlog.GetApp()
+	p := app.NewPage(r.PathValue("page"))
 	if p == nil || !p.Exists() {
 		return xlog.NotFound("page not found")
 	}
@@ -34,7 +35,8 @@ func encryptHandler(r xlog.Request) xlog.Output {
 }
 
 func decryptHandler(r xlog.Request) xlog.Output {
-	p := xlog.NewPage(r.PathValue("page"))
+	app := xlog.GetApp()
+	p := app.NewPage(r.PathValue("page"))
 	if p == nil || !p.Exists() {
 		return xlog.NotFound("page not found")
 	}
@@ -44,7 +46,7 @@ func decryptHandler(r xlog.Request) xlog.Output {
 		return xlog.InternalServerError(deleteFailedErr)
 	}
 
-	decryptedPage := xlog.NewPage(p.Name())
+	decryptedPage := app.NewPage(p.Name())
 	if decryptedPage == nil || !decryptedPage.Write(content) {
 		return xlog.InternalServerError(encryptionFailedErr)
 	}

@@ -39,7 +39,8 @@ func UpdatePagesList(Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 
-	ps := MapPage(context.Background(), func(p Page) *NormalizedPage {
+	app := GetApp()
+	ps := MapPage(app, context.Background(), func(p Page) *NormalizedPage {
 		return &NormalizedPage{
 			page:           p,
 			normalizedName: path.Base(strings.ToLower(p.Name())),
@@ -68,7 +69,8 @@ func backlinksSection(p Page) template.HTML {
 		return ""
 	}
 
-	pages := MapPage(context.Background(), func(a Page) Page {
+	app := GetApp()
+	pages := MapPage(app, context.Background(), func(a Page) Page {
 		_, tree := a.AST()
 		if a.Name() == p.Name() || !containLinkTo(tree, p) {
 			return nil
@@ -77,7 +79,7 @@ func backlinksSection(p Page) template.HTML {
 		return a
 	})
 
-	return Partial("backlinks", Locals{"pages": pages})
+	return app.Partial("backlinks", Locals{"pages": pages})
 }
 
 func containLinkTo(n ast.Node, p Page) bool {
