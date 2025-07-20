@@ -27,8 +27,6 @@ type App struct {
 	templatesFSs []fs.FS
 	staticDirs   []fs.FS
 
-	// Extensions and plugins
-
 	// Widgets
 	widgets map[WidgetSpace]*priorityList[WidgetFunc]
 
