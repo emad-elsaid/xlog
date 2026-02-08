@@ -2,6 +2,7 @@ package autolink_pages
 
 import (
 	"strings"
+	"sync"
 
 	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
@@ -11,6 +12,13 @@ import (
 )
 
 type pageLinkParser struct{}
+
+// Simple cache for parser results - key is first 50 chars of normalized line
+var parserCache sync.Map // map[string]*parserCacheEntry
+type parserCacheEntry struct {
+	found    Page
+	matchLen int
+}
 
 func (*pageLinkParser) Trigger() []byte {
 	// ' ' indicates any white spaces and a line head
@@ -41,21 +49,48 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		line = line[1:]
 	}
 
-	var found Page
-	var m int
+	if len(line) == 0 {
+		block.Advance(consumes)
+		return nil
+	}
+
 	normalizedLine := strings.ToLower(string(line))
 
-	for _, p := range autolinkPages {
-		if len(line) < len(p.normalizedName) {
-			continue
+	// Cache key: first 50 chars (most page names are shorter)
+	cacheKey := normalizedLine
+	if len(cacheKey) > 50 {
+		cacheKey = cacheKey[:50]
+	}
+
+	// Check cache
+	var found Page
+	var m int
+	if cached, ok := parserCache.Load(cacheKey); ok {
+		entry := cached.(*parserCacheEntry)
+		found = entry.found
+		m = entry.matchLen
+	} else {
+		// Cache miss - use trie for O(m) lookup instead of O(n) linear search
+		if autolinkTrie != nil {
+			found, m = autolinkTrie.search(normalizedLine)
+		} else {
+			// Fallback to linear search if trie not built yet
+			for _, p := range autolinkPages {
+				if len(line) < len(p.normalizedName) {
+					continue
+				}
+
+				// Found a page
+				if strings.HasPrefix(normalizedLine, p.normalizedName) {
+					found = p.page
+					m = len(p.normalizedName)
+					break
+				}
+			}
 		}
 
-		// Found a page
-		if strings.HasPrefix(normalizedLine, p.normalizedName) {
-			found = p.page
-			m = len(p.normalizedName)
-			break
-		}
+		// Store in cache
+		parserCache.Store(cacheKey, &parserCacheEntry{found: found, matchLen: m})
 	}
 
 	if found == nil ||
