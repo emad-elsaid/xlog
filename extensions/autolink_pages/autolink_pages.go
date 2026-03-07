@@ -70,7 +70,7 @@ func backlinksSection(p Page) template.HTML {
 
 	pages := MapPage(context.Background(), func(a Page) Page {
 		_, tree := a.AST()
-		if a.Name() == p.Name() || !containLinkTo(tree, p) {
+		if a.Name() == p.Name() || !containLinkToFrom(tree, a, p) {
 			return nil
 		}
 
@@ -80,6 +80,10 @@ func backlinksSection(p Page) template.HTML {
 	return Partial("backlinks", Locals{"pages": pages})
 }
 
+// containLinkTo checks if an AST node contains a link to the given page.
+// For relative links, it matches on basename only, which means links may
+// incorrectly match pages with the same basename in different folders.
+// This is a known limitation when the source page context is unavailable.
 func containLinkTo(n ast.Node, p Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
@@ -91,17 +95,16 @@ func containLinkTo(n ast.Node, p Page) bool {
 		t, _ := n.(*ast.Link)
 		dst := string(t.Destination)
 
-		// link is absolute: remove /
+		// link is absolute: remove / and match full path
 		if strings.HasPrefix(dst, "/") {
 			path := strings.TrimPrefix(dst, "/")
 			if string(path) == p.Name() {
 				return true
 			}
-		} else { // link is relative: get relative part
-			// TODO: what if another folder has the same filename?
-			// * just ignore that fact
-			// * dont support relative paths
-			// there is no way to know who is the parent folder
+		} else { // link is relative: match on basename
+			// Note: This may incorrectly match pages with the same basename
+			// in different folders. Without knowing the source page location,
+			// we cannot resolve relative paths accurately.
 			base := path.Base(p.Name())
 			if dst == base {
 				return true
@@ -111,6 +114,56 @@ func containLinkTo(n ast.Node, p Page) bool {
 
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
 		if containLinkTo(c, p) {
+			return true
+		}
+
+		if c == n.LastChild() {
+			break
+		}
+	}
+
+	return false
+}
+
+// containLinkToFrom checks if an AST node contains a link from sourcePage to targetPage.
+// This version is aware of the source page context and can better resolve relative links.
+func containLinkToFrom(n ast.Node, sourcePage, targetPage Page) bool {
+	if n.Kind() == KindPageLink {
+		t, _ := n.(*PageLink)
+		if t.page.FileName() == targetPage.FileName() {
+			return true
+		}
+	}
+	if n.Kind() == ast.KindLink {
+		t, _ := n.(*ast.Link)
+		dst := string(t.Destination)
+
+		// link is absolute: remove / and match full path
+		if strings.HasPrefix(dst, "/") {
+			cleanPath := strings.TrimPrefix(dst, "/")
+			if cleanPath == targetPage.Name() {
+				return true
+			}
+		} else { // link is relative: resolve from source page's directory
+			sourceDir := path.Dir(sourcePage.Name())
+			resolvedPath := path.Join(sourceDir, dst)
+			// Normalize path by cleaning it
+			resolvedPath = path.Clean(resolvedPath)
+			
+			if resolvedPath == targetPage.Name() {
+				return true
+			}
+			
+			// Fallback: also check basename for compatibility
+			// This handles cases where relative links use just the filename
+			if dst == path.Base(targetPage.Name()) {
+				return true
+			}
+		}
+	}
+
+	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
+		if containLinkToFrom(c, sourcePage, targetPage) {
 			return true
 		}
 

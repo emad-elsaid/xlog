@@ -360,6 +360,183 @@ func TestNormalizedName(t *testing.T) {
 	}
 }
 
+// TestContainLinkToFrom_RelativeWithContext tests context-aware relative link resolution
+func TestContainLinkToFrom_RelativeWithContext(t *testing.T) {
+	tests := []struct {
+		name         string
+		sourcePage   string
+		targetPage   string
+		linkDest     string
+		shouldMatch  bool
+		description  string
+	}{
+		{
+			name:         "Same directory - simple filename",
+			sourcePage:   "folder/source.md",
+			targetPage:   "folder/target.md",
+			linkDest:     "target.md",
+			shouldMatch:  true,
+			description:  "Relative link in same directory should match",
+		},
+		{
+			name:         "Subdirectory - relative path",
+			sourcePage:   "folder/source.md",
+			targetPage:   "folder/sub/target.md",
+			linkDest:     "sub/target.md",
+			shouldMatch:  true,
+			description:  "Relative link with subdirectory should match",
+		},
+		{
+			name:         "Parent directory - relative path",
+			sourcePage:   "folder/sub/source.md",
+			targetPage:   "folder/target.md",
+			linkDest:     "../target.md",
+			shouldMatch:  true,
+			description:  "Relative link to parent directory should match",
+		},
+		{
+			name:         "Different folders - same basename",
+			sourcePage:   "folder1/source.md",
+			targetPage:   "folder2/target.md",
+			linkDest:     "target.md",
+			shouldMatch:  true, // Fallback to basename matching
+			description:  "Basename fallback should match even in different folders",
+		},
+		{
+			name:         "Different folders - relative path",
+			sourcePage:   "folder1/source.md",
+			targetPage:   "folder2/target.md",
+			linkDest:     "../folder2/target.md",
+			shouldMatch:  true,
+			description:  "Explicit relative path to different folder should match",
+		},
+		{
+			name:         "Root level - simple filename",
+			sourcePage:   "source.md",
+			targetPage:   "target.md",
+			linkDest:     "target.md",
+			shouldMatch:  true,
+			description:  "Files at root level should match by name",
+		},
+		{
+			name:         "Wrong target",
+			sourcePage:   "folder/source.md",
+			targetPage:   "folder/target.md",
+			linkDest:     "other.md",
+			shouldMatch:  false,
+			description:  "Link to different file should not match",
+		},
+		{
+			name:         "Absolute path mismatch",
+			sourcePage:   "folder/source.md",
+			targetPage:   "folder/target.md",
+			linkDest:     "/other/target.md",
+			shouldMatch:  false,
+			description:  "Absolute path to different location should not match",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create source and target pages
+			sourcePage := &mockPage{name: tt.sourcePage, filename: tt.sourcePage}
+			targetPage := &mockPage{name: tt.targetPage, filename: tt.targetPage}
+
+			// Create a link node
+			link := ast.NewLink()
+			link.Destination = []byte(tt.linkDest)
+			link.AppendChild(link, ast.NewString([]byte("link text")))
+
+			// Create a paragraph containing the link
+			para := ast.NewParagraph()
+			para.AppendChild(para, link)
+
+			// Test containLinkToFrom
+			result := containLinkToFrom(para, sourcePage, targetPage)
+			if result != tt.shouldMatch {
+				t.Errorf("%s: expected %v, got %v. Source: %s, Target: %s, Link: %s",
+					tt.description, tt.shouldMatch, result, tt.sourcePage, tt.targetPage, tt.linkDest)
+			}
+		})
+	}
+}
+
+// TestContainLinkToFrom_AbsoluteLink tests absolute link handling with context
+func TestContainLinkToFrom_AbsoluteLink(t *testing.T) {
+	sourcePage := &mockPage{name: "folder/source.md", filename: "folder/source.md"}
+	targetPage := &mockPage{name: "other/target.md", filename: "other/target.md"}
+
+	// Create an absolute link
+	link := ast.NewLink()
+	link.Destination = []byte("/other/target.md")
+	link.AppendChild(link, ast.NewString([]byte("link text")))
+
+	para := ast.NewParagraph()
+	para.AppendChild(para, link)
+
+	// Absolute links should match regardless of source location
+	if !containLinkToFrom(para, sourcePage, targetPage) {
+		t.Error("Absolute link should match target page")
+	}
+}
+
+// TestContainLinkToFrom_PageLink tests PageLink handling with context
+func TestContainLinkToFrom_PageLink(t *testing.T) {
+	sourcePage := &mockPage{name: "folder/source.md", filename: "folder/source.md"}
+	targetPage := &mockPage{name: "folder/target.md", filename: "folder/target.md"}
+
+	// Create a PageLink node
+	pageLink := &PageLink{
+		page: targetPage,
+	}
+	pageLink.AppendChild(pageLink, ast.NewString([]byte("target.md")))
+
+	para := ast.NewParagraph()
+	para.AppendChild(para, pageLink)
+
+	// PageLink should match when filenames are the same
+	if !containLinkToFrom(para, sourcePage, targetPage) {
+		t.Error("PageLink should match target page")
+	}
+}
+
+// TestContainLinkToFrom_ComplexPath tests path normalization
+func TestContainLinkToFrom_ComplexPath(t *testing.T) {
+	sourcePage := &mockPage{name: "a/b/c/source.md", filename: "a/b/c/source.md"}
+	targetPage := &mockPage{name: "a/b/target.md", filename: "a/b/target.md"}
+
+	// Link with unnecessary path segments (../c/../target.md should resolve to ../target.md)
+	link := ast.NewLink()
+	link.Destination = []byte("../c/../target.md")
+	link.AppendChild(link, ast.NewString([]byte("link text")))
+
+	para := ast.NewParagraph()
+	para.AppendChild(para, link)
+
+	// Path should be normalized and match
+	if !containLinkToFrom(para, sourcePage, targetPage) {
+		t.Error("Complex relative path should be normalized and match")
+	}
+}
+
+// TestContainLinkTo_BackwardCompatibility ensures old function still works
+func TestContainLinkTo_BackwardCompatibility(t *testing.T) {
+	// This test ensures containLinkTo (without source context) still works
+	link := ast.NewLink()
+	link.Destination = []byte("target.md")
+	link.AppendChild(link, ast.NewString([]byte("link text")))
+
+	para := ast.NewParagraph()
+	para.AppendChild(para, link)
+
+	targetPage := &mockPage{name: "some/folder/target.md"}
+
+	// Should still match on basename (legacy behavior)
+	if !containLinkTo(para, targetPage) {
+		t.Error("containLinkTo should maintain backward compatibility with basename matching")
+	}
+}
+
 // mockPage is a minimal Page implementation for testing
 type mockPage struct {
 	name     string
