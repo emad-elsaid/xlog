@@ -70,7 +70,7 @@ func backlinksSection(p Page) template.HTML {
 
 	pages := MapPage(context.Background(), func(a Page) Page {
 		_, tree := a.AST()
-		if a.Name() == p.Name() || !containLinkTo(tree, p) {
+		if a.Name() == p.Name() || !containLinkToFrom(tree, a, p) {
 			return nil
 		}
 
@@ -80,10 +80,12 @@ func backlinksSection(p Page) template.HTML {
 	return Partial("backlinks", Locals{"pages": pages})
 }
 
-func containLinkTo(n ast.Node, p Page) bool {
+// containLinkToFrom checks if an AST node contains a link from sourcePage to targetPage.
+// This version is aware of the source page context and can properly resolve relative links.
+func containLinkToFrom(n ast.Node, sourcePage, targetPage Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
-		if t.page.FileName() == p.FileName() {
+		if t.page.FileName() == targetPage.FileName() {
 			return true
 		}
 	}
@@ -91,26 +93,32 @@ func containLinkTo(n ast.Node, p Page) bool {
 		t, _ := n.(*ast.Link)
 		dst := string(t.Destination)
 
-		// link is absolute: remove /
+		// link is absolute: remove / and match full path
 		if strings.HasPrefix(dst, "/") {
-			path := strings.TrimPrefix(dst, "/")
-			if string(path) == p.Name() {
+			cleanPath := strings.TrimPrefix(dst, "/")
+			if cleanPath == targetPage.Name() {
 				return true
 			}
-		} else { // link is relative: get relative part
-			// TODO: what if another folder has the same filename?
-			// * just ignore that fact
-			// * dont support relative paths
-			// there is no way to know who is the parent folder
-			base := path.Base(p.Name())
-			if dst == base {
+		} else { // link is relative: resolve from source page's directory
+			sourceDir := path.Dir(sourcePage.Name())
+			resolvedPath := path.Join(sourceDir, dst)
+			// Normalize path by cleaning it
+			resolvedPath = path.Clean(resolvedPath)
+			
+			if resolvedPath == targetPage.Name() {
+				return true
+			}
+			
+			// Fallback: also check basename for compatibility
+			// This handles cases where relative links use just the filename
+			if dst == path.Base(targetPage.Name()) {
 				return true
 			}
 		}
 	}
 
 	for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-		if containLinkTo(c, p) {
+		if containLinkToFrom(c, sourcePage, targetPage) {
 			return true
 		}
 

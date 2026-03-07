@@ -22,6 +22,20 @@ func init() {
 	if err == nil {
 		testTimeoutMultiplier = m
 	}
+	
+	// Race detector adds significant overhead (5-10x slower)
+	// If no explicit multiplier is set, use 2.0 for race builds
+	// This is detected via a simple test that will only pass with race detector
+	if testTimeoutMultiplier == 1.0 && detectRaceEnabled() {
+		testTimeoutMultiplier = 2.0
+	}
+}
+
+// detectRaceEnabled returns true if race detector is active
+func detectRaceEnabled() bool {
+	// Use runtime package to detect race builds
+	// This uses a build tag approach
+	return raceEnabled
 }
 
 func TestExtras(t *testing.T) {
