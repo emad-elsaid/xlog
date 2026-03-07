@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"io"
 	"net/url"
-	"regexp"
 	"sort"
 	"strconv"
 	"unicode"
@@ -766,11 +765,8 @@ func FindURLIndex(b []byte) int {
 	return i
 }
 
-var emailDomainRegexp = regexp.MustCompile(`^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*`) //nolint:golint,lll
-
 // FindEmailIndex returns a stop index value if the given bytes seem an email address.
 func FindEmailIndex(b []byte) int {
-	// TODO: eliminate regexps
 	i := 0
 	for ; i < len(b); i++ {
 		c := b[i]
@@ -788,11 +784,64 @@ func FindEmailIndex(b []byte) int {
 	if i >= len(b) {
 		return -1
 	}
-	match := emailDomainRegexp.FindSubmatchIndex(b[i:])
-	if match == nil {
-		return -1
+	
+	// Validate domain part without regex
+	// Domain format: label(.label)* where each label is alphanumeric with optional hyphens
+	// Each label: starts with alphanumeric, ends with alphanumeric, max 63 chars
+	// Labels separated by dots
+	domainStart := i
+	
+	for i < len(b) {
+		// Label must start with alphanumeric
+		if !IsAlphaNumeric(b[i]) {
+			return -1
+		}
+		labelStart := i
+		i++
+		
+		// Read through label (alphanumeric or hyphen, max 63 chars)
+		for i < len(b) && i-labelStart < 63 {
+			c := b[i]
+			if IsAlphaNumeric(c) || c == '-' {
+				i++
+			} else {
+				break
+			}
+		}
+		
+		// Label must end with alphanumeric (not hyphen)
+		if i > labelStart+1 && b[i-1] == '-' {
+			return -1
+		}
+		
+		// Check what comes after the label
+		if i >= len(b) {
+			// End of input - valid if we read at least one label
+			if i > domainStart {
+				return i
+			}
+			return -1
+		}
+		
+		// If next char is a dot, continue to next label
+		if b[i] == '.' {
+			i++
+			if i >= len(b) {
+				// Domain can't end with a dot
+				return i - 1
+			}
+			continue
+		}
+		
+		// Any other character ends the domain
+		break
 	}
-	return i + match[1]
+	
+	// Valid if we read at least one character in the domain part
+	if i > domainStart {
+		return i
+	}
+	return -1
 }
 
 var spaces = []byte(" \t\n\x0b\x0c\x0d")
