@@ -179,154 +179,12 @@ func TestPageLinkParser_Parse(t *testing.T) {
 	}
 }
 
-// TestContainLinkTo_AbsoluteLink tests detection of absolute markdown links
-func TestContainLinkTo_AbsoluteLink(t *testing.T) {
-	// Create a link node
-	link := ast.NewLink()
-	link.Destination = []byte("/target-page.md")
-	link.AppendChild(link, ast.NewString([]byte("link text")))
 
-	// Create a paragraph containing the link
-	para := ast.NewParagraph()
-	para.AppendChild(para, link)
 
-	// Create a mock target page
-	targetPage := &mockPage{name: "target-page.md"}
 
-	// Test containLinkTo
-	if !containLinkTo(para, targetPage) {
-		t.Error("Expected to find absolute link to target page")
-	}
-}
 
-// TestContainLinkTo_RelativeLink tests detection of relative markdown links
-func TestContainLinkTo_RelativeLink(t *testing.T) {
-	// Create a link node with relative path
-	link := ast.NewLink()
-	link.Destination = []byte("target.md")
-	link.AppendChild(link, ast.NewString([]byte("link text")))
 
-	// Create a paragraph containing the link
-	para := ast.NewParagraph()
-	para.AppendChild(para, link)
 
-	// Create a mock target page with path
-	targetPage := &mockPage{name: "some/folder/target.md"}
-
-	// Test containLinkTo (should match on base name)
-	if !containLinkTo(para, targetPage) {
-		t.Error("Expected to find relative link to target page")
-	}
-}
-
-// TestContainLinkTo_NoLink tests that pages without links return false
-func TestContainLinkTo_NoLink(t *testing.T) {
-	// Create a paragraph with just text, no links
-	para := ast.NewParagraph()
-	para.AppendChild(para, ast.NewString([]byte("just some text")))
-
-	// Create a mock target page
-	targetPage := &mockPage{name: "target.md"}
-
-	// Test containLinkTo
-	if containLinkTo(para, targetPage) {
-		t.Error("Expected NOT to find link to target page")
-	}
-}
-
-// TestContainLinkTo_WrongLink tests that links to other pages don't match
-func TestContainLinkTo_WrongLink(t *testing.T) {
-	// Create a link to a different page
-	link := ast.NewLink()
-	link.Destination = []byte("/other-page.md")
-	link.AppendChild(link, ast.NewString([]byte("link text")))
-
-	para := ast.NewParagraph()
-	para.AppendChild(para, link)
-
-	// Create a mock target page (different from the link)
-	targetPage := &mockPage{name: "target.md"}
-
-	// Test containLinkTo
-	if containLinkTo(para, targetPage) {
-		t.Error("Expected NOT to find link to target page (link points elsewhere)")
-	}
-}
-
-// TestContainLinkTo_PageLink tests detection of PageLink nodes
-func TestContainLinkTo_PageLink(t *testing.T) {
-	// Create a PageLink node
-	targetPage := &mockPage{name: "target.md", filename: "target.md"}
-	pageLink := &PageLink{
-		page: targetPage,
-	}
-	pageLink.AppendChild(pageLink, ast.NewString([]byte("target.md")))
-
-	// Create a paragraph containing the PageLink
-	para := ast.NewParagraph()
-	para.AppendChild(para, pageLink)
-
-	// Test containLinkTo
-	if !containLinkTo(para, targetPage) {
-		t.Error("Expected to find PageLink to target page")
-	}
-}
-
-// TestContainLinkTo_NestedNodes tests traversal through nested AST nodes
-func TestContainLinkTo_NestedNodes(t *testing.T) {
-	// Create nested structure: paragraph > list > list item > link
-	link := ast.NewLink()
-	link.Destination = []byte("/nested-target.md")
-	link.AppendChild(link, ast.NewString([]byte("link text")))
-
-	listItem := ast.NewListItem(0)
-	listItem.AppendChild(listItem, link)
-
-	list := ast.NewList('-')
-	list.AppendChild(list, listItem)
-
-	para := ast.NewParagraph()
-	para.AppendChild(para, list)
-
-	// Create a mock target page
-	targetPage := &mockPage{name: "nested-target.md"}
-
-	// Test containLinkTo (should traverse nested nodes)
-	if !containLinkTo(para, targetPage) {
-		t.Error("Expected to find link in nested structure")
-	}
-}
-
-// TestContainLinkTo_MultipleLinks tests pages with multiple links
-func TestContainLinkTo_MultipleLinks(t *testing.T) {
-	// Create multiple links
-	link1 := ast.NewLink()
-	link1.Destination = []byte("/page1.md")
-	link1.AppendChild(link1, ast.NewString([]byte("link 1")))
-
-	link2 := ast.NewLink()
-	link2.Destination = []byte("/target.md")
-	link2.AppendChild(link2, ast.NewString([]byte("link 2")))
-
-	link3 := ast.NewLink()
-	link3.Destination = []byte("/page3.md")
-	link3.AppendChild(link3, ast.NewString([]byte("link 3")))
-
-	para := ast.NewParagraph()
-	para.AppendChild(para, link1)
-	para.AppendChild(para, ast.NewString([]byte(" and ")))
-	para.AppendChild(para, link2)
-	para.AppendChild(para, ast.NewString([]byte(" and ")))
-	para.AppendChild(para, link3)
-
-	// Create a mock target page
-	targetPage := &mockPage{name: "target.md"}
-
-	// Test containLinkTo (should find the second link)
-	if !containLinkTo(para, targetPage) {
-		t.Error("Expected to find link to target page among multiple links")
-	}
-}
 
 // TestNormalizedName tests case-insensitive matching
 func TestNormalizedName(t *testing.T) {
@@ -519,23 +377,6 @@ func TestContainLinkToFrom_ComplexPath(t *testing.T) {
 	}
 }
 
-// TestContainLinkTo_BackwardCompatibility ensures old function still works
-func TestContainLinkTo_BackwardCompatibility(t *testing.T) {
-	// This test ensures containLinkTo (without source context) still works
-	link := ast.NewLink()
-	link.Destination = []byte("target.md")
-	link.AppendChild(link, ast.NewString([]byte("link text")))
-
-	para := ast.NewParagraph()
-	para.AppendChild(para, link)
-
-	targetPage := &mockPage{name: "some/folder/target.md"}
-
-	// Should still match on basename (legacy behavior)
-	if !containLinkTo(para, targetPage) {
-		t.Error("containLinkTo should maintain backward compatibility with basename matching")
-	}
-}
 
 // mockPage is a minimal Page implementation for testing
 type mockPage struct {
