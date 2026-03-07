@@ -730,13 +730,39 @@ func RenderAttributes(w util.BufWriter, node ast.Node, filter util.BytesFilter) 
 		_, _ = w.WriteString(" ")
 		_, _ = w.Write(attr.Name)
 		_, _ = w.WriteString(`="`)
-		// TODO: convert numeric values to strings
+		
 		var value []byte
 		switch typed := attr.Value.(type) {
 		case []byte:
 			value = typed
 		case string:
 			value = util.StringToReadOnlyBytes(typed)
+		case int:
+			value = util.StringToReadOnlyBytes(strconv.Itoa(typed))
+		case int8:
+			value = util.StringToReadOnlyBytes(strconv.FormatInt(int64(typed), 10))
+		case int16:
+			value = util.StringToReadOnlyBytes(strconv.FormatInt(int64(typed), 10))
+		case int32:
+			value = util.StringToReadOnlyBytes(strconv.FormatInt(int64(typed), 10))
+		case int64:
+			value = util.StringToReadOnlyBytes(strconv.FormatInt(typed, 10))
+		case uint:
+			value = util.StringToReadOnlyBytes(strconv.FormatUint(uint64(typed), 10))
+		case uint8:
+			value = util.StringToReadOnlyBytes(strconv.FormatUint(uint64(typed), 10))
+		case uint16:
+			value = util.StringToReadOnlyBytes(strconv.FormatUint(uint64(typed), 10))
+		case uint32:
+			value = util.StringToReadOnlyBytes(strconv.FormatUint(uint64(typed), 10))
+		case uint64:
+			value = util.StringToReadOnlyBytes(strconv.FormatUint(typed, 10))
+		case float32:
+			value = util.StringToReadOnlyBytes(strconv.FormatFloat(float64(typed), 'f', -1, 32))
+		case float64:
+			value = util.StringToReadOnlyBytes(strconv.FormatFloat(typed, 'f', -1, 64))
+		case bool:
+			value = util.StringToReadOnlyBytes(strconv.FormatBool(typed))
 		}
 		_, _ = w.Write(util.EscapeHTML(value))
 		_ = w.WriteByte('"')
