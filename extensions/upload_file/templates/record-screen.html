@@ -12,13 +12,28 @@
          });
      }
 
+     // Auto-detect supported video codec
+     function getSupportedMimeType() {
+         const types = [
+             "video/webm; codecs=vp9",
+             "video/webm; codecs=vp8",
+             "video/webm",
+         ];
+         for (const type of types) {
+             if (MediaRecorder.isTypeSupported(type)) {
+                 return type;
+             }
+         }
+         return "video/webm"; // fallback
+     }
+
      let params = {
          video: {cursor: "always"},
          audio: true
      }
      let stream = await navigator.mediaDevices.getDisplayMedia(params);
+     let mimetype = getSupportedMimeType();
      let extension = "webm"
-     let mimetype = "video/webm; codecs=vp9"
      let options = { mimeType: mimetype };
      let recorder = new MediaRecorder(stream, options);
      recorder.ondataavailable = (event) => {

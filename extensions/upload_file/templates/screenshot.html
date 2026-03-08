@@ -15,20 +15,50 @@
      var stream = await navigator.mediaDevices.getDisplayMedia({video: true, audio: false});
 
      stream.getTracks().forEach(async function(track) {
-         var ic = new ImageCapture(track);
-         var bmp = await ic.grabFrame();
-         track.stop();
+         // Check if ImageCapture API is available (Chrome/Edge)
+         if (typeof ImageCapture !== 'undefined') {
+             // Chrome/Edge path: Use ImageCapture for better quality
+             var ic = new ImageCapture(track);
+             var bmp = await ic.grabFrame();
+             track.stop();
 
-         const canvas = document.createElement('canvas');
-         canvas.width = bmp.width;
-         canvas.height = bmp.height;
-         const ctx = canvas.getContext('bitmaprenderer');
-         ctx.transferFromImageBitmap(bmp);
+             const canvas = document.createElement('canvas');
+             canvas.width = bmp.width;
+             canvas.height = bmp.height;
+             const ctx = canvas.getContext('bitmaprenderer');
+             ctx.transferFromImageBitmap(bmp);
 
-         canvas.toBlob( recording => {
-             var file = new File([recording], 'screenshot.png', {type: 'image/png'});
-             uploadFile(file);
-         }, "image/png");
+             canvas.toBlob( recording => {
+                 var file = new File([recording], 'screenshot.png', {type: 'image/png'});
+                 uploadFile(file);
+             }, "image/png");
+         } else {
+             // Firefox/Safari fallback: Use video element + canvas
+             const video = document.createElement('video');
+             video.srcObject = stream;
+             video.play();
+
+             // Wait for video to have dimensions
+             await new Promise(resolve => {
+                 video.onloadedmetadata = () => {
+                     video.onloadedmetadata = null;
+                     resolve();
+                 };
+             });
+
+             const canvas = document.createElement('canvas');
+             canvas.width = video.videoWidth;
+             canvas.height = video.videoHeight;
+             const ctx = canvas.getContext('2d');
+             ctx.drawImage(video, 0, 0);
+
+             track.stop();
+
+             canvas.toBlob(recording => {
+                 var file = new File([recording], 'screenshot.png', {type: 'image/png'});
+                 uploadFile(file);
+             }, "image/png");
+         }
      });
  })()
 </script>
