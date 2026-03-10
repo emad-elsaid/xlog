@@ -1,15 +1,19 @@
 package xlog
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"reflect"
 	"runtime"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/csrf"
@@ -69,6 +73,190 @@ func server() *http.Server {
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
+}
+
+// warmASTCache pre-warms AST cache in background for better first-request performance
+func warmASTCache() {
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				slog.Error("Cache warming panicked", "error", r)
+			}
+		}()
+
+		slog.Info("Starting AST cache warming in background")
+		start := time.Now()
+
+		ctx := context.Background()
+		pages := Pages(ctx)
+		total := len(pages)
+
+		// Trigger BeforeCacheWarming event - extensions can prepare their caches
+		// For example: autolink_pages extension builds its trie here
+		Trigger(BeforeCacheWarming, nil)
+
+		// Use aggressive concurrency - we're I/O bound (file reads)
+		concurrency := runtime.NumCPU() * 10
+		if concurrency > 400 {
+			concurrency = 400
+		}
+		slog.Info("Cache warming configuration",
+			"pages", total,
+			"concurrency", concurrency,
+			"cpus", runtime.NumCPU())
+
+		// PHASE 1: Pre-load all file contents into memory
+		// This batches file I/O to reduce syscall overhead
+		slog.Info("Phase 1: Pre-loading file contents into memory")
+		preloadStart := time.Now()
+
+		type pageContent struct {
+			page    Page
+			content Markdown
+			modtime time.Time
+		}
+
+		contentsCh := make(chan pageContent, concurrency*2)
+		pageInputCh := make(chan Page, concurrency*2)
+		var preloadWg sync.WaitGroup
+
+		// Workers for reading AND preprocessing files
+		for i := 0; i < concurrency; i++ {
+			preloadWg.Add(1)
+			go func() {
+				defer preloadWg.Done()
+				for p := range pageInputCh {
+					stat, err := os.Stat(p.FileName())
+					if err != nil {
+						slog.Error("Failed to stat file", "page", p.Name(), "error", err)
+						continue
+					}
+
+					content, err := os.ReadFile(p.FileName())
+					if err != nil {
+						slog.Error("Failed to pre-load file", "page", p.Name(), "error", err)
+						continue
+					}
+
+					contentsCh <- pageContent{page: p, content: Markdown(content), modtime: stat.ModTime()}
+				}
+			}()
+		}
+
+		// Second set of workers for preprocessing (CPU intensive)
+		var preprocessWg sync.WaitGroup
+		for i := 0; i < concurrency; i++ {
+			preprocessWg.Add(1)
+			go func() {
+				defer preprocessWg.Done()
+				for pc := range contentsCh {
+					// Type assert to access internal method
+					if p, ok := pc.page.(*page); ok {
+						p.loadContent(pc.content, pc.modtime)
+					}
+				}
+			}()
+		}
+
+		// Feed pages to file reading workers
+		go func() {
+			for _, p := range pages {
+				pageInputCh <- p
+			}
+			close(pageInputCh)
+		}()
+
+		// Wait for file readers, then close preprocessing channel
+		preloadWg.Wait()
+		close(contentsCh)
+		preprocessWg.Wait()
+
+		preloadElapsed := time.Since(preloadStart)
+		slog.Info("Phase 1 complete: Files pre-loaded",
+			"duration", preloadElapsed,
+			"pages", total,
+			"pages_per_sec", fmt.Sprintf("%.0f", float64(total)/preloadElapsed.Seconds()))
+
+		// PHASE 2: Parse AST (now with cached content, no file I/O)
+		slog.Info("Phase 2: Parsing AST from cached content")
+		parseStart := time.Now()
+
+		// Worker pool pattern
+		pagesCh := make(chan Page, concurrency*2)
+		var wg sync.WaitGroup
+
+		// Atomic counter for lock-free progress tracking
+		var completed atomic.Int64
+		progressTicker := time.NewTicker(2 * time.Second)
+		defer progressTicker.Stop()
+
+		// Progress reporter goroutine
+		go func() {
+			for range progressTicker.C {
+				count := completed.Load()
+				if count > 0 && count <= int64(total) {
+					slog.Info("Phase 2 progress: AST parsing",
+						"completed", count,
+						"total", total,
+						"percent", fmt.Sprintf("%.1f%%", float64(count)/float64(total)*100))
+				}
+				if count >= int64(total) {
+					return
+				}
+			}
+		}()
+
+		// Start worker goroutines
+		for i := 0; i < concurrency; i++ {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				for page := range pagesCh {
+					func() {
+						defer func() {
+							if r := recover(); r != nil {
+								slog.Error("Page AST parsing panicked", "page", page.Name(), "error", r)
+							}
+						}()
+
+						// Parse AST (content already cached, no file I/O)
+						_, _ = page.AST()
+
+						// Increment completed count (lock-free)
+						completed.Add(1)
+					}()
+				}
+			}()
+		}
+
+		// Feed pages to workers
+		for _, p := range pages {
+			pagesCh <- p
+		}
+		close(pagesCh)
+
+		// Wait for all workers to complete
+		wg.Wait()
+
+		parseElapsed := time.Since(parseStart)
+		slog.Info("Phase 2 complete: AST parsing finished",
+			"duration", parseElapsed,
+			"pages", total,
+			"pages_per_sec", fmt.Sprintf("%.0f", float64(total)/parseElapsed.Seconds()))
+
+		elapsed := time.Since(start)
+		slog.Info("Cache warming completed",
+			"pages", total,
+			"duration", elapsed,
+			"pages_per_sec", fmt.Sprintf("%.0f", float64(total)/elapsed.Seconds()))
+
+		// Log file read statistics
+		readCount := fileReadCount.Load()
+		slog.Info("File read statistics",
+			"total_reads", readCount,
+			"pages", total,
+			"reads_per_page", fmt.Sprintf("%.2f", float64(readCount)/float64(total)))
+	}()
 }
 
 // HandlerFunc is the type of an HTTP handler function + returns output function.

@@ -19,7 +19,8 @@ type (
 const (
 	PageChanged PageEvent = iota
 	PageDeleted
-	PageNotFound // user requested a page that's not found
+	PageNotFound       // user requested a page that's not found
+	BeforeCacheWarming // triggered before warming AST cache - extensions can prepare here
 )
 
 // a map to keep all page events and respective list of event handlers
