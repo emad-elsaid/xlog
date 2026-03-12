@@ -34,8 +34,9 @@
       {{- if ne .config.Index .page.Name -}}
       <div dir="auto" class="title is-1 has-text-weight-bold" style="view-transition-name: page-title;">
         {{- with .page -}}
+          {{ $page := . }}
           {{ with $props.title }}
-            {{- emoji . }}
+            {{- emoji $page }}
             {{ .Value }}
           {{ else }}
             {{ with dir .Name }}<p class="subtitle">{{.}}</p>{{ end }}
