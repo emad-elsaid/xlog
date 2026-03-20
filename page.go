@@ -8,11 +8,15 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
+
+// Counter for file reads during development
+var fileReadCount atomic.Int64
 
 // Markdown is used instead of string to make sure it's clear the string is markdown string
 type Markdown string
@@ -52,6 +56,8 @@ type page struct {
 	lastUpdate time.Time
 	ast        ast.Node
 	content    *Markdown
+	banner     *string    // cached banner result
+	modTime    *time.Time // cached modtime
 }
 
 func (p *page) Name() string {
@@ -79,6 +85,7 @@ func (p *page) Render() template.HTML {
 }
 
 func (p *page) Content() Markdown {
+	fileReadCount.Add(1) // Track file reads
 	dat, err := os.ReadFile(p.FileName())
 	if err != nil {
 		return ""
@@ -86,11 +93,29 @@ func (p *page) Content() Markdown {
 	return Markdown(dat)
 }
 
+// modTimeLocked returns modtime assuming lock is already held
+func (p *page) modTimeLocked() time.Time {
+	if p.modTime != nil {
+		return *p.modTime
+	}
+
+	s, err := os.Stat(p.FileName())
+	if err != nil {
+		zero := time.Time{}
+		p.modTime = &zero
+		return zero
+	}
+
+	mt := s.ModTime()
+	p.modTime = &mt
+	return mt
+}
+
 func (p *page) preProcessedContent() Markdown {
 	p.l.Lock()
 	defer p.l.Unlock()
 
-	modtime := p.ModTime()
+	modtime := p.modTimeLocked()
 
 	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()
@@ -133,12 +158,9 @@ func (p *page) Write(content Markdown) bool {
 }
 
 func (p *page) ModTime() time.Time {
-	s, err := os.Stat(p.FileName())
-	if err != nil {
-		return time.Time{}
-	}
-
-	return s.ModTime()
+	p.l.Lock()
+	defer p.l.Unlock()
+	return p.modTimeLocked()
 }
 
 func (p *page) AST() (source []byte, tree ast.Node) {
@@ -155,7 +177,23 @@ func (p *page) AST() (source []byte, tree ast.Node) {
 func (p *page) clearCache() {
 	p.content = nil
 	p.ast = nil
+	p.banner = nil
+	p.modTime = nil
 	p.lastUpdate = time.Time{}
+}
+
+// loadContent pre-loads content into the cache without triggering file read counter
+// Used during cache warming to batch file reads efficiently
+func (p *page) loadContent(content Markdown, modtime time.Time) {
+	p.l.Lock()
+	defer p.l.Unlock()
+
+	c := PreProcess(content)
+	p.content = &c
+	p.lastUpdate = modtime
+
+	// Cache modtime too to avoid another stat call
+	p.modTime = &modtime
 }
 
 // DynamicPage implement Page interface and allow extensions to define a page to
