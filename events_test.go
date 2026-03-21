@@ -237,9 +237,9 @@ func TestTriggerEmptyHandlerList(t *testing.T) {
 func TestEventHandlerReceivesCorrectPage(t *testing.T) {
 	pageEvents = map[PageEvent][]PageEventHandler{}
 
-	var receivedPage Page
+	receivedChan := make(chan Page, 1)
 	handler := func(p Page) error {
-		receivedPage = p
+		receivedChan <- p
 		return nil
 	}
 
@@ -253,15 +253,15 @@ func TestEventHandlerReceivesCorrectPage(t *testing.T) {
 
 	Trigger(PageDeleted, testP)
 
-	if receivedPage == nil {
-		t.Fatal("Handler did not receive page")
-	}
-
-	if receivedPage.Name() != "deleted-page" {
-		t.Errorf("Expected page name 'deleted-page', got %s", receivedPage.Name())
-	}
-
-	if !receivedPage.ModTime().Equal(expectedTime) {
-		t.Errorf("Expected mod time %v, got %v", expectedTime, receivedPage.ModTime())
+	select {
+	case receivedPage := <-receivedChan:
+		if receivedPage.Name() != "deleted-page" {
+			t.Errorf("Expected page name 'deleted-page', got %s", receivedPage.Name())
+		}
+		if !receivedPage.ModTime().Equal(expectedTime) {
+			t.Errorf("Expected mod time %v, got %v", expectedTime, receivedPage.ModTime())
+		}
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Handler did not receive page within timeout")
 	}
 }
