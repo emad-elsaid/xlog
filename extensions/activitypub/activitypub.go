@@ -83,7 +83,10 @@ func webfinger(r Request) Output {
 					"type": "application/activity+json",
 					"href": fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 				},
-				// TODO we need to make sure this is actually needed
+				// OStatus remote subscribe link for legacy compatibility with older Mastodon instances
+				// and fediverse servers. Modern ActivityPub implementations use the inbox for follows,
+				// but this template allows users to initiate follows via web UI on their home instance.
+				// Required by Mastodon's remote follow flow. See: https://docs.joinmastodon.org/spec/webfinger/
 				{
 					"rel":      "http://ostatus.org/schema/1.0/subscribe",
 					"template": fmt.Sprintf("https://%s/authorize_interaction?uri={uri}", domain),
