@@ -5,6 +5,7 @@ import (
 	"flag"
 	"html/template"
 	"log/slog"
+	"net/http"
 	"os"
 	"runtime"
 	"time"
@@ -44,6 +45,14 @@ func Start(ctx context.Context) {
 
 	initExtensions()
 
+	// Register pprof handlers before catch-all routes
+	router.Handle("GET /debug/pprof/", http.DefaultServeMux)
+	router.Handle("GET /debug/pprof/cmdline", http.DefaultServeMux)
+	router.Handle("GET /debug/pprof/profile", http.DefaultServeMux)
+	router.Handle("GET /debug/pprof/symbol", http.DefaultServeMux)
+	router.Handle("GET /debug/pprof/trace", http.DefaultServeMux)
+	router.Handle("GET /debug/pprof/heap", http.DefaultServeMux)
+
 	Get("/{$}", rootHandler)
 	Get("/{page...}", getPageHandler)
 
@@ -58,6 +67,9 @@ func Start(ctx context.Context) {
 
 	srv := server()
 	slog.Info("Starting server", "address", Config.BindAddress)
+
+	// Pre-warm AST cache in background for better performance
+	warmASTCache()
 
 	go func() {
 		<-ctx.Done()
