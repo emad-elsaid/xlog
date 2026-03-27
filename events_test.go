@@ -3,6 +3,7 @@ package xlog
 import (
 	"errors"
 	"html/template"
+	"sync"
 	"testing"
 	"time"
 
@@ -27,7 +28,7 @@ func (t *testPage) AST() ([]byte, ast.Node)        { return nil, nil }
 
 func TestListen(t *testing.T) {
 	// Clear any existing handlers to isolate test
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	var called bool
 	handler := func(p Page) error {
@@ -51,7 +52,7 @@ func TestListen(t *testing.T) {
 }
 
 func TestListenMultipleHandlers(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	callCount := 0
 	handler1 := func(p Page) error {
@@ -79,7 +80,7 @@ func TestListenMultipleHandlers(t *testing.T) {
 }
 
 func TestListenDifferentEvents(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	changedCalled := false
 	deletedCalled := false
@@ -120,7 +121,7 @@ func TestListenDifferentEvents(t *testing.T) {
 }
 
 func TestTriggerNonExistentEvent(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	// Create a non-standard event
 	customEvent := PageEvent(999)
@@ -131,7 +132,7 @@ func TestTriggerNonExistentEvent(t *testing.T) {
 }
 
 func TestTriggerWithError(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	expectedErr := errors.New("handler error")
 	errorHandler := func(p Page) error {
@@ -160,7 +161,7 @@ func TestTriggerWithError(t *testing.T) {
 }
 
 func TestTriggerPageData(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	var receivedName string
 	handler := func(p Page) error {
@@ -183,7 +184,7 @@ func TestAllPageEvents(t *testing.T) {
 	// Verify all defined events can be used
 	events := []PageEvent{PageChanged, PageDeleted, PageNotFound}
 
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 	callCounts := make(map[PageEvent]int)
 
 	for _, event := range events {
@@ -208,7 +209,7 @@ func TestAllPageEvents(t *testing.T) {
 }
 
 func TestListenIdempotency(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
 	handler := func(p Page) error { return nil }
 
@@ -235,10 +236,15 @@ func TestTriggerEmptyHandlerList(t *testing.T) {
 }
 
 func TestEventHandlerReceivesCorrectPage(t *testing.T) {
-	pageEvents = map[PageEvent][]PageEventHandler{}
+	clearPageEvents()
 
-	var receivedPage Page
+	var (
+		receivedPage Page
+		mu           sync.Mutex
+	)
 	handler := func(p Page) error {
+		mu.Lock()
+		defer mu.Unlock()
 		receivedPage = p
 		return nil
 	}
@@ -253,6 +259,9 @@ func TestEventHandlerReceivesCorrectPage(t *testing.T) {
 
 	Trigger(PageDeleted, testP)
 
+	mu.Lock()
+	defer mu.Unlock()
+	
 	if receivedPage == nil {
 		t.Fatal("Handler did not receive page")
 	}

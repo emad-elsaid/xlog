@@ -1,6 +1,9 @@
 package xlog
 
-import "log/slog"
+import (
+	"log/slog"
+	"sync"
+)
 
 type (
 	// a type used to define events to be used when the page is manipulated for
@@ -23,13 +26,26 @@ const (
 )
 
 // a map to keep all page events and respective list of event handlers
-var pageEvents = map[PageEvent][]PageEventHandler{}
+var (
+	pageEvents      = map[PageEvent][]PageEventHandler{}
+	pageEventsMutex sync.RWMutex
+)
+
+// clearPageEvents clears all registered event handlers. Used for testing.
+func clearPageEvents() {
+	pageEventsMutex.Lock()
+	defer pageEventsMutex.Unlock()
+	pageEvents = map[PageEvent][]PageEventHandler{}
+}
 
 // Register an event handler to be executed when PageEvent is triggered.
 // extensions can use this to register hooks under specific page events.
 // extensions that keeps a cached version of the pages list for example needs to
 // register handlers to update its cache
 func Listen(e PageEvent, h PageEventHandler) {
+	pageEventsMutex.Lock()
+	defer pageEventsMutex.Unlock()
+	
 	if _, ok := pageEvents[e]; !ok {
 		pageEvents[e] = []PageEventHandler{}
 	}
@@ -41,11 +57,15 @@ func Listen(e PageEvent, h PageEventHandler) {
 // function to trigger all registered handlers when the page is edited or
 // deleted for example.
 func Trigger(e PageEvent, p Page) {
-	if _, ok := pageEvents[e]; !ok {
+	pageEventsMutex.RLock()
+	handlers, ok := pageEvents[e]
+	pageEventsMutex.RUnlock()
+	
+	if !ok {
 		return
 	}
 
-	for _, h := range pageEvents[e] {
+	for _, h := range handlers {
 		if err := h(p); err != nil {
 			slog.Error("Failed to execute handler for event", "event", e, "handler", h, "error", err)
 		}
