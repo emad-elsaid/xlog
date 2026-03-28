@@ -131,10 +131,6 @@ func TestMarkdownFS_Cache(t *testing.T) {
 }
 
 func TestMarkdownFS_Watch_FileChange(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping file watch test in short mode")
-	}
-
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.md")
 
@@ -175,10 +171,6 @@ func TestMarkdownFS_Watch_FileChange(t *testing.T) {
 }
 
 func TestMarkdownFS_Watch_FileDelete(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping file watch test in short mode")
-	}
-
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.md")
 
