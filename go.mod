@@ -1,6 +1,6 @@
 module github.com/emad-elsaid/xlog
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/alecthomas/chroma/v2 v2.13.0
@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
-	golang.org/x/image v0.18.0
+	golang.org/x/image v0.38.0
 )
 
 require (
