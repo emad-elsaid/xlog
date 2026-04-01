@@ -121,36 +121,6 @@ image: https://www.emadelsaid.com/public/logo.png
 website: https://www.emadelsaid.com
 byline: Developer, Youtuber and casual gamer
 ```
-```person
-name: Emad Elsaid
-image: https://www.emadelsaid.com/public/logo.png
-website: https://www.emadelsaid.com
-byline: Developer, Youtuber and casual gamer
-```
-```person
-name: Emad Elsaid
-image: https://www.emadelsaid.com/public/logo.png
-website: https://www.emadelsaid.com
-byline: Developer, Youtuber and casual gamer
-```
-```person
-name: Emad Elsaid
-image: https://www.emadelsaid.com/public/logo.png
-website: https://www.emadelsaid.com
-byline: Developer, Youtuber and casual gamer
-```
-```person
-name: Emad Elsaid
-image: https://www.emadelsaid.com/public/logo.png
-website: https://www.emadelsaid.com
-byline: Developer, Youtuber and casual gamer
-```
-```person
-name: Emad Elsaid
-image: https://www.emadelsaid.com/public/logo.png
-website: https://www.emadelsaid.com
-byline: Developer, Youtuber and casual gamer
-```
 
 
 The previous list each one of them is a block that looks like the following: 
@@ -174,10 +144,6 @@ or one-liner. as only one line is needed
 ```
 /github-user name: emad-elsaid
 ```
-
-/github-user name: emad-elsaid
-
-/github-user name: emad-elsaid
 
 /github-user name: emad-elsaid
 
