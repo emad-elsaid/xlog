@@ -34,19 +34,25 @@ func (a fileInfoByNameLength) Less(i, j int) bool {
 
 var autolinkPages []*NormalizedPage
 var autolinkPage_lck sync.Mutex
+var autolinkTrie *trie
 
 func UpdatePagesList(Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 
+	// Build both the list (for backwards compat) and trie
+	t := newTrie()
 	ps := MapPage(context.Background(), func(p Page) *NormalizedPage {
+		normalized := path.Base(strings.ToLower(p.Name()))
+		t.insert(normalized, p)
 		return &NormalizedPage{
 			page:           p,
-			normalizedName: path.Base(strings.ToLower(p.Name())),
+			normalizedName: normalized,
 		}
 	})
 	sort.Sort(fileInfoByNameLength(ps))
 	autolinkPages = ps
+	autolinkTrie = t
 	return
 }
 

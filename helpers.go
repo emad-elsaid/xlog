@@ -144,7 +144,35 @@ func IsFontAwesome(i string) bool {
 }
 
 func Banner(p Page) string {
+	// Check if we can use cached banner from page struct
+	if pp, ok := p.(*page); ok {
+		pp.l.Lock()
+		// If cache is valid, return cached value
+		if pp.banner != nil && pp.modTime != nil && pp.lastUpdate.Equal(*pp.modTime) {
+			cached := *pp.banner
+			pp.l.Unlock()
+			return cached
+		}
+		pp.l.Unlock()
+
+		// Cache miss or stale cache - compute banner by calling AST (without holding lock)
+		_, a := pp.AST()
+		result := extractBannerFromAST(a, pp.FileName())
+
+		// Cache the result
+		pp.l.Lock()
+		pp.banner = &result
+		pp.l.Unlock()
+
+		return result
+	}
+
+	// For non-page types (DynamicPage), compute without cache
 	_, a := p.AST()
+	return extractBannerFromAST(a, p.FileName())
+}
+
+func extractBannerFromAST(a ast.Node, fileName string) string {
 	if a == nil {
 		return ""
 	}
@@ -170,7 +198,7 @@ func Banner(p Page) string {
 	}
 
 	if !(path.IsAbs(dest) || strings.HasPrefix(dest, "http")) {
-		d := path.Dir(p.FileName())
+		d := path.Dir(fileName)
 		dest = path.Join("/", d, dest)
 	}
 
