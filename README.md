@@ -7,6 +7,8 @@ XLog
 
 <p align="center"><img width="200" src="public/logo.png" /></p>
 
+<p align="center"><img width="100%" src="public/screenshot.png" /></p>
+
 
 # Documentation
 
