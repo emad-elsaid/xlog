@@ -853,7 +853,7 @@ func TestRenderAutoLink(t *testing.T) {
 			source := []byte(tc.url)
 			txt := ast.NewText()
 			txt.Segment = text.NewSegment(0, len(tc.url))
-			
+
 			al := ast.NewAutoLink(tc.linkType, txt)
 			if tc.hasProtocol {
 				al.Protocol = []byte("mailto")
@@ -1023,7 +1023,7 @@ func TestRenderImage(t *testing.T) {
 			if tc.title != "" {
 				link.Title = []byte(tc.title)
 			}
-			
+
 			img := ast.NewImage(link)
 			if tc.alt != "" {
 				txt := ast.NewText()
@@ -1209,11 +1209,11 @@ func TestRenderTexts(t *testing.T) {
 
 	parent := ast.NewParagraph()
 	source := []byte("hello world")
-	
+
 	txt := ast.NewText()
 	txt.Segment = text.NewSegment(0, 5)
 	parent.AppendChild(parent, txt)
-	
+
 	str := ast.NewString([]byte(" world"))
 	parent.AppendChild(parent, str)
 
