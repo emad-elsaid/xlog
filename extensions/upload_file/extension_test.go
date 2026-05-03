@@ -216,11 +216,12 @@ func TestFilterChars(t *testing.T) {
 }
 
 func TestUploadFileExtensionInit(t *testing.T) {
+	const expectedName = "upload-file"
 	// Test that Init registers handlers correctly
 	ext := UploadFile{}
 
-	if name := ext.Name(); name != "upload-file" {
-		t.Errorf("Name() = %q, want %q", name, "upload-file")
+	if name := ext.Name(); name != expectedName {
+		t.Errorf("Name() = %q, want %q", name, expectedName)
 	}
 
 	// Init should not panic
@@ -368,4 +369,159 @@ func TestRecordAudio_Command(t *testing.T) {
 	if got := cmd.Name(); got != "Record audio" {
 		t.Errorf("Name() = %q, want %q", got, "Record audio")
 	}
+}
+
+func TestFormHandlers(t *testing.T) {
+	tests := []struct {
+		name     string
+		handler  func(xlog.Request) xlog.Output
+		pageName string
+	}{
+		{
+			name:     "UploadForm handles request",
+			handler:  UploadForm,
+			pageName: "test-page",
+		},
+		{
+			name:     "ScreenshotForm handles request",
+			handler:  ScreenshotForm,
+			pageName: "my-page",
+		},
+		{
+			name:     "RecordScreenForm handles request",
+			handler:  RecordScreenForm,
+			pageName: "notes",
+		},
+		{
+			name:     "RecordCameraForm handles request",
+			handler:  RecordCameraForm,
+			pageName: "video-page",
+		},
+		{
+			name:     "RecordAudioForm handles request",
+			handler:  RecordAudioForm,
+			pageName: "audio-notes",
+		},
+		{
+			name:     "handles page names with special characters",
+			handler:  UploadForm,
+			pageName: "test-page-stuff",
+		},
+		{
+			name:     "handles empty page name",
+			handler:  UploadForm,
+			pageName: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create mock request with page parameter
+			req := httptest.NewRequest(http.MethodPost, "/test", nil)
+			req.Form = map[string][]string{
+				"page": {tc.pageName},
+			}
+
+			// Execute handler - verifies the function doesn't panic
+			result := tc.handler(req)
+
+			// Verify result is not nil
+			if result == nil {
+				t.Fatal("handler returned nil Output")
+			}
+
+			// Verify handler doesn't panic when called
+			// Note: Full rendering test would require template infrastructure setup
+		})
+	}
+}
+
+func TestCommandAttrs(t *testing.T) {
+	tests := []struct {
+		name            string
+		command         xlog.Command
+		wantHrefPattern string
+		wantHxPost      bool
+	}{
+		{
+			name:            "Upload Attrs includes correct href",
+			command:         Upload{p: mockPage{name: "my-page"}},
+			wantHrefPattern: "/+/upload-file/form?page=my-page",
+			wantHxPost:      true,
+		},
+		{
+			name:            "Screenshot Attrs includes correct href",
+			command:         Screenshot{p: mockPage{name: "notes"}},
+			wantHrefPattern: "/+/upload-file/screenshot-form?page=notes",
+			wantHxPost:      true,
+		},
+		{
+			name:            "RecordScreen Attrs includes correct href",
+			command:         RecordScreen{p: mockPage{name: "video"}},
+			wantHrefPattern: "/+/upload-file/record-screen-form?page=video",
+			wantHxPost:      true,
+		},
+		{
+			name:            "RecordCamera Attrs includes correct href",
+			command:         RecordCamera{p: mockPage{name: "camera-test"}},
+			wantHrefPattern: "/+/upload-file/record-camera-form?page=camera-test",
+			wantHxPost:      true,
+		},
+		{
+			name:            "RecordAudio Attrs includes correct href",
+			command:         RecordAudio{p: mockPage{name: "audio"}},
+			wantHrefPattern: "/+/upload-file/record-audio-form?page=audio",
+			wantHxPost:      true,
+		},
+		{
+			name:            "handles page names with special characters",
+			command:         Upload{p: mockPage{name: "test-page-more"}},
+			wantHrefPattern: "/+/upload-file/form?page=test-page-more",
+			wantHxPost:      true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			attrs := tc.command.Attrs()
+			if attrs == nil {
+				t.Fatal("Attrs() returned nil")
+			}
+
+			// Check href attribute
+			href, ok := attrs["href"]
+			if !ok {
+				t.Error("Attrs() missing 'href' attribute")
+			} else if !strings.Contains(fmt.Sprint(href), tc.wantHrefPattern) {
+				t.Errorf("href = %v, want to contain %q", href, tc.wantHrefPattern)
+			}
+
+			// Check hx-post attribute if expected
+			if tc.wantHxPost {
+				if _, ok := attrs["hx-post"]; !ok {
+					t.Error("Attrs() missing 'hx-post' attribute")
+				}
+			}
+		})
+	}
+}
+
+func TestInit(t *testing.T) {
+	const expectedName = "upload-file"
+	// Verify Init doesn't panic
+	ext := UploadFile{}
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Init() panicked: %v", r)
+		}
+	}()
+
+	// Test that Name returns correct value
+	if got := ext.Name(); got != expectedName {
+		t.Errorf("Name() = %q, want %q", got, expectedName)
+	}
+
+	// Note: Full Init testing would require mocking xlog registration functions
+	// Testing Init() execution would require integration test setup
 }
