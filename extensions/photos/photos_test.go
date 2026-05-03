@@ -879,3 +879,177 @@ func TestPhotoHandler_WithHTTPRequest(t *testing.T) {
 		})
 	}
 }
+
+func TestResizeHandler_ImageDecodingErrors(t *testing.T) {
+	tests := []struct {
+		name       string
+		setupFile  func(t *testing.T) string
+		expectFail bool
+	}{
+		{
+			name: "corrupted image file fails gracefully",
+			setupFile: func(t *testing.T) string {
+				tmpFile := filepath.Join(t.TempDir(), "corrupted.png")
+				// Write invalid PNG data
+				if err := os.WriteFile(tmpFile, []byte("not a real png file"), 0600); err != nil {
+					t.Fatalf("Failed to create corrupted file: %v", err)
+				}
+				return tmpFile
+			},
+			expectFail: true,
+		},
+		{
+			name:       "valid PNG decodes and resizes successfully",
+			setupFile:  createTestPNG,
+			expectFail: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			photoPath := tc.setupFile(t)
+			defer func() {
+				_ = os.Remove(photoPath)
+				_ = os.RemoveAll(".cache")
+			}()
+
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+			req.SetPathValue("path", photoPath)
+
+			output := resizeHandler(req)
+			w := httptest.NewRecorder()
+			output(w, req)
+
+			body := w.Body.Bytes()
+			if !tc.expectFail {
+				// Should be valid PNG
+				_, err := png.Decode(bytes.NewReader(body))
+				if err != nil {
+					t.Errorf("Expected valid PNG output, decode failed: %v", err)
+				}
+
+				// Verify dimensions are 700 width
+				img, _ := png.Decode(bytes.NewReader(body))
+				if img.Bounds().Dx() != 700 {
+					t.Errorf("Expected width 700, got %d", img.Bounds().Dx())
+				}
+			} else {
+				// Should return error text, not valid PNG
+				_, err := png.Decode(bytes.NewReader(body))
+				if err == nil {
+					t.Error("Expected decode to fail for corrupted image")
+				}
+			}
+		})
+	}
+}
+
+func TestResizeHandler_AspectRatioPreservation(t *testing.T) {
+	tests := []struct {
+		name           string
+		originalWidth  int
+		originalHeight int
+		expectedHeight int
+	}{
+		{
+			name:           "square image maintains aspect ratio",
+			originalWidth:  100,
+			originalHeight: 100,
+			expectedHeight: 700, // 700 * (100/100) = 700
+		},
+		{
+			name:           "wide image maintains aspect ratio",
+			originalWidth:  200,
+			originalHeight: 100,
+			expectedHeight: 350, // 700 * (100/200) = 350
+		},
+		{
+			name:           "tall image maintains aspect ratio",
+			originalWidth:  100,
+			originalHeight: 200,
+			expectedHeight: 1400, // 700 * (200/100) = 1400
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test image with specific dimensions
+			tmpFile := filepath.Join(t.TempDir(), "aspect_test.png")
+			img := image.NewRGBA(image.Rect(0, 0, tc.originalWidth, tc.originalHeight))
+
+			// Fill with color
+			for y := 0; y < tc.originalHeight; y++ {
+				for x := 0; x < tc.originalWidth; x++ {
+					img.Set(x, y, color.RGBA{100, 100, 100, 255})
+				}
+			}
+
+			var buf bytes.Buffer
+			if err := png.Encode(&buf, img); err != nil {
+				t.Fatalf("Failed to encode test image: %v", err)
+			}
+
+			if err := os.WriteFile(tmpFile, buf.Bytes(), 0600); err != nil {
+				t.Fatalf("Failed to write test file: %v", err)
+			}
+
+			defer func() {
+				_ = os.Remove(tmpFile)
+				_ = os.RemoveAll(".cache")
+			}()
+
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+tmpFile, nil)
+			req.SetPathValue("path", tmpFile)
+
+			output := resizeHandler(req)
+			w := httptest.NewRecorder()
+			output(w, req)
+
+			// Decode response
+			resultImg, err := png.Decode(bytes.NewReader(w.Body.Bytes()))
+			if err != nil {
+				t.Fatalf("Failed to decode result: %v", err)
+			}
+
+			bounds := resultImg.Bounds()
+			if bounds.Dx() != 700 {
+				t.Errorf("Expected width 700, got %d", bounds.Dx())
+			}
+
+			if bounds.Dy() != tc.expectedHeight {
+				t.Errorf("Expected height %d, got %d", tc.expectedHeight, bounds.Dy())
+			}
+		})
+	}
+}
+
+func TestResizeHandler_CacheWriteFailure(t *testing.T) {
+	// Test that handler continues even if cache write fails
+	photoPath := createTestPNG(t)
+	defer func() {
+		_ = os.Remove(photoPath)
+	}()
+
+	// Create cache directory as read-only to force write failure
+	const cacheDir = ".cache"
+	if err := os.MkdirAll(cacheDir, 0500); err != nil && !os.IsExist(err) {
+		t.Fatalf("Failed to create cache dir: %v", err)
+	}
+	defer func() {
+		_ = os.Chmod(cacheDir, 0700)
+		_ = os.RemoveAll(cacheDir)
+	}()
+
+	req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+	req.SetPathValue("path", photoPath)
+
+	output := resizeHandler(req)
+	w := httptest.NewRecorder()
+	output(w, req)
+
+	// Should still return valid image despite cache failure
+	_, err := png.Decode(bytes.NewReader(w.Body.Bytes()))
+	if err != nil {
+		t.Errorf("Expected valid PNG despite cache failure, got error: %v", err)
+	}
+}

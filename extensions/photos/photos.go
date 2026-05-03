@@ -182,7 +182,14 @@ func resizeHandler(r xlog.Request) xlog.Output {
 			}
 		}()
 
-		src, _, _ := image.Decode(inputImage)
+		src, _, err := image.Decode(inputImage)
+		if err != nil {
+			if _, writeErr := fmt.Fprintf(w, "Failed to decode image: %v", err); writeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write decode error: %v\n", writeErr)
+			}
+			return
+		}
+
 		bounds := src.Bounds()
 		dim := bounds.Max
 
