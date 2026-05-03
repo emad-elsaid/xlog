@@ -8,6 +8,7 @@ import (
 	"image/color"
 	"image/png"
 	"io/fs"
+	"net/http/httptest"
 	"os"
 	"path"
 	"path/filepath"
@@ -737,4 +738,144 @@ func createTestPNGInDir(t *testing.T, dir, filename string) string {
 	}
 
 	return filePath
+}
+
+func TestResizeHandler_WithHTTPRequest(t *testing.T) {
+	tests := []struct {
+		name          string
+		setupPhoto    func(t *testing.T) string
+		expectSuccess bool
+		validateResp  func(t *testing.T, body []byte)
+	}{
+		{
+			name:          "valid photo returns resized PNG",
+			setupPhoto:    createTestPNG,
+			expectSuccess: true,
+			validateResp: func(t *testing.T, body []byte) {
+				if len(body) == 0 {
+					t.Error("Expected non-empty response body")
+				}
+				// Verify it's a valid PNG
+				img, err := png.Decode(bytes.NewReader(body))
+				if err != nil {
+					t.Errorf("Response is not a valid PNG: %v", err)
+				}
+				// Verify dimensions
+				bounds := img.Bounds()
+				if bounds.Dx() != 700 {
+					t.Errorf("Expected width 700, got %d", bounds.Dx())
+				}
+			},
+		},
+		{
+			name: "nonexistent photo returns error message",
+			setupPhoto: func(t *testing.T) string {
+				return "/nonexistent/photo.png"
+			},
+			expectSuccess: false,
+			validateResp: func(t *testing.T, body []byte) {
+				if len(body) == 0 {
+					t.Error("Expected error message in body")
+				}
+			},
+		},
+		{
+			name: "cached photo served from cache",
+			setupPhoto: func(t *testing.T) string {
+				photoPath := createTestPNG(t)
+
+				// Pre-populate cache
+				const cacheDir = ".cache"
+				if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
+					t.Fatalf("Failed to create cache dir: %v", err)
+				}
+
+				cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photoPath))))
+				cachedData := []byte("cached content")
+				if err := os.WriteFile(cacheFile, cachedData, 0600); err != nil {
+					t.Fatalf("Failed to write cache: %v", err)
+				}
+
+				return photoPath
+			},
+			expectSuccess: true,
+			validateResp: func(t *testing.T, body []byte) {
+				if string(body) != "cached content" {
+					t.Error("Expected cached content to be served")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			photoPath := tc.setupPhoto(t)
+			defer func() {
+				_ = os.RemoveAll(".cache")
+			}()
+			if tc.expectSuccess {
+				defer func() {
+					_ = os.Remove(photoPath)
+				}()
+			}
+
+			// Create mock HTTP request
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+			req.SetPathValue("path", photoPath)
+
+			// Get handler output function
+			output := resizeHandler(req)
+
+			// Execute the handler
+			w := httptest.NewRecorder()
+			output(w, req)
+
+			// Validate response
+			tc.validateResp(t, w.Body.Bytes())
+		})
+	}
+}
+
+func TestPhotoHandler_WithHTTPRequest(t *testing.T) {
+	tests := []struct {
+		name          string
+		setupPhoto    func(t *testing.T) string
+		expectSuccess bool
+	}{
+		{
+			name:          "valid photo path returns output function",
+			setupPhoto:    createTestPNG,
+			expectSuccess: true,
+		},
+		{
+			name: "nonexistent photo returns error output",
+			setupPhoto: func(t *testing.T) string {
+				return "/nonexistent/photo.png"
+			},
+			expectSuccess: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			photoPath := tc.setupPhoto(t)
+			if tc.expectSuccess {
+				defer func() {
+					_ = os.Remove(photoPath)
+				}()
+			}
+
+			// Create mock HTTP request
+			req := httptest.NewRequest("GET", "/+/photos/photo/"+photoPath, nil)
+			req.SetPathValue("path", photoPath)
+
+			// Get handler output
+			output := photoHandler(req)
+
+			// Verify output function exists
+			if output == nil {
+				t.Error("Expected non-nil output function")
+			}
+		})
+	}
 }
