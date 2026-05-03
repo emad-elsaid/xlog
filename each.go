@@ -53,7 +53,7 @@ func Pages(ctx context.Context) []Page {
 		pagesMutex.RUnlock()
 	}
 
-	return cached[:]
+	return cached
 }
 
 // EachPage iterates on all available pages. many extensions
