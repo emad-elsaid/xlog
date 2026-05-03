@@ -165,28 +165,44 @@ func (s *typographerParser) Trigger() []byte {
 func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser.Context) gast.Node {
 	line, _ := block.PeekLine()
 	c := line[0]
+
+	// Try parsing multi-character punctuation.
+	if node := s.parseMultiCharPunctuation(line, c, block); node != nil {
+		return node
+	}
+
+	// Try parsing quotes and apostrophes.
+	if c == '\'' || c == '"' {
+		return s.parseQuote(line, c, block, pc)
+	}
+
+	return nil
+}
+
+// parseMultiCharPunctuation handles ---, ..., <<, >>, and --.
+func (s *typographerParser) parseMultiCharPunctuation(line []byte, c byte, block text.Reader) gast.Node {
 	if len(line) > 2 {
-		if c == '-' {
-			if s.Substitutions[EmDash] != nil && line[1] == '-' && line[2] == '-' { // ---
-				node := gast.NewString(s.Substitutions[EmDash])
-				node.SetCode(true)
-				block.Advance(3)
-				return node
-			}
-		} else if c == '.' {
-			if s.Substitutions[Ellipsis] != nil && line[1] == '.' && line[2] == '.' { // ...
-				node := gast.NewString(s.Substitutions[Ellipsis])
-				node.SetCode(true)
-				block.Advance(3)
-				return node
-			}
+		if c == '-' && s.Substitutions[EmDash] != nil && line[1] == '-' && line[2] == '-' {
+			node := gast.NewString(s.Substitutions[EmDash])
+			node.SetCode(true)
+			block.Advance(3)
+			return node
+		}
+		if c == '.' && s.Substitutions[Ellipsis] != nil && line[1] == '.' && line[2] == '.' {
+			node := gast.NewString(s.Substitutions[Ellipsis])
+			node.SetCode(true)
+			block.Advance(3)
+			return node
+		}
+		if c == '.' {
 			return nil
 		}
 	}
+
 	if len(line) > 1 {
 		switch c {
 		case '<':
-			if s.Substitutions[LeftAngleQuote] != nil && line[1] == '<' { // <<
+			if s.Substitutions[LeftAngleQuote] != nil && line[1] == '<' {
 				node := gast.NewString(s.Substitutions[LeftAngleQuote])
 				node.SetCode(true)
 				block.Advance(2)
@@ -194,7 +210,7 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 			}
 			return nil
 		case '>':
-			if s.Substitutions[RightAngleQuote] != nil && line[1] == '>' { // >>
+			if s.Substitutions[RightAngleQuote] != nil && line[1] == '>' {
 				node := gast.NewString(s.Substitutions[RightAngleQuote])
 				node.SetCode(true)
 				block.Advance(2)
@@ -202,7 +218,7 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 			}
 			return nil
 		case '-':
-			if s.Substitutions[EnDash] != nil && line[1] == '-' { // --
+			if s.Substitutions[EnDash] != nil && line[1] == '-' {
 				node := gast.NewString(s.Substitutions[EnDash])
 				node.SetCode(true)
 				block.Advance(2)
@@ -210,118 +226,185 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 			}
 		}
 	}
-	if c == '\'' || c == '"' {
-		before := block.PrecendingCharacter()
-		d := parser.ScanDelimiter(line, before, 1, defaultTypographerDelimiterProcessor)
-		if d == nil {
-			return nil
-		}
-		counter := getUnclosedCounter(pc)
-		if c == '\'' {
-			if s.Substitutions[Apostrophe] != nil {
-				// Handle decade abbrevations such as '90s
-				if d.CanOpen && !d.CanClose && len(line) > 3 &&
-					util.IsNumeric(line[1]) && util.IsNumeric(line[2]) && line[3] == 's' {
-					after := rune(' ')
-					if len(line) > 4 {
-						after = util.ToRune(line, 4)
-					}
-					if len(line) == 3 || util.IsSpaceRune(after) || util.IsPunctRune(after) {
-						node := gast.NewString(s.Substitutions[Apostrophe])
-						node.SetCode(true)
-						block.Advance(1)
-						return node
-					}
-				}
-				// special cases: 'twas, 'em, 'net
-				if len(line) > 1 && (unicode.IsPunct(before) || unicode.IsSpace(before)) &&
-					(line[1] == 't' || line[1] == 'e' || line[1] == 'n' || line[1] == 'l') {
-					node := gast.NewString(s.Substitutions[Apostrophe])
-					node.SetCode(true)
-					block.Advance(1)
-					return node
-				}
-				// Convert normal apostrophes. This is probably more flexible than necessary but
-				// converts any apostrophe in between two alphanumerics.
-				if len(line) > 1 && (unicode.IsDigit(before) || unicode.IsLetter(before)) &&
-					(unicode.IsLetter(util.ToRune(line, 1))) {
-					node := gast.NewString(s.Substitutions[Apostrophe])
-					node.SetCode(true)
-					block.Advance(1)
-					return node
-				}
-			}
-			if s.Substitutions[LeftSingleQuote] != nil && d.CanOpen && !d.CanClose {
-				nt := LeftSingleQuote
-				// special cases: Alice's, I'm, Don't, You'd
-				if len(line) > 1 && (line[1] == 's' || line[1] == 'm' || line[1] == 't' || line[1] == 'd') &&
-					(len(line) < 3 || util.IsPunct(line[2]) || util.IsSpace(line[2])) {
-					nt = RightSingleQuote
-				}
-				// special cases: I've, I'll, You're
-				if len(line) > 2 && ((line[1] == 'v' && line[2] == 'e') ||
-					(line[1] == 'l' && line[2] == 'l') || (line[1] == 'r' && line[2] == 'e')) &&
-					(len(line) < 4 || util.IsPunct(line[3]) || util.IsSpace(line[3])) {
-					nt = RightSingleQuote
-				}
-				if nt == LeftSingleQuote {
-					counter.Single++
-				}
 
-				node := gast.NewString(s.Substitutions[nt])
-				node.SetCode(true)
-				block.Advance(1)
-				return node
-			}
-			if s.Substitutions[RightSingleQuote] != nil {
-				// plural possesive and abbreviations: Smiths', doin'
-				if len(line) > 1 && unicode.IsSpace(util.ToRune(line, 0)) || unicode.IsPunct(util.ToRune(line, 0)) &&
-					(len(line) > 2 && !unicode.IsDigit(util.ToRune(line, 1))) {
-					node := gast.NewString(s.Substitutions[RightSingleQuote])
-					node.SetCode(true)
-					block.Advance(1)
-					return node
-				}
-			}
-			if s.Substitutions[RightSingleQuote] != nil && counter.Single > 0 {
-				isClose := d.CanClose && !d.CanOpen
-				maybeClose := d.CanClose && d.CanOpen && len(line) > 1 && unicode.IsPunct(util.ToRune(line, 1)) &&
-					(len(line) == 2 || (len(line) > 2 && util.IsPunct(line[2]) || util.IsSpace(line[2])))
-				if isClose || maybeClose {
-					node := gast.NewString(s.Substitutions[RightSingleQuote])
-					node.SetCode(true)
-					block.Advance(1)
-					counter.Single--
-					return node
-				}
-			}
+	return nil
+}
+
+// parseQuote handles single and double quote parsing.
+func (s *typographerParser) parseQuote(line []byte, c byte, block text.Reader, pc parser.Context) gast.Node {
+	before := block.PrecendingCharacter()
+	d := parser.ScanDelimiter(line, before, 1, defaultTypographerDelimiterProcessor)
+	if d == nil {
+		return nil
+	}
+
+	counter := getUnclosedCounter(pc)
+
+	if c == '\'' {
+		return s.parseSingleQuote(line, before, d, counter, block)
+	}
+
+	if c == '"' {
+		return s.parseDoubleQuote(line, before, d, counter, block)
+	}
+
+	return nil
+}
+
+// parseSingleQuote handles apostrophes and single quotes.
+func (s *typographerParser) parseSingleQuote(line []byte, before rune, d *parser.Delimiter, counter *unclosedCounter, block text.Reader) gast.Node {
+	// Try apostrophe detection first.
+	if node := s.tryApostrophe(line, before, d, block); node != nil {
+		return node
+	}
+
+	// Try left single quote.
+	if node := s.tryLeftSingleQuote(line, d, counter, block); node != nil {
+		return node
+	}
+
+	// Try right single quote.
+	if node := s.tryRightSingleQuote(line, d, counter, block); node != nil {
+		return node
+	}
+
+	return nil
+}
+
+// tryApostrophe detects apostrophes in contractions, possessives, and decade abbreviations.
+func (s *typographerParser) tryApostrophe(line []byte, before rune, d *parser.Delimiter, block text.Reader) gast.Node {
+	if s.Substitutions[Apostrophe] == nil {
+		return nil
+	}
+
+	// Decade abbreviations: '90s.
+	if d.CanOpen && !d.CanClose && len(line) > 3 &&
+		util.IsNumeric(line[1]) && util.IsNumeric(line[2]) && line[3] == 's' {
+		after := rune(' ')
+		if len(line) > 4 {
+			after = util.ToRune(line, 4)
 		}
-		if c == '"' {
-			if s.Substitutions[LeftDoubleQuote] != nil && d.CanOpen && !d.CanClose {
-				node := gast.NewString(s.Substitutions[LeftDoubleQuote])
-				node.SetCode(true)
-				block.Advance(1)
-				counter.Double++
-				return node
-			}
-			if s.Substitutions[RightDoubleQuote] != nil && counter.Double > 0 {
-				isClose := d.CanClose && !d.CanOpen
-				maybeClose := d.CanClose && d.CanOpen && len(line) > 1 && (unicode.IsPunct(util.ToRune(line, 1))) &&
-					(len(line) == 2 || (len(line) > 2 && util.IsPunct(line[2]) || util.IsSpace(line[2])))
-				if isClose || maybeClose {
-					// special case: "Monitor 21""
-					if len(line) > 1 && line[1] == '"' && unicode.IsDigit(before) {
-						return nil
-					}
-					node := gast.NewString(s.Substitutions[RightDoubleQuote])
-					node.SetCode(true)
-					block.Advance(1)
-					counter.Double--
-					return node
-				}
-			}
+		if len(line) == 3 || util.IsSpaceRune(after) || util.IsPunctRune(after) {
+			node := gast.NewString(s.Substitutions[Apostrophe])
+			node.SetCode(true)
+			block.Advance(1)
+			return node
 		}
 	}
+
+	// Special cases: 'twas, 'em, 'net, 'til.
+	if len(line) > 1 && (unicode.IsPunct(before) || unicode.IsSpace(before)) &&
+		(line[1] == 't' || line[1] == 'e' || line[1] == 'n' || line[1] == 'l') {
+		node := gast.NewString(s.Substitutions[Apostrophe])
+		node.SetCode(true)
+		block.Advance(1)
+		return node
+	}
+
+	// Apostrophes between alphanumerics: it's, don't.
+	if len(line) > 1 && (unicode.IsDigit(before) || unicode.IsLetter(before)) &&
+		unicode.IsLetter(util.ToRune(line, 1)) {
+		node := gast.NewString(s.Substitutions[Apostrophe])
+		node.SetCode(true)
+		block.Advance(1)
+		return node
+	}
+
+	return nil
+}
+
+// tryLeftSingleQuote detects opening single quotes.
+func (s *typographerParser) tryLeftSingleQuote(line []byte, d *parser.Delimiter, counter *unclosedCounter, block text.Reader) gast.Node {
+	if s.Substitutions[LeftSingleQuote] == nil || !d.CanOpen || d.CanClose {
+		return nil
+	}
+
+	nt := LeftSingleQuote
+
+	// Special cases: Alice's, I'm, Don't, You'd.
+	if len(line) > 1 && (line[1] == 's' || line[1] == 'm' || line[1] == 't' || line[1] == 'd') &&
+		(len(line) < 3 || util.IsPunct(line[2]) || util.IsSpace(line[2])) {
+		nt = RightSingleQuote
+	}
+
+	// Special cases: I've, I'll, You're.
+	if len(line) > 2 && ((line[1] == 'v' && line[2] == 'e') ||
+		(line[1] == 'l' && line[2] == 'l') || (line[1] == 'r' && line[2] == 'e')) &&
+		(len(line) < 4 || util.IsPunct(line[3]) || util.IsSpace(line[3])) {
+		nt = RightSingleQuote
+	}
+
+	if nt == LeftSingleQuote {
+		counter.Single++
+	}
+
+	node := gast.NewString(s.Substitutions[nt])
+	node.SetCode(true)
+	block.Advance(1)
+	return node
+}
+
+// tryRightSingleQuote detects closing single quotes.
+func (s *typographerParser) tryRightSingleQuote(line []byte, d *parser.Delimiter, counter *unclosedCounter, block text.Reader) gast.Node {
+	if s.Substitutions[RightSingleQuote] == nil {
+		return nil
+	}
+
+	// Plural possessive and abbreviations: Smiths', doin'.
+	if len(line) > 1 && (unicode.IsSpace(util.ToRune(line, 0)) || unicode.IsPunct(util.ToRune(line, 0))) &&
+		(len(line) > 2 && !unicode.IsDigit(util.ToRune(line, 1))) {
+		node := gast.NewString(s.Substitutions[RightSingleQuote])
+		node.SetCode(true)
+		block.Advance(1)
+		return node
+	}
+
+	// Closing quote matching an opening quote.
+	if counter.Single > 0 {
+		isClose := d.CanClose && !d.CanOpen
+		maybeClose := d.CanClose && d.CanOpen && len(line) > 1 && unicode.IsPunct(util.ToRune(line, 1)) &&
+			(len(line) == 2 || (len(line) > 2 && (util.IsPunct(line[2]) || util.IsSpace(line[2]))))
+		if isClose || maybeClose {
+			node := gast.NewString(s.Substitutions[RightSingleQuote])
+			node.SetCode(true)
+			block.Advance(1)
+			counter.Single--
+			return node
+		}
+	}
+
+	return nil
+}
+
+// parseDoubleQuote handles double quote parsing.
+func (s *typographerParser) parseDoubleQuote(line []byte, before rune, d *parser.Delimiter, counter *unclosedCounter, block text.Reader) gast.Node {
+	// Try left double quote.
+	if s.Substitutions[LeftDoubleQuote] != nil && d.CanOpen && !d.CanClose {
+		node := gast.NewString(s.Substitutions[LeftDoubleQuote])
+		node.SetCode(true)
+		block.Advance(1)
+		counter.Double++
+		return node
+	}
+
+	// Try right double quote.
+	if s.Substitutions[RightDoubleQuote] != nil && counter.Double > 0 {
+		isClose := d.CanClose && !d.CanOpen
+		maybeClose := d.CanClose && d.CanOpen && len(line) > 1 && unicode.IsPunct(util.ToRune(line, 1)) &&
+			(len(line) == 2 || (len(line) > 2 && (util.IsPunct(line[2]) || util.IsSpace(line[2]))))
+		if isClose || maybeClose {
+			// Special case: "Monitor 21"".
+			if len(line) > 1 && line[1] == '"' && unicode.IsDigit(before) {
+				return nil
+			}
+			node := gast.NewString(s.Substitutions[RightDoubleQuote])
+			node.SetCode(true)
+			block.Advance(1)
+			counter.Double--
+			return node
+		}
+	}
+
 	return nil
 }
 
