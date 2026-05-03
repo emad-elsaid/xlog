@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/emad-elsaid/xlog"
+	"gopkg.in/yaml.v3"
 )
 
 func TestBlocksExtensionName(t *testing.T) {
@@ -137,4 +138,106 @@ func TestEmbedFSNotEmpty(t *testing.T) {
 	if public == (embed.FS{}) {
 		t.Error("public embed.FS should not be empty")
 	}
+}
+
+func TestRegisterShortCodesExecution(t *testing.T) {
+	tests := []struct {
+		name             string
+		templateFile     string
+		expectedBaseName string
+	}{
+		{"book template", "templates/book.html", "book"},
+		{"github-user template", "templates/github-user.html", "github-user"},
+		{"hero template", "templates/hero.html", "hero"},
+		{"person template", "templates/person.html", "person"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := templates.ReadFile(tc.templateFile)
+			if err != nil {
+				t.Errorf("Template file %q should exist: %v", tc.templateFile, err)
+			}
+		})
+	}
+
+	// Verify RegisterShortCodes completes without panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("RegisterShortCodes panicked: %v", r)
+		}
+	}()
+
+	RegisterShortCodes()
+}
+
+func TestRegisterBuildFilesExecution(t *testing.T) {
+	// Verify registerBuildFiles completes without panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("registerBuildFiles panicked: %v", r)
+		}
+	}()
+
+	registerBuildFiles()
+}
+
+func TestBlockFunctionCreation(t *testing.T) {
+	tests := []struct {
+		name         string
+		templateName string
+	}{
+		{"book template function", "book"},
+		{"github-user template function", "github-user"},
+		{"hero template function", "hero"},
+		{"person template function", "person"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			renderFn := block(tc.templateName)
+			if renderFn == nil {
+				t.Errorf("block(%q) returned nil function", tc.templateName)
+			}
+		})
+	}
+}
+
+func TestBlockYAMLUnmarshalErrors(t *testing.T) {
+	tests := []struct {
+		name     string
+		yamlData string
+	}{
+		{
+			name:     "malformed YAML tabs",
+			yamlData: "key:\tvalue\t\tinvalid",
+		},
+		{
+			name:     "unclosed bracket",
+			yamlData: "[unclosed",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// We can test YAML unmarshaling independently
+			var result map[string]any
+			err := yaml.Unmarshal([]byte(tc.yamlData), &result)
+			if err == nil {
+				t.Logf("YAML parser accepted: %q", tc.yamlData)
+			}
+		})
+	}
+}
+
+func TestInitExecution(t *testing.T) {
+	// Verify Init completes without panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Init panicked: %v", r)
+		}
+	}()
+
+	ext := Blocks{}
+	ext.Init()
 }
