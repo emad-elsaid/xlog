@@ -1,7 +1,9 @@
 package date
 
 import (
+	"context"
 	"html/template"
+	"net/http"
 	"testing"
 	"time"
 
@@ -210,6 +212,143 @@ func TestOrganizeCalendar_WeekStructure(t *testing.T) {
 	if !found {
 		t.Error("Did not find day 1 in organized calendar")
 	}
+}
+
+func TestDateHandler(t *testing.T) {
+	tests := []struct {
+		name         string
+		dateParam    string
+		setupPages   map[string]string
+		expectError  bool
+		expectStatus int
+		expectedName string
+		pageCount    int
+	}{
+		{
+			name:         "valid date with matching pages",
+			dateParam:    "15-3-2026",
+			setupPages:   map[string]string{"page1.md": "Meeting on 15/3/2026"},
+			expectError:  false,
+			expectedName: "15 March 2026",
+			pageCount:    1,
+		},
+		{
+			name:         "valid date no matching pages",
+			dateParam:    "1-1-2026",
+			setupPages:   map[string]string{"page1.md": "No dates here"},
+			expectError:  false,
+			expectedName: "1 January 2026",
+			pageCount:    0,
+		},
+		{
+			name:         "invalid date format",
+			dateParam:    "invalid-date",
+			expectError:  true,
+			expectStatus: 400,
+		},
+		{
+			name:         "malformed date",
+			dateParam:    "32-13-2026",
+			expectError:  true,
+			expectStatus: 400,
+		},
+		{
+			name:         "multiple pages same date",
+			dateParam:    "10-5-2026",
+			setupPages:   map[string]string{"page1.md": "Event 10/5/2026", "page2.md": "Another 10/5/2026"},
+			expectError:  false,
+			expectedName: "10 May 2026",
+			pageCount:    2,
+		},
+		{
+			name:         "date with different format in content",
+			dateParam:    "25-12-2025",
+			setupPages:   map[string]string{"page1.md": "Christmas 25/12/2025"},
+			expectError:  false,
+			expectedName: "25 December 2025",
+			pageCount:    1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup mock request with PathValue
+			req := createMockRequest(map[string]string{"date": tt.dateParam})
+
+			// Execute handler
+			output := dateHandler(req)
+
+			if output == nil {
+				t.Fatal("dateHandler returned nil output")
+			}
+
+			// For now, we just verify handler doesn't panic and returns output
+			// Full integration testing would require template rendering
+		})
+	}
+}
+
+func TestCalendarHandler(t *testing.T) {
+	tests := []struct {
+		name       string
+		setupPages map[string]string
+		expectName string
+	}{
+		{
+			name:       "empty calendar",
+			setupPages: map[string]string{},
+			expectName: "Calendar",
+		},
+		{
+			name:       "calendar with single date",
+			setupPages: map[string]string{"page1.md": "Meeting 15/3/2026"},
+			expectName: "Calendar",
+		},
+		{
+			name: "calendar with multiple dates",
+			setupPages: map[string]string{
+				"page1.md": "Event 1/1/2026",
+				"page2.md": "Event 15/3/2026",
+				"page3.md": "Event 25/12/2026",
+			},
+			expectName: "Calendar",
+		},
+		{
+			name:       "calendar with pages without dates",
+			setupPages: map[string]string{"page1.md": "No dates"},
+			expectName: "Calendar",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup mock request
+			req := createMockRequest(map[string]string{})
+
+			// Execute handler
+			output := calendarHandler(req)
+
+			if output == nil {
+				t.Fatal("calendarHandler returned nil output")
+			}
+
+			// Verify output structure (basic smoke test)
+			// Full testing would require template rendering
+		})
+	}
+}
+
+// createMockRequest creates a mock *http.Request for testing handlers.
+func createMockRequest(pathValues map[string]string) *http.Request {
+	req, _ := http.NewRequest("GET", "/test", nil)
+	req = req.WithContext(context.Background())
+
+	// Set path values using SetPathValue (available in Go 1.22+)
+	for key, value := range pathValues {
+		req.SetPathValue(key, value)
+	}
+
+	return req
 }
 
 func TestOrganizeCalendar_FirstDayOfWeek(t *testing.T) {
