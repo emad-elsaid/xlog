@@ -350,20 +350,22 @@ func parseLinkDestination(block text.Reader) ([]byte, bool) {
 	}
 	opened := 0
 	i := 0
+loop:
 	for i < len(line) {
 		c := line[i]
-		if c == '\\' && i < len(line)-1 && util.IsPunct(line[i+1]) {
+		switch {
+		case c == '\\' && i < len(line)-1 && util.IsPunct(line[i+1]):
 			i += 2
 			continue
-		} else if c == '(' {
+		case c == '(':
 			opened++
-		} else if c == ')' {
+		case c == ')':
 			opened--
 			if opened < 0 {
-				break
+				break loop
 			}
-		} else if util.IsSpace(c) {
-			break
+		case util.IsSpace(c):
+			break loop
 		}
 		i++
 	}

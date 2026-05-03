@@ -635,7 +635,8 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 		i := 0
 		for i < len(bs) {
 			c := bs[i]
-			if opts.CodeSpan && codeSpanOpener != 0 && c == '`' {
+			switch {
+			case opts.CodeSpan && codeSpanOpener != 0 && c == '`':
 				codeSpanCloser := 0
 				for ; i < len(bs); i++ {
 					if bs[i] == '`' {
@@ -648,10 +649,10 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 				if codeSpanCloser == codeSpanOpener {
 					codeSpanOpener = 0
 				}
-			} else if codeSpanOpener == 0 && c == '\\' && i < len(bs)-1 && util.IsPunct(bs[i+1]) {
+			case codeSpanOpener == 0 && c == '\\' && i < len(bs)-1 && util.IsPunct(bs[i+1]):
 				i += 2
 				continue
-			} else if opts.CodeSpan && codeSpanOpener == 0 && c == '`' {
+			case opts.CodeSpan && codeSpanOpener == 0 && c == '`':
 				for ; i < len(bs); i++ {
 					if bs[i] == '`' {
 						codeSpanOpener++
@@ -660,7 +661,7 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 						break
 					}
 				}
-			} else if (opts.CodeSpan && codeSpanOpener == 0) || !opts.CodeSpan {
+			case (opts.CodeSpan && codeSpanOpener == 0) || !opts.CodeSpan:
 				if c == closer {
 					opened--
 					if opened == 0 {

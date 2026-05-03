@@ -129,15 +129,17 @@ func (t *Segment) TrimLeftSpaceWidth(width int, buffer []byte) Segment {
 		if start >= t.Stop-1 || width <= 0 {
 			break
 		}
-		if c == ' ' {
+		switch c {
+		case ' ':
 			width--
-		} else if c == '\t' {
+		case '\t':
 			width -= 4
-		} else {
-			break
+		default:
+			goto endLoop
 		}
 		start++
 	}
+endLoop:
 	if width < 0 {
 		padding = width * -1
 	}

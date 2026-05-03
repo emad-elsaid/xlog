@@ -113,16 +113,17 @@ func (b *atxHeadingParser) Open(parent ast.Node, reader text.Reader, pc Context)
 		closureOpen := -1
 		for j := start; j < stop; {
 			c := line[j]
-			if util.IsEscapedPunctuation(line, j) {
+			switch {
+			case util.IsEscapedPunctuation(line, j):
 				j += 2
-			} else if util.IsSpace(c) && j < stop-1 && line[j+1] == '#' {
+			case util.IsSpace(c) && j < stop-1 && line[j+1] == '#':
 				closureOpen = j + 1
 				k := j + 1
 				for ; k < stop && line[k] == '#'; k++ {
 				}
 				closureClose = k
-				break
-			} else {
+				j = stop // exit the loop
+			default:
 				j++
 			}
 		}

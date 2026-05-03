@@ -172,14 +172,16 @@ func IndentPositionPadding(bs []byte, currentPos, paddingv, width int) (pos, pad
 			w++
 			continue
 		}
-		if bs[i] == '\t' && w < width {
+		switch {
+		case bs[i] == '\t' && w < width:
 			w += TabWidth(currentPos + w)
-		} else if bs[i] == ' ' && w < width {
+		case bs[i] == ' ' && w < width:
 			w++
-		} else {
-			break
+		default:
+			goto endLoop
 		}
 	}
+endLoop:
 	if w >= width {
 		return i - paddingv, w - width
 	}
@@ -197,14 +199,16 @@ func DedentPosition(bs []byte, currentPos, width int) (pos, padding int) {
 	l := len(bs)
 	i := 0
 	for ; i < l; i++ {
-		if bs[i] == '\t' {
+		switch {
+		case bs[i] == '\t':
 			w += TabWidth(currentPos + w)
-		} else if bs[i] == ' ' {
+		case bs[i] == ' ':
 			w++
-		} else {
-			break
+		default:
+			goto endDedent
 		}
 	}
+endDedent:
 	if w >= width {
 		return i, w - width
 	}
@@ -225,14 +229,16 @@ func DedentPositionPadding(bs []byte, currentPos, paddingv, width int) (pos, pad
 	i := 0
 	l := len(bs)
 	for ; i < l; i++ {
-		if bs[i] == '\t' {
+		switch {
+		case bs[i] == '\t':
 			w += TabWidth(currentPos + w)
-		} else if bs[i] == ' ' {
+		case bs[i] == ' ':
 			w++
-		} else {
-			break
+		default:
+			goto endDedentPadding
 		}
 	}
+endDedentPadding:
 	if w >= width {
 		return i - paddingv, w - width
 	}
@@ -244,17 +250,18 @@ func IndentWidth(bs []byte, currentPos int) (width, pos int) {
 	l := len(bs)
 	for i := 0; i < l; i++ {
 		b := bs[i]
-		if b == ' ' {
+		switch {
+		case b == ' ':
 			width++
 			pos++
-		} else if b == '\t' {
+		case b == '\t':
 			width += TabWidth(currentPos + width)
 			pos++
-		} else {
-			break
+		default:
+			return width, pos
 		}
 	}
-	return
+	return width, pos
 }
 
 // FirstNonSpacePosition returns a position line that is a first nonspace
@@ -288,7 +295,8 @@ func FindClosure(bs []byte, opener, closure byte, codeSpan, allowNesting bool) i
 	codeSpanOpener := 0
 	for i < len(bs) {
 		c := bs[i]
-		if codeSpan && codeSpanOpener != 0 && c == '`' {
+		switch {
+		case codeSpan && codeSpanOpener != 0 && c == '`':
 			codeSpanCloser := 0
 			for ; i < len(bs); i++ {
 				if bs[i] == '`' {
@@ -301,10 +309,10 @@ func FindClosure(bs []byte, opener, closure byte, codeSpan, allowNesting bool) i
 			if codeSpanCloser == codeSpanOpener {
 				codeSpanOpener = 0
 			}
-		} else if codeSpanOpener == 0 && c == '\\' && i < len(bs)-1 && IsPunct(bs[i+1]) {
+		case codeSpanOpener == 0 && c == '\\' && i < len(bs)-1 && IsPunct(bs[i+1]):
 			i += 2
 			continue
-		} else if codeSpan && codeSpanOpener == 0 && c == '`' {
+		case codeSpan && codeSpanOpener == 0 && c == '`':
 			for ; i < len(bs); i++ {
 				if bs[i] == '`' {
 					codeSpanOpener++
@@ -313,7 +321,7 @@ func FindClosure(bs []byte, opener, closure byte, codeSpan, allowNesting bool) i
 					break
 				}
 			}
-		} else if (codeSpan && codeSpanOpener == 0) || !codeSpan {
+		case (codeSpan && codeSpanOpener == 0) || !codeSpan:
 			if c == closure {
 				opened--
 				if opened == 0 {
@@ -471,12 +479,13 @@ func ReplaceSpaces(source []byte, repl byte) []byte {
 	start := -1
 	for i, c := range source {
 		iss := IsSpace(c)
-		if start < 0 && iss {
+		switch {
+		case start < 0 && iss:
 			start = i
 			continue
-		} else if start >= 0 && iss {
+		case start >= 0 && iss:
 			continue
-		} else if start >= 0 {
+		case start >= 0:
 			if ret == nil {
 				ret = make([]byte, 0, len(source))
 				ret = append(ret, source[:start]...)

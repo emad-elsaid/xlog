@@ -1144,24 +1144,25 @@ func (p *parser) parseBlock(block text.BlockReader, parent ast.Node, pc Context)
 		lineLength := len(line)
 		var lineBreakFlags uint8
 		hasNewLine := line[lineLength-1] == '\n'
-		if ((lineLength >= 3 && line[lineLength-2] == '\\' &&
-			line[lineLength-3] != '\\') || (lineLength == 2 && line[lineLength-2] == '\\')) && hasNewLine { // ends with \\n
+		switch {
+		case ((lineLength >= 3 && line[lineLength-2] == '\\' &&
+			line[lineLength-3] != '\\') || (lineLength == 2 && line[lineLength-2] == '\\')) && hasNewLine: // ends with \\n
 			lineLength -= 2
 			lineBreakFlags |= lineBreakHard | lineBreakVisible
-		} else if ((lineLength >= 4 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r' &&
+		case ((lineLength >= 4 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r' &&
 			line[lineLength-4] != '\\') || (lineLength == 3 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r')) &&
-			hasNewLine { // ends with \\r\n
+			hasNewLine: // ends with \\r\n
 			lineLength -= 3
 			lineBreakFlags |= lineBreakHard | lineBreakVisible
-		} else if lineLength >= 3 && line[lineLength-3] == ' ' && line[lineLength-2] == ' ' &&
-			hasNewLine { // ends with [space][space]\n
+		case lineLength >= 3 && line[lineLength-3] == ' ' && line[lineLength-2] == ' ' &&
+			hasNewLine: // ends with [space][space]\n
 			lineLength -= 3
 			lineBreakFlags |= lineBreakHard
-		} else if lineLength >= 4 && line[lineLength-4] == ' ' && line[lineLength-3] == ' ' &&
-			line[lineLength-2] == '\r' && hasNewLine { // ends with [space][space]\r\n
+		case lineLength >= 4 && line[lineLength-4] == ' ' && line[lineLength-3] == ' ' &&
+			line[lineLength-2] == '\r' && hasNewLine: // ends with [space][space]\r\n
 			lineLength -= 4
 			lineBreakFlags |= lineBreakHard
-		} else if hasNewLine {
+		case hasNewLine:
 			// If the line ends with a newline character, but it is not a hardlineBreak, then it is a softLinebreak
 			// If the line ends with a hardlineBreak, then it cannot end with a softLinebreak
 			// See https://spec.commonmark.org/0.30/#soft-line-breaks
