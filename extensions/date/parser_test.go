@@ -81,6 +81,26 @@ func TestDateParser_Parse(t *testing.T) {
 			input:    "2026-3-26",
 			wantDate: "2026-03-26",
 		},
+		{
+			name:    "Single character input returns nil",
+			input:   " a",
+			wantNil: true,
+		},
+		{
+			name:     "Too many separators stops parsing",
+			input:    " 2026-03-26-15-30",
+			wantDate: "2026-03-26",
+		},
+		{
+			name:    "More than three separators truncates",
+			input:   " 2026/03/26/extra/data",
+			wantNil: true,
+		},
+		{
+			name:    "Non-alphanumeric stops parsing early",
+			input:   " 2026@invalid",
+			wantNil: true,
+		},
 	}
 
 	for _, tt := range tests {
