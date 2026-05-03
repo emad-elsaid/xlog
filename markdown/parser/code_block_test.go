@@ -190,21 +190,21 @@ func TestCodeBlockParser_Close(t *testing.T) {
 			reader := text.NewReader([]byte(tc.input))
 			pc := NewContext()
 
-		// Open and continue to build the node naturally
-		node, _ := parser.Open(ast.NewDocument(), reader, pc)
-		if node == nil {
-			t.Fatal("Open() returned nil")
-		}
-		reader.AdvanceLine()
-
-		// Continue until close or EOF
-		for reader.Peek() != text.EOF {
-			state := parser.Continue(node, reader, pc)
-			if state == Close {
-				break
+			// Open and continue to build the node naturally
+			node, _ := parser.Open(ast.NewDocument(), reader, pc)
+			if node == nil {
+				t.Fatal("Open() returned nil")
 			}
 			reader.AdvanceLine()
-		}
+
+			// Continue until close or EOF
+			for reader.Peek() != text.EOF {
+				state := parser.Continue(node, reader, pc)
+				if state == Close {
+					break
+				}
+				reader.AdvanceLine()
+			}
 
 			// Now test Close trims trailing blanks
 			parser.Close(node, reader, pc)
@@ -262,20 +262,20 @@ func TestCodeBlockParser_PreserveLeadingTab(t *testing.T) {
 			reader := text.NewReader([]byte(tc.input))
 			pc := NewContext()
 
-		node, _ := parser.Open(ast.NewDocument(), reader, pc)
-		if node == nil {
-			t.Fatal("Open() returned nil")
-		}
-		reader.AdvanceLine()
-
-		// Continue reading all lines
-		for reader.Peek() != text.EOF {
-			state := parser.Continue(node, reader, pc)
-			if state == Close {
-				break
+			node, _ := parser.Open(ast.NewDocument(), reader, pc)
+			if node == nil {
+				t.Fatal("Open() returned nil")
 			}
 			reader.AdvanceLine()
-		}
+
+			// Continue reading all lines
+			for reader.Peek() != text.EOF {
+				state := parser.Continue(node, reader, pc)
+				if state == Close {
+					break
+				}
+				reader.AdvanceLine()
+			}
 
 			if node.Lines().Len() != tc.wantLines {
 				t.Errorf("Got %d lines, want %d", node.Lines().Len(), tc.wantLines)
