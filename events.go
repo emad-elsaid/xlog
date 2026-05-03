@@ -11,7 +11,7 @@ type (
 	PageEvent int
 	// a function that handles a page event. this should be implemented by an
 	// extension and then registered. it will get executed when the event is
-	// triggered
+	// triggered.
 	PageEventHandler func(Page) error
 )
 
@@ -25,7 +25,7 @@ const (
 	PageNotFound // user requested a page that's not found
 )
 
-// a map to keep all page events and respective list of event handlers
+// a map to keep all page events and respective list of event handlers.
 var (
 	pageEvents      = map[PageEvent][]PageEventHandler{}
 	pageEventsMutex sync.RWMutex
@@ -34,7 +34,7 @@ var (
 // Register an event handler to be executed when PageEvent is triggered.
 // extensions can use this to register hooks under specific page events.
 // extensions that keeps a cached version of the pages list for example needs to
-// register handlers to update its cache
+// register handlers to update its cache.
 func Listen(e PageEvent, h PageEventHandler) {
 	pageEventsMutex.Lock()
 	defer pageEventsMutex.Unlock()

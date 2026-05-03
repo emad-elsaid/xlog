@@ -9,7 +9,7 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
-// testPage implements the Page interface for testing events
+// testPage implements the Page interface for testing events.
 type testPage struct {
 	name    string
 	modTime time.Time

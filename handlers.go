@@ -14,7 +14,7 @@ import (
 )
 
 // Define the catch all HTTP routes, parse CLI flags and take actions like
-// building the static pages and exit, or start the HTTP server
+// building the static pages and exit, or start the HTTP server.
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
@@ -77,7 +77,7 @@ func rootHandler(r Request) Output {
 }
 
 // Shows a page. the page name is the path itself. if the page doesn't exist it
-// redirect to edit page otherwise will render it to HTML
+// redirect to edit page otherwise will render it to HTML.
 func getPageHandler(r Request) Output {
 	page := NewPage(r.PathValue("page"))
 

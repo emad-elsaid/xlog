@@ -31,7 +31,7 @@ var staticDirs = []fs.FS{assets}
 
 // RegisterStaticDir adds a filesystem to the filesystems list scanned for files
 // when serving static files. can be used to add a directory of CSS or JS files
-// by extensions
+// by extensions.
 func RegisterStaticDir(f fs.FS) {
 	staticDirs = append(staticDirs, f)
 }

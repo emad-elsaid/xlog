@@ -50,7 +50,7 @@ func RegisterHelper(name string, f any) error {
 // duration in human readable way such as "3 seconds ago". "5 hours 30 minutes
 // ago". The precision of this function is 2. which means it returns the largest
 // unit of time possible and the next one after it. for example days + hours, or
-// Hours + minutes or Minutes + seconds...etc
+// Hours + minutes or Minutes + seconds...etc.
 func ago(t time.Time) string {
 	if Config.Readonly {
 		return t.Format("Monday 2 January 2006")
@@ -110,7 +110,7 @@ func ago(t time.Time) string {
 
 var js = []string{}
 
-// RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template
+// RegisterJS adds a Javascript library URL/path to be included in the scripts used by the template.
 func RegisterJS(f string) {
 	if slices.Contains(js, f) {
 		return
@@ -119,7 +119,7 @@ func RegisterJS(f string) {
 	js = append(js, f)
 }
 
-// RequireHTMX registes HTML library, this helps include one version of HTMX
+// RequireHTMX registes HTML library, this helps include one version of HTMX.
 func RequireHTMX() {
 	RegisterJS("/public/htmx.min.js")
 }
@@ -196,7 +196,7 @@ func dir(s string) string {
 	return v
 }
 
-// raw a helper to output input string as safe HTML
+// raw a helper to output input string as safe HTML.
 func raw(i string) template.HTML {
 	return template.HTML(i)
 }
