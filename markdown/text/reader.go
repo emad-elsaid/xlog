@@ -620,6 +620,29 @@ func readRuneReader(r Reader) (rune, int, error) {
 	return rn, size, nil
 }
 
+// countBackticks returns the number of consecutive backticks starting at position i.
+// It advances i to the position after the last backtick.
+func countBackticks(bs []byte, i int) (count int, newPos int) {
+	for ; i < len(bs) && bs[i] == '`'; i++ {
+		count++
+	}
+	return count, i - 1
+}
+
+// handleCodeSpanOpener processes the opening of a code span (backticks).
+// Returns the new codeSpanOpener count and updated position.
+func handleCodeSpanOpener(bs []byte, i int) (openerCount int, newPos int) {
+	count, pos := countBackticks(bs, i)
+	return count, pos
+}
+
+// handleCodeSpanCloser processes the closing of a code span (backticks).
+// Returns whether the code span was closed and the updated position.
+func handleCodeSpanCloser(bs []byte, i int, codeSpanOpener int) (closed bool, newPos int) {
+	count, pos := countBackticks(bs, i)
+	return count == codeSpanOpener, pos
+}
+
 func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (*Segments, bool) {
 	opened := 1
 	codeSpanOpener := 0
@@ -637,30 +660,16 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 			c := bs[i]
 			switch {
 			case opts.CodeSpan && codeSpanOpener != 0 && c == '`':
-				codeSpanCloser := 0
-				for ; i < len(bs); i++ {
-					if bs[i] == '`' {
-						codeSpanCloser++
-					} else {
-						i--
-						break
-					}
-				}
-				if codeSpanCloser == codeSpanOpener {
+				spanClosed, newPos := handleCodeSpanCloser(bs, i, codeSpanOpener)
+				i = newPos
+				if spanClosed {
 					codeSpanOpener = 0
 				}
 			case codeSpanOpener == 0 && c == '\\' && i < len(bs)-1 && util.IsPunct(bs[i+1]):
 				i += 2
 				continue
 			case opts.CodeSpan && codeSpanOpener == 0 && c == '`':
-				for ; i < len(bs); i++ {
-					if bs[i] == '`' {
-						codeSpanOpener++
-					} else {
-						i--
-						break
-					}
-				}
+				codeSpanOpener, i = handleCodeSpanOpener(bs, i)
 			case (opts.CodeSpan && codeSpanOpener == 0) || !opts.CodeSpan:
 				if c == closer {
 					opened--
