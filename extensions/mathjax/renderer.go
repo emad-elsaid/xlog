@@ -27,7 +27,7 @@ MathJax = {
 <script type="text/javascript" src="/js/tex-chtml-full.js" async></script>`
 
 func registerBuildFiles() {
-	fs.WalkDir(js, ".", func(path string, d fs.DirEntry, err error) error {
+	_ = fs.WalkDir(js, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -58,17 +58,17 @@ func (r *InlineMathRenderer) renderInlineMath(w util.BufWriter, source []byte, n
 			segment := c.(*ast.Text).Segment
 			value := segment.Value(source)
 			if bytes.HasSuffix(value, []byte("\n")) {
-				w.Write(value[:len(value)-1])
+				_, _ = w.Write(value[:len(value)-1])
 				if c != n.LastChild() {
-					w.Write([]byte(" "))
+					_, _ = w.Write([]byte(" "))
 				}
 			} else {
-				w.Write(value)
+				_, _ = w.Write(value)
 			}
 		}
 		return ast.WalkSkipChildren, nil
 	}
-	w.WriteString(r.endDelim + `</span>` + script)
+	_, _ = w.WriteString(r.endDelim + `</span>` + script)
 	return ast.WalkContinue, nil
 }
 
@@ -88,7 +88,7 @@ func (r *MathBlockRenderer) renderMathBlock(w util.BufWriter, source []byte, nod
 		l := n.Lines().Len()
 		for i := 0; i < l; i++ {
 			line := n.Lines().At(i)
-			w.Write(line.Value(source))
+			_, _ = w.Write(line.Value(source))
 		}
 	} else {
 		_, _ = w.WriteString(r.endDelim + `</p>` + "\n" + script)
