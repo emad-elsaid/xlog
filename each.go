@@ -13,7 +13,7 @@ import (
 
 // a List of directories that should be ignored by directory walking function.
 // for example the versioning extension can register `.versions` directory to be
-// ignored
+// ignored.
 var ignoredPaths = []*regexp.Regexp{
 	regexp.MustCompile(`^\.`), // Ignore any hidden directory
 }
@@ -25,7 +25,7 @@ func IgnorePath(r *regexp.Regexp) {
 
 // IsIgnoredPath checks if a file path should be ignored according to the list
 // of ignored paths. page source implementations can use it to ignore files from
-// their sources
+// their sources.
 func IsIgnoredPath(d string) bool {
 	for _, v := range ignoredPaths {
 		if v.MatchString(d) {
