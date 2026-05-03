@@ -125,6 +125,8 @@ func PlainText(text string) Output {
 	}
 }
 
+// JsonResponse returns an output function that encodes data as JSON and writes it to response
+// with appropriate content-type header.
 func JsonResponse(a any) Output {
 	return func(w Response, r Request) {
 		b, err := json.Marshal(a)
