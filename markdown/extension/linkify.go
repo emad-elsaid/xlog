@@ -167,6 +167,105 @@ var (
 	domainWWW  = []byte("www.")
 )
 
+// tryMatchURL attempts to match a URL with protocol in the line.
+func (s *linkifyParser) tryMatchURL(line []byte) []int {
+	if s.LinkifyConfig.AllowedProtocols == nil {
+		if bytes.HasPrefix(line, protoHTTP) || bytes.HasPrefix(line, protoHTTPS) || bytes.HasPrefix(line, protoFTP) {
+			return s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
+		}
+	} else {
+		for _, prefix := range s.LinkifyConfig.AllowedProtocols {
+			if bytes.HasPrefix(line, prefix) {
+				return s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
+			}
+		}
+	}
+	return nil
+}
+
+// trimURLTrailingPunctuation removes trailing punctuation from URL matches.
+func (s *linkifyParser) trimURLTrailingPunctuation(line []byte, m []int) {
+	lastChar := line[m[1]-1]
+	switch lastChar {
+	case '.':
+		m[1]--
+	case ')':
+		closing := 0
+		for i := m[1] - 1; i >= m[0]; i-- {
+			if line[i] == ')' {
+				closing++
+			} else if line[i] == '(' {
+				closing--
+			}
+		}
+		if closing > 0 {
+			m[1] -= closing
+		}
+	case ';':
+		i := m[1] - 2
+		for ; i >= m[0]; i-- {
+			if util.IsAlphaNumeric(line[i]) {
+				continue
+			}
+			break
+		}
+		if i != m[1]-2 {
+			if line[i] == '&' {
+				m[1] -= m[1] - i
+			}
+		}
+	}
+}
+
+// tryMatchEmail attempts to match an email address in the line.
+func (s *linkifyParser) tryMatchEmail(line []byte) []int {
+	if len(line) > 0 && util.IsPunct(line[0]) {
+		return nil
+	}
+	stop := -1
+	if s.LinkifyConfig.EmailRegexp == nil {
+		stop = util.FindEmailIndex(line)
+	} else {
+		m := s.LinkifyConfig.EmailRegexp.FindSubmatchIndex(line)
+		if m != nil && m[0] == 0 {
+			stop = m[1]
+		}
+	}
+	if stop < 0 {
+		return nil
+	}
+	at := bytes.IndexByte(line, '@')
+	m := []int{0, stop, at, stop - 1}
+	if m == nil || bytes.IndexByte(line[m[2]:m[3]], '.') < 0 {
+		return nil
+	}
+	lastChar := line[m[1]-1]
+	if lastChar == '.' {
+		m[1]--
+	}
+	if m[1] < len(line) {
+		nextChar := line[m[1]]
+		if nextChar == '-' || nextChar == '_' {
+			return nil
+		}
+	}
+	return m
+}
+
+// trimTrailingPunctuation removes trailing punctuation from the matched text.
+func trimTrailingPunctuation(line []byte, endIdx int) int {
+	i := endIdx - 1
+	for ; i > 0; i-- {
+		c := line[i]
+		switch c {
+		case '?', '!', '.', ',', ':', '*', '_', '~':
+		default:
+			return i + 1
+		}
+	}
+	return i + 1
+}
+
 func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	if pc.IsInLinkLabel() {
 		return nil
@@ -175,7 +274,7 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	consumes := 0
 	start := segment.Start
 	c := line[0]
-	// advance if current position is not a line head.
+	// Advance if current position is not a line head.
 	if c == ' ' || c == '*' || c == '_' || c == '~' || c == '(' {
 		consumes++
 		start++
@@ -185,18 +284,9 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	var m []int
 	var protocol []byte
 	var typ ast.AutoLinkType = ast.AutoLinkURL
-	if s.LinkifyConfig.AllowedProtocols == nil {
-		if bytes.HasPrefix(line, protoHTTP) || bytes.HasPrefix(line, protoHTTPS) || bytes.HasPrefix(line, protoFTP) {
-			m = s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
-		}
-	} else {
-		for _, prefix := range s.LinkifyConfig.AllowedProtocols {
-			if bytes.HasPrefix(line, prefix) {
-				m = s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
-				break
-			}
-		}
-	}
+
+	// Try to match URL with protocol.
+	m = s.tryMatchURL(line)
 	if m == nil && bytes.HasPrefix(line, domainWWW) {
 		m = s.LinkifyConfig.WWWRegexp.FindSubmatchIndex(line)
 		protocol = []byte("http")
@@ -205,88 +295,25 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 		m = nil
 	}
 	if m != nil && m[0] == 0 {
-		lastChar := line[m[1]-1]
-		switch lastChar {
-		case '.':
-			m[1]--
-		case ')':
-			closing := 0
-			for i := m[1] - 1; i >= m[0]; i-- {
-				if line[i] == ')' {
-					closing++
-				} else if line[i] == '(' {
-					closing--
-				}
-			}
-			if closing > 0 {
-				m[1] -= closing
-			}
-		case ';':
-			i := m[1] - 2
-			for ; i >= m[0]; i-- {
-				if util.IsAlphaNumeric(line[i]) {
-					continue
-				}
-				break
-			}
-			if i != m[1]-2 {
-				if line[i] == '&' {
-					m[1] -= m[1] - i
-				}
-			}
-		}
+		s.trimURLTrailingPunctuation(line, m)
 	}
+
+	// Try to match email if no URL was found.
 	if m == nil {
-		if len(line) > 0 && util.IsPunct(line[0]) {
-			return nil
-		}
 		typ = ast.AutoLinkEmail
-		stop := -1
-		if s.LinkifyConfig.EmailRegexp == nil {
-			stop = util.FindEmailIndex(line)
-		} else {
-			m := s.LinkifyConfig.EmailRegexp.FindSubmatchIndex(line)
-			if m != nil && m[0] == 0 {
-				stop = m[1]
-			}
-		}
-		if stop < 0 {
-			return nil
-		}
-		at := bytes.IndexByte(line, '@')
-		m = []int{0, stop, at, stop - 1}
-		if m == nil || bytes.IndexByte(line[m[2]:m[3]], '.') < 0 {
-			return nil
-		}
-		lastChar := line[m[1]-1]
-		if lastChar == '.' {
-			m[1]--
-		}
-		if m[1] < len(line) {
-			nextChar := line[m[1]]
-			if nextChar == '-' || nextChar == '_' {
-				return nil
-			}
-		}
+		m = s.tryMatchEmail(line)
 	}
+
 	if m == nil {
 		return nil
 	}
+
 	if consumes != 0 {
 		s := segment.WithStop(segment.Start + 1)
 		ast.MergeOrAppendTextSegment(parent, s)
 	}
-	i := m[1] - 1
-	for ; i > 0; i-- {
-		c := line[i]
-		switch c {
-		case '?', '!', '.', ',', ':', '*', '_', '~':
-		default:
-			goto endfor
-		}
-	}
-endfor:
-	i++
+
+	i := trimTrailingPunctuation(line, m[1])
 	consumes += i
 	block.Advance(consumes)
 	n := ast.NewTextSegment(text.NewSegment(start, start+i))
