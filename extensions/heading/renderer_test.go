@@ -190,7 +190,7 @@ func TestHeadingRenderer_RenderExitingWithAttributes(t *testing.T) {
 	}
 }
 
-// Helper function
+// Helper function.
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && containsAt(s, substr))
 }
@@ -204,7 +204,7 @@ func containsAt(s, substr string) bool {
 	return false
 }
 
-// Mock implementations
+// Mock implementations.
 type mockNodeRendererFuncRegisterer struct {
 	registerFunc func(ast.NodeKind, renderer.NodeRendererFunc)
 }

@@ -43,7 +43,7 @@ func Get(pc parser.Context) map[string]any {
 }
 
 // TryGet tries to get a YAML metadata.
-// If there are YAML parsing errors, then nil and error are returned
+// If there are YAML parsing errors, then nil and error are returned.
 func TryGet(pc parser.Context) (map[string]any, error) {
 	dtmp := pc.Get(contextKey)
 	if dtmp == nil {
