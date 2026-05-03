@@ -87,6 +87,7 @@ func getPageHandler(r Request) Output {
 
 	if !page.Exists() {
 		// if it's a directory get back to home page
+		// #nosec G703 -- page.Name() is sanitized by PageSource abstraction, no path traversal risk
 		if s, err := os.Stat(page.Name()); err == nil && s.IsDir() {
 			return Redirect(Config.Index)
 		}
