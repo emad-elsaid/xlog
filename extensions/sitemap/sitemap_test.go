@@ -19,7 +19,11 @@ func TestSitemapHandler(t *testing.T) {
 	// Setup test environment
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore working directory: %v", err)
+		}
+	}()
 	if err := os.Chdir(tempDir); err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +91,11 @@ func TestSitemapHandlerEmptyDirectory(t *testing.T) {
 	// Setup empty test environment
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore working directory: %v", err)
+		}
+	}()
 	if err := os.Chdir(tempDir); err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +133,11 @@ func TestSitemapHandlerDifferentDomain(t *testing.T) {
 	// Setup test environment
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore working directory: %v", err)
+		}
+	}()
 	if err := os.Chdir(tempDir); err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +177,11 @@ func TestSitemapHandlerHTTPS(t *testing.T) {
 	// Setup test environment
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore working directory: %v", err)
+		}
+	}()
 	if err := os.Chdir(tempDir); err != nil {
 		t.Fatal(err)
 	}

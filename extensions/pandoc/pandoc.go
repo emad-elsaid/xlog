@@ -52,7 +52,7 @@ func (p *pandoc) Page(name string) xlog.Page {
 }
 
 func (p *pandoc) Each(ctx context.Context, f func(xlog.Page)) {
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
+	_ = filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		select {
 
 		case <-ctx.Done():
@@ -144,7 +144,10 @@ func (p *page) Write(content xlog.Markdown) bool {
 	defer xlog.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
-	os.MkdirAll(filepath.Dir(name), 0700)
+	if err := os.MkdirAll(filepath.Dir(name), 0700); err != nil {
+		slog.Error("Failed to create directory", "path", filepath.Dir(name), "error", err)
+		return false
+	}
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	if err := os.WriteFile(name, []byte(content), 0644); err != nil {

@@ -101,7 +101,7 @@ func rawText(source []byte, n ast.Node, limit int) string {
 	}
 
 	out := ""
-	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
