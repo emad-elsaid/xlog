@@ -6,6 +6,7 @@ import (
 	"github.com/emad-elsaid/xlog/markdown"
 	gast "github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
 	"github.com/emad-elsaid/xlog/markdown/testutil"
 	"github.com/emad-elsaid/xlog/markdown/text"
@@ -138,4 +139,115 @@ Another one.[^2]
 		},
 		t,
 	)
+}
+
+func TestFootnoteConfig_SetOption(t *testing.T) {
+	tests := []struct {
+		name     string
+		option   renderer.OptionName
+		value    any
+		validate func(*testing.T, *FootnoteConfig)
+	}{
+		{
+			name:   "optFootnoteIDPrefix",
+			option: renderer.OptionName("FootnoteIDPrefix"),
+			value:  []byte("test-prefix-"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.IDPrefix) != "test-prefix-" {
+					t.Errorf("expected IDPrefix to be 'test-prefix-', got %q", c.IDPrefix)
+				}
+			},
+		},
+		{
+			name:   "optFootnoteIDPrefixFunction",
+			option: renderer.OptionName("FootnoteIDPrefixFunction"),
+			value: func(n gast.Node) []byte {
+				return []byte("dynamic-")
+			},
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if c.IDPrefixFunction == nil {
+					t.Error("expected IDPrefixFunction to be set")
+				} else {
+					result := c.IDPrefixFunction(nil)
+					if string(result) != "dynamic-" {
+						t.Errorf("expected IDPrefixFunction to return 'dynamic-', got %q", result)
+					}
+				}
+			},
+		},
+		{
+			name:   "optFootnoteLinkTitle",
+			option: renderer.OptionName("FootnoteLinkTitle"),
+			value:  []byte("Link to footnote ^^"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.LinkTitle) != "Link to footnote ^^" {
+					t.Errorf("expected LinkTitle to be 'Link to footnote ^^', got %q", c.LinkTitle)
+				}
+			},
+		},
+		{
+			name:   "optFootnoteBacklinkTitle",
+			option: renderer.OptionName("FootnoteBacklinkTitle"),
+			value:  []byte("Return to content"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.BacklinkTitle) != "Return to content" {
+					t.Errorf("expected BacklinkTitle to be 'Return to content', got %q", c.BacklinkTitle)
+				}
+			},
+		},
+		{
+			name:   "optFootnoteLinkClass",
+			option: renderer.OptionName("FootnoteLinkClass"),
+			value:  []byte("custom-footnote-link"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.LinkClass) != "custom-footnote-link" {
+					t.Errorf("expected LinkClass to be 'custom-footnote-link', got %q", c.LinkClass)
+				}
+			},
+		},
+		{
+			name:   "optFootnoteBacklinkClass",
+			option: renderer.OptionName("FootnoteBacklinkClass"),
+			value:  []byte("custom-backlink"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.BacklinkClass) != "custom-backlink" {
+					t.Errorf("expected BacklinkClass to be 'custom-backlink', got %q", c.BacklinkClass)
+				}
+			},
+		},
+		{
+			name:   "optFootnoteBacklinkHTML",
+			option: renderer.OptionName("FootnoteBacklinkHTML"),
+			value:  []byte("&uarr;"),
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				if string(c.BacklinkHTML) != "&uarr;" {
+					t.Errorf("expected BacklinkHTML to be '&uarr;', got %q", c.BacklinkHTML)
+				}
+			},
+		},
+		{
+			name:   "unknown option delegates to Config",
+			option: renderer.OptionName("UnknownOption"),
+			value:  "test-value",
+			validate: func(t *testing.T, c *FootnoteConfig) {
+				// Verify it was passed to underlying Config by checking no panic occurred.
+				// The html.Config should handle unknown options gracefully.
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			config := NewFootnoteConfig()
+			config.SetOption(tc.option, tc.value)
+			tc.validate(t, &config)
+		})
+	}
+}
+
+func TestFootnoteBlockParser_CanAcceptIndentedLine(t *testing.T) {
+	parser := NewFootnoteBlockParser()
+	if parser.(*footnoteBlockParser).CanAcceptIndentedLine() {
+		t.Error("CanAcceptIndentedLine should return false")
+	}
 }
