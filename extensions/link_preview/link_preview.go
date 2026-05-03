@@ -139,7 +139,9 @@ type Meta struct {
 
 func getUrlMeta(url string) (*Meta, error) {
 	const cacheDir = ".cache"
-	os.Mkdir(cacheDir, 0700)
+	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
+		return nil, err
+	}
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))
 	cache, err := os.ReadFile(cacheFile)
@@ -154,7 +156,9 @@ func getUrlMeta(url string) (*Meta, error) {
 	if resp == nil || err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	cont, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -196,8 +200,9 @@ func getUrlMeta(url string) (*Meta, error) {
 		}
 	}
 
-	js, _ := json.Marshal(meta)
-	os.WriteFile(cacheFile, js, 0644)
+	if js, err := json.Marshal(meta); err == nil {
+		_ = os.WriteFile(cacheFile, js, 0644)
+	}
 
 	return &meta, nil
 }
