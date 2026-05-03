@@ -324,3 +324,217 @@ func TestTemplateHelpers(t *testing.T) {
 		t.Errorf("Expected helper function to work, got: %s", resultStr)
 	}
 }
+
+// BenchmarkPartialSimple benchmarks simple template rendering with minimal data.
+func BenchmarkPartialSimple(b *testing.B) {
+	// Setup: compile templates once
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	// Create a simple template
+	template.Must(templates.New("bench-simple").Parse(`<div>Hello {{.name}}</div>`))
+
+	data := Locals{"name": "World"}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-simple", data)
+	}
+}
+
+// BenchmarkPartialComplex benchmarks complex template with nested data and helpers.
+func BenchmarkPartialComplex(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	// Create a complex template with loops and conditionals
+	complexTemplate := `
+{{range .items}}
+  <div class="item">
+    <h2>{{.title}}</h2>
+    <p>{{.description}}</p>
+    {{if .tags}}
+      <ul>
+      {{range .tags}}
+        <li>{{.}}</li>
+      {{end}}
+      </ul>
+    {{end}}
+  </div>
+{{end}}
+`
+	template.Must(templates.New("bench-complex").Funcs(helpers).Parse(complexTemplate))
+
+	data := Locals{
+		"items": []map[string]interface{}{
+			{
+				"title":       "Item 1",
+				"description": "Description for item 1",
+				"tags":        []string{"tag1", "tag2", "tag3"},
+			},
+			{
+				"title":       "Item 2",
+				"description": "Description for item 2",
+				"tags":        []string{"tag4", "tag5"},
+			},
+			{
+				"title":       "Item 3",
+				"description": "Description for item 3",
+				"tags":        []string{},
+			},
+		},
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-complex", data)
+	}
+}
+
+// BenchmarkPartialWithConfig benchmarks template rendering with config access.
+func BenchmarkPartialWithConfig(b *testing.B) {
+	originalTemplates := templates
+	originalConfig := Config
+	defer func() {
+		templates = originalTemplates
+		Config = originalConfig
+	}()
+
+	compileTemplates()
+	Config = Configuration{
+		Sitename:    "Benchmark Site",
+		BindAddress: ":8080",
+		Index:       "index",
+	}
+
+	template.Must(templates.New("bench-config").Parse(`
+<header>
+  <h1>{{.config.Sitename}}</h1>
+  <nav>{{.config.Index}}</nav>
+</header>
+`))
+
+	data := Locals{"title": "Test Page"}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-config", data)
+	}
+}
+
+// BenchmarkPartialNilData benchmarks template rendering with nil data.
+func BenchmarkPartialNilData(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	template.Must(templates.New("bench-nil").Parse(`<div>Static content</div>`))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-nil", nil)
+	}
+}
+
+// BenchmarkPartialEmptyData benchmarks template rendering with empty Locals.
+func BenchmarkPartialEmptyData(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	template.Must(templates.New("bench-empty").Parse(`<div>Static content</div>`))
+
+	data := Locals{}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-empty", data)
+	}
+}
+
+// BenchmarkPartialConcurrent benchmarks concurrent template rendering.
+func BenchmarkPartialConcurrent(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	template.Must(templates.New("bench-concurrent").Parse(`<div>{{.id}}: {{.data}}</div>`))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	b.RunParallel(func(pb *testing.PB) {
+		i := 0
+		for pb.Next() {
+			data := Locals{
+				"id":   i,
+				"data": "concurrent data",
+			}
+			_ = Partial("bench-concurrent", data)
+			i++
+		}
+	})
+}
+
+// BenchmarkPartialLargeData benchmarks template rendering with large data sets.
+func BenchmarkPartialLargeData(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	largeTemplate := `
+{{range .entries}}
+<article>
+  <h1>{{.title}}</h1>
+  <time>{{.date}}</time>
+  <p>{{.content}}</p>
+</article>
+{{end}}
+`
+	template.Must(templates.New("bench-large").Parse(largeTemplate))
+
+	// Generate large dataset (100 entries)
+	entries := make([]map[string]string, 100)
+	for i := 0; i < 100; i++ {
+		entries[i] = map[string]string{
+			"title":   "Article " + string(rune(i)),
+			"date":    "2024-01-01",
+			"content": "This is the content for article number " + string(rune(i)),
+		}
+	}
+
+	data := Locals{"entries": entries}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("bench-large", data)
+	}
+}
+
+// BenchmarkPartialNotFound benchmarks template not found error path.
+func BenchmarkPartialNotFound(b *testing.B) {
+	originalTemplates := templates
+	defer func() { templates = originalTemplates }()
+	compileTemplates()
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = Partial("nonexistent-template-bench", Locals{})
+	}
+}
