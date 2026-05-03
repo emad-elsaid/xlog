@@ -11,111 +11,142 @@ import (
 	"time"
 )
 
-const testExtensionName = "recent"
-
-func TestRecentExtensionName(t *testing.T) {
-	ext := Recent{}
-
-	if ext.Name() != testExtensionName {
-		t.Errorf("Expected name '%s', got '%s'", testExtensionName, ext.Name())
-	}
-}
-
-func TestLinksIcon(t *testing.T) {
+func TestRecent_Extension(t *testing.T) {
 	tests := []struct {
 		name     string
 		expected string
 	}{
-		{
-			name:     "returns clock rotate left icon",
-			expected: "fa-solid fa-clock-rotate-left",
-		},
+		{"returns correct extension name", "recent"},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			l := links{}
-			if l.Icon() != tc.expected {
-				t.Errorf("Expected icon '%s', got '%s'", tc.expected, l.Icon())
+			ext := Recent{}
+			if got := ext.Name(); got != tc.expected {
+				t.Errorf("Name() = %q, want %q", got, tc.expected)
 			}
 		})
 	}
 }
 
-func TestLinksName(t *testing.T) {
-	tests := []struct {
-		name     string
-		expected string
-	}{
-		{
-			name:     "returns Recent as display name",
-			expected: "Recent",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			l := links{}
-			if l.Name() != tc.expected {
-				t.Errorf("Expected name '%s', got '%s'", tc.expected, l.Name())
-			}
-		})
-	}
-}
-
-func TestLinksAttrs(t *testing.T) {
+func TestRecent_LinksCommand(t *testing.T) {
 	tests := []struct {
 		name         string
-		expectedHref string
+		checkIcon    bool
+		wantIcon     string
+		checkName    bool
+		wantName     string
+		checkHref    bool
+		wantHref     string
+		checkKeyType bool
 	}{
 		{
-			name:         "returns href pointing to recent endpoint",
-			expectedHref: "/+/recent",
+			name:         "returns complete command implementation",
+			checkIcon:    true,
+			wantIcon:     "fa-solid fa-clock-rotate-left",
+			checkName:    true,
+			wantName:     "Recent",
+			checkHref:    true,
+			wantHref:     "/+/recent",
+			checkKeyType: true,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			l := links{}
-			attrs := l.Attrs()
 
-			if attrs == nil {
-				t.Fatal("Expected attrs map, got nil")
+			if tc.checkIcon {
+				if got := l.Icon(); got != tc.wantIcon {
+					t.Errorf("Icon() = %q, want %q", got, tc.wantIcon)
+				}
 			}
 
-			href, ok := attrs["href"]
-			if !ok {
-				t.Error("Expected 'href' attribute in attrs map")
+			if tc.checkName {
+				if got := l.Name(); got != tc.wantName {
+					t.Errorf("Name() = %q, want %q", got, tc.wantName)
+				}
 			}
 
-			hrefStr, ok := href.(string)
-			if !ok {
-				t.Fatalf("Expected href to be string, got %T", href)
+			if tc.checkHref {
+				attrs := l.Attrs()
+				if attrs == nil {
+					t.Fatal("Attrs() returned nil")
+				}
+
+				href, ok := attrs["href"]
+				if !ok {
+					t.Error("Attrs() missing 'href' key")
+				}
+
+				hrefStr, ok := href.(string)
+				if !ok {
+					t.Errorf("href type = %T, want string", href)
+				}
+
+				if hrefStr != tc.wantHref {
+					t.Errorf("href = %q, want %q", hrefStr, tc.wantHref)
+				}
 			}
 
-			if hrefStr != tc.expectedHref {
-				t.Errorf("Expected href '%s', got '%s'", tc.expectedHref, hrefStr)
+			if tc.checkKeyType {
+				attrs := l.Attrs()
+				for key := range attrs {
+					if _, ok := interface{}(key).(template.HTMLAttr); !ok {
+						t.Errorf("key type = %T, want template.HTMLAttr", key)
+					}
+					break
+				}
 			}
 		})
 	}
 }
 
-func TestLinksAttrsType(t *testing.T) {
-	l := links{}
-	attrs := l.Attrs()
+func TestRecent_Handler(t *testing.T) {
+	tests := []struct {
+		name          string
+		method        string
+		path          string
+		cancelContext bool
+		wantNonNilOut bool
+	}{
+		{
+			name:          "GET request returns output",
+			method:        http.MethodGet,
+			path:          "/+/recent",
+			wantNonNilOut: true,
+		},
+		{
+			name:          "cancelled context returns output",
+			method:        http.MethodGet,
+			path:          "/+/recent",
+			cancelContext: true,
+			wantNonNilOut: true,
+		},
+	}
 
-	// Verify the map key type is template.HTMLAttr
-	for key := range attrs {
-		_, ok := interface{}(key).(template.HTMLAttr)
-		if !ok {
-			t.Errorf("Expected key type template.HTMLAttr, got %T", key)
-		}
-		break // Just check first key
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var ctx context.Context
+			if tc.cancelContext {
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithCancel(context.Background())
+				cancel()
+			} else {
+				ctx = context.Background()
+			}
+
+			r := httptest.NewRequest(tc.method, tc.path, nil).WithContext(ctx)
+			output := recentHandler(r)
+
+			if tc.wantNonNilOut && output == nil {
+				t.Error("recentHandler() returned nil, want non-nil output")
+			}
+		})
 	}
 }
 
-func TestRecentHandlerSorting(t *testing.T) {
-	// Create temporary directory with test pages
+func TestRecent_HandlerSorting(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
 	defer func() { _ = os.Chdir(origDir) }()
@@ -157,10 +188,6 @@ func TestRecentHandlerSorting(t *testing.T) {
 		},
 		{
 			name: "handles empty pages list",
-			pages: []struct {
-				name    string
-				modTime time.Time
-			}{},
 		},
 		{
 			name: "handles single page",
@@ -176,26 +203,23 @@ func TestRecentHandlerSorting(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create test pages
 			for _, p := range tc.pages {
 				pagePath := filepath.Join(tmpDir, p.name)
 				if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
-					t.Fatalf("Failed to create test page %s: %v", p.name, err)
+					t.Fatalf("WriteFile(%s) failed: %v", p.name, err)
 				}
-				// Set modification time
 				if err := os.Chtimes(pagePath, p.modTime, p.modTime); err != nil {
-					t.Fatalf("Failed to set modtime for %s: %v", p.name, err)
+					t.Fatalf("Chtimes(%s) failed: %v", p.name, err)
 				}
 			}
 
-			// Setup request and context
-			_ = httptest.NewRequest(http.MethodGet, "/+/recent", nil)
+			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
+			output := recentHandler(r)
 
-			// Note: Full integration testing of recentHandler requires
-			// RegisterFileSystemSource to populate pages cache.
-			// This test verifies the sorting logic is present in the handler.
+			if output == nil {
+				t.Error("recentHandler() returned nil")
+			}
 
-			// Cleanup test files
 			for _, p := range tc.pages {
 				_ = os.Remove(filepath.Join(tmpDir, p.name))
 			}
@@ -203,485 +227,26 @@ func TestRecentHandlerSorting(t *testing.T) {
 	}
 }
 
-func TestRecentHandlerResponse(t *testing.T) {
+func TestRecent_TemplatesEmbedded(t *testing.T) {
 	tests := []struct {
-		name   string
-		method string
-		path   string
+		name            string
+		wantNonEmptyDir bool
 	}{
 		{
-			name:   "GET request to recent endpoint returns output",
-			method: http.MethodGet,
-			path:   "/+/recent",
+			name:            "embedded templates directory contains files",
+			wantNonEmptyDir: true,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(tc.method, tc.path, nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			// Verify handler returns non-nil output function
-			if output == nil {
-				t.Error("Expected non-nil output from recentHandler")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerUsesRenderFunction(t *testing.T) {
-	tests := []struct {
-		name             string
-		expectedTemplate string
-	}{
-		{
-			name:             "returns Render output for recent template",
-			expectedTemplate: "recent",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			// Verify output function is returned
-			if output == nil {
-				t.Error("Expected output function from recentHandler")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerPagesSorting(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "returns output function for pages sorting",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-			if output == nil {
-				t.Fatal("recentHandler returned nil output")
-			}
-		})
-	}
-}
-
-func TestRecentInit(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "Init completes without panic",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Note: Init registers global routes which cannot be easily
-			// tested in isolation without mocking the router.
-			// This test verifies the extension structure is valid.
-			ext := Recent{}
-			name := ext.Name()
-
-			if name != testExtensionName {
-				t.Errorf("Expected extension name '%s', got '%s'", testExtensionName, name)
-			}
-		})
-	}
-}
-
-func TestRecentHandlerDynamicPageName(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler creates output with DynamicPage",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected non-nil output")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerWithContextCancellation(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler returns output with cancelled context",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx, cancel := context.WithCancel(context.Background())
-			cancel()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected non-nil output even with cancelled context")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerRendersTemplate(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "returns output from Render function",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected Render() to return output function")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerLocalsStructure(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler returns output function",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-			if output == nil {
-				t.Fatal("recentHandler returned nil")
-			}
-		})
-	}
-}
-
-func TestLinksAttrsMapStructure(t *testing.T) {
-	tests := []struct {
-		name              string
-		expectedKeyCount  int
-		expectedHasHref   bool
-		expectedHrefValue string
-	}{
-		{
-			name:              "returns map with href attribute",
-			expectedKeyCount:  1,
-			expectedHasHref:   true,
-			expectedHrefValue: "/+/recent",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			l := links{}
-			attrs := l.Attrs()
-
-			if len(attrs) != tc.expectedKeyCount {
-				t.Errorf("Expected %d attributes, got %d", tc.expectedKeyCount, len(attrs))
-			}
-
-			if tc.expectedHasHref {
-				href, exists := attrs["href"]
-				if !exists {
-					t.Error("Expected 'href' key in attrs")
-				}
-
-				hrefStr, ok := href.(string)
-				if !ok {
-					t.Errorf("Expected href value to be string, got %T", href)
-				}
-
-				if hrefStr != tc.expectedHrefValue {
-					t.Errorf("Expected href '%s', got '%s'", tc.expectedHrefValue, hrefStr)
-				}
-			}
-		})
-	}
-}
-
-func TestRecentHandlerPagesSortingOrder(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler implements sorting logic",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-			if output == nil {
-				t.Error("Handler should return output function")
-			}
-		})
-	}
-}
-
-func TestRecentExtensionInit_TemplateRegistration(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "extension has embedded templates directory",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			// Verify templates can be read from embedded FS
 			entries, err := templates.ReadDir("templates")
 			if err != nil {
-				t.Errorf("Failed to read templates directory: %v", err)
+				t.Fatalf("ReadDir(templates) failed: %v", err)
 			}
 
-			if len(entries) == 0 {
-				t.Error("Expected at least one template file in templates directory")
-			}
-		})
-	}
-}
-
-func TestRecentExtensionInit_BuildPageRegistration(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "extension structure is valid",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			ext := Recent{}
-
-			// Verify extension interface implementation
-			if ext.Name() == "" {
-				t.Error("Extension should have non-empty name")
-			}
-		})
-	}
-}
-
-func TestRecentExtensionInit_LinkRegistration(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "links struct implements required methods",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			l := links{}
-
-			// Verify links implements Command interface methods
-			if l.Icon() == "" {
-				t.Error("links should return non-empty icon")
-			}
-
-			if l.Name() == "" {
-				t.Error("links should return non-empty name")
-			}
-
-			if l.Attrs() == nil {
-				t.Error("links should return non-nil attrs map")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerOutputType(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "returns Output type with ServeHTTP method",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Fatal("Expected non-nil output")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerCallsPagesFunction(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler calls Pages with context",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected non-nil output from recentHandler")
-			}
-		})
-	}
-}
-
-func TestLinksStructImplementsCommandInterface(t *testing.T) {
-	tests := []struct {
-		name         string
-		hasIcon      bool
-		hasName      bool
-		hasAttrs     bool
-		iconNotEmpty bool
-		nameNotEmpty bool
-		attrsNotNil  bool
-	}{
-		{
-			name:         "implements all Command interface methods",
-			hasIcon:      true,
-			hasName:      true,
-			hasAttrs:     true,
-			iconNotEmpty: true,
-			nameNotEmpty: true,
-			attrsNotNil:  true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			l := links{}
-
-			if tc.hasIcon {
-				icon := l.Icon()
-				if tc.iconNotEmpty && icon == "" {
-					t.Error("Icon() should return non-empty string")
-				}
-			}
-
-			if tc.hasName {
-				name := l.Name()
-				if tc.nameNotEmpty && name == "" {
-					t.Error("Name() should return non-empty string")
-				}
-			}
-
-			if tc.hasAttrs {
-				attrs := l.Attrs()
-				if tc.attrsNotNil && attrs == nil {
-					t.Error("Attrs() should return non-nil map")
-				}
-			}
-		})
-	}
-}
-
-func TestRecentHandlerResponseContainsPageData(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler returns output function",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected non-nil output")
-			}
-		})
-	}
-}
-
-func TestRecentHandlerEmptyPagesSlice(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{
-			name: "handler handles empty pages gracefully",
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
-			ctx := context.Background()
-			r = r.WithContext(ctx)
-
-			output := recentHandler(r)
-
-			if output == nil {
-				t.Error("Expected non-nil output")
+			if tc.wantNonEmptyDir && len(entries) == 0 {
+				t.Error("templates directory is empty, want at least one file")
 			}
 		})
 	}
