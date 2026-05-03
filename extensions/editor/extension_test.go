@@ -1,13 +1,16 @@
 package editor
 
 import (
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
 const (
@@ -142,13 +145,13 @@ func TestEditorHandler(t *testing.T) {
 }
 
 func TestLinksWithEmptyFileName(t *testing.T) {
-	page := xlog.NewPage("")
-	commands := links(page)
+	// Create a mock page that returns empty filename
+	mockPage := &mockPage{filename: ""}
+	commands := links(mockPage)
 
-	// Empty page should still have a button since FileName() might not be empty
-	// Just verify we don't panic
-	if commands == nil {
-		t.Log("Commands is nil for empty page name")
+	// Empty filename should return nil (line 83 coverage)
+	if commands != nil {
+		t.Errorf("Expected nil commands for empty filename, got %d commands", len(commands))
 	}
 }
 
@@ -260,3 +263,18 @@ func TestEditButtonStructMethods(t *testing.T) {
 		t.Errorf("Expected hx-post '%s', got '%s'", expectedPath, hxPost)
 	}
 }
+
+// mockPage implements xlog.Page interface for testing.
+type mockPage struct {
+	filename string
+}
+
+func (m *mockPage) Name() string             { return "" }
+func (m *mockPage) FileName() string         { return m.filename }
+func (m *mockPage) Exists() bool             { return false }
+func (m *mockPage) Render() template.HTML    { return "" }
+func (m *mockPage) Content() xlog.Markdown   { return "" }
+func (m *mockPage) Delete() bool             { return false }
+func (m *mockPage) Write(xlog.Markdown) bool { return false }
+func (m *mockPage) ModTime() time.Time       { return time.Time{} }
+func (m *mockPage) AST() ([]byte, ast.Node)  { return nil, nil }
