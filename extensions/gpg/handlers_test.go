@@ -179,12 +179,12 @@ func TestDecryptHandler(t *testing.T) {
 				if err := os.Chdir(origWd); err != nil {
 					t.Errorf("failed to restore directory: %v", err)
 				}
-			}()
+		}()
 
-			// Set GPG ID
-			gpgId = "test@example.com"
+		// Set GPG ID
+		gpgId = "test@example.com"
 
-			// Create encrypted test page if it should exist
+		// Create encrypted test page if it should exist
 			if tc.pageExists && tc.setupEncrypted {
 				dir := filepath.Dir(tc.pageName)
 				if err := os.MkdirAll(dir, 0700); err != nil {
@@ -261,5 +261,97 @@ func TestHandlerErrors(t *testing.T) {
 				t.Errorf("error message = %q, want %q", tc.err.Error(), tc.expectedMsg)
 			}
 		})
+	}
+}
+
+// TestEncryptHandlerWriteFailure tests encryption failure path (line 22-24).
+func TestEncryptHandlerWriteFailure(t *testing.T) {
+	tmpDir := t.TempDir()
+	origWd, _ := os.Getwd()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(origWd)
+	}()
+
+	// Set GPG ID but ensure GPG encryption will fail
+	gpgId = "nonexistent@invalid"
+
+	// Create test page
+	pageName := "test/writefail"
+	dir := filepath.Dir(pageName)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		t.Fatalf("failed to create directory: %v", err)
+	}
+	if err := os.WriteFile(pageName+".md", []byte("# Test\nContent"), 0600); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
+
+	// Create request
+	req := httptest.NewRequest(http.MethodPost, "/+/gpg/encrypt/"+pageName, nil)
+	req.SetPathValue("page", pageName)
+	w := httptest.NewRecorder()
+
+	// Execute handler - encryption should fail without valid GPG setup
+	output := encryptHandler(req)
+	if output != nil {
+		output(w, req)
+	}
+
+	// Verify we got an error response (not 204 No Content)
+	if w.Code == http.StatusNoContent {
+		t.Skip("GPG configured correctly - cannot test encryption failure path")
+	}
+
+	// Should return 500 Internal Server Error for encryption failure
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("expected status 500, got %d", w.Code)
+	}
+}
+
+// TestDecryptHandlerWriteFailure tests decryption write failure (line 48-50).
+func TestDecryptHandlerWriteFailure(t *testing.T) {
+	tmpDir := t.TempDir()
+	origWd, _ := os.Getwd()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
+	defer func() {
+		_ = os.Chdir(origWd)
+	}()
+
+	// Set GPG ID
+	gpgId = "test@example.com"
+
+	// Create encrypted test page
+	pageName := "test/decryptfail"
+	dir := filepath.Dir(pageName)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		t.Fatalf("failed to create directory: %v", err)
+	}
+	if err := os.WriteFile(pageName+EXT, []byte("encrypted content"), 0600); err != nil {
+		t.Fatalf("failed to write encrypted file: %v", err)
+	}
+
+	// Create request
+	req := httptest.NewRequest(http.MethodPost, "/+/gpg/decrypt/"+pageName, nil)
+	req.SetPathValue("page", pageName)
+	w := httptest.NewRecorder()
+
+	// Execute handler - should fail on Write after Delete
+	output := decryptHandler(req)
+	if output != nil {
+		output(w, req)
+	}
+
+	// Without real GPG, decryption will fail
+	if w.Code == http.StatusNoContent {
+		t.Skip("GPG configured - cannot test write failure path")
+	}
+
+	// Should return error
+	if w.Code != http.StatusInternalServerError && w.Code != http.StatusNotFound {
+		t.Errorf("expected error status, got %d", w.Code)
 	}
 }
