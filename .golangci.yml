@@ -1,0 +1,55 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Vet examines Go source code
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Advanced Go linter
+    - unused        # Check for unused constants, variables, functions and types
+    - gofmt         # Check whether code was gofmt-ed
+    - misspell      # Find commonly misspelled English words in comments
+    - revive        # Fast, configurable, extensible, flexible, and beautiful linter for Go
+    - gosec         # Inspects source code for security problems
+
+linters-settings:
+  errcheck:
+    check-blank: false
+    check-type-assertions: false
+  
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # Too pedantic for most codebases
+  
+  revive:
+    severity: warning
+    rules:
+      - name: exported
+        disabled: true  # Too strict for existing code
+      - name: package-comments
+        disabled: true  # Not critical
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - gosec
+        - errcheck
+    
+    # Ignore vendored/generated code
+    - path: markdown/
+      linters:
+        - all
+    
+    # Allow fmt.Printf in benchmark and tool code
+    - path: (_benchmark|_tools)/
+      linters:
+        - forbidigo
+  
+  max-issues-per-linter: 0
+  max-same-issues: 0
