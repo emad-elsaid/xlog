@@ -25,14 +25,14 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 	n := node.(*east.TaskCheckBox)
 	p := n.Parent()
 
-	w.WriteString(`<input name="checked" type="checkbox" `)
+	_, _ = w.WriteString(`<input name="checked" type="checkbox" `)
 
 	if n.IsChecked {
-		w.WriteString(`checked="" `)
+		_, _ = w.WriteString(`checked="" `)
 	}
 
 	if Config.Readonly {
-		w.WriteString(`disabled="" `)
+		_, _ = w.WriteString(`disabled="" `)
 	} else if p.Kind() == ast.KindTextBlock {
 		if l := p.Lines(); l != nil {
 
@@ -41,10 +41,10 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 				l.At(0).Start,
 			)
 
-			fmt.Fprintf(w, `hx-post="/+/todo" hx-vals="js:%s"`, template.HTMLEscapeString(vals))
+			_, _ = fmt.Fprintf(w, `hx-post="/+/todo" hx-vals="js:%s"`, template.HTMLEscapeString(vals))
 		}
 	}
 
-	w.WriteString("> ")
+	_, _ = w.WriteString("> ")
 	return ast.WalkContinue, nil
 }
