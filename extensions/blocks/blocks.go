@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"embed"
+	"html"
 	"html/template"
 	"io/fs"
 	"strings"
@@ -76,11 +77,14 @@ func block(tpl string) func(xlog.Markdown) template.HTML {
 		b := map[string]any{}
 
 		if err := yaml.Unmarshal([]byte(in), &b); err != nil {
-			return template.HTML(err.Error())
+			// Escape error message to prevent potential XSS if error contains user input.
+			// #nosec G203 - Error string is HTML-escaped before conversion to template.HTML
+			return template.HTML(html.EscapeString(err.Error()))
 		}
 
 		output := xlog.Partial(tpl, xlog.Locals(b))
 
+		// #nosec G203 - xlog.Partial returns trusted output from html/template execution
 		return template.HTML(output)
 	}
 }

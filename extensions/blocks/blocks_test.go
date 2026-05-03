@@ -230,6 +230,49 @@ func TestBlockYAMLUnmarshalErrors(t *testing.T) {
 	}
 }
 
+func TestBlockErrorMessageEscaping(t *testing.T) {
+	// Test that errors are properly escaped before being rendered as HTML.
+	// While current YAML errors don't contain user input, this ensures
+	// defense-in-depth against future error types or error message changes.
+	
+	tests := []struct {
+		name     string
+		yamlData string
+	}{
+		{
+			name:     "malformed YAML with special chars",
+			yamlData: "key: [unclosed, <test>",
+		},
+		{
+			name:     "invalid YAML structure",
+			yamlData: "invalid:\n  {unclosed",
+		},
+		{
+			name:     "mapping values error",
+			yamlData: "key: value: extra:",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			renderFn := block("hero")
+			result := renderFn(xlog.Markdown(tc.yamlData))
+			resultStr := string(result)
+
+			// Should contain YAML error message
+			if !containsAny(resultStr, []string{"yaml", "did not find", "line", "mapping"}) {
+				t.Errorf("Expected YAML error message, got: %q", resultStr)
+			}
+			
+			// Error output should never contain raw HTML tags that could cause XSS
+			// html.EscapeString converts < to &lt; and > to &gt;
+			if containsAny(resultStr, []string{"<test>", "<script>", "<img"}) {
+				t.Errorf("Error output contains unescaped HTML tags: %q", resultStr)
+			}
+		})
+	}
+}
+
 func TestInitExecution(t *testing.T) {
 	// Verify Init completes without panic
 	defer func() {
