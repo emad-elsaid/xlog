@@ -2,6 +2,7 @@ package gpg
 
 import (
 	"bytes"
+	"html"
 	"html/template"
 	"log/slog"
 	"os"
@@ -33,7 +34,8 @@ func (p *page) Render() template.HTML {
 	content = xlog.PreProcess(content)
 	var buf bytes.Buffer
 	if err := xlog.MarkdownConverter().Convert([]byte(content), &buf); err != nil {
-		return template.HTML(err.Error())
+		// Escape error message to prevent potential XSS from error content
+		return template.HTML(html.EscapeString(err.Error()))
 	}
 
 	return template.HTML(buf.String())
