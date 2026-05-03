@@ -1,6 +1,7 @@
 package gpg
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -93,5 +94,69 @@ func TestPageExists(t *testing.T) {
 	// Should return false for non-existent file
 	if p.Exists() {
 		t.Errorf("Exists() = true for non-existent file, want false")
+	}
+}
+
+// TestPageModTime verifies the ModTime method returns correct modification time.
+func TestPageModTime(t *testing.T) {
+	tests := []struct {
+		name         string
+		pageName     string
+		expectZero   bool
+		setupFile    bool
+		setupContent string
+	}{
+		{
+			name:       "non-existent file returns zero time",
+			pageName:   "test/nonexistent",
+			expectZero: true,
+			setupFile:  false,
+		},
+		{
+			name:         "existing file returns valid time",
+			pageName:     "test/existing",
+			expectZero:   false,
+			setupFile:    true,
+			setupContent: "test content",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			p := &page{name: tc.pageName}
+
+			if tc.setupFile {
+				// Create temporary file for testing
+				tmpDir := t.TempDir()
+				origWd, _ := os.Getwd()
+				if err := os.Chdir(tmpDir); err != nil {
+					t.Fatalf("failed to change directory: %v", err)
+				}
+				defer func() {
+					if err := os.Chdir(origWd); err != nil {
+						t.Errorf("failed to restore directory: %v", err)
+					}
+				}()
+
+				if err := os.MkdirAll("test", 0700); err != nil {
+					t.Fatalf("failed to create directory: %v", err)
+				}
+				if err := os.WriteFile(p.FileName(), []byte(tc.setupContent), 0600); err != nil {
+					t.Fatalf("failed to write file: %v", err)
+				}
+			}
+
+			modTime := p.ModTime()
+
+			if tc.expectZero {
+				if !modTime.IsZero() {
+					t.Errorf("ModTime() = %v, expected zero time", modTime)
+				}
+			} else {
+				if modTime.IsZero() {
+					t.Errorf("ModTime() returned zero time, expected valid time")
+				}
+			}
+		})
 	}
 }
