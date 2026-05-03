@@ -268,6 +268,7 @@ func TestPage_Render(t *testing.T) {
 
 	p := &page{name: "test", ext: ".html"}
 	rendered := p.Render()
+	// #nosec G203 -- Test comparison with known safe content
 	expected := template.HTML(htmlContent)
 	if rendered != expected {
 		t.Errorf("Expected rendered content '%s', got '%s'", expected, rendered)

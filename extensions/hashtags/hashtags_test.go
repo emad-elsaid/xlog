@@ -962,6 +962,7 @@ func (m *mockPage) Name() string     { return m.name }
 func (m *mockPage) FileName() string { return m.name + ".md" }
 func (m *mockPage) Exists() bool     { return true }
 func (m *mockPage) Render() template.HTML {
+	// #nosec G203 -- Mock test data with known safe content
 	return template.HTML(m.content)
 }
 func (m *mockPage) Content() xlog.Markdown {

@@ -35,6 +35,7 @@ func TestManifestHead_ReturnsLinkTag(t *testing.T) {
 
 	// Check it returns link tag
 	expected := `<link rel="manifest" href="/manifest.json">`
+	// #nosec G203 -- Test comparison with known safe content
 	if result != template.HTML(expected) {
 		t.Errorf("Expected head widget to return %q, got %q", expected, result)
 	}

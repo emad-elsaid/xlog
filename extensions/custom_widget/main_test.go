@@ -66,6 +66,7 @@ func TestCustomWidgetInit_WithHeadFile(t *testing.T) {
 
 	// Test that readFile works correctly
 	output := readFile(headFile)
+	// #nosec G203 -- Test comparison with known safe content
 	if output != template.HTML(headContent) {
 		t.Errorf("Expected readFile output to be %q, got %q", headContent, output)
 	}
@@ -96,6 +97,7 @@ func TestCustomWidgetInit_WithBeforeViewFile(t *testing.T) {
 
 	// Test that readFile works correctly
 	output := readFile(beforeFile)
+	// #nosec G203 -- Test comparison with known safe content
 	if output != template.HTML(beforeContent) {
 		t.Errorf("Expected readFile output to be %q, got %q", beforeContent, output)
 	}
@@ -126,6 +128,7 @@ func TestCustomWidgetInit_WithAfterViewFile(t *testing.T) {
 
 	// Test that readFile works correctly
 	output := readFile(afterFile)
+	// #nosec G203 -- Test comparison with known safe content
 	if output != template.HTML(afterContent) {
 		t.Errorf("Expected readFile output to be %q, got %q", afterContent, output)
 	}
@@ -181,12 +184,15 @@ func TestCustomWidgetInit_WithMultipleFiles(t *testing.T) {
 	beforeOutput := readFile(beforeFile)
 	afterOutput := readFile(afterFile)
 
+	// #nosec G203 -- Test comparison with known safe content
 	if headOutput != template.HTML(headContent) {
 		t.Errorf("Expected head output %q, got %q", headContent, headOutput)
 	}
+	// #nosec G203 -- Test comparison with known safe content
 	if beforeOutput != template.HTML(beforeContent) {
 		t.Errorf("Expected before output %q, got %q", beforeContent, beforeOutput)
 	}
+	// #nosec G203 -- Test comparison with known safe content
 	if afterOutput != template.HTML(afterContent) {
 		t.Errorf("Expected after output %q, got %q", afterContent, afterOutput)
 	}
@@ -203,6 +209,7 @@ func TestReadFile_ValidFile(t *testing.T) {
 
 	// Read file
 	result := readFile(testFile)
+	// #nosec G203 -- Test comparison with known safe content
 	if result != template.HTML(content) {
 		t.Errorf("Expected %q, got %q", content, result)
 	}
