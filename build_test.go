@@ -445,6 +445,7 @@ func TestBuild_404Handling(t *testing.T) {
 	// Verify 404.html was copied to root
 	notFoundCopy := filepath.Join(tmpDir, "404.html")
 	if _, err := os.Stat(notFoundCopy); err == nil {
+		// #nosec G304 -- notFoundCopy is constructed from t.TempDir(), not user input
 		content, readErr := os.ReadFile(notFoundCopy)
 		if readErr != nil {
 			t.Errorf("Failed to read 404.html: %v", readErr)
