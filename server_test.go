@@ -392,7 +392,7 @@ func TestRequestLoggerHandler_LogInjectionPrevention(t *testing.T) {
 	}
 }
 
-// TestSanitizeLogString tests the log sanitization function to prevent injection attacks
+// TestSanitizeLogString tests the log sanitization function to prevent injection attacks.
 func TestSanitizeLogString(t *testing.T) {
 	tests := []struct {
 		name     string
