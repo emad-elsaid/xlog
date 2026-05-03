@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/csrf"
 )
 
+const testIndexPage = "index"
+
 func init() {
 	// Initialize templates for all tests
 	compileTemplates()
@@ -22,11 +24,11 @@ func TestRootHandler(t *testing.T) {
 		configIndex  string
 		expectedPath string
 	}{
-		{
-			name:         "default index redirect",
-			configIndex:  "index",
-			expectedPath: "/index",
-		},
+	{
+		name:         "default index redirect",
+		configIndex:  testIndexPage,
+		expectedPath: "/index",
+	},
 		{
 			name:         "custom index redirect",
 			configIndex:  "home",
@@ -162,7 +164,7 @@ func TestGetPageHandler_Directory(t *testing.T) {
 
 	oldIndex := Config.Index
 	defer func() { Config.Index = oldIndex }()
-	Config.Index = "index"
+	Config.Index = testIndexPage
 
 	req := httptest.NewRequest(http.MethodGet, "/"+dirName, nil)
 	req.SetPathValue("page", dirName)
@@ -391,7 +393,7 @@ func TestStart_BuildModeExecution(t *testing.T) {
 	Config.Source = sourceDir
 	Config.Build = buildDir
 	Config.Readonly = false
-	Config.Index = "index"
+	Config.Index = testIndexPage
 
 	// Reset flags for testing
 	os.Args = []string{"xlog"}
