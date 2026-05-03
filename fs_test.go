@@ -29,7 +29,11 @@ func TestPriorityFSOpen(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		defer f.Close()
+		defer func() {
+			if err := f.Close(); err != nil {
+				t.Errorf("Failed to close file: %v", err)
+			}
+		}()
 
 		// Verify it's the correct file
 		if stat, err := f.Stat(); err == nil {
@@ -44,7 +48,11 @@ func TestPriorityFSOpen(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		defer f.Close()
+		defer func() {
+			if err := f.Close(); err != nil {
+				t.Errorf("Failed to close file: %v", err)
+			}
+		}()
 
 		if stat, err := f.Stat(); err == nil {
 			if stat.Name() != "file2.txt" {
@@ -60,7 +68,11 @@ func TestPriorityFSOpen(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Expected no error, got %v", err)
 		}
-		defer f.Close()
+		defer func() {
+			if err := f.Close(); err != nil {
+				t.Errorf("Failed to close file: %v", err)
+			}
+		}()
 
 		// Read content to verify it's from fs2
 		data := make([]byte, 100)
@@ -122,8 +134,14 @@ func TestStaticHandler(t *testing.T) {
 
 	// Change to temp directory for the test
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	t.Run("serve existing file", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/test.txt", nil)
@@ -223,8 +241,14 @@ func TestStaticHandlerPriority(t *testing.T) {
 
 	// Change to temp directory
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	// Request the file - local version should win due to priorityFS behavior
 	req := httptest.NewRequest("GET", "/override.txt", nil)

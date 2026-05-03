@@ -18,9 +18,9 @@ func init() {
 
 func TestRootHandler(t *testing.T) {
 	tests := []struct {
-		name          string
-		configIndex   string
-		expectedPath  string
+		name         string
+		configIndex  string
+		expectedPath string
 	}{
 		{
 			name:         "default index redirect",
@@ -42,7 +42,7 @@ func TestRootHandler(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			w := httptest.NewRecorder()
-			
+
 			output := rootHandler(req)
 			output(w, req)
 
@@ -61,8 +61,14 @@ func TestRootHandler(t *testing.T) {
 func TestGetPageHandler_ExistingPage(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	// Create test page
 	testPageName := "testpage"
@@ -79,29 +85,29 @@ func TestGetPageHandler_ExistingPage(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/"+testPageName, nil)
 	req.SetPathValue("page", testPageName)
-	
+
 	testPassed := false
-	
+
 	// Wrap in CSRF middleware to generate token
 	handler := csrfMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		output := getPageHandler(r)
-		
+
 		// Execute the output function and verify it renders
 		// Note: We can't easily verify template name without parsing output
 		// but we can verify it doesn't error and returns 200
 		output(w, r)
-		
+
 		// If we get here without panic, the page was found and rendered
 		testPassed = true
 	}))
 
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, req)
-	
+
 	if !testPassed {
 		t.Error("Handler did not execute successfully")
 	}
-	
+
 	// Verify we got a successful response (not redirect or error)
 	if w.Code != http.StatusOK && w.Code != 0 { // 0 means default/unset
 		t.Errorf("Expected status OK, got %d", w.Code)
@@ -111,8 +117,14 @@ func TestGetPageHandler_ExistingPage(t *testing.T) {
 func TestGetPageHandler_NonExistentPage_ReadonlyMode(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	oldReadonly := Config.Readonly
 	defer func() { Config.Readonly = oldReadonly }()
@@ -133,8 +145,14 @@ func TestGetPageHandler_NonExistentPage_ReadonlyMode(t *testing.T) {
 func TestGetPageHandler_Directory(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	// Create a directory
 	dirName := "testdir"
@@ -167,8 +185,14 @@ func TestGetPageHandler_Directory(t *testing.T) {
 func TestGetPageHandler_NonExistentPage_DynamicMode(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	oldReadonly := Config.Readonly
 	defer func() { Config.Readonly = oldReadonly }()
@@ -188,7 +212,7 @@ func TestGetPageHandler_NonExistentPage_DynamicMode(t *testing.T) {
 	handler := csrfMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		output := getPageHandler(r)
 		output(w, r)
-		
+
 		// Verify we got a render response (not redirect or 404)
 		// In dynamic mode, non-existent pages should render a dynamic page
 		testPassed = true
@@ -210,8 +234,14 @@ func TestGetPageHandler_NonExistentPage_DynamicMode(t *testing.T) {
 func TestGetPageHandler_StaticFile(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
 
 	// Create public directory and static file
 	publicDir := "public"
@@ -240,15 +270,21 @@ func TestGetPageHandler_StaticFile(t *testing.T) {
 func TestStart_BuildMode(t *testing.T) {
 	// This test verifies build mode setup but doesn't actually run the full Start()
 	// to avoid server startup. We test the configuration changes instead.
-	
+
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	// Create minimal structure
 	sourceDir := filepath.Join(tempDir, "source")
 	buildDir := filepath.Join(tempDir, "build")
-	os.Mkdir(sourceDir, 0750)
+	if err := os.Mkdir(sourceDir, 0750); err != nil {
+		t.Fatalf("Failed to create source directory: %v", err)
+	}
 
 	oldConfig := Config
 	defer func() { Config = oldConfig }()
@@ -271,17 +307,17 @@ func TestStart_BuildMode(t *testing.T) {
 func TestStart_EventListenersNotInReadonly(t *testing.T) {
 	// Verify that event listeners are only registered in non-readonly mode
 	// This tests the logic at lines 35-38 in handlers.go
-	
+
 	oldReadonly := Config.Readonly
 	defer func() { Config.Readonly = oldReadonly }()
 
 	// In readonly mode, listeners should NOT be registered
 	Config.Readonly = true
-	
+
 	// We can't directly test Listen() calls without refactoring Start()
 	// This is a design note: current implementation doesn't allow testing
 	// event listener registration without actually calling Start()
-	
+
 	// For now, we verify the conditional logic
 	shouldRegisterListeners := !Config.Readonly
 	if shouldRegisterListeners {
@@ -299,9 +335,9 @@ func TestStart_EventListenersNotInReadonly(t *testing.T) {
 func TestStart_ServerContext(t *testing.T) {
 	// Test context cancellation behavior
 	// This verifies the goroutine at lines 62-67
-	
+
 	ctx, cancel := context.WithCancel(context.Background())
-	
+
 	// Verify context is cancellable
 	select {
 	case <-ctx.Done():

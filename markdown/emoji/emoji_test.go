@@ -161,8 +161,9 @@ func TestOptions(t *testing.T) {
 				),
 				WithRenderingMethod(Func),
 				WithRendererFunc(func(w util.BufWriter, source []byte, n *east.Emoji, config *RendererConfig) {
-
-					fmt.Fprintf(w, `<img class="emoji" alt="%s" src="https://cultofthepartyparrot.com/parrots/hd/%s.gif>`, n.Value.Name, n.Value.ShortNames[0])
+					if _, err := fmt.Fprintf(w, `<img class="emoji" alt="%s" src="https://cultofthepartyparrot.com/parrots/hd/%s.gif>`, n.Value.Name, n.Value.ShortNames[0]); err != nil {
+						panic(err)
+					}
 				}),
 			),
 		),
