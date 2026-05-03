@@ -8,6 +8,29 @@ import (
 	"testing"
 )
 
+// failingResponseWriter is a mock ResponseWriter that fails on Write operations
+// to test error handling paths.
+type failingResponseWriter struct {
+	writeCalled bool
+	header      http.Header
+}
+
+func (f *failingResponseWriter) Header() http.Header {
+	if f.header == nil {
+		f.header = make(http.Header)
+	}
+	return f.header
+}
+
+func (f *failingResponseWriter) Write(b []byte) (int, error) {
+	f.writeCalled = true
+	return 0, errors.New("simulated write failure")
+}
+
+func (f *failingResponseWriter) WriteHeader(statusCode int) {
+	// No-op for this mock
+}
+
 func TestBadRequest(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -755,6 +778,107 @@ func TestRenderOutput(t *testing.T) {
 			if tc.shouldFind != "" && !contains(w.Body.String(), tc.shouldFind) {
 				t.Errorf("expected response to contain %q, got %q",
 					tc.shouldFind, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestPlainTextOutput_WriteError(t *testing.T) {
+	tests := []struct {
+		name string
+		text string
+	}{
+		{
+			name: "write error on simple text",
+			text: "hello world",
+		},
+		{
+			name: "write error on empty text",
+			text: "",
+		},
+		{
+			name: "write error on large text",
+			text: string(make([]byte, 10000)),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := &failingResponseWriter{}
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := PlainText(tc.text)
+			handler.ServeHTTP(w, r)
+
+			if !w.writeCalled {
+				t.Error("Write should have been called")
+			}
+		})
+	}
+}
+
+func TestJsonResponseOutput_WriteError(t *testing.T) {
+	tests := []struct {
+		name string
+		data any
+	}{
+		{
+			name: "write error on valid JSON",
+			data: map[string]string{"key": "value"},
+		},
+		{
+			name: "write error on array",
+			data: []int{1, 2, 3},
+		},
+		{
+			name: "write error on marshal failure",
+			data: make(chan int),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := &failingResponseWriter{}
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := JsonResponse(tc.data)
+			handler.ServeHTTP(w, r)
+
+			if !w.writeCalled {
+				t.Error("Write should have been called")
+			}
+		})
+	}
+}
+
+func TestRenderOutput_WriteError(t *testing.T) {
+	tests := []struct {
+		name         string
+		templatePath string
+		data         Locals
+	}{
+		{
+			name:         "write error on missing template",
+			templatePath: "nonexistent",
+			data:         Locals{},
+		},
+		{
+			name:         "write error with nil data",
+			templatePath: "missing",
+			data:         nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := &failingResponseWriter{}
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := Render(tc.templatePath, tc.data)
+			handler.ServeHTTP(w, r)
+
+			if !w.writeCalled {
+				t.Error("Write should have been called")
 			}
 		})
 	}

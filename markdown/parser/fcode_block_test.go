@@ -11,11 +11,11 @@ func TestFencedCodeBlockParser_Trigger(t *testing.T) {
 	parser := NewFencedCodeBlockParser()
 	trigger := parser.Trigger()
 	expected := []byte{'~', '`'}
-	
+
 	if len(trigger) != len(expected) {
 		t.Fatalf("Trigger() length = %d, want %d", len(trigger), len(expected))
 	}
-	
+
 	for i, c := range expected {
 		if trigger[i] != c {
 			t.Errorf("Trigger()[%d] = %c, want %c", i, trigger[i], c)
@@ -152,29 +152,29 @@ func TestFencedCodeBlockParser_Open(t *testing.T) {
 			reader := text.NewReader([]byte(tc.input))
 			ctx := NewContext()
 			ctx.SetBlockOffset(tc.blockOffset)
-			
+
 			node, state := parser.Open(ast.NewDocument(), reader, ctx)
-			
+
 			if tc.wantNil {
 				if node != nil {
 					t.Errorf("Open() node = %v, want nil", node)
 				}
 				return
 			}
-			
+
 			if node == nil {
 				t.Fatal("Open() node = nil, want non-nil")
 			}
-			
+
 			if state != tc.wantState {
 				t.Errorf("Open() state = %v, want %v", state, tc.wantState)
 			}
-			
+
 			fcb, ok := node.(*ast.FencedCodeBlock)
 			if !ok {
 				t.Fatalf("Open() node type = %T, want *ast.FencedCodeBlock", node)
 			}
-			
+
 			if tc.wantInfo {
 				if fcb.Info == nil {
 					t.Error("Open() node.Info = nil, want non-nil")
@@ -278,7 +278,7 @@ func TestFencedCodeBlockParser_Continue(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			parser := NewFencedCodeBlockParser()
-			
+
 			// Setup: Open the fence
 			reader := text.NewReader([]byte(tc.setup))
 			ctx := NewContext()
@@ -287,15 +287,15 @@ func TestFencedCodeBlockParser_Continue(t *testing.T) {
 			if node == nil {
 				t.Fatal("Setup failed: Open() returned nil")
 			}
-			
+
 			// Test: Continue with next line
 			reader = text.NewReader([]byte(tc.nextLine))
 			state := parser.Continue(node, reader, ctx)
-			
+
 			if state != tc.wantState {
 				t.Errorf("Continue() state = %v, want %v", state, tc.wantState)
 			}
-			
+
 			if node.Lines().Len() != tc.wantLines {
 				t.Errorf("Continue() lines count = %d, want %d", node.Lines().Len(), tc.wantLines)
 			}
@@ -305,27 +305,27 @@ func TestFencedCodeBlockParser_Continue(t *testing.T) {
 
 func TestFencedCodeBlockParser_Close(t *testing.T) {
 	parser := NewFencedCodeBlockParser()
-	
+
 	// Setup: Open a fence
 	input := "```\n"
 	reader := text.NewReader([]byte(input))
 	ctx := NewContext()
 	ctx.SetBlockOffset(0)
 	node, _ := parser.Open(ast.NewDocument(), reader, ctx)
-	
+
 	if node == nil {
 		t.Fatal("Setup failed: Open() returned nil")
 	}
-	
+
 	// Verify context has fence data before close
 	fdata := ctx.Get(fencedCodeBlockInfoKey)
 	if fdata == nil {
 		t.Fatal("Context missing fence data before Close()")
 	}
-	
+
 	// Test: Close the block
 	parser.Close(node, reader, ctx)
-	
+
 	// Verify context cleared fence data
 	fdata = ctx.Get(fencedCodeBlockInfoKey)
 	if fdata != nil {
@@ -354,23 +354,23 @@ func TestFencedCodeBlockParser_MultilineCode(t *testing.T) {
 		wantLines int
 	}{
 		{
-			name: "simple multiline code",
-			input: "```\nline1\nline2\nline3\n```\n",
+			name:      "simple multiline code",
+			input:     "```\nline1\nline2\nline3\n```\n",
 			wantLines: 3,
 		},
 		{
-			name: "code with empty lines",
-			input: "```\nline1\n\nline2\n```\n",
+			name:      "code with empty lines",
+			input:     "```\nline1\n\nline2\n```\n",
 			wantLines: 3,
 		},
 		{
-			name: "code with indentation preserved",
-			input: "```\n  func main() {\n    println()\n  }\n```\n",
+			name:      "code with indentation preserved",
+			input:     "```\n  func main() {\n    println()\n  }\n```\n",
 			wantLines: 3,
 		},
 		{
-			name: "empty code block",
-			input: "```\n```\n",
+			name:      "empty code block",
+			input:     "```\n```\n",
 			wantLines: 0,
 		},
 	}
@@ -382,7 +382,7 @@ func TestFencedCodeBlockParser_MultilineCode(t *testing.T) {
 			reader := text.NewReader(lines)
 			ctx := NewContext()
 			ctx.SetBlockOffset(0)
-			
+
 			// Open the fence
 			node, state := parser.Open(ast.NewDocument(), reader, ctx)
 			if node == nil {
@@ -391,7 +391,7 @@ func TestFencedCodeBlockParser_MultilineCode(t *testing.T) {
 			if state != NoChildren {
 				t.Fatalf("Open() state = %v, want NoChildren", state)
 			}
-			
+
 			// Process all lines until close
 			_, seg := reader.PeekLine()
 			reader.Advance(seg.Stop - seg.Start)
@@ -400,14 +400,14 @@ func TestFencedCodeBlockParser_MultilineCode(t *testing.T) {
 				if len(line) == 0 {
 					break
 				}
-				
+
 				state = parser.Continue(node, reader, ctx)
 				if state == Close {
 					break
 				}
 				reader.Advance(seg.Stop - seg.Start)
 			}
-			
+
 			if node.Lines().Len() != tc.wantLines {
 				t.Errorf("Lines count = %d, want %d", node.Lines().Len(), tc.wantLines)
 			}
@@ -454,17 +454,17 @@ func TestFencedCodeBlockParser_InfoString(t *testing.T) {
 			reader := text.NewReader([]byte(tc.input))
 			ctx := NewContext()
 			ctx.SetBlockOffset(0)
-			
+
 			node, _ := parser.Open(ast.NewDocument(), reader, ctx)
 			if node == nil {
 				t.Fatal("Open() returned nil")
 			}
-			
+
 			fcb, ok := node.(*ast.FencedCodeBlock)
 			if !ok {
 				t.Fatalf("node type = %T, want *ast.FencedCodeBlock", node)
 			}
-			
+
 			if tc.wantInfo == "" {
 				if fcb.Info != nil {
 					t.Errorf("Info = %v, want nil", fcb.Info)
@@ -473,11 +473,11 @@ func TestFencedCodeBlockParser_InfoString(t *testing.T) {
 				if fcb.Info == nil {
 					t.Fatal("Info = nil, want non-nil")
 				}
-				
+
 				// Extract the actual info text from the segment
 				infoSegment := fcb.Info.Segment
 				actualInfo := string([]byte(tc.input)[infoSegment.Start:infoSegment.Stop])
-				
+
 				if actualInfo != tc.wantInfo {
 					t.Errorf("Info text = %q, want %q", actualInfo, tc.wantInfo)
 				}
