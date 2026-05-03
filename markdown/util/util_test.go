@@ -657,3 +657,381 @@ func TestIndentPosition(t *testing.T) {
 		})
 	}
 }
+
+func TestTrimLeftSpace(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "leading spaces",
+			input:    []byte("   hello"),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "leading tabs",
+			input:    []byte("\t\thello"),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "mixed leading whitespace",
+			input:    []byte(" \t \nhello"),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "no leading whitespace",
+			input:    []byte("hello world"),
+			expected: []byte("hello world"),
+		},
+		{
+			name:     "only whitespace",
+			input:    []byte("   "),
+			expected: []byte(""),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+		{
+			name:     "preserves trailing spaces",
+			input:    []byte("  hello  "),
+			expected: []byte("hello  "),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimLeftSpace(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrimRightSpace(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "trailing spaces",
+			input:    []byte("hello   "),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "trailing tabs",
+			input:    []byte("hello\t\t"),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "mixed trailing whitespace",
+			input:    []byte("hello \t \n"),
+			expected: []byte("hello"),
+		},
+		{
+			name:     "no trailing whitespace",
+			input:    []byte("hello world"),
+			expected: []byte("hello world"),
+		},
+		{
+			name:     "only whitespace",
+			input:    []byte("   "),
+			expected: []byte(""),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+		{
+			name:     "preserves leading spaces",
+			input:    []byte("  hello  "),
+			expected: []byte("  hello"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimRightSpace(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestEscapeHTML(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "no special characters",
+			input:    []byte("hello world"),
+			expected: []byte("hello world"),
+		},
+		{
+			name:     "ampersand",
+			input:    []byte("Tom & Jerry"),
+			expected: []byte("Tom &amp; Jerry"),
+		},
+		{
+			name:     "less than",
+			input:    []byte("5 < 10"),
+			expected: []byte("5 &lt; 10"),
+		},
+		{
+			name:     "greater than",
+			input:    []byte("10 > 5"),
+			expected: []byte("10 &gt; 5"),
+		},
+		{
+			name:     "quote",
+			input:    []byte(`He said "hello"`),
+			expected: []byte("He said &quot;hello&quot;"),
+		},
+		{
+			name:     "all special characters",
+			input:    []byte(`<div>"text" & 'stuff'</div>`),
+			expected: []byte("&lt;div&gt;&quot;text&quot; &amp; 'stuff'&lt;/div&gt;"),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+		{
+			name:     "multiple ampersands",
+			input:    []byte("&&&"),
+			expected: []byte("&amp;&amp;&amp;"),
+		},
+		{
+			name:     "html tag",
+			input:    []byte("<script>alert('xss')</script>"),
+			expected: []byte("&lt;script&gt;alert('xss')&lt;/script&gt;"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := EscapeHTML(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestToLinkReference(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected string
+	}{
+		{
+			name:     "simple text",
+			input:    []byte("hello"),
+			expected: "hello",
+		},
+		{
+			name:     "with leading spaces",
+			input:    []byte("  hello"),
+			expected: "hello",
+		},
+		{
+			name:     "with trailing spaces",
+			input:    []byte("hello  "),
+			expected: "hello",
+		},
+		{
+			name:     "with multiple spaces",
+			input:    []byte("hello   world"),
+			expected: "hello world",
+		},
+		{
+			name:     "uppercase to lowercase",
+			input:    []byte("HELLO WORLD"),
+			expected: "hello world",
+		},
+		{
+			name:     "mixed case",
+			input:    []byte("Hello World"),
+			expected: "hello world",
+		},
+		{
+			name:     "with tabs",
+			input:    []byte("hello\t\tworld"),
+			expected: "hello world",
+		},
+		{
+			name:     "complex whitespace",
+			input:    []byte("  Hello   World  "),
+			expected: "hello world",
+		},
+		{
+			name:     "unicode characters",
+			input:    []byte("Héllo Wörld"),
+			expected: "héllo wörld",
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: "",
+		},
+		{
+			name:     "only spaces",
+			input:    []byte("   "),
+			expected: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := ToLinkReference(tc.input)
+			if result != tc.expected {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestIsNumeric(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    byte
+		expected bool
+	}{
+		{
+			name:     "digit 0",
+			input:    '0',
+			expected: true,
+		},
+		{
+			name:     "digit 5",
+			input:    '5',
+			expected: true,
+		},
+		{
+			name:     "digit 9",
+			input:    '9',
+			expected: true,
+		},
+		{
+			name:     "lowercase letter",
+			input:    'a',
+			expected: false,
+		},
+		{
+			name:     "uppercase letter",
+			input:    'Z',
+			expected: false,
+		},
+		{
+			name:     "space",
+			input:    ' ',
+			expected: false,
+		},
+		{
+			name:     "special character",
+			input:    '!',
+			expected: false,
+		},
+		{
+			name:     "before 0",
+			input:    '/',
+			expected: false,
+		},
+		{
+			name:     "after 9",
+			input:    ':',
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := IsNumeric(tc.input)
+			if result != tc.expected {
+				t.Errorf("IsNumeric(%q) = %v, expected %v", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsHexDecimal(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    byte
+		expected bool
+	}{
+		{
+			name:     "digit 0",
+			input:    '0',
+			expected: true,
+		},
+		{
+			name:     "digit 9",
+			input:    '9',
+			expected: true,
+		},
+		{
+			name:     "lowercase a",
+			input:    'a',
+			expected: true,
+		},
+		{
+			name:     "lowercase f",
+			input:    'f',
+			expected: true,
+		},
+		{
+			name:     "uppercase A",
+			input:    'A',
+			expected: true,
+		},
+		{
+			name:     "uppercase F",
+			input:    'F',
+			expected: true,
+		},
+		{
+			name:     "lowercase g (not hex)",
+			input:    'g',
+			expected: false,
+		},
+		{
+			name:     "uppercase G (not hex)",
+			input:    'G',
+			expected: false,
+		},
+		{
+			name:     "lowercase z",
+			input:    'z',
+			expected: false,
+		},
+		{
+			name:     "space",
+			input:    ' ',
+			expected: false,
+		},
+		{
+			name:     "special character",
+			input:    '@',
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := IsHexDecimal(tc.input)
+			if result != tc.expected {
+				t.Errorf("IsHexDecimal(%q) = %v, expected %v", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
