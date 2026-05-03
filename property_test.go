@@ -77,16 +77,16 @@ func TestPropertiesDefaultProps(t *testing.T) {
 		t.Errorf("Expected 1 default property, got %d", len(props))
 	}
 
-	modifiedProp, exists := props["modified"]
+	modifiedProp, exists := props[propertyNameModified]
 	if !exists {
 		t.Fatal("Expected 'modified' property to exist")
 	}
 
-	if modifiedProp.Name() != "modified" {
+	if modifiedProp.Name() != propertyNameModified {
 		t.Errorf("Expected property name 'modified', got %s", modifiedProp.Name())
 	}
 
-	if modifiedProp.Icon() != "fa-solid fa-clock" {
+	if modifiedProp.Icon() != propertyIconClock {
 		t.Errorf("Expected icon 'fa-solid fa-clock', got %s", modifiedProp.Icon())
 	}
 
@@ -151,7 +151,7 @@ func TestPropertiesMultipleSources(t *testing.T) {
 	}
 
 	// Check each property exists
-	expectedProps := []string{"modified", "words", "reading-time"}
+	expectedProps := []string{propertyNameModified, "words", "reading-time"}
 	for _, name := range expectedProps {
 		if _, exists := props[name]; !exists {
 			t.Errorf("Expected property '%s' to exist", name)
@@ -234,7 +234,7 @@ func TestPropertiesEmptySource(t *testing.T) {
 		t.Errorf("Expected 1 property (only default), got %d", len(props))
 	}
 
-	if _, exists := props["modified"]; !exists {
+	if _, exists := props[propertyNameModified]; !exists {
 		t.Error("Expected default 'modified' property to exist")
 	}
 }
@@ -248,11 +248,11 @@ func TestLastUpdatePropInterface(t *testing.T) {
 
 	prop := lastUpdateProp{page: testP}
 
-	if prop.Icon() != "fa-solid fa-clock" {
+	if prop.Icon() != propertyIconClock {
 		t.Errorf("Expected icon 'fa-solid fa-clock', got %s", prop.Icon())
 	}
 
-	if prop.Name() != "modified" {
+	if prop.Name() != propertyNameModified {
 		t.Errorf("Expected name 'modified', got %s", prop.Name())
 	}
 
@@ -289,7 +289,7 @@ func TestPropertiesReturnsMapNotSlice(t *testing.T) {
 	}
 
 	// Maps allow direct key access
-	_, exists := props["modified"]
+	_, exists := props[propertyNameModified]
 	if !exists {
 		t.Error("Expected map to support key-based access")
 	}

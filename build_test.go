@@ -7,6 +7,11 @@ import (
 	"testing"
 )
 
+const (
+	testIndexFile     = "index.md"
+	testNotFoundFile  = "404.md"
+)
+
 func TestRegisterBuildPage(t *testing.T) {
 	tests := []struct {
 		name         string
@@ -258,8 +263,8 @@ func TestBuild_Integration(t *testing.T) {
 	}{
 		{
 			name:           "build with default index",
-			setupIndex:     "index.md",
-			setupNotFound:  "404.md",
+			setupIndex:     testIndexFile,
+			setupNotFound:  testNotFoundFile,
 			expectIndexErr: false,
 		},
 		{
@@ -271,7 +276,7 @@ func TestBuild_Integration(t *testing.T) {
 		{
 			name:           "build with nonexistent index",
 			setupIndex:     "nonexistent-page.md",
-			setupNotFound:  "404.md",
+			setupNotFound:  testNotFoundFile,
 			expectIndexErr: true,
 		},
 	}
@@ -324,8 +329,8 @@ func TestBuild_AssetCopying(t *testing.T) {
 		Config.NotFoundPage = origNotFound
 	}()
 
-	Config.Index = "index.md"
-	Config.NotFoundPage = "404.md"
+	Config.Index = testIndexFile
+	Config.NotFoundPage = testNotFoundFile
 
 	err = build(tmpDir)
 	if err != nil {
@@ -360,8 +365,8 @@ func TestBuild_ExtensionPages(t *testing.T) {
 		Config.NotFoundPage = origNotFound
 	}()
 
-	Config.Index = "index.md"
-	Config.NotFoundPage = "404.md"
+	Config.Index = testIndexFile
+	Config.NotFoundPage = testNotFoundFile
 
 	// Register some test extension pages
 	testPages := []struct {
@@ -413,8 +418,8 @@ func TestBuild_404Handling(t *testing.T) {
 		Config.Index = origIndex
 	}()
 
-	Config.Index = "index.md"
-	Config.NotFoundPage = "404.md"
+	Config.Index = testIndexFile
+	Config.NotFoundPage = testNotFoundFile
 
 	// First create the expected 404 source directory and file
 	notFoundDir := filepath.Join(tmpDir, Config.NotFoundPage)
@@ -495,8 +500,8 @@ func TestBuild_ErrorHandling(t *testing.T) {
 				Config.NotFoundPage = origNotFound
 			}()
 
-			Config.Index = "index.md"
-			Config.NotFoundPage = "404.md"
+			Config.Index = testIndexFile
+			Config.NotFoundPage = testNotFoundFile
 
 			err = build(testDir)
 

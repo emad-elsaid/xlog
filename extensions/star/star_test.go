@@ -10,6 +10,11 @@ import (
 	. "github.com/emad-elsaid/xlog"
 )
 
+const (
+	testPageFile = "test-page.md"
+	starIconClass = "fa-solid fa-star"
+)
+
 func TestIsStarredLogic(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -71,7 +76,7 @@ func TestActionIconAndName(t *testing.T) {
 		{
 			name:         "Starred action shows unstar",
 			starred:      true,
-			expectedIcon: "fa-solid fa-star",
+			expectedIcon: starIconClass,
 			expectedName: "Unstar",
 		},
 		{
@@ -110,7 +115,7 @@ func TestActionAttrs(t *testing.T) {
 	}
 
 	// Create a test page
-	testPageName := "test-page.md"
+	testPageName := testPageFile
 	if err := os.WriteFile(testPageName, []byte("# Test Page"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +205,7 @@ func TestIsStarred(t *testing.T) {
 	}
 
 	// Create test pages
-	testPage := "test-page.md"
+	testPage := testPageFile
 	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -277,7 +282,7 @@ func TestStarAction(t *testing.T) {
 	}
 
 	// Create a test page
-	testPage := "test-page.md"
+	testPage := testPageFile
 	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -364,7 +369,7 @@ func TestStarredPageIcon(t *testing.T) {
 	}
 
 	// Create a test page without emoji
-	testPage := "test-page.md"
+	testPage := testPageFile
 	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
@@ -377,7 +382,7 @@ func TestStarredPageIcon(t *testing.T) {
 	sp := starredPage{page}
 	icon := sp.Icon()
 
-	if icon != "fa-solid fa-star" {
+	if icon != starIconClass {
 		t.Errorf("Expected default icon 'fa-solid fa-star', got %s", icon)
 	}
 }
@@ -408,7 +413,7 @@ func TestStarredPageName(t *testing.T) {
 	sp := starredPage{page}
 	name := sp.Name()
 
-	expected := "test-page.md"
+	expected := testPageFile
 	if name != expected {
 		t.Errorf("Expected name %s, got %s", expected, name)
 	}

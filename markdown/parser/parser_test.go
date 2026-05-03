@@ -6,6 +6,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
+const (
+	testComputedValue = "computed"
+)
+
 func TestReference(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -215,12 +219,12 @@ func TestContext_ComputeIfAbsent(t *testing.T) {
 	callCount := 0
 	computeFunc := func() any {
 		callCount++
-		return "computed"
+		return testComputedValue
 	}
 
 	// First call should compute
 	val1 := ctx.ComputeIfAbsent(key, computeFunc)
-	if val1 != "computed" {
+	if val1 != testComputedValue {
 		t.Errorf("First ComputeIfAbsent = %v, want 'computed'", val1)
 	}
 	if callCount != 1 {
@@ -229,7 +233,7 @@ func TestContext_ComputeIfAbsent(t *testing.T) {
 
 	// Second call should not compute
 	val2 := ctx.ComputeIfAbsent(key, computeFunc)
-	if val2 != "computed" {
+	if val2 != testComputedValue {
 		t.Errorf("Second ComputeIfAbsent = %v, want 'computed'", val2)
 	}
 	if callCount != 1 {

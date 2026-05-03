@@ -9,6 +9,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
+const (
+	dirAutoValue = "auto"
+)
+
 func TestRTLExtensionName(t *testing.T) {
 	ext := RTL{}
 	expected := "rtl"
@@ -155,8 +159,8 @@ This is a paragraph.
 					dirStr = string(dirBytes)
 				}
 
-				if dirStr != "auto" {
-					t.Errorf("Expected dir='auto', got dir='%s'", dirStr)
+			if dirStr != dirAutoValue {
+				t.Errorf("Expected dir='auto', got dir='%s'", dirStr)
 				}
 			}
 		})
