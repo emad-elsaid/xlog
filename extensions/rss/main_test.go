@@ -252,3 +252,99 @@ func TestFeedContentType(t *testing.T) {
 		t.Fatalf("Generated invalid XML: %v", err)
 	}
 }
+
+func TestLinks(t *testing.T) {
+	cleanup := setupTestEnv(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+	pages := Pages(req.Context())
+	if len(pages) == 0 {
+		t.Fatal("Expected at least one page")
+	}
+
+	commands := links(pages[0])
+
+	if len(commands) != 1 {
+		t.Fatalf("Expected 1 link command, got %d", len(commands))
+	}
+
+	cmd := commands[0]
+
+	if cmd.Name() != "RSS" {
+		t.Errorf("Expected link name 'RSS', got '%s'", cmd.Name())
+	}
+
+	if cmd.Icon() != "fa-solid fa-rss" {
+		t.Errorf("Expected icon 'fa-solid fa-rss', got '%s'", cmd.Icon())
+	}
+
+	attrs := cmd.Attrs()
+	if href, ok := attrs["href"]; !ok || href != "/+/feed.rss" {
+		t.Errorf("Expected href '/+/feed.rss', got %v", href)
+	}
+}
+
+func TestMetaTag(t *testing.T) {
+	tests := []struct {
+		name     string
+		sitename string
+		want     string
+	}{
+		{
+			name:     "normal sitename",
+			sitename: "My Site",
+			want:     `<link href="/+/feed.rss" rel="alternate" title="My Site" type="application/rss+xml">`,
+		},
+		{
+			name:     "sitename with special chars",
+			sitename: "Site & <Test>",
+			want:     `<link href="/+/feed.rss" rel="alternate" title="Site \u0026 \u003CTest\u003E" type="application/rss+xml">`,
+		},
+		{
+			name:     "sitename with quotes",
+			sitename: `Site "Name"`,
+			want:     `<link href="/+/feed.rss" rel="alternate" title="Site \"Name\"" type="application/rss+xml">`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cleanup := setupTestEnv(t)
+			defer cleanup()
+
+			Config.Sitename = tc.sitename
+
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			pages := Pages(req.Context())
+			if len(pages) == 0 {
+				t.Fatal("Expected at least one page")
+			}
+
+			result := metaTag(pages[0])
+
+			if string(result) != tc.want {
+				t.Errorf("Expected meta tag:\n%s\nGot:\n%s", tc.want, string(result))
+			}
+		})
+	}
+}
+
+func TestRSSLinkInterface(t *testing.T) {
+	link := rssLink{}
+
+	if link.Icon() != "fa-solid fa-rss" {
+		t.Errorf("Expected icon 'fa-solid fa-rss', got '%s'", link.Icon())
+	}
+
+	if link.Name() != "RSS" {
+		t.Errorf("Expected name 'RSS', got '%s'", link.Name())
+	}
+
+	attrs := link.Attrs()
+	if href, ok := attrs["href"]; !ok || href != "/+/feed.rss" {
+		t.Errorf("Expected href '/+/feed.rss', got %v", href)
+	}
+}
