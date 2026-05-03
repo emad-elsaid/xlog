@@ -1431,3 +1431,423 @@ func TestFindClosure(t *testing.T) {
 		})
 	}
 }
+
+func TestUnescapePunctuations(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "escaped asterisk",
+			input:    []byte(`\*`),
+			expected: []byte("*"),
+		},
+		{
+			name:     "escaped period",
+			input:    []byte(`\.`),
+			expected: []byte("."),
+		},
+		{
+			name:     "multiple escaped punctuation",
+			input:    []byte(`\*\.\!\?`),
+			expected: []byte("*.!?"),
+		},
+		{
+			name:     "escaped in text",
+			input:    []byte(`hello\*world`),
+			expected: []byte("hello*world"),
+		},
+		{
+			name:     "backslash before non-punctuation preserved",
+			input:    []byte(`\abc`),
+			expected: []byte(`\abc`),
+		},
+		{
+			name:     "no escaping",
+			input:    []byte("hello world"),
+			expected: []byte("hello world"),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+		{
+			name:     "backslash at end",
+			input:    []byte(`hello\`),
+			expected: []byte(`hello\`),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := UnescapePunctuations(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestResolveNumericReferences(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "decimal numeric reference",
+			input:    []byte("&#65;"),
+			expected: []byte("A"),
+		},
+		{
+			name:     "hex numeric reference lowercase x",
+			input:    []byte("&#x41;"),
+			expected: []byte("A"),
+		},
+		{
+			name:     "hex numeric reference uppercase X",
+			input:    []byte("&#X41;"),
+			expected: []byte("A"),
+		},
+		{
+			name:     "multiple numeric references",
+			input:    []byte("&#72;&#101;&#108;&#108;&#111;"),
+			expected: []byte("Hello"),
+		},
+		{
+			name:     "mixed with text",
+			input:    []byte("Hello &#38; Goodbye"),
+			expected: []byte("Hello & Goodbye"),
+		},
+		{
+			name:     "no references",
+			input:    []byte("plain text"),
+			expected: []byte("plain text"),
+		},
+		{
+			name:     "incomplete reference no semicolon",
+			input:    []byte("&#65"),
+			expected: []byte("&#65"),
+		},
+		{
+			name:     "invalid reference non-numeric",
+			input:    []byte("&#abc;"),
+			expected: []byte("&#abc;"),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+		{
+			name:     "unicode emoji decimal",
+			input:    []byte("&#128512;"),
+			expected: []byte("😀"),
+		},
+		{
+			name:     "unicode emoji hex",
+			input:    []byte("&#x1F600;"),
+			expected: []byte("😀"),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := ResolveNumericReferences(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestResolveEntityNames(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected []byte
+	}{
+		{
+			name:     "ampersand entity",
+			input:    []byte("&amp;"),
+			expected: []byte("&"),
+		},
+		{
+			name:     "less than entity",
+			input:    []byte("&lt;"),
+			expected: []byte("<"),
+		},
+		{
+			name:     "greater than entity",
+			input:    []byte("&gt;"),
+			expected: []byte(">"),
+		},
+		{
+			name:     "quote entity",
+			input:    []byte("&quot;"),
+			expected: []byte("\""),
+		},
+		{
+			name:     "multiple entities",
+			input:    []byte("&lt;div&gt;&amp;&lt;/div&gt;"),
+			expected: []byte("<div>&</div>"),
+		},
+		{
+			name:     "mixed with text",
+			input:    []byte("Tom &amp; Jerry"),
+			expected: []byte("Tom & Jerry"),
+		},
+		{
+			name:     "unknown entity preserved",
+			input:    []byte("&unknown;"),
+			expected: []byte("&unknown;"),
+		},
+		{
+			name:     "no entities",
+			input:    []byte("plain text"),
+			expected: []byte("plain text"),
+		},
+		{
+			name:     "incomplete entity no semicolon",
+			input:    []byte("&amp"),
+			expected: []byte("&amp"),
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: []byte(""),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := ResolveEntityNames(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %q, got %q", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestEscapeHTMLByte(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    byte
+		expected []byte
+	}{
+		{
+			name:     "ampersand",
+			input:    '&',
+			expected: []byte("&amp;"),
+		},
+		{
+			name:     "less than",
+			input:    '<',
+			expected: []byte("&lt;"),
+		},
+		{
+			name:     "greater than",
+			input:    '>',
+			expected: []byte("&gt;"),
+		},
+		{
+			name:     "quote",
+			input:    '"',
+			expected: []byte("&quot;"),
+		},
+		{
+			name:     "normal character",
+			input:    'a',
+			expected: nil,
+		},
+		{
+			name:     "number",
+			input:    '5',
+			expected: nil,
+		},
+		{
+			name:     "space",
+			input:    ' ',
+			expected: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := EscapeHTMLByte(tc.input)
+			if !bytes.Equal(result, tc.expected) {
+				t.Errorf("expected %v, got %v", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrimLeftLength(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		chars    []byte
+		expected int
+	}{
+		{
+			name:     "trim spaces",
+			input:    []byte("   hello"),
+			chars:    []byte(" "),
+			expected: 3,
+		},
+		{
+			name:     "trim multiple chars",
+			input:    []byte("xxxhello"),
+			chars:    []byte("x"),
+			expected: 3,
+		},
+		{
+			name:     "no match",
+			input:    []byte("hello"),
+			chars:    []byte("x"),
+			expected: 0,
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			chars:    []byte(" "),
+			expected: 0,
+		},
+		{
+			name:     "all trimmed",
+			input:    []byte("xxx"),
+			chars:    []byte("x"),
+			expected: 3,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimLeftLength(tc.input, tc.chars)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrimRightLength(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		chars    []byte
+		expected int
+	}{
+		{
+			name:     "trim spaces",
+			input:    []byte("hello   "),
+			chars:    []byte(" "),
+			expected: 3,
+		},
+		{
+			name:     "trim multiple chars",
+			input:    []byte("helloxxx"),
+			chars:    []byte("x"),
+			expected: 3,
+		},
+		{
+			name:     "no match",
+			input:    []byte("hello"),
+			chars:    []byte("x"),
+			expected: 0,
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			chars:    []byte(" "),
+			expected: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimRightLength(tc.input, tc.chars)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrimLeftSpaceLength(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected int
+	}{
+		{
+			name:     "spaces only",
+			input:    []byte("   hello"),
+			expected: 3,
+		},
+		{
+			name:     "tabs and spaces",
+			input:    []byte("\t  hello"),
+			expected: 3,
+		},
+		{
+			name:     "no leading space",
+			input:    []byte("hello"),
+			expected: 0,
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimLeftSpaceLength(tc.input)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
+
+func TestTrimRightSpaceLength(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected int
+	}{
+		{
+			name:     "trailing spaces",
+			input:    []byte("hello   "),
+			expected: 3,
+		},
+		{
+			name:     "tabs and spaces",
+			input:    []byte("hello\t  "),
+			expected: 3,
+		},
+		{
+			name:     "no trailing space",
+			input:    []byte("hello"),
+			expected: 0,
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := TrimRightSpaceLength(tc.input)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
