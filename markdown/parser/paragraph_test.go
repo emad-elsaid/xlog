@@ -195,11 +195,11 @@ func TestParagraphParser_Continue(t *testing.T) {
 
 func TestParagraphParser_Close(t *testing.T) {
 	tests := []struct {
-		name           string
-		lines          []string
-		wantLineCount  int
-		wantFirstLine  string
-		wantLastLine   string
+		name            string
+		lines           []string
+		wantLineCount   int
+		wantFirstLine   string
+		wantLastLine    string
 		shouldBeRemoved bool
 	}{
 		{
@@ -254,7 +254,7 @@ func TestParagraphParser_Close(t *testing.T) {
 			lines:         []string{"  日本語  ", "  中文  "},
 			wantLineCount: 2,
 			wantFirstLine: "日本語  ", // Leading trimmed, trailing kept
-			wantLastLine:  "中文",     // Both trimmed (last line)
+			wantLastLine:  "中文",    // Both trimmed (last line)
 		},
 		{
 			name:          "tabs in content trimmed appropriately",
