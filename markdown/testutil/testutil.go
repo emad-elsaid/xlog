@@ -372,7 +372,7 @@ func applyEscapeSequence(b []byte) []byte {
 				i++
 				continue
 			case 'x':
-				if len(b) >= i+3 && util.IsHexDecimal(b[i+2]) && util.IsHexDecimal(b[i+3]) {
+				if len(b) >= i+4 && util.IsHexDecimal(b[i+2]) && util.IsHexDecimal(b[i+3]) {
 					v, _ := hex.DecodeString(string(b[i+2 : i+4]))
 					result = append(result, v[0])
 					i += 3
