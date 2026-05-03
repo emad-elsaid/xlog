@@ -1128,6 +1128,121 @@ const (
 	lineBreakVisible
 )
 
+// detectLineBreak analyzes a line's ending to determine its line break type and adjusted length.
+func detectLineBreak(line []byte) (adjustedLength int, flags uint8) {
+	lineLength := len(line)
+	hasNewLine := line[lineLength-1] == '\n'
+
+	switch {
+	case ((lineLength >= 3 && line[lineLength-2] == '\\' &&
+		line[lineLength-3] != '\\') || (lineLength == 2 && line[lineLength-2] == '\\')) && hasNewLine:
+		return lineLength - 2, lineBreakHard | lineBreakVisible
+	case ((lineLength >= 4 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r' &&
+		line[lineLength-4] != '\\') || (lineLength == 3 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r')) &&
+		hasNewLine:
+		return lineLength - 3, lineBreakHard | lineBreakVisible
+	case lineLength >= 3 && line[lineLength-3] == ' ' && line[lineLength-2] == ' ' && hasNewLine:
+		return lineLength - 3, lineBreakHard
+	case lineLength >= 4 && line[lineLength-4] == ' ' && line[lineLength-3] == ' ' &&
+		line[lineLength-2] == '\r' && hasNewLine:
+		return lineLength - 4, lineBreakHard
+	case hasNewLine:
+		return lineLength, lineBreakSoft
+	}
+
+	return lineLength, 0
+}
+
+// tryInlineParsers attempts to parse inline content at the current position.
+// Returns the parsed node and true if successful, nil and false otherwise.
+func (p *parser) tryInlineParsers(parserChar byte, parent ast.Node, block text.BlockReader,
+	pc Context, i int, n *int, startPosition *text.Segment) (ast.Node, bool) {
+	ips := p.inlineParsers[parserChar]
+	if ips == nil {
+		return nil, false
+	}
+
+	block.Advance(*n)
+	*n = 0
+	savedLine, savedPosition := block.Position()
+	if i != 0 {
+		_, currentPosition := block.Position()
+		ast.MergeOrAppendTextSegment(parent, startPosition.Between(currentPosition))
+		_, *startPosition = block.Position()
+	}
+
+	var inlineNode ast.Node
+	for _, ip := range ips {
+		inlineNode = ip.Parse(parent, block, pc)
+		if inlineNode != nil {
+			break
+		}
+		block.SetPosition(savedLine, savedPosition)
+	}
+
+	return inlineNode, inlineNode != nil
+}
+
+// processLineContent processes a single line's content, handling escape sequences and inline parsing.
+func (p *parser) processLineContent(line []byte, lineLength int, parent ast.Node,
+	block text.BlockReader, pc Context, escaped *bool, startPosition *text.Segment) bool {
+	n := 0
+	for i := 0; i < lineLength; i++ {
+		c := line[i]
+		if c == '\n' {
+			break
+		}
+
+		isSpace := util.IsSpace(c) && c != '\r' && c != '\n'
+		isPunct := util.IsPunct(c)
+
+		if (isPunct && !*escaped) || isSpace && !(*escaped && p.escapedSpace) || i == 0 {
+			parserChar := c
+			if isSpace || (i == 0 && !isPunct) {
+				parserChar = ' '
+			}
+
+			if inlineNode, found := p.tryInlineParsers(parserChar, parent, block, pc, i, &n, startPosition); found {
+				parent.AppendChild(parent, inlineNode)
+				return true // signal retry
+			}
+		}
+
+		if *escaped {
+			*escaped = false
+			n++
+			continue
+		}
+
+		if c == '\\' {
+			*escaped = true
+			n++
+			continue
+		}
+
+		*escaped = false
+		n++
+	}
+
+	if n != 0 {
+		block.Advance(n)
+	}
+	return false
+}
+
+// appendTextSegment creates and appends a text segment with appropriate line break flags.
+func appendTextSegment(parent ast.Node, diff text.Segment, lineBreakFlags uint8, source []byte) {
+	var text *ast.Text
+	if lineBreakFlags&(lineBreakHard|lineBreakVisible) == lineBreakHard|lineBreakVisible {
+		text = ast.NewTextSegment(diff)
+	} else {
+		text = ast.NewTextSegment(diff.TrimRightSpace(source))
+	}
+	text.SetSoftLineBreak(lineBreakFlags&lineBreakSoft != 0)
+	text.SetHardLineBreak(lineBreakFlags&lineBreakHard != 0)
+	parent.AppendChild(parent, text)
+}
+
 func (p *parser) parseBlock(block text.BlockReader, parent ast.Node, pc Context) {
 	if parent.IsRaw() {
 		return
@@ -1135,110 +1250,28 @@ func (p *parser) parseBlock(block text.BlockReader, parent ast.Node, pc Context)
 	escaped := false
 	source := block.Source()
 	block.Reset(parent.Lines())
+
 	for {
 	retry:
 		line, _ := block.PeekLine()
 		if line == nil {
 			break
 		}
-		lineLength := len(line)
-		var lineBreakFlags uint8
-		hasNewLine := line[lineLength-1] == '\n'
-		switch {
-		case ((lineLength >= 3 && line[lineLength-2] == '\\' &&
-			line[lineLength-3] != '\\') || (lineLength == 2 && line[lineLength-2] == '\\')) && hasNewLine: // ends with \\n
-			lineLength -= 2
-			lineBreakFlags |= lineBreakHard | lineBreakVisible
-		case ((lineLength >= 4 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r' &&
-			line[lineLength-4] != '\\') || (lineLength == 3 && line[lineLength-3] == '\\' && line[lineLength-2] == '\r')) &&
-			hasNewLine: // ends with \\r\n
-			lineLength -= 3
-			lineBreakFlags |= lineBreakHard | lineBreakVisible
-		case lineLength >= 3 && line[lineLength-3] == ' ' && line[lineLength-2] == ' ' &&
-			hasNewLine: // ends with [space][space]\n
-			lineLength -= 3
-			lineBreakFlags |= lineBreakHard
-		case lineLength >= 4 && line[lineLength-4] == ' ' && line[lineLength-3] == ' ' &&
-			line[lineLength-2] == '\r' && hasNewLine: // ends with [space][space]\r\n
-			lineLength -= 4
-			lineBreakFlags |= lineBreakHard
-		case hasNewLine:
-			// If the line ends with a newline character, but it is not a hardlineBreak, then it is a softLinebreak
-			// If the line ends with a hardlineBreak, then it cannot end with a softLinebreak
-			// See https://spec.commonmark.org/0.30/#soft-line-breaks
-			lineBreakFlags |= lineBreakSoft
-		}
 
+		lineLength, lineBreakFlags := detectLineBreak(line)
 		l, startPosition := block.Position()
-		n := 0
-		for i := 0; i < lineLength; i++ {
-			c := line[i]
-			if c == '\n' {
-				break
-			}
-			isSpace := util.IsSpace(c) && c != '\r' && c != '\n'
-			isPunct := util.IsPunct(c)
-			if (isPunct && !escaped) || isSpace && !(escaped && p.escapedSpace) || i == 0 {
-				parserChar := c
-				if isSpace || (i == 0 && !isPunct) {
-					parserChar = ' '
-				}
-				ips := p.inlineParsers[parserChar]
-				if ips != nil {
-					block.Advance(n)
-					n = 0
-					savedLine, savedPosition := block.Position()
-					if i != 0 {
-						_, currentPosition := block.Position()
-						ast.MergeOrAppendTextSegment(parent, startPosition.Between(currentPosition))
-						_, startPosition = block.Position()
-					}
-					var inlineNode ast.Node
-					for _, ip := range ips {
-						inlineNode = ip.Parse(parent, block, pc)
-						if inlineNode != nil {
-							break
-						}
-						block.SetPosition(savedLine, savedPosition)
-					}
-					if inlineNode != nil {
-						parent.AppendChild(parent, inlineNode)
-						goto retry
-					}
-				}
-			}
-			if escaped {
-				escaped = false
-				n++
-				continue
-			}
 
-			if c == '\\' {
-				escaped = true
-				n++
-				continue
-			}
+		if p.processLineContent(line, lineLength, parent, block, pc, &escaped, &startPosition) {
+			goto retry
+		}
 
-			escaped = false
-			n++
-		}
-		if n != 0 {
-			block.Advance(n)
-		}
 		currentL, currentPosition := block.Position()
 		if l != currentL {
 			continue
 		}
+
 		diff := startPosition.Between(currentPosition)
-		var text *ast.Text
-		if lineBreakFlags&(lineBreakHard|lineBreakVisible) == lineBreakHard|lineBreakVisible {
-			text = ast.NewTextSegment(diff)
-		} else {
-			text = ast.NewTextSegment(diff.TrimRightSpace(source))
-		}
-		text.SetSoftLineBreak(lineBreakFlags&lineBreakSoft != 0)
-		text.SetHardLineBreak(lineBreakFlags&lineBreakHard != 0)
-		parent.AppendChild(parent, text)
+		appendTextSegment(parent, diff, lineBreakFlags, source)
 		block.AdvanceLine()
 	}
 
@@ -1246,5 +1279,4 @@ func (p *parser) parseBlock(block text.BlockReader, parent ast.Node, pc Context)
 	for _, ip := range p.closeBlockers {
 		ip.CloseBlock(parent, block, pc)
 	}
-
 }
