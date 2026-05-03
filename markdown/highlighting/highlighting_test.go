@@ -28,16 +28,16 @@ func TestHighlighting(t *testing.T) {
 					_, ok := c.Language()
 					if entering {
 						if !ok {
-							w.WriteString("<pre><code>")
+							_, _ = w.WriteString("<pre><code>")
 							return
 						}
-						w.WriteString(`<div class="highlight">`)
+						_, _ = w.WriteString(`<div class="highlight">`)
 					} else {
 						if !ok {
-							w.WriteString("</pre></code>")
+							_, _ = w.WriteString("</pre></code>")
 							return
 						}
-						w.WriteString(`</div>`)
+						_, _ = w.WriteString(`</div>`)
 					}
 				}),
 				WithCodeBlockOptions(func(c CodeBlockContext) []chromahtml.Option {
@@ -187,9 +187,9 @@ func TestHighlighting3(t *testing.T) {
 			NewHighlighting(
 				WithWrapperRenderer(func(w util.BufWriter, c CodeBlockContext, entering bool) {
 					if entering {
-						w.WriteString(`<pre tabindex="0" style="background-color:#fff;display:grid;"><code>`)
+						_, _ = w.WriteString(`<pre tabindex="0" style="background-color:#fff;display:grid;"><code>`)
 					} else {
-						w.WriteString(`</code></pre>`)
+						_, _ = w.WriteString(`</code></pre>`)
 					}
 				}),
 				WithCodeBlockOptions(func(c CodeBlockContext) []chromahtml.Option {
@@ -274,16 +274,16 @@ func TestHighlightingCustom(t *testing.T) {
 					_, ok := c.Language()
 					if entering {
 						if !ok {
-							w.WriteString("<pre><code>")
+							_, _ = w.WriteString("<pre><code>")
 							return
 						}
-						w.WriteString(`<div class="highlight">`)
+						_, _ = w.WriteString(`<div class="highlight">`)
 					} else {
 						if !ok {
-							w.WriteString("</pre></code>")
+							_, _ = w.WriteString("</pre></code>")
 							return
 						}
-						w.WriteString(`</div>`)
+						_, _ = w.WriteString(`</div>`)
 					}
 				}),
 				WithCodeBlockOptions(func(c CodeBlockContext) []chromahtml.Option {
