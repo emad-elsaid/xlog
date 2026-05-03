@@ -114,12 +114,12 @@ This is a paragraph.
 			transformer := addDirAuto{}
 			transformer.Transform(docNode, reader, parser.NewContext())
 
-			// Collect nodes that should have dir="auto"
-			var nodesWithDir []ast.Node
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
-				if !entering {
-					return ast.WalkContinue, nil
-				}
+		// Collect nodes that should have dir="auto"
+		var nodesWithDir []ast.Node
+		_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			if !entering {
+				return ast.WalkContinue, nil
+			}
 
 				kind := node.Kind()
 				if kind == ast.KindParagraph ||
@@ -180,7 +180,7 @@ func TestAddDirAutoIgnoresOtherNodes(t *testing.T) {
 
 	// Count nodes that should NOT have dir="auto"
 	var codeNodes, emphasisNodes, thematicBreaks int
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
@@ -247,7 +247,7 @@ func TestAddDirAutoWithEmptyDocument(t *testing.T) {
 
 	// Count nodes with dir attribute (should be 0)
 	var count int
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			if _, ok := node.AttributeString("dir"); ok {
 				count++
@@ -279,7 +279,7 @@ func TestAddDirAutoWithRTLContent(t *testing.T) {
 
 	// Verify heading and paragraph have dir="auto"
 	var headingCount, paragraphCount int
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
