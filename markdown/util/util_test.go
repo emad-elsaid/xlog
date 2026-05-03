@@ -1265,3 +1265,169 @@ func TestFirstNonSpacePosition(t *testing.T) {
 		})
 	}
 }
+
+func TestFindClosure(t *testing.T) {
+	tests := []struct {
+		name         string
+		input        []byte
+		opener       byte
+		closure      byte
+		codeSpan     bool
+		allowNesting bool
+		expected     int
+	}{
+		{
+			name:         "simple balanced brackets",
+			input:        []byte("text]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     4,
+		},
+		{
+			name:         "simple balanced parentheses",
+			input:        []byte("hello)"),
+			opener:       '(',
+			closure:      ')',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     5,
+		},
+		{
+			name:         "no closure found",
+			input:        []byte("text without closure"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     -1,
+		},
+		{
+			name:         "empty input",
+			input:        []byte(""),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     -1,
+		},
+		{
+			name:         "nested brackets with nesting allowed",
+			input:        []byte("outer [inner] outer]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: true,
+			expected:     19,
+		},
+		{
+			name:         "nested brackets without nesting allowed",
+			input:        []byte("outer [inner] outer]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     -1,
+		},
+		{
+			name:         "escaped closure character",
+			input:        []byte(`text \] more]`),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     12,
+		},
+		{
+			name:         "escaped opener character",
+			input:        []byte(`text \[ more]`),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     12,
+		},
+		{
+			name:         "code span with backticks",
+			input:        []byte("text `code]` more]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     true,
+			allowNesting: false,
+			expected:     17,
+		},
+		{
+			name:         "closure inside code span ignored",
+			input:        []byte("`]`]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     true,
+			allowNesting: false,
+			expected:     3,
+		},
+		{
+			name:         "multiple backtick code span",
+			input:        []byte("``code]``]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     true,
+			allowNesting: false,
+			expected:     9,
+		},
+		{
+			name:         "mismatched backtick counts leaves code span open",
+			input:        []byte("``code`]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     true,
+			allowNesting: false,
+			expected:     -1,
+		},
+		{
+			name:         "closure at start",
+			input:        []byte("]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     0,
+		},
+		{
+			name:         "multiple nested levels",
+			input:        []byte("a[b[c]d]e]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: true,
+			expected:     9,
+		},
+		{
+			name:         "escaped punctuation before closure",
+			input:        []byte(`\*\.]`),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     4,
+		},
+		{
+			name:         "code span disabled finds first closure",
+			input:        []byte("`backticks]ignored]"),
+			opener:       '[',
+			closure:      ']',
+			codeSpan:     false,
+			allowNesting: false,
+			expected:     10,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := FindClosure(tc.input, tc.opener, tc.closure, tc.codeSpan, tc.allowNesting)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
