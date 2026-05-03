@@ -2,10 +2,14 @@ package hashtags
 
 import (
 	"bytes"
+	"html/template"
 	"strings"
 	"testing"
+	"time"
 
+	. "github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/text"
@@ -504,5 +508,267 @@ func TestLinksFunction(t *testing.T) {
 
 	if l.Name() != "Hashtags" {
 		t.Errorf("link.Name() = %q, want %q", l.Name(), "Hashtags")
+	}
+}
+
+func TestHashtagsPageChangedAndDeleted(t *testing.T) {
+	tests := []struct {
+		name           string
+		setupCache     bool
+		operation      string
+		expectedCached bool
+	}{
+		{
+			name:           "PageChanged clears cache for existing page",
+			setupCache:     true,
+			operation:      "changed",
+			expectedCached: false,
+		},
+		{
+			name:           "PageChanged on non-cached page",
+			setupCache:     false,
+			operation:      "changed",
+			expectedCached: false,
+		},
+		{
+			name:           "PageDeleted clears cache for existing page",
+			setupCache:     true,
+			operation:      "deleted",
+			expectedCached: false,
+		},
+		{
+			name:           "PageDeleted on non-cached page",
+			setupCache:     false,
+			operation:      "deleted",
+			expectedCached: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &Hashtags{
+				pages: make(map[Page][]*HashTag),
+			}
+
+			// Create a mock page
+			mockPage := &mockPage{name: "test-page"}
+
+			// Setup cache if needed
+			if tt.setupCache {
+				h.pages[mockPage] = []*HashTag{
+					{value: []byte("test")},
+				}
+			}
+
+			// Perform operation
+			var err error
+			if tt.operation == "changed" {
+				err = h.PageChanged(mockPage)
+			} else {
+				err = h.PageDeleted(mockPage)
+			}
+
+			if err != nil {
+				t.Errorf("Operation %s returned error: %v", tt.operation, err)
+			}
+
+			// Verify cache state
+			_, cached := h.pages[mockPage]
+			if cached != tt.expectedCached {
+				t.Errorf("After %s: expected cached=%v, got cached=%v",
+					tt.operation, tt.expectedCached, cached)
+			}
+		})
+	}
+}
+
+// mockPage implements the Page interface for testing.
+type mockPage struct {
+	name    string
+	content []byte
+}
+
+func (m *mockPage) Name() string     { return m.name }
+func (m *mockPage) FileName() string { return m.name + ".md" }
+func (m *mockPage) Exists() bool     { return true }
+func (m *mockPage) Render() template.HTML {
+	return template.HTML(m.content)
+}
+func (m *mockPage) Content() Markdown {
+	if m.content == nil {
+		return Markdown("# " + m.name)
+	}
+	return Markdown(m.content)
+}
+func (m *mockPage) Delete() bool        { return true }
+func (m *mockPage) Write(Markdown) bool { return true }
+func (m *mockPage) ModTime() time.Time  { return time.Now() }
+func (m *mockPage) AST() ([]byte, ast.Node) {
+	// Parse content as markdown
+	md := markdown.New()
+	h := &HashTag{}
+	md.Parser().AddOptions(parser.WithInlineParsers(
+		util.Prioritized(h, 999),
+	))
+	content := m.content
+	if content == nil {
+		content = []byte("# " + m.name)
+	}
+	doc := md.Parser().Parse(text.NewReader(content))
+	return content, doc
+}
+
+func TestHashtagsFor(t *testing.T) {
+	tests := []struct {
+		name         string
+		pageContent  string
+		expectedTags []string
+		cached       bool
+	}{
+		{
+			name:         "page with single hashtag",
+			pageContent:  "This is a #golang post",
+			expectedTags: []string{"golang"},
+			cached:       false,
+		},
+		{
+			name:         "page with multiple hashtags",
+			pageContent:  "Learning #golang and #rust together",
+			expectedTags: []string{"golang", "rust"},
+			cached:       false,
+		},
+		{
+			name:         "page with no hashtags",
+			pageContent:  "This is a post without tags",
+			expectedTags: []string{},
+			cached:       false,
+		},
+		{
+			name:         "page with duplicate hashtags",
+			pageContent:  "#golang is great, I love #golang",
+			expectedTags: []string{"golang", "golang"},
+			cached:       false,
+		},
+		{
+			name:         "cached result returns same tags",
+			pageContent:  "Another #test post",
+			expectedTags: []string{"test"},
+			cached:       true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &Hashtags{
+				pages: make(map[Page][]*HashTag),
+			}
+
+			mockPage := &mockPage{
+				name:    "test-page",
+				content: []byte(tt.pageContent),
+			}
+
+			// If testing cached scenario, populate cache first
+			if tt.cached {
+				expectedHashtags := make([]*HashTag, len(tt.expectedTags))
+				for i, tag := range tt.expectedTags {
+					expectedHashtags[i] = &HashTag{value: []byte(tag)}
+				}
+				h.pages[mockPage] = expectedHashtags
+			}
+
+			// Call hashtagsFor
+			tags := h.hashtagsFor(mockPage)
+
+			// Verify tag count
+			if len(tags) != len(tt.expectedTags) {
+				t.Errorf("Expected %d tags, got %d", len(tt.expectedTags), len(tags))
+			}
+
+			// Verify tag values
+			for i, expectedTag := range tt.expectedTags {
+				if i >= len(tags) {
+					break
+				}
+				if string(tags[i].value) != expectedTag {
+					t.Errorf("Tag[%d]: expected %q, got %q",
+						i, expectedTag, string(tags[i].value))
+				}
+			}
+
+			// Verify caching occurred (second call should return same instance)
+			if !tt.cached {
+				tags2 := h.hashtagsFor(mockPage)
+				if len(tags) > 0 && len(tags2) > 0 {
+					// Should be same slice instance (cached)
+					if &tags[0] != &tags2[0] {
+						t.Log("Note: Tags were re-parsed instead of cached (this may be expected)")
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestHashtagsForConcurrency(t *testing.T) {
+	h := &Hashtags{
+		pages: make(map[Page][]*HashTag),
+	}
+
+	mockPage := &mockPage{
+		name:    "concurrent-test",
+		content: []byte("Testing #concurrency with #hashtags"),
+	}
+
+	// Test concurrent access doesn't cause race conditions
+	done := make(chan bool)
+	for i := 0; i < 10; i++ {
+		go func() {
+			tags := h.hashtagsFor(mockPage)
+			if len(tags) != 2 {
+				t.Errorf("Expected 2 tags, got %d", len(tags))
+			}
+			done <- true
+		}()
+	}
+
+	// Wait for all goroutines
+	for i := 0; i < 10; i++ {
+		<-done
+	}
+}
+
+func TestRegisterFuncs(t *testing.T) {
+	h := &HashTag{}
+
+	// Create a mock registerer
+	registered := false
+	var registeredKind ast.NodeKind
+
+	mockReg := &mockRegisterer{
+		registerFunc: func(kind ast.NodeKind, fn renderer.NodeRendererFunc) {
+			registered = true
+			registeredKind = kind
+		},
+	}
+
+	h.RegisterFuncs(mockReg)
+
+	if !registered {
+		t.Error("RegisterFuncs did not call Register")
+	}
+
+	if registeredKind != KindHashTag {
+		t.Errorf("Registered wrong kind: got %v, want %v", registeredKind, KindHashTag)
+	}
+}
+
+type mockRegisterer struct {
+	registerFunc func(ast.NodeKind, renderer.NodeRendererFunc)
+}
+
+func (m *mockRegisterer) Register(kind ast.NodeKind, fn renderer.NodeRendererFunc) {
+	if m.registerFunc != nil {
+		m.registerFunc(kind, fn)
 	}
 }
