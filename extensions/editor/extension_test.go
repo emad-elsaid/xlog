@@ -10,6 +10,13 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
+const (
+	testPageName   = "test-page.md"
+	noOpCommand    = "true"
+	editButtonIcon = "fa-solid fa-pen"
+	editButtonName = "Edit"
+)
+
 func TestEditorExtensionName(t *testing.T) {
 	ext := Editor{}
 	if ext.Name() != "editor" {
@@ -44,7 +51,7 @@ func TestOpenEditorWithValidPage(t *testing.T) {
 	defer func() { editor = originalEditor }()
 
 	// Set editor to a no-op command
-	editor = "true"
+	editor = noOpCommand
 
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
@@ -55,7 +62,7 @@ func TestOpenEditorWithValidPage(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -83,7 +90,7 @@ func TestOpenEditorWithEmptyEditor(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -100,7 +107,7 @@ func TestEditorHandler(t *testing.T) {
 	defer func() { editor = originalEditor }()
 
 	// Set editor to a no-op command
-	editor = "true"
+	editor = noOpCommand
 
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
@@ -111,7 +118,7 @@ func TestEditorHandler(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -155,7 +162,7 @@ func TestLinksWithValidPage(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -170,11 +177,11 @@ func TestLinksWithValidPage(t *testing.T) {
 
 	if len(commands) > 0 {
 		btn := commands[0].(editButton)
-		if btn.Icon() != "fa-solid fa-pen" {
-			t.Errorf("Expected icon 'fa-solid fa-pen', got '%s'", btn.Icon())
+		if btn.Icon() != editButtonIcon {
+			t.Errorf("Expected icon '%s', got '%s'", editButtonIcon, btn.Icon())
 		}
-		if btn.Name() != "Edit" {
-			t.Errorf("Expected name 'Edit', got '%s'", btn.Name())
+		if btn.Name() != editButtonName {
+			t.Errorf("Expected name '%s', got '%s'", editButtonName, btn.Name())
 		}
 
 		attrs := btn.Attrs()
@@ -190,7 +197,7 @@ func TestNewPageCallback(t *testing.T) {
 	defer func() { editor = originalEditor }()
 
 	// Set editor to a no-op command
-	editor = "true"
+	editor = noOpCommand
 
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
@@ -201,7 +208,7 @@ func TestNewPageCallback(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -225,7 +232,7 @@ func TestEditButtonStructMethods(t *testing.T) {
 	}
 
 	// Create a test page
-	pageName := "test-page.md"
+	pageName := testPageName
 	pagePath := filepath.Join(tmpDir, pageName)
 	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
@@ -234,12 +241,12 @@ func TestEditButtonStructMethods(t *testing.T) {
 	page := xlog.NewPage(pageName)
 	btn := editButton{page: page}
 
-	if btn.Icon() != "fa-solid fa-pen" {
-		t.Errorf("Expected icon 'fa-solid fa-pen', got '%s'", btn.Icon())
+	if btn.Icon() != editButtonIcon {
+		t.Errorf("Expected icon '%s', got '%s'", editButtonIcon, btn.Icon())
 	}
 
-	if btn.Name() != "Edit" {
-		t.Errorf("Expected name 'Edit', got '%s'", btn.Name())
+	if btn.Name() != editButtonName {
+		t.Errorf("Expected name '%s', got '%s'", editButtonName, btn.Name())
 	}
 
 	attrs := btn.Attrs()
