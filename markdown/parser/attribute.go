@@ -85,33 +85,83 @@ func ParseAttributes(reader text.Reader) (Attributes, bool) {
 func parseAttribute(reader text.Reader) (Attribute, bool) {
 	reader.SkipSpaces()
 	c := reader.Peek()
+
+	// Try parsing shorthand ID/class notation first
 	if c == '#' || c == '.' {
-		reader.Advance(1)
-		line, _ := reader.PeekLine()
-		i := 0
-		// HTML5 allows any kind of characters as id, but XHTML restricts characters for id.
-		// CommonMark is basically defined for XHTML(even though it is legacy).
-		// So we restrict id characters.
-		for ; i < len(line) && !util.IsSpace(line[i]) &&
-			(!util.IsPunct(line[i]) || line[i] == '_' ||
-				line[i] == '-' || line[i] == ':' || line[i] == '.'); i++ {
-		}
-		name := attrNameClass
-		if c == '#' {
-			name = attrNameID
-		}
-		reader.Advance(i)
-		return Attribute{Name: name, Value: line[0:i]}, true
+		return parseShorthandAttribute(reader, c)
 	}
+
+	// Parse regular name=value attribute
+	return parseNameValueAttribute(reader)
+}
+
+// parseShorthandAttribute parses shorthand ID (#) or class (.) attributes.
+func parseShorthandAttribute(reader text.Reader, shorthandChar byte) (Attribute, bool) {
+	reader.Advance(1)
+	line, _ := reader.PeekLine()
+	i := 0
+	// HTML5 allows any kind of characters as id, but XHTML restricts characters for id.
+	// CommonMark is basically defined for XHTML(even though it is legacy).
+	// So we restrict id characters.
+	for ; i < len(line) && !util.IsSpace(line[i]) &&
+		(!util.IsPunct(line[i]) || line[i] == '_' ||
+			line[i] == '-' || line[i] == ':' || line[i] == '.'); i++ {
+	}
+	name := attrNameClass
+	if shorthandChar == '#' {
+		name = attrNameID
+	}
+	reader.Advance(i)
+	return Attribute{Name: name, Value: line[0:i]}, true
+}
+
+// parseNameValueAttribute parses regular name=value attribute format.
+func parseNameValueAttribute(reader text.Reader) (Attribute, bool) {
+	// Parse attribute name
+	name, ok := parseAttributeName(reader)
+	if !ok {
+		return Attribute{}, false
+	}
+
+	// Expect '=' separator
+	reader.SkipSpaces()
+	if reader.Peek() != '=' {
+		return Attribute{}, false
+	}
+	reader.Advance(1)
+	reader.SkipSpaces()
+
+	// Parse attribute value
+	value, ok := parseAttributeValue(reader)
+	if !ok {
+		return Attribute{}, false
+	}
+
+	// Validate class attribute has byte slice value
+	if bytes.Equal(name, attrNameClass) {
+		if _, ok = value.([]byte); !ok {
+			return Attribute{}, false
+		}
+	}
+
+	return Attribute{Name: name, Value: value}, true
+}
+
+// parseAttributeName parses an attribute name from the reader.
+func parseAttributeName(reader text.Reader) ([]byte, bool) {
 	line, _ := reader.PeekLine()
 	if len(line) == 0 {
-		return Attribute{}, false
+		return nil, false
 	}
-	c = line[0]
+
+	// First character must be letter, underscore, or colon
+	c := line[0]
 	if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
 		c == '_' || c == ':') {
-		return Attribute{}, false
+		return nil, false
 	}
+
+	// Scan remaining valid attribute name characters
 	i := 0
 	for ; i < len(line); i++ {
 		c = line[i]
@@ -121,25 +171,10 @@ func parseAttribute(reader text.Reader) (Attribute, bool) {
 			break
 		}
 	}
+
 	name := line[:i]
 	reader.Advance(i)
-	reader.SkipSpaces()
-	c = reader.Peek()
-	if c != '=' {
-		return Attribute{}, false
-	}
-	reader.Advance(1)
-	reader.SkipSpaces()
-	value, ok := parseAttributeValue(reader)
-	if !ok {
-		return Attribute{}, false
-	}
-	if bytes.Equal(name, attrNameClass) {
-		if _, ok = value.([]byte); !ok {
-			return Attribute{}, false
-		}
-	}
-	return Attribute{Name: name, Value: value}, true
+	return name, true
 }
 
 func parseAttributeValue(reader text.Reader) (any, bool) {
