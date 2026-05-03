@@ -2,8 +2,13 @@ package hashtags
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"html/template"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -1068,6 +1073,145 @@ func TestHashtagsFor(t *testing.T) {
 						t.Log("Note: Tags were re-parsed instead of cached (this may be expected)")
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestTagsHandler(t *testing.T) {
+	tests := []struct {
+		name        string
+		setupPages  map[string]string
+		expectEmpty bool
+	}{
+		{
+			name: "returns all unique hashtags across pages",
+			setupPages: map[string]string{
+				"page1.md": "Content with #golang and #testing",
+				"page2.md": "More #golang content",
+				"page3.md": "Different #rust content",
+			},
+			expectEmpty: false,
+		},
+		{
+			name: "handles pages without hashtags",
+			setupPages: map[string]string{
+				"page1.md": "No hashtags here",
+			},
+			expectEmpty: true,
+		},
+		{
+			name: "deduplicates hashtags within same page",
+			setupPages: map[string]string{
+				"page1.md": "#golang #golang #golang",
+			},
+			expectEmpty: false,
+		},
+		{
+			name:        "handles empty directory",
+			setupPages:  map[string]string{},
+			expectEmpty: true,
+		},
+		{
+			name: "case insensitive hashtag grouping",
+			setupPages: map[string]string{
+				"page1.md": "#GoLang content",
+				"page2.md": "#golang more",
+			},
+			expectEmpty: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := Config.Source
+			Config.Source = tmpDir
+			t.Cleanup(func() { Config.Source = origSource })
+
+			for filename, content := range tc.setupPages {
+				path := filepath.Join(tmpDir, filename)
+				if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			r := httptest.NewRequest(http.MethodGet, "/+/tags", nil)
+			ctx := context.Background()
+			r = r.WithContext(ctx)
+
+			output := h.tagsHandler(r)
+
+			if output == nil {
+				t.Fatal("tagsHandler returned nil output")
+			}
+		})
+	}
+}
+
+func TestTagHandler(t *testing.T) {
+	tests := []struct {
+		name       string
+		tagValue   string
+		setupPages map[string]string
+	}{
+		{
+			name:     "retrieves pages for specific tag",
+			tagValue: "golang",
+			setupPages: map[string]string{
+				"page1.md": "Content with #golang",
+				"page2.md": "Content with #rust",
+			},
+		},
+		{
+			name:     "handles tag with no matching pages",
+			tagValue: "nonexistent",
+			setupPages: map[string]string{
+				"page1.md": "Content with #golang",
+			},
+		},
+		{
+			name:     "handles special characters in tag",
+			tagValue: "hello-world",
+			setupPages: map[string]string{
+				"page1.md": "Content with #hello-world",
+			},
+		},
+		{
+			name:     "case insensitive tag matching",
+			tagValue: "GoLang",
+			setupPages: map[string]string{
+				"page1.md": "Content with #golang",
+				"page2.md": "Content with #GOLANG",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := Config.Source
+			Config.Source = tmpDir
+			t.Cleanup(func() { Config.Source = origSource })
+
+			for filename, content := range tc.setupPages {
+				path := filepath.Join(tmpDir, filename)
+				if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			r := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tagValue, nil)
+			r.SetPathValue("tag", tc.tagValue)
+			ctx := context.Background()
+			r = r.WithContext(ctx)
+
+			output := h.tagHandler(r)
+
+			if output == nil {
+				t.Fatal("tagHandler returned nil output")
 			}
 		})
 	}
