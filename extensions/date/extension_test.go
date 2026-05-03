@@ -155,7 +155,7 @@ func TestDateRenderer_Render(t *testing.T) {
 		},
 	}
 
-		for _, tc := range tests {
+	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
