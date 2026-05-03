@@ -429,3 +429,42 @@ func TestPopulatePagesCache_ContextCancellation(t *testing.T) {
 	// Cache initialization happens, but source enumeration stops
 	assert.NotNil(t, pages, "Cache slice should be initialized")
 }
+
+func TestEachPage_PopulatesCache(t *testing.T) {
+	// Save original and restore
+	originalPages := pages
+	originalSources := sources
+	defer func() {
+		pages = originalPages
+		sources = originalSources
+	}()
+
+	// Clear cache to trigger population path
+	pages = nil
+
+	// Setup mock source
+	sources = []PageSource{
+		&mockPageSource{
+			eachFunc: func(ctx context.Context, fn func(Page)) {
+				fn(&mockPage{name: "auto1"})
+				fn(&mockPage{name: "auto2"})
+				fn(&mockPage{name: "auto3"})
+			},
+		},
+	}
+
+	ctx := context.Background()
+	var names []string
+
+	EachPage(ctx, func(p Page) {
+		names = append(names, p.Name())
+	})
+
+	// Verify cache was populated and iteration occurred
+	assert.Equal(t, 3, len(names), "Should iterate over all populated pages")
+	assert.Equal(t, []string{"auto1", "auto2", "auto3"}, names)
+
+	// Verify cache persists for subsequent calls
+	assert.NotNil(t, pages, "Cache should be populated after EachPage")
+	assert.Equal(t, 3, len(pages), "Cache should contain all pages from source")
+}
