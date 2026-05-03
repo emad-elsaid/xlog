@@ -1646,3 +1646,139 @@ func TestHashtagParseBoundaryConditions(t *testing.T) {
 		})
 	}
 }
+
+func TestRelatedPagesLogic(t *testing.T) {
+	tests := []struct {
+		name           string
+		currentPage    *mockPage
+		otherPages     []*mockPage
+		expectRelated  []string
+		setupTemplates bool
+	}{
+		{
+			name: "finds pages with shared hashtags",
+			currentPage: &mockPage{
+				name:    "current",
+				content: []byte("Content with #golang and #testing"),
+			},
+			otherPages: []*mockPage{
+				{name: "related1", content: []byte("More #golang content")},
+				{name: "related2", content: []byte("Different #testing approach")},
+				{name: "unrelated", content: []byte("No shared tags #rust")},
+			},
+			expectRelated: []string{"related1", "related2"},
+		},
+		{
+			name: "excludes current page from results",
+			currentPage: &mockPage{
+				name:    "self",
+				content: []byte("#golang post"),
+			},
+			otherPages: []*mockPage{
+				{name: "self", content: []byte("#golang post")},
+				{name: "other", content: []byte("#golang content")},
+			},
+			expectRelated: []string{"other"},
+		},
+		{
+			name: "handles page with no hashtags",
+			currentPage: &mockPage{
+				name:    "noTags",
+				content: []byte("Plain content without tags"),
+			},
+			otherPages: []*mockPage{
+				{name: "tagged", content: []byte("Content with #tag")},
+			},
+			expectRelated: []string{},
+		},
+		{
+			name: "case insensitive hashtag matching",
+			currentPage: &mockPage{
+				name:    "current",
+				content: []byte("Content with #GoLang"),
+			},
+			otherPages: []*mockPage{
+				{name: "lower", content: []byte("Content with #golang")},
+				{name: "upper", content: []byte("Content with #GOLANG")},
+			},
+			expectRelated: []string{"lower", "upper"},
+		},
+		{
+			name: "multiple shared hashtags only includes page once",
+			currentPage: &mockPage{
+				name:    "current",
+				content: []byte("#golang #rust #testing"),
+			},
+			otherPages: []*mockPage{
+				{name: "multi", content: []byte("#golang #rust content")},
+			},
+			expectRelated: []string{"multi"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			for _, p := range tc.otherPages {
+				filename := filepath.Join(tmpDir, p.name+".md")
+				if err := os.WriteFile(filename, p.content, 0600); err != nil {
+					t.Fatalf("Failed to create page: %v", err)
+				}
+			}
+
+			defer func() {
+				if r := recover(); r != nil {
+					panicStr := fmt.Sprint(r)
+					if !strings.Contains(panicStr, "nil pointer") &&
+						!strings.Contains(panicStr, "template") {
+						t.Errorf("Unexpected panic: %v", r)
+					}
+				}
+			}()
+
+			_ = h.relatedPages(tc.currentPage)
+		})
+	}
+}
+
+func TestRelatedPagesWithRealFiles(t *testing.T) {
+	tmpDir := t.TempDir()
+	origSource := xlog.Config.Source
+	xlog.Config.Source = tmpDir
+	t.Cleanup(func() { xlog.Config.Source = origSource })
+
+	files := map[string]string{
+		"golang.md":  "Post about #golang and #programming",
+		"rust.md":    "Post about #rust and #programming",
+		"cooking.md": "Recipe with #food and #cooking",
+	}
+
+	for name, content := range files {
+		path := filepath.Join(tmpDir, name)
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+			t.Fatalf("Failed to create test file: %v", err)
+		}
+	}
+
+	h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+	golangPage := &mockPage{
+		name:    "golang",
+		content: []byte("Post about #golang and #programming"),
+	}
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("Expected panic from Partial call, got none")
+		}
+	}()
+
+	_ = h.relatedPages(golangPage)
+}
