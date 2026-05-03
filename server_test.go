@@ -618,6 +618,20 @@ func TestRouteRegistration(t *testing.T) {
 			registerFunc:   Patch,
 			expectedMethod: http.MethodPatch,
 		},
+		{
+			name:           "HEAD route registration",
+			method:         http.MethodHead,
+			path:           "/test-head",
+			registerFunc:   Head,
+			expectedMethod: http.MethodHead,
+		},
+		{
+			name:           "OPTIONS route registration",
+			method:         http.MethodOptions,
+			path:           "/test-options",
+			registerFunc:   Options,
+			expectedMethod: http.MethodOptions,
+		},
 	}
 
 	for _, tc := range tests {

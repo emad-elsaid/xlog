@@ -176,6 +176,20 @@ func Patch(path string, handler HandlerFunc) {
 	router.HandleFunc("PATCH "+path, handlerFuncToHttpHandler(handler))
 }
 
+// Head defines a new route that gets executed when the request matches path and
+// method is http Head.
+func Head(path string, handler HandlerFunc) {
+	slog.Info("HEAD", "path", path, "func", funcStringer{handler})
+	router.HandleFunc("HEAD "+path, handlerFuncToHttpHandler(handler))
+}
+
+// Options defines a new route that gets executed when the request matches path and
+// method is http Options.
+func Options(path string, handler HandlerFunc) {
+	slog.Info("OPTIONS", "path", path, "func", funcStringer{handler})
+	router.HandleFunc("OPTIONS "+path, handlerFuncToHttpHandler(handler))
+}
+
 // Render returns an output function that renders partial with data and writes it as response.
 func Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
