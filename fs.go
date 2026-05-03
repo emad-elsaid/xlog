@@ -55,7 +55,7 @@ func staticHandler(r Request) (Output, error) {
 	if f, err := staticFSs.Open(cleanPath); err != nil {
 		return nil, err
 	} else {
-		f.Close()
+		_ = f.Close() // Only checking file existence, Close error is not critical.
 		return Cache(server.ServeHTTP), nil
 	}
 }
