@@ -85,7 +85,11 @@ func NewPhoto(path string) (*Photo, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	exifData, _ := exif.Decode(f)
 	t := stat.ModTime()
@@ -149,23 +153,34 @@ func resizeHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 
 	const cacheDir = ".cache"
-	os.Mkdir(cacheDir, 0700)
+	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
+		return xlog.InternalServerError(err)
+	}
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photo_path))))
 	cache, err := os.ReadFile(cacheFile)
 	if err == nil {
 		return func(w xlog.Response, r xlog.Request) {
-			w.Write(cache)
+			if _, writeErr := w.Write(cache); writeErr != nil {
+				// Log error but can't do much at this point
+				fmt.Fprintf(os.Stderr, "Failed to write cached photo: %v\n", writeErr)
+			}
 		}
 	}
 
 	return func(w xlog.Response, r xlog.Request) {
 		inputImage, err := os.Open(photo_path)
 		if err != nil {
-			fmt.Fprint(w, err.Error())
+			if _, writeErr := fmt.Fprint(w, err.Error()); writeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
+			}
 			return
 		}
-		defer inputImage.Close()
+		defer func() {
+			if closeErr := inputImage.Close(); closeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to close input image: %v\n", closeErr)
+			}
+		}()
 
 		src, _, _ := image.Decode(inputImage)
 		bounds := src.Bounds()
@@ -179,9 +194,21 @@ func resizeHandler(r xlog.Request) xlog.Output {
 
 		var out bytes.Buffer
 
-		png.Encode(&out, dst)
-		os.WriteFile(cacheFile, out.Bytes(), 0700)
-		w.Write(out.Bytes())
+		if err := png.Encode(&out, dst); err != nil {
+			if _, writeErr := fmt.Fprintf(w, "Failed to encode image: %v", err); writeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write encode error: %v\n", writeErr)
+			}
+			return
+		}
+
+		if err := os.WriteFile(cacheFile, out.Bytes(), 0700); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to cache resized image: %v\n", err)
+			// Continue despite cache failure
+		}
+
+		if _, err := w.Write(out.Bytes()); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to write resized image: %v\n", err)
+		}
 	}
 }
 
