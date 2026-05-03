@@ -215,6 +215,17 @@ func Cache(out Output) Output {
 	}
 }
 
+// NoCache wraps Output and adds headers to prevent browser and proxy caching.
+// Useful for dynamic content, APIs, and pages that should always be fresh.
+func NoCache(out Output) Output {
+	return func(w Response, r Request) {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		out(w, r)
+	}
+}
+
 type funcStringer struct{ any }
 
 func (f funcStringer) String() string {

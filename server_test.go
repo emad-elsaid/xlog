@@ -455,6 +455,84 @@ func TestRedirect(t *testing.T) {
 	}
 }
 
+func TestNoCache(t *testing.T) {
+	tests := []struct {
+		name                 string
+		wrappedOutput        Output
+		expectedCacheControl string
+		expectedPragma       string
+		expectedExpires      string
+		expectedBody         string
+	}{
+		{
+			name:                 "no cache plain text response",
+			wrappedOutput:        PlainText("dynamic content"),
+			expectedCacheControl: "no-cache, no-store, must-revalidate",
+			expectedPragma:       "no-cache",
+			expectedExpires:      "0",
+			expectedBody:         "dynamic content",
+		},
+		{
+			name:                 "no cache empty response",
+			wrappedOutput:        PlainText(""),
+			expectedCacheControl: "no-cache, no-store, must-revalidate",
+			expectedPragma:       "no-cache",
+			expectedExpires:      "0",
+			expectedBody:         "",
+		},
+		{
+			name:                 "no cache json response",
+			wrappedOutput:        JsonResponse(map[string]string{"status": "ok"}),
+			expectedCacheControl: "no-cache, no-store, must-revalidate",
+			expectedPragma:       "no-cache",
+			expectedExpires:      "0",
+			expectedBody:         `{"status":"ok"}`,
+		},
+		{
+			name: "no cache no content response",
+			wrappedOutput: func(w Response, r Request) {
+				w.WriteHeader(http.StatusNoContent)
+			},
+			expectedCacheControl: "no-cache, no-store, must-revalidate",
+			expectedPragma:       "no-cache",
+			expectedExpires:      "0",
+			expectedBody:         "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := NoCache(tc.wrappedOutput)
+			handler.ServeHTTP(w, r)
+
+			cacheControl := w.Header().Get("Cache-Control")
+			if cacheControl != tc.expectedCacheControl {
+				t.Errorf("cache-control header: want %q, got %q",
+					tc.expectedCacheControl, cacheControl)
+			}
+
+			pragma := w.Header().Get("Pragma")
+			if pragma != tc.expectedPragma {
+				t.Errorf("pragma header: want %q, got %q",
+					tc.expectedPragma, pragma)
+			}
+
+			expires := w.Header().Get("Expires")
+			if expires != tc.expectedExpires {
+				t.Errorf("expires header: want %q, got %q",
+					tc.expectedExpires, expires)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
 func TestCache(t *testing.T) {
 	tests := []struct {
 		name                 string
