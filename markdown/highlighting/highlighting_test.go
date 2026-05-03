@@ -9,6 +9,7 @@ import (
 	"github.com/alecthomas/chroma/v2"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/emad-elsaid/xlog/markdown"
+	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/testutil"
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
@@ -583,5 +584,133 @@ User-Agent: foo
 </span></span></code></pre>
 `) {
 		t.Errorf("render mismatch, got\n%s", buffer.String())
+	}
+}
+
+func TestImmutableAttributes(t *testing.T) {
+	tests := []struct {
+		name      string
+		setupNode func() *immutableAttributes
+		testFunc  func(*testing.T, *immutableAttributes)
+	}{
+		{
+			name: "GetString returns value for existing attribute",
+			setupNode: func() *immutableAttributes {
+				node := ast.NewFencedCodeBlock(nil)
+				node.SetAttributeString("lang", "go")
+				return &immutableAttributes{n: node}
+			},
+			testFunc: func(t *testing.T, ia *immutableAttributes) {
+				val, ok := ia.GetString("lang")
+				if !ok || val != "go" {
+					t.Errorf("GetString(lang) = (%v, %v), want (go, true)", val, ok)
+				}
+			},
+		},
+		{
+			name: "Get returns value for existing byte attribute",
+			setupNode: func() *immutableAttributes {
+				node := ast.NewFencedCodeBlock(nil)
+				node.SetAttribute([]byte("style"), "monokai")
+				return &immutableAttributes{n: node}
+			},
+			testFunc: func(t *testing.T, ia *immutableAttributes) {
+				val, ok := ia.Get([]byte("style"))
+				if !ok || val != "monokai" {
+					t.Errorf("Get(style) = (%v, %v), want (monokai, true)", val, ok)
+				}
+			},
+		},
+		{
+			name: "All returns empty slice when no attributes",
+			setupNode: func() *immutableAttributes {
+				node := ast.NewFencedCodeBlock(nil)
+				return &immutableAttributes{n: node}
+			},
+			testFunc: func(t *testing.T, ia *immutableAttributes) {
+				all := ia.All()
+				if len(all) != 0 {
+					t.Errorf("All() = %v, want empty slice", all)
+				}
+			},
+		},
+		{
+			name: "All returns attributes when present",
+			setupNode: func() *immutableAttributes {
+				node := ast.NewFencedCodeBlock(nil)
+				node.SetAttribute([]byte("class"), "highlight")
+				node.SetAttribute([]byte("id"), "code1")
+				return &immutableAttributes{n: node}
+			},
+			testFunc: func(t *testing.T, ia *immutableAttributes) {
+				all := ia.All()
+				if len(all) != 2 {
+					t.Errorf("All() returned %d attributes, want 2", len(all))
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ia := tc.setupNode()
+			tc.testFunc(t, ia)
+		})
+	}
+}
+
+func TestCodeBlockContext(t *testing.T) {
+	tests := []struct {
+		name        string
+		lang        []byte
+		highlighted bool
+		expectLang  bool
+		expectHL    bool
+	}{
+		{
+			name:        "context with language",
+			lang:        []byte("python"),
+			highlighted: true,
+			expectLang:  true,
+			expectHL:    true,
+		},
+		{
+			name:        "context without language",
+			lang:        nil,
+			highlighted: false,
+			expectLang:  false,
+			expectHL:    false,
+		},
+		{
+			name:        "context with empty language",
+			lang:        []byte{},
+			highlighted: true,
+			expectLang:  true,
+			expectHL:    true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			node := ast.NewFencedCodeBlock(nil)
+			attrs := &immutableAttributes{n: node}
+			ctx := newCodeBlockContext(tc.lang, tc.highlighted, attrs)
+
+			lang, ok := ctx.Language()
+			if ok != tc.expectLang {
+				t.Errorf("Language() ok = %v, want %v", ok, tc.expectLang)
+			}
+			if tc.expectLang && string(lang) != string(tc.lang) {
+				t.Errorf("Language() = %s, want %s", lang, tc.lang)
+			}
+
+			if hl := ctx.Highlighted(); hl != tc.expectHL {
+				t.Errorf("Highlighted() = %v, want %v", hl, tc.expectHL)
+			}
+
+			if a := ctx.Attributes(); a == nil {
+				t.Error("Attributes() returned nil")
+			}
+		})
 	}
 }
