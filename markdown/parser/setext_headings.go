@@ -15,6 +15,9 @@ type setextHeadingParser struct {
 func matchesSetextHeadingBar(line []byte) (byte, bool) {
 	start := 0
 	end := len(line)
+	if end == 0 {
+		return 0, false
+	}
 	space := util.TrimLeftLength(line, []byte{' '})
 	if space > 3 {
 		return 0, false
