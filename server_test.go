@@ -326,3 +326,260 @@ func anyContains(s, substr string) bool {
 	}
 	return false
 }
+
+func TestNotFound(t *testing.T) {
+	tests := []struct {
+		name           string
+		message        string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "simple not found message",
+			message:        "page not found",
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   "\n",
+		},
+		{
+			name:           "empty message",
+			message:        "",
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   "\n",
+		},
+		{
+			name:           "detailed message",
+			message:        "resource /users/123 does not exist",
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   "\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := NotFound(tc.message)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestRedirect(t *testing.T) {
+	tests := []struct {
+		name             string
+		url              string
+		expectedStatus   int
+		expectedLocation string
+	}{
+		{
+			name:             "redirect to home page",
+			url:              "/",
+			expectedStatus:   http.StatusFound,
+			expectedLocation: "/",
+		},
+		{
+			name:             "redirect to specific page",
+			url:              "/dashboard",
+			expectedStatus:   http.StatusFound,
+			expectedLocation: "/dashboard",
+		},
+		{
+			name:             "redirect with query parameters",
+			url:              "/search?q=test&page=2",
+			expectedStatus:   http.StatusFound,
+			expectedLocation: "/search?q=test&page=2",
+		},
+		{
+			name:             "redirect to external URL",
+			url:              "https://example.com",
+			expectedStatus:   http.StatusFound,
+			expectedLocation: "https://example.com",
+		},
+		{
+			name:             "redirect with special characters",
+			url:              "/page?name=hello%20world",
+			expectedStatus:   http.StatusFound,
+			expectedLocation: "/page?name=hello%20world",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := Redirect(tc.url)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			location := w.Header().Get("Location")
+			if location != tc.expectedLocation {
+				t.Errorf("location header: want %q, got %q", tc.expectedLocation, location)
+			}
+		})
+	}
+}
+
+func TestCache(t *testing.T) {
+	tests := []struct {
+		name                 string
+		wrappedOutput        Output
+		expectedCacheControl string
+		expectedBody         string
+	}{
+		{
+			name:                 "cache plain text response",
+			wrappedOutput:        PlainText("cached content"),
+			expectedCacheControl: "max-age=604800",
+			expectedBody:         "cached content",
+		},
+		{
+			name:                 "cache empty response",
+			wrappedOutput:        PlainText(""),
+			expectedCacheControl: "max-age=604800",
+			expectedBody:         "",
+		},
+		{
+			name:                 "cache json response",
+			wrappedOutput:        JsonResponse(map[string]string{"status": "ok"}),
+			expectedCacheControl: "max-age=604800",
+			expectedBody:         `{"status":"ok"}`,
+		},
+		{
+			name: "cache no content response",
+			wrappedOutput: func(w Response, r Request) {
+				w.WriteHeader(http.StatusNoContent)
+			},
+			expectedCacheControl: "max-age=604800",
+			expectedBody:         "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := Cache(tc.wrappedOutput)
+			handler.ServeHTTP(w, r)
+
+			cacheControl := w.Header().Get("Cache-Control")
+			if cacheControl != tc.expectedCacheControl {
+				t.Errorf("cache-control header: want %q, got %q",
+					tc.expectedCacheControl, cacheControl)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestHandlerFuncToHttpHandler(t *testing.T) {
+	tests := []struct {
+		name           string
+		handlerFunc    HandlerFunc
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name: "plain text handler",
+			handlerFunc: func(r Request) Output {
+				return PlainText("test response")
+			},
+			expectedStatus: http.StatusOK,
+			expectedBody:   "test response",
+		},
+		{
+			name: "not found handler",
+			handlerFunc: func(r Request) Output {
+				return NotFound("resource not found")
+			},
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   "\n",
+		},
+		{
+			name: "redirect handler",
+			handlerFunc: func(r Request) Output {
+				return Redirect("/new-location")
+			},
+			expectedStatus: http.StatusFound,
+			expectedBody:   "",
+		},
+		{
+			name: "json response handler",
+			handlerFunc: func(r Request) Output {
+				return JsonResponse(map[string]int{"count": 42})
+			},
+			expectedStatus: http.StatusOK,
+			expectedBody:   `{"count":42}`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := handlerFuncToHttpHandler(tc.handlerFunc)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if tc.expectedBody != "" && w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestFuncStringer(t *testing.T) {
+	tests := []struct {
+		name          string
+		function      any
+		shouldContain string
+	}{
+		{
+			name:          "lambda function",
+			function:      func() {},
+			shouldContain: "TestFuncStringer",
+		},
+		{
+			name:          "package function reference",
+			function:      TestFuncStringer,
+			shouldContain: "TestFuncStringer",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			fs := funcStringer{tc.function}
+			result := fs.String()
+
+			if !contains(result, tc.shouldContain) {
+				t.Errorf("String(): expected to contain %q, got %q",
+					tc.shouldContain, result)
+			}
+
+			// Should not contain full github path prefix
+			if contains(result, "github.com/") {
+				t.Errorf("String(): should strip github prefix, got %q", result)
+			}
+		})
+	}
+}
