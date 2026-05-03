@@ -399,141 +399,170 @@ func getAttributes(node *ast.FencedCodeBlock, infostr []byte) ImmutableAttribute
 	return nil
 }
 
-func (r *HTMLRenderer) renderFencedCodeBlock(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
-	n := node.(*ast.FencedCodeBlock)
-	if !entering {
-		return ast.WalkContinue, nil
+// processBaseLineNumber extracts base line number from attributes and applies it to formatter options.
+func processBaseLineNumber(attrs ImmutableAttributes, chromaFormatterOptions []chromahtml.Option) (int, []chromahtml.Option) {
+	baseLineNumber := 1
+	if linenostartAttr, ok := attrs.Get(linenostartAttrName); ok {
+		if linenostart, ok := linenostartAttr.(float64); ok {
+			baseLineNumber = int(linenostart)
+			chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.BaseLineNumber(baseLineNumber))
+		}
 	}
-	language := n.Language(source)
+	return baseLineNumber, chromaFormatterOptions
+}
 
-	chromaFormatterOptions := make([]chromahtml.Option, len(r.FormatOptions))
-	copy(chromaFormatterOptions, r.FormatOptions)
-
-	style := r.CustomStyle
-	if style == nil {
-		style = styles.Get(r.Style)
+// parseHighlightLines parses highlight line ranges from attributes.
+func parseHighlightLines(linesAttr any, baseLineNumber int) [][2]int {
+	lines, ok := linesAttr.([]any)
+	if !ok {
+		return nil
 	}
+
+	var hlRanges [][2]int
+	for _, l := range lines {
+		if ln, ok := l.(float64); ok {
+			hlRanges = append(hlRanges, [2]int{int(ln) + baseLineNumber - 1, int(ln) + baseLineNumber - 1})
+		}
+		if rng, ok := l.([]uint8); ok {
+			slices := strings.Split(string([]byte(rng)), "-")
+			lhs, err := strconv.Atoi(slices[0])
+			if err != nil {
+				continue
+			}
+			rhs := lhs
+			if len(slices) > 1 {
+				rhs, err = strconv.Atoi(slices[1])
+				if err != nil {
+					continue
+				}
+			}
+			hlRanges = append(hlRanges, [2]int{lhs + baseLineNumber - 1, rhs + baseLineNumber - 1})
+		}
+	}
+	return hlRanges
+}
+
+// applyAttributesToFormatterOptions processes all attributes and applies them to formatter options.
+func applyAttributesToFormatterOptions(attrs ImmutableAttributes, chromaFormatterOptions []chromahtml.Option, style *chroma.Style) ([]chromahtml.Option, *chroma.Style, bool) {
 	nohl := false
-
-	var info []byte
-	if n.Info != nil {
-		info = n.Info.Segment.Value(source)
+	if attrs == nil {
+		return chromaFormatterOptions, style, nohl
 	}
-	attrs := getAttributes(n, info)
-	if attrs != nil {
-		baseLineNumber := 1
-		if linenostartAttr, ok := attrs.Get(linenostartAttrName); ok {
-			if linenostart, ok := linenostartAttr.(float64); ok {
-				baseLineNumber = int(linenostart)
-				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.BaseLineNumber(baseLineNumber))
-			}
-		}
-		if linesAttr, hasLinesAttr := attrs.Get(highlightLinesAttrName); hasLinesAttr {
-			if lines, ok := linesAttr.([]any); ok {
-				var hlRanges [][2]int
-				for _, l := range lines {
-					if ln, ok := l.(float64); ok {
-						hlRanges = append(hlRanges, [2]int{int(ln) + baseLineNumber - 1, int(ln) + baseLineNumber - 1})
-					}
-					if rng, ok := l.([]uint8); ok {
-						slices := strings.Split(string([]byte(rng)), "-")
-						lhs, err := strconv.Atoi(slices[0])
-						if err != nil {
-							continue
-						}
-						rhs := lhs
-						if len(slices) > 1 {
-							rhs, err = strconv.Atoi(slices[1])
-							if err != nil {
-								continue
-							}
-						}
-						hlRanges = append(hlRanges, [2]int{lhs + baseLineNumber - 1, rhs + baseLineNumber - 1})
-					}
-				}
-				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.HighlightLines(hlRanges))
-			}
-		}
-		if styleAttr, hasStyleAttr := attrs.Get(styleAttrName); hasStyleAttr {
-			if st, ok := styleAttr.([]uint8); ok {
-				styleStr := string([]byte(st))
-				style = styles.Get(styleStr)
-			}
-		}
-		if _, hasNohlAttr := attrs.Get(nohlAttrName); hasNohlAttr {
-			nohl = true
-		}
 
-		if linenosAttr, ok := attrs.Get(linenosAttrName); ok {
-			switch v := linenosAttr.(type) {
-			case bool:
-				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.WithLineNumbers(v))
-			case []uint8:
-				if v != nil {
-					chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.WithLineNumbers(true))
-				}
-				if bytes.Equal(v, linenosTableAttrValue) {
-					chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.LineNumbersInTable(true))
-				} else if bytes.Equal(v, linenosInlineAttrValue) {
-					chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.LineNumbersInTable(false))
-				}
+	baseLineNumber, chromaFormatterOptions := processBaseLineNumber(attrs, chromaFormatterOptions)
+
+	if linesAttr, hasLinesAttr := attrs.Get(highlightLinesAttrName); hasLinesAttr {
+		hlRanges := parseHighlightLines(linesAttr, baseLineNumber)
+		if hlRanges != nil {
+			chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.HighlightLines(hlRanges))
+		}
+	}
+
+	if styleAttr, hasStyleAttr := attrs.Get(styleAttrName); hasStyleAttr {
+		if st, ok := styleAttr.([]uint8); ok {
+			styleStr := string([]byte(st))
+			style = styles.Get(styleStr)
+		}
+	}
+
+	if _, hasNohlAttr := attrs.Get(nohlAttrName); hasNohlAttr {
+		nohl = true
+	}
+
+	if linenosAttr, ok := attrs.Get(linenosAttrName); ok {
+		switch v := linenosAttr.(type) {
+		case bool:
+			chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.WithLineNumbers(v))
+		case []uint8:
+			if v != nil {
+				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.WithLineNumbers(true))
+			}
+			if bytes.Equal(v, linenosTableAttrValue) {
+				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.LineNumbersInTable(true))
+			} else if bytes.Equal(v, linenosInlineAttrValue) {
+				chromaFormatterOptions = append(chromaFormatterOptions, chromahtml.LineNumbersInTable(false))
 			}
 		}
 	}
 
+	return chromaFormatterOptions, style, nohl
+}
+
+// extractCodeContent extracts the code content from fenced code block node.
+func extractCodeContent(n *ast.FencedCodeBlock, source []byte) string {
+	var buffer bytes.Buffer
+	l := n.Lines().Len()
+	for i := 0; i < l; i++ {
+		line := n.Lines().At(i)
+		buffer.Write(line.Value(source))
+	}
+	return buffer.String()
+}
+
+// renderHighlightedCode renders code with syntax highlighting using Chroma.
+func (r *HTMLRenderer) renderHighlightedCode(w util.BufWriter, language []byte, content string, attrs ImmutableAttributes, chromaFormatterOptions []chromahtml.Option, style *chroma.Style) (ast.WalkStatus, error) {
+	lexer := r.getLexer(language, content)
+	if lexer == nil {
+		return ast.WalkSkipChildren, nil
+	}
+
+	if style == nil {
+		style = styles.Fallback
+	}
+
+	lexer = chroma.Coalesce(lexer)
+	iterator, err := lexer.Tokenise(nil, content)
+	if err != nil {
+		return ast.WalkSkipChildren, nil
+	}
+
+	detectedLanguage := language
+	if language == nil {
+		detectedLanguage = []byte(strings.ToLower(lexer.Config().Name))
+	}
+
+	c := newCodeBlockContext(detectedLanguage, true, attrs)
+	if r.CodeBlockOptions != nil {
+		chromaFormatterOptions = append(chromaFormatterOptions, r.CodeBlockOptions(c)...)
+	}
+
+	formatter := chromahtml.New(chromaFormatterOptions...)
+	if r.WrapperRenderer != nil {
+		r.WrapperRenderer(w, c, true)
+	}
+	_ = formatter.Format(w, style, iterator) == nil
+	if r.WrapperRenderer != nil {
+		r.WrapperRenderer(w, c, false)
+	}
+	if r.CSSWriter != nil {
+		_ = formatter.WriteCSS(r.CSSWriter, style)
+	}
+	return ast.WalkContinue, nil
+}
+
+// getLexer returns the appropriate lexer for the given language or analyzes the content.
+func (r *HTMLRenderer) getLexer(language []byte, content string) chroma.Lexer {
 	var lexer chroma.Lexer
 	if language != nil {
 		lexer = lexers.Get(string(language))
 	}
-	if !nohl && (lexer != nil || r.GuessLanguage) {
-		if style == nil {
-			style = styles.Fallback
-		}
-		var buffer bytes.Buffer
-		l := n.Lines().Len()
-		for i := 0; i < l; i++ {
-			line := n.Lines().At(i)
-			buffer.Write(line.Value(source))
-		}
-
+	if lexer == nil && r.GuessLanguage {
+		lexer = lexers.Analyse(content)
 		if lexer == nil {
-			lexer = lexers.Analyse(buffer.String())
-			if lexer == nil {
-				lexer = lexers.Fallback
-			}
-			language = []byte(strings.ToLower(lexer.Config().Name))
-		}
-		lexer = chroma.Coalesce(lexer)
-
-		iterator, err := lexer.Tokenise(nil, buffer.String())
-		if err == nil {
-			c := newCodeBlockContext(language, true, attrs)
-
-			if r.CodeBlockOptions != nil {
-				chromaFormatterOptions = append(chromaFormatterOptions, r.CodeBlockOptions(c)...)
-			}
-			formatter := chromahtml.New(chromaFormatterOptions...)
-			if r.WrapperRenderer != nil {
-				r.WrapperRenderer(w, c, true)
-			}
-			_ = formatter.Format(w, style, iterator) == nil
-			if r.WrapperRenderer != nil {
-				r.WrapperRenderer(w, c, false)
-			}
-			if r.CSSWriter != nil {
-				_ = formatter.WriteCSS(r.CSSWriter, style)
-			}
-			return ast.WalkContinue, nil
+			lexer = lexers.Fallback
 		}
 	}
+	return lexer
+}
 
+// renderPlainCode renders code without syntax highlighting.
+func (r *HTMLRenderer) renderPlainCode(w util.BufWriter, n *ast.FencedCodeBlock, source []byte, language []byte, attrs ImmutableAttributes) {
 	var c CodeBlockContext
 	if r.WrapperRenderer != nil {
 		c = newCodeBlockContext(language, false, attrs)
 		r.WrapperRenderer(w, c, true)
 	} else {
 		_, _ = w.WriteString("<pre><code")
-		language := n.Language(source)
 		if language != nil {
 			_, _ = w.WriteString(" class=\"language-")
 			r.Writer.Write(w, language)
@@ -541,16 +570,54 @@ func (r *HTMLRenderer) renderFencedCodeBlock(w util.BufWriter, source []byte, no
 		}
 		_ = w.WriteByte('>')
 	}
+
 	l := n.Lines().Len()
 	for i := 0; i < l; i++ {
 		line := n.Lines().At(i)
 		r.Writer.RawWrite(w, line.Value(source))
 	}
+
 	if r.WrapperRenderer != nil {
 		r.WrapperRenderer(w, c, false)
 	} else {
 		_, _ = w.WriteString("</code></pre>\n")
 	}
+}
+
+func (r *HTMLRenderer) renderFencedCodeBlock(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
+	n := node.(*ast.FencedCodeBlock)
+	if !entering {
+		return ast.WalkContinue, nil
+	}
+
+	language := n.Language(source)
+	chromaFormatterOptions := make([]chromahtml.Option, len(r.FormatOptions))
+	copy(chromaFormatterOptions, r.FormatOptions)
+
+	style := r.CustomStyle
+	if style == nil {
+		style = styles.Get(r.Style)
+	}
+
+	var info []byte
+	if n.Info != nil {
+		info = n.Info.Segment.Value(source)
+	}
+	attrs := getAttributes(n, info)
+
+	chromaFormatterOptions, style, nohl := applyAttributesToFormatterOptions(attrs, chromaFormatterOptions, style)
+
+	var lexer chroma.Lexer
+	if language != nil {
+		lexer = lexers.Get(string(language))
+	}
+
+	if !nohl && (lexer != nil || r.GuessLanguage) {
+		content := extractCodeContent(n, source)
+		return r.renderHighlightedCode(w, language, content, attrs, chromaFormatterOptions, style)
+	}
+
+	r.renderPlainCode(w, n, source, language, attrs)
 	return ast.WalkContinue, nil
 }
 
