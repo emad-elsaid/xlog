@@ -15,16 +15,16 @@ func (s *imagesColumnsRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegis
 
 func (s *imagesColumnsRenderer) render(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	if entering {
-		w.WriteString(`<div class="columns">`)
+		_, _ = w.WriteString(`<div class="columns">`)
 
 		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-			w.WriteString(`<div class="column">`)
-			MarkdownConverter().Renderer().Render(w, source, c)
-			w.WriteString(`</div>`)
+			_, _ = w.WriteString(`<div class="column">`)
+			_ = MarkdownConverter().Renderer().Render(w, source, c)
+			_, _ = w.WriteString(`</div>`)
 		}
 
 	} else {
-		w.WriteString(`</div>`)
+		_, _ = w.WriteString(`</div>`)
 	}
 
 	return ast.WalkSkipChildren, nil

@@ -11,7 +11,7 @@ type columnizeImagesParagraph struct{}
 func (t columnizeImagesParagraph) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
 	paragraphs := []*ast.Paragraph{}
 
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
