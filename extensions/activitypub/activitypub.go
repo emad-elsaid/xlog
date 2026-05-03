@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 var domain string
@@ -26,28 +26,28 @@ func init() {
 	flag.StringVar(&icon, "activitypub.icon", "/public/logo.png", "the path to the activitypub profile icon. mastodon use it as profile picture for example.")
 	flag.StringVar(&image, "activitypub.image", "/public/logo.png", "the path to the activitypub profile image. mastodon use it as profile cover for example.")
 
-	RegisterExtension(ActivityPub{})
+	xlog.RegisterExtension(ActivityPub{})
 }
 
 type ActivityPub struct{}
 
 func (ActivityPub) Name() string { return "activitypub" }
 func (ActivityPub) Init() {
-	Get(`/.well-known/webfinger`, webfinger)
-	Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
-	Get(`/+/activitypub/{user}/outbox`, outbox)
-	Get(`/+/activitypub/{user}`, profile)
-	RegisterWidget(WidgetHead, 1, meta)
+	xlog.Get(`/.well-known/webfinger`, webfinger)
+	xlog.Get(`/+/activitypub/{user}/outbox/{page}`, outboxPage)
+	xlog.Get(`/+/activitypub/{user}/outbox`, outbox)
+	xlog.Get(`/+/activitypub/{user}`, profile)
+	xlog.RegisterWidget(xlog.WidgetHead, 1, meta)
 }
 
-func meta(p Page) template.HTML {
+func meta(p xlog.Page) template.HTML {
 	if domain == "" || username == "" {
 		return ""
 	}
 
-	RegisterBuildPage("/.well-known/webfinger", false)
-	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s", username), true)
-	RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox", username), true)
+	xlog.RegisterBuildPage("/.well-known/webfinger", false)
+	xlog.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s", username), true)
+	xlog.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox", username), true)
 
 	o := fmt.Sprintf(`<link href='https://%s/+/activitypub/@%s' rel='alternate' type='application/activity+json'>`, domain, username)
 
@@ -60,12 +60,12 @@ type webfingerResponse struct {
 	Links   []map[string]string `json:"links,omitempty"`
 }
 
-func webfinger(r Request) Output {
+func webfinger(r xlog.Request) xlog.Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		webfingerResponse{
 			Subject: fmt.Sprintf("acct:%s@%s", username, domain),
 			Aliases: []string{
@@ -111,16 +111,16 @@ type profileResponse struct {
 	Image             map[string]string `json:"image,omitempty"`
 }
 
-func profile(r Request) Output {
+func profile(r xlog.Request) xlog.Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		profileResponse{
 			Context:           "https://www.w3.org/ns/activitystreams",
 			ID:                fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
@@ -158,22 +158,22 @@ type outboxResponse struct {
 	Last       string `json:"last,omitempty"`
 }
 
-func outbox(r Request) Output {
+func outbox(r xlog.Request) xlog.Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
 	count := 0
-	EachPage(r.Context(), func(Page) {
+	xlog.EachPage(r.Context(), func(xlog.Page) {
 		count += 1
-		RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
+		xlog.RegisterBuildPage(fmt.Sprintf("/+/activitypub/@%s/outbox/%d", username, count), false)
 	})
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		outboxResponse{
 			Context:    "https://www.w3.org/ns/activitystreams",
 			ID:         fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
@@ -214,26 +214,26 @@ type outboxPageObject struct {
 	Content      string
 }
 
-func outboxPage(r Request) Output {
+func outboxPage(r xlog.Request) xlog.Output {
 	if domain == "" || username == "" {
-		return NoContent()
+		return xlog.NoContent()
 	}
 
 	if r.PathValue("user") != "@"+username {
-		return NotFound("User not found")
+		return xlog.NotFound("User not found")
 	}
 
 	pageIndex, _ := strconv.ParseInt(r.PathValue("page"), 10, 64)
 	pageIndex--
 
-	pages := Pages(r.Context())
+	pages := xlog.Pages(r.Context())
 
 	if int(pageIndex) >= len(pages) || pageIndex < 0 {
-		return NotFound("page index is out of context")
+		return xlog.NotFound("page index is out of context")
 	}
 
-	var page Page
-	slices.SortFunc(pages, func(a, b Page) int {
+	var page xlog.Page
+	slices.SortFunc(pages, func(a, b xlog.Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
 		}
@@ -248,7 +248,7 @@ func outboxPage(r Request) Output {
 	u.Path = "/" + page.Name()
 	u.Host = domain
 
-	return JsonResponse(
+	return xlog.JsonResponse(
 		outboxPageResponse{
 			Context: "https://www.w3.org/ns/activitystreams",
 			ID:      fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex),

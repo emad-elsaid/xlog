@@ -11,37 +11,37 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 const STARRED_PAGES = "starred"
 
 func init() {
-	RegisterExtension(Star{})
+	xlog.RegisterExtension(Star{})
 }
 
 type Star struct{}
 
 func (Star) Name() string { return "star" }
 func (Star) Init() {
-	RegisterLink(starredPages)
-	IgnorePath(regexp.MustCompile(`^starred\.md$`))
+	xlog.RegisterLink(starredPages)
+	xlog.IgnorePath(regexp.MustCompile(`^starred\.md$`))
 
-	if !Config.Readonly {
-		RequireHTMX()
-		RegisterCommand(starAction)
-		RegisterQuickCommand(starAction)
-		Post(`/+/star/{page...}`, starHandler)
-		Delete(`/+/star/{page...}`, unstarHandler)
+	if !xlog.Config.Readonly {
+		xlog.RequireHTMX()
+		xlog.RegisterCommand(starAction)
+		xlog.RegisterQuickCommand(starAction)
+		xlog.Post(`/+/star/{page...}`, starHandler)
+		xlog.Delete(`/+/star/{page...}`, unstarHandler)
 	}
 }
 
 type starredPage struct {
-	Page
+	Page xlog.Page
 }
 
 func (s starredPage) Icon() string {
-	if e := Emoji(s); e == "" {
+	if e := xlog.Emoji(s.Page); e == "" {
 		return "fa-solid fa-star"
 	} else {
 		return e
@@ -58,8 +58,8 @@ func (s starredPage) Name() string {
 	return path.Base(s.Page.Name())
 }
 
-func starredPages(p Page) []Command {
-	pages := NewPage(STARRED_PAGES)
+func starredPages(p xlog.Page) []xlog.Command {
+	pages := xlog.NewPage(STARRED_PAGES)
 	if pages == nil {
 		return nil
 	}
@@ -70,9 +70,9 @@ func starredPages(p Page) []Command {
 	}
 
 	list := strings.Split(content, "\n")
-	ps := make([]Command, 0, len(list))
+	ps := make([]xlog.Command, 0, len(list))
 	for _, v := range list {
-		p := starredPage{NewPage(v)}
+		p := starredPage{Page: xlog.NewPage(v)}
 		ps = append(ps, p)
 	}
 
@@ -80,7 +80,7 @@ func starredPages(p Page) []Command {
 }
 
 type action struct {
-	page    Page
+	page    xlog.Page
 	starred bool
 }
 
@@ -110,45 +110,45 @@ func (l action) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
-func starAction(p Page) []Command {
+func starAction(p xlog.Page) []xlog.Command {
 	if !p.Exists() {
 		return nil
 	}
 
 	starred := isStarred(p)
-	return []Command{action{starred: starred, page: p}}
+	return []xlog.Command{action{starred: starred, page: p}}
 }
 
-func starHandler(r Request) Output {
-	page := NewPage(r.PathValue("page"))
+func starHandler(r xlog.Request) xlog.Output {
+	page := xlog.NewPage(r.PathValue("page"))
 
 	if page == nil || !page.Exists() {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
-	starred_pages := NewPage(STARRED_PAGES)
+	starred_pages := xlog.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	new_content := strings.TrimSpace(string(starred_pages.Content())) + "\n" + page.Name()
-	starred_pages.Write(Markdown(new_content))
+	starred_pages.Write(xlog.Markdown(new_content))
 
-	return func(w Response, r Request) {
+	return func(w xlog.Response, r xlog.Request) {
 		w.Header().Add("HX-Refresh", "true")
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-func unstarHandler(r Request) Output {
-	page := NewPage(r.PathValue("page"))
+func unstarHandler(r xlog.Request) xlog.Output {
+	page := xlog.NewPage(r.PathValue("page"))
 	if page == nil || !page.Exists() {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
-	starred_pages := NewPage(STARRED_PAGES)
+	starred_pages := xlog.NewPage(STARRED_PAGES)
 	if starred_pages == nil {
-		return Redirect("/")
+		return xlog.Redirect("/")
 	}
 
 	content := strings.Split(strings.TrimSpace(string(starred_pages.Content())), "\n")
@@ -158,16 +158,16 @@ func unstarHandler(r Request) Output {
 			new_content += "\n" + v
 		}
 	}
-	starred_pages.Write(Markdown(new_content))
+	starred_pages.Write(xlog.Markdown(new_content))
 
-	return func(w Response, r Request) {
+	return func(w xlog.Response, r xlog.Request) {
 		w.Header().Add("HX-Refresh", "true")
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-func isStarred(p Page) bool {
-	starred_page := NewPage(STARRED_PAGES)
+func isStarred(p xlog.Page) bool {
+	starred_page := xlog.NewPage(STARRED_PAGES)
 	if starred_page == nil {
 		return false
 	}

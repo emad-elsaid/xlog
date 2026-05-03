@@ -100,7 +100,7 @@ func unicodeCaseFoldingMapSubCommand(args []string) {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile(*outputPath, jsonData, 0644)
+	err = os.WriteFile(*outputPath, jsonData, 0600)
 	if err != nil {
 		panic(err)
 	}

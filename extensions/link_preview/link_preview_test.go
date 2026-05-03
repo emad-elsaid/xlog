@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 func TestImgUrlPreprocessor(t *testing.T) {
 	tests := []struct {
 		name  string
-		input Markdown
-		want  Markdown
+		input xlog.Markdown
+		want  xlog.Markdown
 	}{
 		{
 			name:  "valid image URL with jpg",
@@ -62,7 +62,7 @@ func TestImgUrlPreprocessor(t *testing.T) {
 func TestTweetUrlPreprocessor(t *testing.T) {
 	tests := []struct {
 		name  string
-		input Markdown
+		input xlog.Markdown
 		want  string
 	}{
 		{
@@ -106,7 +106,7 @@ func TestTweetUrlPreprocessor(t *testing.T) {
 func TestYoutubeUrlPreprocessor(t *testing.T) {
 	tests := []struct {
 		name  string
-		input Markdown
+		input xlog.Markdown
 		want  string
 	}{
 		{
@@ -145,7 +145,7 @@ func TestYoutubeUrlPreprocessor(t *testing.T) {
 func TestFbUrlPreprocessor(t *testing.T) {
 	tests := []struct {
 		name  string
-		input Markdown
+		input xlog.Markdown
 		want  string
 	}{
 		{
@@ -184,8 +184,8 @@ func TestFbUrlPreprocessor(t *testing.T) {
 func TestGiphyUrlPreprocessor(t *testing.T) {
 	tests := []struct {
 		name  string
-		input Markdown
-		want  Markdown
+		input xlog.Markdown
+		want  xlog.Markdown
 	}{
 		{
 			name:  "valid giphy URL",
@@ -217,7 +217,7 @@ func TestGetUrlMeta(t *testing.T) {
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Test Page Title</title>
+	<title>Test xlog.Page Title</title>
 	<meta property="og:description" content="Test description">
 	<meta property="og:image" content="https://example.com/image.jpg">
 </head>
@@ -234,8 +234,8 @@ func TestGetUrlMeta(t *testing.T) {
 			t.Fatalf("getUrlMeta() error = %v", err)
 		}
 
-		if meta.Title != "Test Page Title" {
-			t.Errorf("meta.Title = %q, want %q", meta.Title, "Test Page Title")
+		if meta.Title != "Test xlog.Page Title" {
+			t.Errorf("meta.Title = %q, want %q", meta.Title, "Test xlog.Page Title")
 		}
 
 		if meta.Description != "Test description" {
@@ -375,7 +375,7 @@ func TestGetUrlMeta(t *testing.T) {
 
 func TestFallbackURLPreprocessor(t *testing.T) {
 	t.Run("non-URL text unchanged", func(t *testing.T) {
-		input := Markdown("just some text")
+		input := xlog.Markdown("just some text")
 		got := fallbackURLPreprocessor(input)
 		if got != input {
 			t.Errorf("fallbackURLPreprocessor() changed non-URL text: %q", got)
@@ -385,7 +385,7 @@ func TestFallbackURLPreprocessor(t *testing.T) {
 	t.Run("URL with failing getUrlMeta returns original URL", func(t *testing.T) {
 		cleanupCache(t)
 
-		input := Markdown("http://invalid-domain-that-does-not-exist-12345.com")
+		input := xlog.Markdown("http://invalid-domain-that-does-not-exist-12345.com")
 		got := fallbackURLPreprocessor(input)
 		if got != input {
 			t.Errorf("fallbackURLPreprocessor() = %q, want %q", got, input)

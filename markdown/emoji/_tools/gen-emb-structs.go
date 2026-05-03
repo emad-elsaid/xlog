@@ -69,7 +69,7 @@ func embStructsSubCommand(args []string) {
 			_, _ = f.WriteString(ft)
 			return
 		}
-		_, _ = f.WriteString(fmt.Sprintf(ft, v...))
+		_, _ = fmt.Fprintf(f, ft, v...)
 	}
 	writeln := func(ft string, v ...any) {
 		write(ft+"\n", v...)

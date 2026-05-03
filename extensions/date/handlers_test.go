@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
@@ -258,37 +258,37 @@ func TestOrganizeCalendar_FirstDayOfWeek(t *testing.T) {
 	}
 }
 
-// mockPage implements the Page interface for testing.
+// mockPage implements the xlog.Page interface for testing.
 type mockPage struct {
 	name    string
 	astTree ast.Node
 }
 
-func (m *mockPage) Name() string                    { return m.name }
-func (m *mockPage) FileName() string                { return m.name + ".md" }
-func (m *mockPage) Exists() bool                    { return true }
-func (m *mockPage) Render() template.HTML           { return template.HTML("test") }
-func (m *mockPage) Content() Markdown               { return Markdown("test content") }
-func (m *mockPage) Delete() bool                    { return true }
-func (m *mockPage) Write(md Markdown) bool          { return true }
-func (m *mockPage) ModTime() time.Time              { return time.Now() }
-func (m *mockPage) AST() ([]byte, ast.Node)         { return []byte("test"), m.astTree }
-func (m *mockPage) SetAST(b []byte, n ast.Node)     { m.astTree = n }
-func (m *mockPage) ClearCache()                     {}
-func (m *mockPage) URL() string                     { return "/" + m.name }
-func (m *mockPage) EditURL() string                 { return "/" + m.name + "/edit" }
-func (m *mockPage) HistoryURL() string              { return "/" + m.name + "/history" }
-func (m *mockPage) RelativePath() string            { return m.name }
-func (m *mockPage) AbsolutePath() string            { return "/tmp/" + m.name }
-func (m *mockPage) ChangeExtension(ext string) Page { return m }
-func (m *mockPage) SetExtension(ext string) Page    { return m }
-func (m *mockPage) Extension() string               { return ".md" }
-func (m *mockPage) ChangeDirectory(dir string) Page { return m }
-func (m *mockPage) Directory() string               { return "" }
-func (m *mockPage) Directories() []string           { return []string{} }
-func (m *mockPage) Rebase(base string) string       { return m.name }
-func (m *mockPage) Equal(other Page) bool           { return m.name == other.Name() }
-func (m *mockPage) IsSubPageOf(parent Page) bool    { return false }
-func (m *mockPage) DirectSubPages() []Page          { return []Page{} }
-func (m *mockPage) AllSubPages() []Page             { return []Page{} }
-func (m *mockPage) IsDirIndex() bool                { return false }
+func (m *mockPage) Name() string                         { return m.name }
+func (m *mockPage) FileName() string                     { return m.name + ".md" }
+func (m *mockPage) Exists() bool                         { return true }
+func (m *mockPage) Render() template.HTML                { return template.HTML("test") }
+func (m *mockPage) Content() xlog.Markdown               { return xlog.Markdown("test content") }
+func (m *mockPage) Delete() bool                         { return true }
+func (m *mockPage) Write(md xlog.Markdown) bool          { return true }
+func (m *mockPage) ModTime() time.Time                   { return time.Now() }
+func (m *mockPage) AST() ([]byte, ast.Node)              { return []byte("test"), m.astTree }
+func (m *mockPage) SetAST(b []byte, n ast.Node)          { m.astTree = n }
+func (m *mockPage) ClearCache()                          {}
+func (m *mockPage) URL() string                          { return "/" + m.name }
+func (m *mockPage) EditURL() string                      { return "/" + m.name + "/edit" }
+func (m *mockPage) HistoryURL() string                   { return "/" + m.name + "/history" }
+func (m *mockPage) RelativePath() string                 { return m.name }
+func (m *mockPage) AbsolutePath() string                 { return "/tmp/" + m.name }
+func (m *mockPage) ChangeExtension(ext string) xlog.Page { return m }
+func (m *mockPage) SetExtension(ext string) xlog.Page    { return m }
+func (m *mockPage) Extension() string                    { return ".md" }
+func (m *mockPage) ChangeDirectory(dir string) xlog.Page { return m }
+func (m *mockPage) Directory() string                    { return "" }
+func (m *mockPage) Directories() []string                { return []string{} }
+func (m *mockPage) Rebase(base string) string            { return m.name }
+func (m *mockPage) Equal(other xlog.Page) bool           { return m.name == other.Name() }
+func (m *mockPage) IsSubPageOf(parent xlog.Page) bool    { return false }
+func (m *mockPage) DirectSubPages() []xlog.Page          { return []xlog.Page{} }
+func (m *mockPage) AllSubPages() []xlog.Page             { return []xlog.Page{} }
+func (m *mockPage) IsDirIndex() bool                     { return false }

@@ -1,7 +1,7 @@
 package images
 
 import (
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/util"
@@ -19,7 +19,7 @@ func (s *imagesColumnsRenderer) render(w util.BufWriter, source []byte, n ast.No
 
 		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
 			_, _ = w.WriteString(`<div class="column">`)
-			_ = MarkdownConverter().Renderer().Render(w, source, c)
+			_ = xlog.MarkdownConverter().Renderer().Render(w, source, c)
 			_, _ = w.WriteString(`</div>`)
 		}
 

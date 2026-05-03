@@ -237,7 +237,7 @@ func (s *giantEmojiParser) Parse(parent ast.Node, block text.Reader, pc parser.C
 	i := 1
 	for ; i < len(line); i++ {
 		c := line[i]
-		if !(util.IsAlphaNumeric(c) || c == '_' || c == '-' || c == '+') {
+		if !util.IsAlphaNumeric(c) && c != '_' && c != '-' && c != '+' {
 			break
 		}
 	}

@@ -43,18 +43,39 @@ func (b *footnoteBlockParser) Open(parent gast.Node, reader text.Reader, pc pars
 	if pos > len(line)-1 || line[pos] != '^' {
 		return nil, parser.NoChildren
 	}
-	open := pos + 1
-	var closes int
-	closure := util.FindClosure(line[pos+1:], '[', ']', false, false) //nolint:staticcheck
-	closes = pos + 1 + closure
-	next := closes + 1
-	if closure > -1 {
-		if next >= len(line) || line[next] != ':' {
-			return nil, parser.NoChildren
-		}
-	} else {
+
+	// Save current position
+	savedLine, savedPos := reader.Position()
+	reader.Advance(pos + 1)
+
+	// Find the closing bracket using reader.FindClosure
+	closureOptions := text.FindClosureOptions{
+		CodeSpan: false,
+		Nesting:  false,
+		Newline:  false,
+		Advance:  false,
+	}
+	segments, found := reader.FindClosure('[', ']', closureOptions)
+
+	// Restore position
+	reader.SetPosition(savedLine, savedPos)
+
+	if !found || segments.Len() == 0 {
 		return nil, parser.NoChildren
 	}
+
+	// Calculate the closing bracket position
+	// The segments contain the content between [ and ]
+	// We need to find where the ] is
+	lastSeg := segments.At(segments.Len() - 1)
+	closes := lastSeg.Stop - segment.Start
+	open := pos + 1
+	next := closes + 1
+
+	if next >= len(line) || line[next] != ':' {
+		return nil, parser.NoChildren
+	}
+
 	padding := segment.Padding
 	label := reader.Value(text.NewSegment(segment.Start+open-padding, segment.Start+closes-padding))
 	if util.IsBlank(label) {
@@ -135,12 +156,31 @@ func (s *footnoteParser) Parse(parent gast.Node, block text.Reader, pc parser.Co
 	if pos >= len(line) {
 		return nil
 	}
-	open := pos
-	closure := util.FindClosure(line[pos:], '[', ']', false, false) //nolint:staticcheck
-	if closure < 0 {
+
+	// Save current position
+	savedLine, savedPos := block.Position()
+	block.Advance(pos)
+
+	// Find the closing bracket using reader.FindClosure
+	closureOptions := text.FindClosureOptions{
+		CodeSpan: false,
+		Nesting:  false,
+		Newline:  false,
+		Advance:  false,
+	}
+	segments, found := block.FindClosure('[', ']', closureOptions)
+
+	// Restore position
+	block.SetPosition(savedLine, savedPos)
+
+	if !found || segments.Len() == 0 {
 		return nil
 	}
-	closes := pos + closure
+
+	// Calculate the closing bracket position
+	lastSeg := segments.At(segments.Len() - 1)
+	closes := lastSeg.Stop - segment.Start
+	open := pos
 	value := block.Value(text.NewSegment(segment.Start+open, segment.Start+closes))
 	block.Advance(closes + 1)
 
@@ -229,7 +269,7 @@ func (a *footnoteASTTransformer) Transform(node *gast.Document, reader text.Read
 		}
 	}
 	for footnote := list.FirstChild(); footnote != nil; {
-		var container gast.Node = footnote
+		container := footnote
 		next := footnote.NextSibling()
 		if fc := container.LastChild(); fc != nil && gast.IsParagraph(fc) {
 			container = fc
@@ -534,7 +574,7 @@ func (r *FootnoteHTMLRenderer) renderFootnoteLink(
 		_, _ = w.Write(r.idPrefix(node))
 		_, _ = w.WriteString(`fnref`)
 		if n.RefIndex > 0 {
-			_, _ = w.WriteString(fmt.Sprintf("%v", n.RefIndex))
+			_, _ = fmt.Fprintf(w, "%v", n.RefIndex)
 		}
 		_ = w.WriteByte(':')
 		_, _ = w.WriteString(is)
@@ -543,11 +583,10 @@ func (r *FootnoteHTMLRenderer) renderFootnoteLink(
 		_, _ = w.WriteString(`fn:`)
 		_, _ = w.WriteString(is)
 		_, _ = w.WriteString(`" class="`)
-		_, _ = w.Write(applyFootnoteTemplate(r.FootnoteConfig.LinkClass,
-			n.Index, n.RefCount))
-		if len(r.FootnoteConfig.LinkTitle) > 0 {
+		_, _ = w.Write(applyFootnoteTemplate(r.LinkClass, n.Index, n.RefCount))
+		if len(r.LinkTitle) > 0 {
 			_, _ = w.WriteString(`" title="`)
-			_, _ = w.Write(util.EscapeHTML(applyFootnoteTemplate(r.FootnoteConfig.LinkTitle, n.Index, n.RefCount)))
+			_, _ = w.Write(util.EscapeHTML(applyFootnoteTemplate(r.LinkTitle, n.Index, n.RefCount)))
 		}
 		_, _ = w.WriteString(`" role="doc-noteref">`)
 
@@ -566,18 +605,18 @@ func (r *FootnoteHTMLRenderer) renderFootnoteBacklink(
 		_, _ = w.Write(r.idPrefix(node))
 		_, _ = w.WriteString(`fnref`)
 		if n.RefIndex > 0 {
-			_, _ = w.WriteString(fmt.Sprintf("%v", n.RefIndex))
+			_, _ = fmt.Fprintf(w, "%v", n.RefIndex)
 		}
 		_ = w.WriteByte(':')
 		_, _ = w.WriteString(is)
 		_, _ = w.WriteString(`" class="`)
-		_, _ = w.Write(applyFootnoteTemplate(r.FootnoteConfig.BacklinkClass, n.Index, n.RefCount))
-		if len(r.FootnoteConfig.BacklinkTitle) > 0 {
+		_, _ = w.Write(applyFootnoteTemplate(r.BacklinkClass, n.Index, n.RefCount))
+		if len(r.BacklinkTitle) > 0 {
 			_, _ = w.WriteString(`" title="`)
-			_, _ = w.Write(util.EscapeHTML(applyFootnoteTemplate(r.FootnoteConfig.BacklinkTitle, n.Index, n.RefCount)))
+			_, _ = w.Write(util.EscapeHTML(applyFootnoteTemplate(r.BacklinkTitle, n.Index, n.RefCount)))
 		}
 		_, _ = w.WriteString(`" role="doc-backlink">`)
-		_, _ = w.Write(applyFootnoteTemplate(r.FootnoteConfig.BacklinkHTML, n.Index, n.RefCount))
+		_, _ = w.Write(applyFootnoteTemplate(r.BacklinkHTML, n.Index, n.RefCount))
 		_, _ = w.WriteString(`</a>`)
 	}
 	return gast.WalkContinue, nil
@@ -611,7 +650,7 @@ func (r *FootnoteHTMLRenderer) renderFootnoteList(
 			html.RenderAttributes(w, node, html.GlobalAttributeFilter)
 		}
 		_ = w.WriteByte('>')
-		if r.Config.XHTML {
+		if r.XHTML {
 			_, _ = w.WriteString("\n<hr />\n")
 		} else {
 			_, _ = w.WriteString("\n<hr>\n")
@@ -625,11 +664,11 @@ func (r *FootnoteHTMLRenderer) renderFootnoteList(
 }
 
 func (r *FootnoteHTMLRenderer) idPrefix(node gast.Node) []byte {
-	if r.FootnoteConfig.IDPrefix != nil {
-		return r.FootnoteConfig.IDPrefix
+	if r.IDPrefix != nil {
+		return r.IDPrefix
 	}
-	if r.FootnoteConfig.IDPrefixFunction != nil {
-		return r.FootnoteConfig.IDPrefixFunction(node)
+	if r.IDPrefixFunction != nil {
+		return r.IDPrefixFunction(node)
 	}
 	return []byte("")
 }

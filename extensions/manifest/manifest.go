@@ -4,30 +4,30 @@ import (
 	"embed"
 	"html/template"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
 
 func init() {
-	RegisterExtension(Manifest{})
+	xlog.RegisterExtension(Manifest{})
 }
 
 type Manifest struct{}
 
 func (Manifest) Name() string { return "manifest" }
 func (Manifest) Init() {
-	Get("/manifest.json", manifest)
-	RegisterBuildPage("/manifest.json", false)
-	RegisterWidget(WidgetHead, 1, head)
-	RegisterTemplate(templates, "templates")
+	xlog.Get("/manifest.json", manifest)
+	xlog.RegisterBuildPage("/manifest.json", false)
+	xlog.RegisterWidget(xlog.WidgetHead, 1, head)
+	xlog.RegisterTemplate(templates, "templates")
 }
 
-func manifest(r Request) Output {
-	return Cache(Render("manifest", Locals{"sitename": Config.Sitename}))
+func manifest(r xlog.Request) xlog.Output {
+	return xlog.Cache(xlog.Render("manifest", xlog.Locals{"sitename": xlog.Config.Sitename}))
 }
 
-func head(Page) template.HTML {
+func head(xlog.Page) template.HTML {
 	return template.HTML(`<link rel="manifest" href="/manifest.json">`)
 }

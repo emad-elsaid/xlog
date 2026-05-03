@@ -671,7 +671,8 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 			case opts.CodeSpan && codeSpanOpener == 0 && c == '`':
 				codeSpanOpener, i = handleCodeSpanOpener(bs, i)
 			case (opts.CodeSpan && codeSpanOpener == 0) || !opts.CodeSpan:
-				if c == closer {
+				switch c {
+				case closer:
 					opened--
 					if opened == 0 {
 						if ret == nil {
@@ -682,7 +683,7 @@ func findClosureReader(r Reader, opener, closer byte, opts FindClosureOptions) (
 						closed = true
 						goto end
 					}
-				} else if c == opener {
+				case opener:
 					if !opts.Nesting {
 						goto end
 					}

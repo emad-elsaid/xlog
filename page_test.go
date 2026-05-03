@@ -171,7 +171,7 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 
 				// Create a file where we need a directory
 				dirPath := filepath.Join(tempDir, "blocked")
-				if err := os.WriteFile(dirPath, []byte("blocking"), 0644); err != nil {
+				if err := os.WriteFile(dirPath, []byte("blocking"), 0600); err != nil {
 					t.Fatalf("failed to create blocking file: %v", err)
 				}
 
@@ -185,9 +185,7 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 				return origDir, p
 			},
 			cleanup: func(origDir string) {
-				if err := os.Chdir(origDir); err != nil {
-					// Log but don't fail cleanup
-				}
+				_ = os.Chdir(origDir) // Intentionally ignore error in cleanup
 			},
 			wantErr: true,
 		},
@@ -211,9 +209,7 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 				return origDir, p
 			},
 			cleanup: func(origDir string) {
-				if err := os.Chdir(origDir); err != nil {
-					// Log but don't fail cleanup
-				}
+				_ = os.Chdir(origDir) // Intentionally ignore error in cleanup
 			},
 			wantErr: true,
 		},

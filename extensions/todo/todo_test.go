@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	east "github.com/emad-elsaid/xlog/markdown/extension/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
@@ -144,7 +144,7 @@ func TestToggleHandler(t *testing.T) {
 			expectedStatus: http.StatusNoContent,
 		},
 		{
-			name:           "Page not found",
+			name:           "xlog.Page not found",
 			page:           "nonexistent",
 			pos:            "0",
 			checked:        "",
@@ -185,7 +185,7 @@ func TestToggleHandler(t *testing.T) {
 			req := httptest.NewRequest("POST", "/+/todo", strings.NewReader(form.Encode()))
 			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-			// Execute handler - get the Output (http.HandlerFunc)
+			// Execute handler - get the xlog.Output (http.HandlerFunc)
 			output := toggleHandler(req)
 
 			// Create a response recorder to capture the response
@@ -293,9 +293,9 @@ func TestTaskCheckBoxHTMLRenderer_Basic(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Save and restore config
-			oldReadonly := Config.Readonly
-			Config.Readonly = tt.readonly
-			defer func() { Config.Readonly = oldReadonly }()
+			oldReadonly := xlog.Config.Readonly
+			xlog.Config.Readonly = tt.readonly
+			defer func() { xlog.Config.Readonly = oldReadonly }()
 
 			// Create task checkbox node
 			taskCheckBox := east.NewTaskCheckBox(tt.isChecked)

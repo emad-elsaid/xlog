@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 var domain string
@@ -22,17 +22,17 @@ func init() {
 	flag.StringVar(&description, "rss.description", "", "RSS feed description")
 	flag.IntVar(&limit, "rss.limit", 30, "Limit the number of items in the RSS feed to this amount")
 
-	RegisterExtension(RSS{})
+	xlog.RegisterExtension(RSS{})
 }
 
 type RSS struct{}
 
 func (RSS) Name() string { return "rss" }
 func (RSS) Init() {
-	RegisterWidget(WidgetHead, 0, metaTag)
-	RegisterBuildPage("/+/feed.rss", false)
-	RegisterLink(links)
-	Get(`/+/feed.rss`, feed)
+	xlog.RegisterWidget(xlog.WidgetHead, 0, metaTag)
+	xlog.RegisterBuildPage("/+/feed.rss", false)
+	xlog.RegisterLink(links)
+	xlog.Get(`/+/feed.rss`, feed)
 }
 
 type rssLink struct{}
@@ -45,13 +45,13 @@ func (rssLink) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
-func links(p Page) []Command {
-	return []Command{rssLink{}}
+func links(p xlog.Page) []xlog.Command {
+	return []xlog.Command{rssLink{}}
 }
 
-func metaTag(p Page) template.HTML {
+func metaTag(p xlog.Page) template.HTML {
 	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
-	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(Config.Sitename)))
+	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(xlog.Config.Sitename)))
 }
 
 type rss struct {
@@ -75,11 +75,11 @@ type Item struct {
 	Link        string    `xml:"link"`
 }
 
-func feed(r Request) Output {
+func feed(r xlog.Request) xlog.Output {
 	f := rss{
 		Version: "2.0",
 		Channel: Channel{
-			Title: Config.Sitename,
+			Title: xlog.Config.Sitename,
 			Link: (&url.URL{
 				Scheme: "https",
 				Host:   domain,
@@ -91,8 +91,8 @@ func feed(r Request) Output {
 		},
 	}
 
-	pages := Pages(r.Context())
-	slices.SortFunc(pages, func(a, b Page) int {
+	pages := xlog.Pages(r.Context())
+	slices.SortFunc(pages, func(a, b xlog.Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
 		}
@@ -120,8 +120,8 @@ func feed(r Request) Output {
 
 	buff, err := xml.MarshalIndent(f, "", "    ")
 	if err != nil {
-		return InternalServerError(err)
+		return xlog.InternalServerError(err)
 	}
 
-	return PlainText(xml.Header + string(buff))
+	return xlog.PlainText(xml.Header + string(buff))
 }

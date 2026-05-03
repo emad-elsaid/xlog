@@ -126,7 +126,7 @@ func isTableDelim(bs []byte) bool {
 		return false
 	}
 	for _, b := range bs {
-		if !(util.IsSpace(b) || b == '-' || b == '|' || b == ':') {
+		if !util.IsSpace(b) && b != '-' && b != '|' && b != ':' {
 			return false
 		}
 	}
@@ -369,7 +369,7 @@ func (r *TableHTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegistere
 // - rules: Deprecated
 // - summary: Deprecated
 // - width: Deprecated.
-var TableAttributeFilter = html.GlobalAttributeFilter.ExtendString(`align,bgcolor,border,cellpadding,cellspacing,frame,rules,summary,width`) // nolint: lll
+var TableAttributeFilter = html.GlobalAttributeFilter.ExtendString(`align,bgcolor,border,cellpadding,cellspacing,frame,rules,summary,width`)
 
 func (r *TableHTMLRenderer) renderTable(
 	w util.BufWriter, source []byte, n gast.Node, entering bool) (gast.WalkStatus, error) {
@@ -456,7 +456,7 @@ func (r *TableHTMLRenderer) renderTableRow(
 //     (defined in the <th>) element relates to [NOT OK in <td>]
 //   - valign:  Obsolete since HTML5
 //   - width:  Deprecated since HTML4. Obsolete since HTML5.
-var TableThCellAttributeFilter = html.GlobalAttributeFilter.ExtendString(`abbr,align,axis,bgcolor,char,charoff,colspan,headers,height,rowspan,scope,valign,width`) // nolint:lll
+var TableThCellAttributeFilter = html.GlobalAttributeFilter.ExtendString(`abbr,align,axis,bgcolor,char,charoff,colspan,headers,height,rowspan,scope,valign,width`)
 
 // TableTdCellAttributeFilter defines attribute names which table <td> cells can have.
 //
@@ -470,11 +470,12 @@ var TableThCellAttributeFilter = html.GlobalAttributeFilter.ExtendString(`abbr,a
 //   - headers:  [OK] This attribute contains a list of space-separated strings, each corresponding
 //     to the id attribute of the <th> elements that apply to this element
 //   - height:  Deprecated since HTML4. Obsolete since HTML5
-//   - rowspan:  [OK] Number of rows that the cell is to span
+//
+// - rowspan:  [OK] Number of rows that the cell is to span
 //   - scope:  Obsolete since HTML5. [OK in <th>]
 //   - valign:  Obsolete since HTML5
 //   - width:  Deprecated since HTML4. Obsolete since HTML5.
-var TableTdCellAttributeFilter = html.GlobalAttributeFilter.ExtendString(`abbr,align,axis,bgcolor,char,charoff,colspan,headers,height,rowspan,scope,valign,width`) // nolint: lll
+var TableTdCellAttributeFilter = html.GlobalAttributeFilter.ExtendString(`abbr,align,axis,bgcolor,char,charoff,colspan,headers,height,rowspan,scope,valign,width`)
 
 func (r *TableHTMLRenderer) renderTableCell(
 	w util.BufWriter, source []byte, node gast.Node, entering bool) (gast.WalkStatus, error) {
@@ -486,9 +487,9 @@ func (r *TableHTMLRenderer) renderTableCell(
 	if entering {
 		_, _ = fmt.Fprintf(w, "<%s", tag)
 		if n.Alignment != ast.AlignNone {
-			amethod := r.TableConfig.TableCellAlignMethod
+			amethod := r.TableCellAlignMethod
 			if amethod == TableCellAlignDefault {
-				if r.Config.XHTML {
+				if r.XHTML {
 					amethod = TableCellAlignAttribute
 				} else {
 					amethod = TableCellAlignStyle

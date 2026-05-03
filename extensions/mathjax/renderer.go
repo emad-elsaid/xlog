@@ -5,7 +5,7 @@ import (
 	"embed"
 	"io/fs"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/util"
@@ -36,7 +36,7 @@ func registerBuildFiles() {
 			return nil
 		}
 
-		RegisterBuildPage("/"+path, false)
+		xlog.RegisterBuildPage("/"+path, false)
 
 		return nil
 	})

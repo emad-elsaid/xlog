@@ -13,39 +13,39 @@ import (
 	"regexp"
 	"strings"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
 
 func init() {
-	RegisterExtension(LinkPreview{})
+	xlog.RegisterExtension(LinkPreview{})
 }
 
 type LinkPreview struct{}
 
 func (LinkPreview) Name() string { return "link-preview" }
 func (LinkPreview) Init() {
-	RegisterPreprocessor(imgUrlPreprocessor)
-	RegisterPreprocessor(tweetUrlPreprocessor)
-	RegisterPreprocessor(youtubeUrlPreprocessor)
-	RegisterPreprocessor(fbUrlPreprocessor)
-	RegisterPreprocessor(giphyUrlPreprocessor)
-	RegisterPreprocessor(fallbackURLPreprocessor)
-	RegisterTemplate(templates, "templates")
+	xlog.RegisterPreprocessor(imgUrlPreprocessor)
+	xlog.RegisterPreprocessor(tweetUrlPreprocessor)
+	xlog.RegisterPreprocessor(youtubeUrlPreprocessor)
+	xlog.RegisterPreprocessor(fbUrlPreprocessor)
+	xlog.RegisterPreprocessor(giphyUrlPreprocessor)
+	xlog.RegisterPreprocessor(fallbackURLPreprocessor)
+	xlog.RegisterTemplate(templates, "templates")
 }
 
 var imgUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/\S+\.(svg|jpg|jpeg|gif|png|webp))$`)
 
-func imgUrlPreprocessor(c Markdown) Markdown {
-	return Markdown(imgUrlReg.ReplaceAllString(string(c), `![]($1)`))
+func imgUrlPreprocessor(c xlog.Markdown) xlog.Markdown {
+	return xlog.Markdown(imgUrlReg.ReplaceAllString(string(c), `![]($1)`))
 }
 
 var tweetUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/(?:twitter|x)\.com(\/\S+\/status\/[0-9]+)$`)
 
-func tweetUrlPreprocessor(c Markdown) Markdown {
-	return Markdown(
+func tweetUrlPreprocessor(c xlog.Markdown) xlog.Markdown {
+	return xlog.Markdown(
 		tweetUrlReg.ReplaceAllString(string(c), `
 <blockquote class="twitter-tweet">
 	<a href="https://twitter.com$1"></a>
@@ -56,7 +56,7 @@ func tweetUrlPreprocessor(c Markdown) Markdown {
 var youtubeUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/www\.youtube\.com\/watch\?v=(\S+)$`)
 var youtubeShortReg = regexp.MustCompile(`(?imU)^https\:\/\/youtu\.be\/(\S+)$`)
 
-func youtubeUrlPreprocessor(c Markdown) Markdown {
+func youtubeUrlPreprocessor(c xlog.Markdown) xlog.Markdown {
 	tmplt := `
 <figure class="image is-16by9 mx-0">
 	<iframe class="has-ratio" width="560" height="315" src="https://www.youtube-nocookie.com/embed/$1" style="border-radius:0.5em;" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -64,13 +64,13 @@ func youtubeUrlPreprocessor(c Markdown) Markdown {
 
 	longUrlReplaced := youtubeUrlReg.ReplaceAllString(string(c), tmplt)
 	shortUrlReplaced := youtubeShortReg.ReplaceAllString(longUrlReplaced, tmplt)
-	return Markdown(shortUrlReplaced)
+	return xlog.Markdown(shortUrlReplaced)
 }
 
 var fbUrlReg = regexp.MustCompile(`(?imU)^(https\:\/\/www\.facebook\.com\/[^\t\n\f\r \/]+/posts/[0-9a-zA-Z]+)$`)
 
-func fbUrlPreprocessor(c Markdown) Markdown {
-	return Markdown(
+func fbUrlPreprocessor(c xlog.Markdown) xlog.Markdown {
+	return xlog.Markdown(
 		fbUrlReg.ReplaceAllStringFunc(string(c), func(l string) string {
 			return fmt.Sprintf(`
 <iframe src="https://www.facebook.com/plugins/post.php?show_text=true&width=500&href=%s" width="500" height="271" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>`, url.QueryEscape(l))
@@ -80,8 +80,8 @@ func fbUrlPreprocessor(c Markdown) Markdown {
 
 var giphyUrlReg = regexp.MustCompile(`(?imU)^https\:\/\/giphy.com\/gifs\/\S+\-([^\t\n\f\r \-]+)$`)
 
-func giphyUrlPreprocessor(c Markdown) Markdown {
-	return Markdown(giphyUrlReg.ReplaceAllString(string(c), `![](https://media.giphy.com/media/$1/giphy.gif)`))
+func giphyUrlPreprocessor(c xlog.Markdown) xlog.Markdown {
+	return xlog.Markdown(giphyUrlReg.ReplaceAllString(string(c), `![](https://media.giphy.com/media/$1/giphy.gif)`))
 }
 
 var (
@@ -92,7 +92,7 @@ var (
 	metaContentReg = regexp.MustCompile(`(?imU)content\s*=\s*"(.*)"`)
 )
 
-func fallbackURLPreprocessor(c Markdown) Markdown {
+func fallbackURLPreprocessor(c xlog.Markdown) xlog.Markdown {
 	output := fallbackUrlReg.ReplaceAllStringFunc(string(c), func(m string) string {
 		m, _ = url.PathUnescape(m)
 
@@ -115,8 +115,8 @@ func fallbackURLPreprocessor(c Markdown) Markdown {
 			image = u.Scheme + "://" + u.Hostname() + image
 		}
 
-		var view string = string(
-			Partial("link-preview", Locals{
+		view := string(
+			xlog.Partial("link-preview", xlog.Locals{
 				"url":         m,
 				"title":       title,
 				"description": meta.Description,
@@ -127,7 +127,7 @@ func fallbackURLPreprocessor(c Markdown) Markdown {
 		return strings.ReplaceAll(view, "\n", "")
 	})
 
-	return Markdown(output)
+	return xlog.Markdown(output)
 }
 
 type Meta struct {
@@ -193,15 +193,16 @@ func getUrlMeta(url string) (*Meta, error) {
 		name := strings.ToLower(n[1])
 		value := v[1]
 
-		if name == "description" || name == "og:description" {
+		switch name {
+		case "description", "og:description":
 			meta.Description = value
-		} else if name == "og:image" {
+		case "og:image":
 			meta.Image = value
 		}
 	}
 
 	if js, err := json.Marshal(meta); err == nil {
-		_ = os.WriteFile(cacheFile, js, 0644)
+		_ = os.WriteFile(cacheFile, js, 0600)
 	}
 
 	return &meta, nil

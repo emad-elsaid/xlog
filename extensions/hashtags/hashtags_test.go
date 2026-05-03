@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
@@ -194,6 +194,7 @@ func TestHashTagRender(t *testing.T) {
 				}
 			}
 		})
+
 	}
 }
 
@@ -292,7 +293,7 @@ func TestHashTagUniqueness(t *testing.T) {
 
 func TestHashtagsConcurrentCacheClearance(t *testing.T) {
 	h := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	// Setup multiple pages in cache
@@ -556,7 +557,7 @@ func TestKindHashTagUniqueness(t *testing.T) {
 
 func TestHashtagsExtensionBasics(t *testing.T) {
 	h := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	// Test Name method
@@ -578,7 +579,7 @@ func TestHashtagsExtensionBasics(t *testing.T) {
 func TestLinkCommandComplete(t *testing.T) {
 	l := link{}
 
-	// Verify complete Command interface
+	// Verify complete xlog.Command interface
 	icon := l.Icon()
 	name := l.Name()
 	attrs := l.Attrs()
@@ -609,11 +610,11 @@ func TestLinkCommandComplete(t *testing.T) {
 func TestHashtagsCacheIsolation(t *testing.T) {
 	// Test that different Hashtags instances have isolated caches
 	h1 := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	h2 := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	mockPage := &mockPage{
@@ -639,7 +640,7 @@ func TestHashtagsExtensionName(t *testing.T) {
 	}{
 		{
 			name:     "default instance",
-			instance: &Hashtags{pages: make(map[Page][]*HashTag)},
+			instance: &Hashtags{pages: make(map[xlog.Page][]*HashTag)},
 			expected: "hashtags",
 		},
 		{
@@ -887,25 +888,25 @@ func TestHashtagsPageChangedAndDeleted(t *testing.T) {
 		expectedCached bool
 	}{
 		{
-			name:           "PageChanged clears cache for existing page",
+			name:           "xlog.PageChanged clears cache for existing page",
 			setupCache:     true,
 			operation:      "changed",
 			expectedCached: false,
 		},
 		{
-			name:           "PageChanged on non-cached page",
+			name:           "xlog.PageChanged on non-cached page",
 			setupCache:     false,
 			operation:      "changed",
 			expectedCached: false,
 		},
 		{
-			name:           "PageDeleted clears cache for existing page",
+			name:           "xlog.PageDeleted clears cache for existing page",
 			setupCache:     true,
 			operation:      "deleted",
 			expectedCached: false,
 		},
 		{
-			name:           "PageDeleted on non-cached page",
+			name:           "xlog.PageDeleted on non-cached page",
 			setupCache:     false,
 			operation:      "deleted",
 			expectedCached: false,
@@ -915,7 +916,7 @@ func TestHashtagsPageChangedAndDeleted(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &Hashtags{
-				pages: make(map[Page][]*HashTag),
+				pages: make(map[xlog.Page][]*HashTag),
 			}
 
 			// Create a mock page
@@ -950,7 +951,7 @@ func TestHashtagsPageChangedAndDeleted(t *testing.T) {
 	}
 }
 
-// mockPage implements the Page interface for testing.
+// mockPage implements the xlog.Page interface for testing.
 type mockPage struct {
 	name    string
 	content []byte
@@ -963,14 +964,14 @@ func (m *mockPage) Exists() bool     { return true }
 func (m *mockPage) Render() template.HTML {
 	return template.HTML(m.content)
 }
-func (m *mockPage) Content() Markdown {
+func (m *mockPage) Content() xlog.Markdown {
 	if m.content == nil {
-		return Markdown("# " + m.name)
+		return xlog.Markdown("# " + m.name)
 	}
-	return Markdown(m.content)
+	return xlog.Markdown(m.content)
 }
-func (m *mockPage) Delete() bool        { return true }
-func (m *mockPage) Write(Markdown) bool { return true }
+func (m *mockPage) Delete() bool             { return true }
+func (m *mockPage) Write(xlog.Markdown) bool { return true }
 func (m *mockPage) ModTime() time.Time {
 	if m.modTime.IsZero() {
 		return time.Now()
@@ -1034,7 +1035,7 @@ func TestHashtagsFor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &Hashtags{
-				pages: make(map[Page][]*HashTag),
+				pages: make(map[xlog.Page][]*HashTag),
 			}
 
 			mockPage := &mockPage{
@@ -1131,18 +1132,18 @@ func TestTagsHandler(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origSource := Config.Source
-			Config.Source = tmpDir
-			t.Cleanup(func() { Config.Source = origSource })
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
 
 			for filename, content := range tc.setupPages {
 				path := filepath.Join(tmpDir, filename)
-				if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 					t.Fatalf("Failed to create test file: %v", err)
 				}
 			}
 
-			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
 			r := httptest.NewRequest(http.MethodGet, "/+/tags", nil)
 			ctx := context.Background()
 			r = r.WithContext(ctx)
@@ -1197,18 +1198,18 @@ func TestTagHandler(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origSource := Config.Source
-			Config.Source = tmpDir
-			t.Cleanup(func() { Config.Source = origSource })
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
 
 			for filename, content := range tc.setupPages {
 				path := filepath.Join(tmpDir, filename)
-				if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 					t.Fatalf("Failed to create test file: %v", err)
 				}
 			}
 
-			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
 			r := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tagValue, nil)
 			r.SetPathValue("tag", tc.tagValue)
 			ctx := context.Background()
@@ -1225,7 +1226,7 @@ func TestTagHandler(t *testing.T) {
 
 func TestHashtagsForConcurrency(t *testing.T) {
 	h := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	mockPage := &mockPage{
@@ -1288,12 +1289,12 @@ func (m *mockRegisterer) Register(kind ast.NodeKind, fn renderer.NodeRendererFun
 
 func TestHashtagsForWithIndexPage(t *testing.T) {
 	h := &Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
 	// Test with index page name
 	indexPage := &mockPage{
-		name:    Config.Index,
+		name:    xlog.Config.Index,
 		content: []byte("Content with #tag"),
 	}
 
@@ -1307,8 +1308,8 @@ func TestHashtagsForWithIndexPage(t *testing.T) {
 
 func TestRelatedPagesIndexHandling(t *testing.T) {
 	// Test that index pages return empty immediately
-	h := &Hashtags{pages: make(map[Page][]*HashTag)}
-	p := &mockPage{name: Config.Index, content: []byte("#test")}
+	h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+	p := &mockPage{name: xlog.Config.Index, content: []byte("#test")}
 
 	result := h.relatedPages(p)
 
@@ -1322,27 +1323,27 @@ func TestHashtagPagesInputTrimming(t *testing.T) {
 	// We'll test by examining the tagPages call indirectly
 	tests := []struct {
 		name        string
-		input       Markdown
+		input       xlog.Markdown
 		expectCalls bool
 	}{
 		{
 			name:        "tag with leading hash is trimmed",
-			input:       Markdown("#golang"),
+			input:       xlog.Markdown("#golang"),
 			expectCalls: true,
 		},
 		{
 			name:        "tag with trailing whitespace is trimmed",
-			input:       Markdown("golang  \n"),
+			input:       xlog.Markdown("golang  \n"),
 			expectCalls: true,
 		},
 		{
 			name:        "tag with leading spaces trimmed",
-			input:       Markdown("  golang"),
+			input:       xlog.Markdown("  golang"),
 			expectCalls: true,
 		},
 		{
 			name:        "complex whitespace combo",
-			input:       Markdown("# golang \n"),
+			input:       xlog.Markdown("# golang \n"),
 			expectCalls: true,
 		},
 	}
@@ -1350,11 +1351,11 @@ func TestHashtagPagesInputTrimming(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origSource := Config.Source
-			Config.Source = tmpDir
-			t.Cleanup(func() { Config.Source = origSource })
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
 
-			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
 
 			// The function will call tagPages and then Partial
 			// We expect it to not panic during the tagPages phase
@@ -1378,26 +1379,26 @@ func TestHashtagPagesGridInputTrimming(t *testing.T) {
 	// Test the input trimming logic in hashtagPagesGrid (parallel to hashtagPages)
 	tests := []struct {
 		name  string
-		input Markdown
+		input xlog.Markdown
 	}{
 		{
 			name:  "hash and spaces trimmed correctly",
-			input: Markdown("# test \n"),
+			input: xlog.Markdown("# test \n"),
 		},
 		{
 			name:  "only whitespace trimmed",
-			input: Markdown("  test  "),
+			input: xlog.Markdown("  test  "),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origSource := Config.Source
-			Config.Source = tmpDir
-			t.Cleanup(func() { Config.Source = origSource })
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
 
-			h := &Hashtags{pages: make(map[Page][]*HashTag)}
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
 
 			// Same approach - expect panic from Partial, not from trimming
 			defer func() {
@@ -1416,14 +1417,14 @@ func TestHashtagPagesGridInputTrimming(t *testing.T) {
 func TestTagPagesSortingInternal(t *testing.T) {
 	// Test tagPages sorting logic via mocked pages
 	// The actual sorting happens in both hashtagPages and hashtagPagesGrid
-	h := &Hashtags{pages: make(map[Page][]*HashTag)}
+	h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
 
 	// Verify sorting logic exists by checking the functions compile and don't panic
 	// when calling tagPages (the underlying method used by both shortcodes)
 	tmpDir := t.TempDir()
-	origSource := Config.Source
-	Config.Source = tmpDir
-	t.Cleanup(func() { Config.Source = origSource })
+	origSource := xlog.Config.Source
+	xlog.Config.Source = tmpDir
+	t.Cleanup(func() { xlog.Config.Source = origSource })
 
 	// This tests the code path, not the full result
 	result := h.tagPages(context.Background(), "test")

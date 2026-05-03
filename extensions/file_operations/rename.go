@@ -7,11 +7,11 @@ import (
 	"os"
 	"path"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 type PageRename struct {
-	page Page
+	page xlog.Page
 }
 
 func (PageRename) Icon() string { return "fa-solid fa-i-cursor" }
@@ -25,19 +25,19 @@ func (f PageRename) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
-func (f PageRename) Form(r Request) Output {
+func (f PageRename) Form(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
-	page := NewPage(name)
+	page := xlog.NewPage(name)
 
-	return Render("rename-form", map[string]any{
+	return xlog.Render("rename-form", map[string]any{
 		"page": page,
 	})
 }
 
-func (f PageRename) Handler(r Request) Output {
-	old := NewPage(r.FormValue("old"))
+func (f PageRename) Handler(r xlog.Request) xlog.Output {
+	old := xlog.NewPage(r.FormValue("old"))
 	if old == nil || !old.Exists() {
-		return BadRequest("file doesn't exist")
+		return xlog.BadRequest("file doesn't exist")
 	}
 
 	ext := path.Ext(old.FileName())
@@ -45,11 +45,11 @@ func (f PageRename) Handler(r Request) Output {
 	newName := basename + ext
 
 	if err := os.Rename(old.FileName(), newName); err != nil {
-		return BadRequest(fmt.Sprintf("Failed to rename file: %v", err))
+		return xlog.BadRequest(fmt.Sprintf("Failed to rename file: %v", err))
 	}
-	old.Write(Markdown(fmt.Sprintf("Renamed to: %s", basename)))
+	old.Write(xlog.Markdown(fmt.Sprintf("Renamed to: %s", basename)))
 
-	return func(w Response, r Request) {
+	return func(w xlog.Response, r xlog.Request) {
 		w.Header().Add("HX-Redirect", "/"+basename)
 	}
 }

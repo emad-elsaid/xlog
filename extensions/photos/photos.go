@@ -201,7 +201,7 @@ func resizeHandler(r xlog.Request) xlog.Output {
 			return
 		}
 
-		if err := os.WriteFile(cacheFile, out.Bytes(), 0700); err != nil {
+		if err := os.WriteFile(cacheFile, out.Bytes(), 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to cache resized image: %v\n", err)
 			// Continue despite cache failure
 		}

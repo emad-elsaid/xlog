@@ -289,7 +289,8 @@ func TestAddDirAutoWithRTLContent(t *testing.T) {
 		}
 
 		kind := node.Kind()
-		if kind == ast.KindHeading {
+		switch kind {
+		case ast.KindHeading:
 			headingCount++
 			dir, ok := node.AttributeString("dir")
 			if !ok {
@@ -308,7 +309,7 @@ func TestAddDirAutoWithRTLContent(t *testing.T) {
 					t.Errorf("Expected dir='auto', got '%s'", dirStr)
 				}
 			}
-		} else if kind == ast.KindParagraph {
+		case ast.KindParagraph:
 			paragraphCount++
 			dir, ok := node.AttributeString("dir")
 			if !ok {

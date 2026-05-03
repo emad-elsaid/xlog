@@ -3,7 +3,7 @@ package heading
 import (
 	"fmt"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
@@ -11,14 +11,14 @@ import (
 )
 
 func init() {
-	RegisterExtension(Heading{})
+	xlog.RegisterExtension(Heading{})
 }
 
 type Heading struct{}
 
 func (Heading) Name() string { return "heading" }
 func (Heading) Init() {
-	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
+	xlog.MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&headingRenderer{}, 0),
 	))
 }
@@ -41,7 +41,7 @@ func (s *headingRenderer) render(w util.BufWriter, source []byte, node ast.Node,
 	} else {
 
 		if id, ok := node.AttributeString("id"); ok {
-			if _, err := w.WriteString(fmt.Sprintf(` <a class="show-on-parent-hover is-hidden has-text-grey" href="#%s">¶</a>`, id)); err != nil {
+			if _, err := fmt.Fprintf(w, ` <a class="show-on-parent-hover is-hidden has-text-grey" href="#%s">¶</a>`, id); err != nil {
 				return ast.WalkStop, err
 			}
 		}

@@ -1,7 +1,7 @@
 package shortcode
 
 import (
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
@@ -9,14 +9,14 @@ import (
 )
 
 func init() {
-	RegisterExtension(ShortCodeEx{})
+	xlog.RegisterExtension(ShortCodeEx{})
 }
 
 type ShortCodeEx struct{}
 
 func (s ShortCodeEx) Name() string { return "shortcode" }
 func (s ShortCodeEx) Init() {
-	s.Extend(MarkdownConverter())
+	s.Extend(xlog.MarkdownConverter())
 }
 
 func (s ShortCodeEx) Extend(md markdown.Markdown) {

@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
@@ -21,22 +21,22 @@ func init() {
 	flag.StringVar(&domain, "og.domain", "", "opengraph domain name to be used for meta tags of og:* and twitter:*")
 	flag.StringVar(&twitterUsername, "twitter.username", "", "user twitter account @handle. including the @")
 
-	RegisterExtension(Opengraph{})
+	xlog.RegisterExtension(Opengraph{})
 }
 
 type Opengraph struct{}
 
 func (Opengraph) Name() string { return "opengraph" }
 func (Opengraph) Init() {
-	RegisterWidget(WidgetHead, 1, opengraphTags)
+	xlog.RegisterWidget(xlog.WidgetHead, 1, opengraphTags)
 }
 
-func opengraphTags(p Page) template.HTML {
+func opengraphTags(p xlog.Page) template.HTML {
 	escape := template.JSEscapeString
 
 	title := p.Name()
-	if p.Name() == Config.Index {
-		title = Config.Sitename
+	if p.Name() == xlog.Config.Index {
+		title = xlog.Config.Sitename
 	}
 
 	var u url.URL
@@ -48,7 +48,7 @@ func opengraphTags(p Page) template.HTML {
 
 	var image string
 	src, tree := p.AST()
-	if imageAST, ok := FindInAST[*ast.Image](tree); ok && imageAST != nil {
+	if imageAST, ok := xlog.FindInAST[*ast.Image](tree); ok && imageAST != nil {
 		image = "https://" + domain + string(imageAST.Destination)
 	}
 
@@ -62,7 +62,7 @@ func opengraphTags(p Page) template.HTML {
     <meta property="og:url" content="%s" />
     <meta property="og:type" content="website" />
 `,
-		escape(Config.Sitename),
+		escape(xlog.Config.Sitename),
 		escape(title),
 		escape(firstParagraph),
 		escape(image),
@@ -107,7 +107,8 @@ func rawText(source []byte, n ast.Node, limit int) string {
 		}
 
 		if n.Kind() == ast.KindText {
-			out += " " + strings.TrimSpace(string(n.(*ast.Text).Text(source)))
+			textNode := n.(*ast.Text)
+			out += " " + strings.TrimSpace(string(textNode.Segment.Value(source)))
 		}
 
 		if len(out) > limit {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 func TestMermaidExtensionName(t *testing.T) {
@@ -19,12 +19,12 @@ func TestMermaidExtensionName(t *testing.T) {
 func TestMermaidRenderer(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    Markdown
+		input    xlog.Markdown
 		contains []string
 	}{
 		{
 			name:  "simple graph",
-			input: Markdown("graph TD\n    A-->B"),
+			input: xlog.Markdown("graph TD\n    A-->B"),
 			contains: []string{
 				`<pre class="mermaid"`,
 				`style="background: transparent;text-align:center;"`,
@@ -37,7 +37,7 @@ func TestMermaidRenderer(t *testing.T) {
 		},
 		{
 			name:  "sequence diagram",
-			input: Markdown("sequenceDiagram\n    Alice->>John: Hello John"),
+			input: xlog.Markdown("sequenceDiagram\n    Alice->>John: Hello John"),
 			contains: []string{
 				`<pre class="mermaid"`,
 				"sequenceDiagram",
@@ -46,7 +46,7 @@ func TestMermaidRenderer(t *testing.T) {
 		},
 		{
 			name:  "empty diagram",
-			input: Markdown(""),
+			input: xlog.Markdown(""),
 			contains: []string{
 				`<pre class="mermaid"`,
 				"</pre>",
@@ -54,7 +54,7 @@ func TestMermaidRenderer(t *testing.T) {
 		},
 		{
 			name:  "diagram with special characters",
-			input: Markdown("graph LR\n    A[\"Item with <>&\"]"),
+			input: xlog.Markdown("graph LR\n    A[\"Item with <>&\"]"),
 			contains: []string{
 				`<pre class="mermaid"`,
 				"graph LR",
@@ -83,7 +83,7 @@ func TestMermaidRenderer(t *testing.T) {
 }
 
 func TestMermaidRendererStructure(t *testing.T) {
-	input := Markdown("graph TD\n    Start-->End")
+	input := xlog.Markdown("graph TD\n    Start-->End")
 	result := renderer(input)
 	resultStr := string(result)
 
@@ -133,7 +133,7 @@ func TestMermaidInit(t *testing.T) {
 	// Verify that the shortcode was registered by checking if we can use it
 	// The shortcode.ShortCodes map should contain "mermaid"
 	// We verify this by attempting to render something
-	result := renderer(Markdown("test"))
+	result := renderer(xlog.Markdown("test"))
 	if result == "" {
 		t.Error("Expected renderer to work after Init()")
 	}

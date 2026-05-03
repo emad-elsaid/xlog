@@ -1,7 +1,7 @@
 package shortcode
 
 import (
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/util"
@@ -25,7 +25,7 @@ func (s *shortCodeRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 	}
 
 	content := source[node.start:node.end]
-	output := node.fun.Render(Markdown(content))
+	output := node.fun.Render(xlog.Markdown(content))
 	if _, err := w.Write([]byte(output)); err != nil {
 		return ast.WalkStop, err
 	}
@@ -50,7 +50,7 @@ func (s *shortCodeRenderer) renderBlock(w util.BufWriter, source []byte, n ast.N
 		content += string(line.Value(source))
 	}
 
-	output := node.fun.Render(Markdown(content))
+	output := node.fun.Render(xlog.Markdown(content))
 	if _, err := w.Write([]byte(output)); err != nil {
 		return ast.WalkStop, err
 	}

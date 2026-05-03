@@ -51,7 +51,7 @@ func TestPandocInit(t *testing.T) {
 func TestPandocPage(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	defer os.Chdir(oldWd) //nolint:errcheck
+	defer func() { _ = os.Chdir(oldWd) }()
 	_ = os.Chdir(tmpDir)
 
 	tests := []struct {
@@ -117,11 +117,11 @@ func TestPandocPage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			testDir := t.TempDir()
 			oldWd, _ := os.Getwd()
-			defer os.Chdir(oldWd) //nolint:errcheck
+			defer func() { _ = os.Chdir(oldWd) }()
 			_ = os.Chdir(testDir)
 
 			for filename, content := range tc.createFiles {
-				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+				if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
 					t.Fatalf("Failed to create test file %s: %v", filename, err)
 				}
 			}
@@ -155,7 +155,7 @@ func TestPandocPage(t *testing.T) {
 func TestPandocEach(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	defer os.Chdir(oldWd) //nolint:errcheck
+	defer func() { _ = os.Chdir(oldWd) }()
 	_ = os.Chdir(tmpDir)
 
 	testFiles := map[string]string{
@@ -170,11 +170,11 @@ func TestPandocEach(t *testing.T) {
 	for filename, content := range testFiles {
 		dir := filepath.Dir(filename)
 		if dir != "." {
-			if err := os.MkdirAll(dir, 0755); err != nil {
+			if err := os.MkdirAll(dir, 0750); err != nil {
 				t.Fatalf("Failed to create directory %s: %v", dir, err)
 			}
 		}
-		if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
 			t.Fatalf("Failed to create test file %s: %v", filename, err)
 		}
 	}
@@ -291,10 +291,10 @@ func TestPageFileName(t *testing.T) {
 func TestPageExists(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	defer os.Chdir(oldWd) //nolint:errcheck
+	defer func() { _ = os.Chdir(oldWd) }()
 	_ = os.Chdir(tmpDir)
 
-	if err := os.WriteFile("existing.org", []byte("content"), 0644); err != nil {
+	if err := os.WriteFile("existing.org", []byte("content"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -327,11 +327,11 @@ func TestPageExists(t *testing.T) {
 func TestPageContent(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	defer os.Chdir(oldWd) //nolint:errcheck
+	defer func() { _ = os.Chdir(oldWd) }()
 	_ = os.Chdir(tmpDir)
 
 	testContent := "* Test Heading\nTest content"
-	if err := os.WriteFile("test.org", []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile("test.org", []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -364,11 +364,11 @@ func TestPageContent(t *testing.T) {
 func TestPageModTime(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	defer os.Chdir(oldWd) //nolint:errcheck
+	defer func() { _ = os.Chdir(oldWd) }()
 	_ = os.Chdir(tmpDir)
 
 	now := time.Now()
-	if err := os.WriteFile("test.org", []byte("content"), 0644); err != nil {
+	if err := os.WriteFile("test.org", []byte("content"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -440,13 +440,13 @@ func TestPageDelete(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			oldWd, _ := os.Getwd()
-			defer os.Chdir(oldWd) //nolint:errcheck
+			defer func() { _ = os.Chdir(oldWd) }()
 			_ = os.Chdir(tmpDir)
 
 			p := &page{name: "test", ext: ".org"}
 
 			if tc.createFile {
-				if err := os.WriteFile(p.FileName(), []byte("content"), 0644); err != nil {
+				if err := os.WriteFile(p.FileName(), []byte("content"), 0600); err != nil {
 					t.Fatalf("Failed to create test file: %v", err)
 				}
 			}
@@ -510,7 +510,7 @@ func TestPageWrite(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			oldWd, _ := os.Getwd()
-			defer os.Chdir(oldWd) //nolint:errcheck
+			defer func() { _ = os.Chdir(oldWd) }()
 			_ = os.Chdir(tmpDir)
 
 			oldReadonly := xlog.Config.Readonly

@@ -166,9 +166,10 @@ func (s *linkParser) Parse(parent ast.Node, block text.Reader, pc Context) ast.N
 	l, pos := block.Position()
 	var link *ast.Link
 	var hasValue bool
-	if c == '(' { // normal link
+	switch c {
+	case '(': // normal link
 		link = s.parseLink(parent, last, block, pc)
-	} else if c == '[' { // reference link
+	case '[': // reference link
 		link, hasValue = s.parseReferenceLink(parent, last, block, pc)
 		if link == nil && hasValue {
 			ast.MergeOrReplaceTextSegment(last.Parent(), last, last.Segment)

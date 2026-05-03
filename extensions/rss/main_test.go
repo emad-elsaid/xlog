@@ -9,7 +9,12 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
+)
+
+const (
+	testRSSName = "RSS"
+	testRSSIcon = "fa-solid fa-rss"
 )
 
 func TestRSSExtensionName(t *testing.T) {
@@ -30,10 +35,10 @@ func setupTestEnv(t *testing.T) func() {
 	}
 
 	// Create test pages
-	if err := os.WriteFile("page1.md", []byte("# Page 1\nContent 1"), 0600); err != nil {
+	if err := os.WriteFile("page1.md", []byte("# xlog.Page 1\nContent 1"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
-	if err := os.WriteFile("page2.md", []byte("# Page 2\nContent 2"), 0600); err != nil {
+	if err := os.WriteFile("page2.md", []byte("# xlog.Page 2\nContent 2"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -41,13 +46,13 @@ func setupTestEnv(t *testing.T) func() {
 	originalDomain := domain
 	originalDescription := description
 	originalLimit := limit
-	originalSitename := Config.Sitename
+	originalSitename := xlog.Config.Sitename
 
 	// Set test values
 	domain = "example.com"
 	description = "Test RSS Feed"
 	limit = 30
-	Config.Sitename = "Test Site"
+	xlog.Config.Sitename = "Test Site"
 
 	cleanup := func() {
 		if err := os.Chdir(wd); err != nil {
@@ -56,7 +61,7 @@ func setupTestEnv(t *testing.T) func() {
 		domain = originalDomain
 		description = originalDescription
 		limit = originalLimit
-		Config.Sitename = originalSitename
+		xlog.Config.Sitename = originalSitename
 	}
 
 	return cleanup
@@ -114,7 +119,7 @@ func TestFeedItemsCount(t *testing.T) {
 	limit = 2
 
 	// Create a third page
-	if err := os.WriteFile("page3.md", []byte("# Page 3\nContent 3"), 0600); err != nil {
+	if err := os.WriteFile("page3.md", []byte("# xlog.Page 3\nContent 3"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -259,7 +264,7 @@ func TestLinks(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	pages := Pages(req.Context())
+	pages := xlog.Pages(req.Context())
 	if len(pages) == 0 {
 		t.Fatal("Expected at least one page")
 	}
@@ -272,12 +277,12 @@ func TestLinks(t *testing.T) {
 
 	cmd := commands[0]
 
-	if cmd.Name() != "RSS" {
-		t.Errorf("Expected link name 'RSS', got '%s'", cmd.Name())
+	if cmd.Name() != testRSSName {
+		t.Errorf("Expected link name '%s', got '%s'", testRSSName, cmd.Name())
 	}
 
-	if cmd.Icon() != "fa-solid fa-rss" {
-		t.Errorf("Expected icon 'fa-solid fa-rss', got '%s'", cmd.Icon())
+	if cmd.Icon() != testRSSIcon {
+		t.Errorf("Expected icon '%s', got '%s'", testRSSIcon, cmd.Icon())
 	}
 
 	attrs := cmd.Attrs()
@@ -314,11 +319,11 @@ func TestMetaTag(t *testing.T) {
 			cleanup := setupTestEnv(t)
 			defer cleanup()
 
-			Config.Sitename = tc.sitename
+			xlog.Config.Sitename = tc.sitename
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 
-			pages := Pages(req.Context())
+			pages := xlog.Pages(req.Context())
 			if len(pages) == 0 {
 				t.Fatal("Expected at least one page")
 			}
@@ -335,12 +340,12 @@ func TestMetaTag(t *testing.T) {
 func TestRSSLinkInterface(t *testing.T) {
 	link := rssLink{}
 
-	if link.Icon() != "fa-solid fa-rss" {
-		t.Errorf("Expected icon 'fa-solid fa-rss', got '%s'", link.Icon())
+	if link.Icon() != testRSSIcon {
+		t.Errorf("Expected icon '%s', got '%s'", testRSSIcon, link.Icon())
 	}
 
-	if link.Name() != "RSS" {
-		t.Errorf("Expected name 'RSS', got '%s'", link.Name())
+	if link.Name() != testRSSName {
+		t.Errorf("Expected name '%s', got '%s'", testRSSName, link.Name())
 	}
 
 	attrs := link.Attrs()

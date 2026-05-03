@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"html/template"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 const tmpl = `
@@ -31,17 +31,17 @@ var domain string
 
 func init() {
 	flag.StringVar(&domain, "disqus", "", "Disqus domain name for example: xlog-emadelsaid.disqus.com")
-	RegisterExtension(Disqus{})
+	xlog.RegisterExtension(Disqus{})
 }
 
 type Disqus struct{}
 
 func (Disqus) Name() string { return "disqus" }
 func (Disqus) Init() {
-	RegisterWidget(WidgetAfterView, 2, widget)
+	xlog.RegisterWidget(xlog.WidgetAfterView, 2, widget)
 }
 
-func widget(p Page) template.HTML {
+func widget(p xlog.Page) template.HTML {
 	if domain == "" {
 		return ""
 	}

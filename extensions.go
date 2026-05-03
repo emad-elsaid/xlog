@@ -24,7 +24,7 @@ func initExtensions() {
 	}
 
 	disabled := strings.Split(Config.DisabledExtensions, ",")
-	disabledNames := []string{} // because the user can input wrong extension name
+	var disabledNames []string
 	enabledNames := []string{}
 	for i := range extensions {
 		if slices.Contains(disabled, extensions[i].Name()) {
@@ -36,5 +36,5 @@ func initExtensions() {
 		enabledNames = append(enabledNames, extensions[i].Name())
 	}
 
-	slog.Info("extensions", "enabled", enabledNames, "disabled", disabled)
+	slog.Info("extensions", "enabled", enabledNames, "disabled", disabledNames)
 }

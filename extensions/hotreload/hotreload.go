@@ -8,7 +8,7 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/gorilla/websocket"
 )
 
@@ -19,23 +19,23 @@ var (
 )
 
 func init() {
-	RegisterExtension(Hotreload{})
+	xlog.RegisterExtension(Hotreload{})
 }
 
 type Hotreload struct{}
 
 func (Hotreload) Name() string { return "hotreload" }
 func (Hotreload) Init() {
-	if Config.Readonly {
+	if xlog.Config.Readonly {
 		return
 	}
 
-	Listen(PageChanged, NotifyPageChange)
-	Get(`/+/hotreload`, handleWebSocket)
-	RegisterWidget(WidgetAfterView, 0, clientWidget)
+	xlog.Listen(xlog.PageChanged, NotifyPageChange)
+	xlog.Get(`/+/hotreload`, handleWebSocket)
+	xlog.RegisterWidget(xlog.WidgetAfterView, 0, clientWidget)
 }
 
-func NotifyPageChange(p Page) error {
+func NotifyPageChange(p xlog.Page) error {
 	if !p.Exists() {
 		return nil
 	}
@@ -57,12 +57,12 @@ func NotifyPageChange(p Page) error {
 	return nil
 }
 
-func handleWebSocket(r Request) Output {
-	return func(w Response, r Request) {
+func handleWebSocket(r xlog.Request) xlog.Output {
+	return func(w xlog.Response, r xlog.Request) {
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			slog.Error("Failed to upgrade", "error", err)
-			BadRequest(err.Error())(w, r)
+			xlog.BadRequest(err.Error())(w, r)
 		}
 
 		// keep connection open
@@ -93,6 +93,6 @@ func handleWebSocket(r Request) Output {
 //go:embed script.html
 var clientScript string
 
-func clientWidget(p Page) template.HTML {
+func clientWidget(p xlog.Page) template.HTML {
 	return template.HTML(clientScript)
 }

@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/text"
@@ -474,7 +474,7 @@ Some intro text
 				t.Fatalf("Failed to write test file: %v", err)
 			}
 
-			p := NewPage("test")
+			p := xlog.NewPage("test")
 			total, done := countTodos(p)
 
 			if total != tt.expectedTotal {
@@ -493,7 +493,7 @@ func TestBacklinksSection(t *testing.T) {
 		cleanup := setupTestEnvironment(t, []string{"index.md"})
 		defer cleanup()
 
-		p := NewPage("index")
+		p := xlog.NewPage("index")
 		result := backlinksSection(p)
 
 		if result != "" {
@@ -516,7 +516,7 @@ func TestBacklinksSection(t *testing.T) {
 			_ = recover() // Ignore panic from uninitialized templates
 		}()
 
-		p := NewPage("target")
+		p := xlog.NewPage("target")
 		_ = backlinksSection(p)
 		// Test passes if no panic before template rendering
 	})
@@ -537,8 +537,7 @@ func setupTestEnvironment(t *testing.T, pageFiles []string) func() {
 	for _, page := range pageFiles {
 		dir := strings.TrimSuffix(page, "/"+strings.Split(page, "/")[len(strings.Split(page, "/"))-1])
 		if dir != page && dir != "" {
-			//nolint:gosec // Test directory - 0755 is acceptable
-			if err := os.MkdirAll(dir, 0755); err != nil {
+			if err := os.MkdirAll(dir, 0750); err != nil {
 				t.Fatalf("Failed to create directory %s: %v", dir, err)
 			}
 		}
@@ -550,11 +549,11 @@ func setupTestEnvironment(t *testing.T, pageFiles []string) func() {
 	}
 
 	// Save original Config values
-	originalIndex := Config.Index
-	Config.Index = "index"
+	originalIndex := xlog.Config.Index
+	xlog.Config.Index = "index"
 
 	cleanup := func() {
-		Config.Index = originalIndex
+		xlog.Config.Index = originalIndex
 		if err := os.Chdir(originalWd); err != nil {
 			t.Errorf("Failed to restore directory: %v", err)
 		}
@@ -575,12 +574,12 @@ func (m *mockPage) Exists() bool     { return true }
 func (m *mockPage) Render() template.HTML {
 	return template.HTML("<h1>Mock Page</h1>")
 }
-func (m *mockPage) Content() Markdown {
-	return Markdown("# Mock Page\nContent")
+func (m *mockPage) Content() xlog.Markdown {
+	return xlog.Markdown("# Mock Page\nContent")
 }
-func (m *mockPage) Delete() bool        { return false }
-func (m *mockPage) Write(Markdown) bool { return false }
-func (m *mockPage) ModTime() time.Time  { return time.Now() }
+func (m *mockPage) Delete() bool             { return false }
+func (m *mockPage) Write(xlog.Markdown) bool { return false }
+func (m *mockPage) ModTime() time.Time       { return time.Now() }
 func (m *mockPage) AST() ([]byte, ast.Node) {
 	return []byte("# Mock Page\nContent"), ast.NewDocument()
 }

@@ -3,21 +3,21 @@ package autolink
 import (
 	"bytes"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 func init() {
-	RegisterExtension(AutoLink{})
+	xlog.RegisterExtension(AutoLink{})
 }
 
 type AutoLink struct{}
 
 func (AutoLink) Name() string { return "autolink" }
 func (AutoLink) Init() {
-	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
+	xlog.MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&extension{}, -1),
 	))
 }

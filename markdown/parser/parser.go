@@ -1196,7 +1196,7 @@ func (p *parser) processLineContent(line []byte, lineLength int, parent ast.Node
 		isSpace := util.IsSpace(c) && c != '\r' && c != '\n'
 		isPunct := util.IsPunct(c)
 
-		if (isPunct && !*escaped) || isSpace && !(*escaped && p.escapedSpace) || i == 0 {
+		if (isPunct && !*escaped) || isSpace && (!*escaped || !p.escapedSpace) || i == 0 {
 			parserChar := c
 			if isSpace || (i == 0 && !isPunct) {
 				parserChar = ' '

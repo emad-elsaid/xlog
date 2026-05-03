@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
@@ -74,7 +74,7 @@ func TestPageDeleteAttrs(t *testing.T) {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
-	page := NewPage(testPageName)
+	page := xlog.NewPage(testPageName)
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
@@ -120,7 +120,7 @@ func TestPageRenameAttrs(t *testing.T) {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
-	page := NewPage(testPageName)
+	page := xlog.NewPage(testPageName)
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
@@ -415,12 +415,12 @@ type mockPage struct {
 	fileName string
 }
 
-func (m *mockPage) Name() string            { return m.fileName }
-func (m *mockPage) FileName() string        { return m.fileName }
-func (m *mockPage) Exists() bool            { return true }
-func (m *mockPage) Delete() bool            { return true }
-func (m *mockPage) Write(md Markdown) bool  { return true }
-func (m *mockPage) Content() Markdown       { return "" }
-func (m *mockPage) Render() template.HTML   { return "" }
-func (m *mockPage) ModTime() time.Time      { return time.Now() }
-func (m *mockPage) AST() ([]byte, ast.Node) { return nil, nil }
+func (m *mockPage) Name() string                { return m.fileName }
+func (m *mockPage) FileName() string            { return m.fileName }
+func (m *mockPage) Exists() bool                { return true }
+func (m *mockPage) Delete() bool                { return true }
+func (m *mockPage) Write(md xlog.Markdown) bool { return true }
+func (m *mockPage) Content() xlog.Markdown      { return "" }
+func (m *mockPage) Render() template.HTML       { return "" }
+func (m *mockPage) ModTime() time.Time          { return time.Now() }
+func (m *mockPage) AST() ([]byte, ast.Node)     { return nil, nil }

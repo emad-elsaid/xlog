@@ -56,11 +56,11 @@ end:
 		// trim first halfspace and last halfspace
 		segment := node.FirstChild().(*ast.Text).Segment
 		shouldTrimmed := true
-		if !(!segment.IsEmpty() && block.Source()[segment.Start] == ' ') {
+		if segment.IsEmpty() || block.Source()[segment.Start] != ' ' {
 			shouldTrimmed = false
 		}
 		segment = node.LastChild().(*ast.Text).Segment
-		if !(!segment.IsEmpty() && block.Source()[segment.Stop-1] == ' ') {
+		if segment.IsEmpty() || block.Source()[segment.Stop-1] != ' ' {
 			shouldTrimmed = false
 		}
 		if shouldTrimmed {
@@ -127,10 +127,11 @@ func (b *mathJaxBlockParser) Continue(node ast.Node, reader text.Reader, pc pars
 		}
 	}
 
-	pos, padding := util.DedentPosition(line, 0, data.indent)
-	seg := text.NewSegmentPadding(segment.Start+pos, segment.Stop, padding)
+	_, padding := util.IndentPositionPadding(line, 0, 0, data.indent)
+	nonSpacePos := util.FirstNonSpacePosition(line)
+	seg := text.NewSegmentPadding(segment.Start+nonSpacePos, segment.Stop, padding)
 	node.Lines().Append(seg)
-	reader.AdvanceAndSetPadding(segment.Stop-segment.Start-pos-1, padding)
+	reader.AdvanceAndSetPadding(segment.Stop-segment.Start-nonSpacePos-1, padding)
 	return parser.Continue | parser.NoChildren
 }
 

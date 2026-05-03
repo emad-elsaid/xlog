@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
@@ -81,22 +81,22 @@ func TestRawText(t *testing.T) {
 
 func TestOpengraphTags(t *testing.T) {
 	// Setup test configuration
-	originalSitename := Config.Sitename
-	originalIndex := Config.Index
+	originalSitename := xlog.Config.Sitename
+	originalIndex := xlog.Config.Index
 	defer func() {
-		Config.Sitename = originalSitename
-		Config.Index = originalIndex
+		xlog.Config.Sitename = originalSitename
+		xlog.Config.Index = originalIndex
 	}()
 
-	Config.Sitename = "Test Site"
-	Config.Index = "index"
+	xlog.Config.Sitename = "Test Site"
+	xlog.Config.Index = "index"
 	domain = "example.com"
 	twitterUsername = "@testuser"
 
 	// Create a mock page
 	mockPage := mockTestPage{
-		name:    "Test Page",
-		content: "# Test Page\n\nThis is a test page with some content.",
+		name:    "Test xlog.Page",
+		content: "# Test xlog.Page\n\nThis is a test page with some content.",
 	}
 
 	result := opengraphTags(mockPage)
@@ -105,10 +105,10 @@ func TestOpengraphTags(t *testing.T) {
 	// Check for required OpenGraph tags
 	expectedTags := []string{
 		`property="og:site_name" content="Test Site"`,
-		`property="og:title" content="Test Page"`,
+		`property="og:title" content="Test xlog.Page"`,
 		`property="og:description"`,
 		`property="og:type" content="website"`,
-		`name="twitter:title" content="Test Page"`,
+		`name="twitter:title" content="Test xlog.Page"`,
 		`name="twitter:creator" content="@testuser"`,
 		`name="twitter:site" content="@testuser"`,
 		`name="description"`,
@@ -122,13 +122,13 @@ func TestOpengraphTags(t *testing.T) {
 }
 
 func TestOpengraphTagsWithImage(t *testing.T) {
-	Config.Sitename = "Test Site"
+	xlog.Config.Sitename = "Test Site"
 	domain = "example.com"
 	twitterUsername = "@testuser"
 
 	mockPage := mockTestPage{
-		name:    "Page With Image",
-		content: "# Page With Image\n\n![alt text](/image.png)\n\nSome content.",
+		name:    "xlog.Page With Image",
+		content: "# xlog.Page With Image\n\n![alt text](/image.png)\n\nSome content.",
 	}
 
 	result := opengraphTags(mockPage)
@@ -144,8 +144,8 @@ func TestOpengraphTagsWithImage(t *testing.T) {
 }
 
 func TestOpengraphTagsForIndexPage(t *testing.T) {
-	Config.Sitename = "My Blog"
-	Config.Index = "index"
+	xlog.Config.Sitename = "My Blog"
+	xlog.Config.Index = "index"
 	domain = "myblog.com"
 
 	mockPage := mockTestPage{
@@ -168,16 +168,16 @@ type mockTestPage struct {
 	content string
 }
 
-func (m mockTestPage) Name() string          { return m.name }
-func (m mockTestPage) FileName() string      { return m.name + ".md" }
-func (m mockTestPage) Exists() bool          { return true }
-func (m mockTestPage) Render() template.HTML { return "" }
-func (m mockTestPage) Content() Markdown     { return Markdown(m.content) }
-func (m mockTestPage) Delete() bool          { return false }
-func (m mockTestPage) Write(Markdown) bool   { return false }
-func (m mockTestPage) ModTime() time.Time    { return time.Now() }
+func (m mockTestPage) Name() string             { return m.name }
+func (m mockTestPage) FileName() string         { return m.name + ".md" }
+func (m mockTestPage) Exists() bool             { return true }
+func (m mockTestPage) Render() template.HTML    { return "" }
+func (m mockTestPage) Content() xlog.Markdown   { return xlog.Markdown(m.content) }
+func (m mockTestPage) Delete() bool             { return false }
+func (m mockTestPage) Write(xlog.Markdown) bool { return false }
+func (m mockTestPage) ModTime() time.Time       { return time.Now() }
 func (m mockTestPage) AST() ([]byte, ast.Node) {
 	source := []byte(m.content)
-	tree := MarkdownConverter().Parser().Parse(text.NewReader(source))
+	tree := xlog.MarkdownConverter().Parser().Parse(text.NewReader(source))
 	return source, tree
 }

@@ -150,7 +150,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 	}
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
-	if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(name, []byte(content), 0600); err != nil {
 		slog.Error("Can't write page", "page", p.Name(), "error", err)
 		return false
 	}

@@ -1,31 +1,31 @@
 package date
 
 import (
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
 func init() {
-	RegisterExtension(Date{})
+	xlog.RegisterExtension(Date{})
 }
 
 type Date struct{}
 
 func (Date) Name() string { return "date" }
 func (Date) Init() {
-	RegisterTemplate(templates, "templates")
-	RegisterLink(links)
-	RegisterBuildPage(`/+/calendar`, true)
+	xlog.RegisterTemplate(templates, "templates")
+	xlog.RegisterLink(links)
+	xlog.RegisterBuildPage(`/+/calendar`, true)
 
-	Get(`/+/date/{date}`, dateHandler)
-	Get(`/+/calendar`, calendarHandler)
+	xlog.Get(`/+/date/{date}`, dateHandler)
+	xlog.Get(`/+/calendar`, calendarHandler)
 
-	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
+	xlog.MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&dateParser{}, 999),
 	))
-	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
+	xlog.MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&dateRenderer{}, 0),
 	))
 }

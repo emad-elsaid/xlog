@@ -109,7 +109,7 @@ func githubSubCommand(args []string) {
 	if err != nil {
 		abortIfError(err)
 	}
-	err = os.WriteFile(*outputPath, jsonData, 0644)
+	err = os.WriteFile(*outputPath, jsonData, 0600)
 	if err != nil {
 		abortIfError(err)
 	}

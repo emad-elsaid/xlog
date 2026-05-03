@@ -325,9 +325,9 @@ func DiffPretty(v1, v2 []byte) []byte {
 		}
 		for _, line := range diff.Lines {
 			if c != " " {
-				b.WriteString(fmt.Sprintf("%s | %s\n", c, util.VisualizeSpaces(line)))
+				fmt.Fprintf(&b, "%s | %s\n", c, util.VisualizeSpaces(line))
 			} else {
-				b.WriteString(fmt.Sprintf("%s | %s\n", c, line))
+				fmt.Fprintf(&b, "%s | %s\n", c, line)
 			}
 		}
 	}

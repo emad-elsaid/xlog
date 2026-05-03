@@ -123,16 +123,16 @@ func TestMarkdownFS_Each(t *testing.T) {
 	for _, f := range testFiles {
 		fullPath := filepath.Join(tmpDir, f)
 		dir := filepath.Dir(fullPath)
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			t.Fatalf("Failed to create directory: %v", err)
 		}
-		if err := os.WriteFile(fullPath, []byte("test content"), 0644); err != nil {
+		if err := os.WriteFile(fullPath, []byte("test content"), 0600); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 	}
 
 	// Create non-markdown file (should be ignored)
-	if err := os.WriteFile(filepath.Join(tmpDir, "ignored.txt"), []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, "ignored.txt"), []byte("test"), 0600); err != nil {
 		t.Fatalf("Failed to create ignored file: %v", err)
 	}
 
@@ -193,20 +193,20 @@ func TestMarkdownFS_EachWithIgnoredPaths(t *testing.T) {
 	for _, file := range testFiles {
 		fullPath := filepath.Join(tmpDir, file)
 		dir := filepath.Dir(fullPath)
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			t.Fatalf("Failed to create directory: %v", err)
 		}
-		if err := os.WriteFile(fullPath, []byte("test"), 0644); err != nil {
+		if err := os.WriteFile(fullPath, []byte("test"), 0600); err != nil {
 			t.Fatalf("Failed to create file: %v", err)
 		}
 	}
 
 	// Create hidden directory - should be skipped by IsIgnoredPath check
 	hiddenDir := filepath.Join(tmpDir, ".hidden")
-	if err := os.MkdirAll(hiddenDir, 0755); err != nil {
+	if err := os.MkdirAll(hiddenDir, 0750); err != nil {
 		t.Fatalf("Failed to create hidden directory: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(hiddenDir, "file.md"), []byte("test"), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(hiddenDir, "file.md"), []byte("test"), 0600); err != nil {
 		t.Fatalf("Failed to create file in hidden dir: %v", err)
 	}
 
@@ -266,7 +266,7 @@ func TestMarkdownFS_EachWithTimeout(t *testing.T) {
 	// Create a few test files
 	for i := 0; i < 5; i++ {
 		filename := filepath.Join(tmpDir, "page"+string(rune('0'+i))+".md")
-		if err := os.WriteFile(filename, []byte("test"), 0644); err != nil {
+		if err := os.WriteFile(filename, []byte("test"), 0600); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 	}

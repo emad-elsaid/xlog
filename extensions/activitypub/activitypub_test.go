@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 func setupTestEnv(t *testing.T) (string, func()) {
@@ -376,7 +376,7 @@ func TestMetaWithoutConfig(t *testing.T) {
 	username = ""
 
 	// meta() expects a Page interface, but we can pass nil since it only checks config
-	var p Page = nil
+	var p xlog.Page = nil
 	result := meta(p)
 
 	if result != "" {
@@ -388,7 +388,7 @@ func TestMetaOutput(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	var p Page = nil
+	var p xlog.Page = nil
 	result := meta(p)
 
 	expected := `<link href='https://example.com/+/activitypub/@testuser' rel='alternate' type='application/activity+json'>`

@@ -29,7 +29,7 @@ func NewEmoji(name string, unicode []rune, shortNames ...string) Emoji {
 
 // IsUnicode returns true if this emoji is defined in unicode, otherwise false.
 func (em *Emoji) IsUnicode() bool {
-	return !(len(em.Unicode) == 1 && em.Unicode[0] == 0xFFFD)
+	return len(em.Unicode) != 1 || em.Unicode[0] != 0xFFFD
 }
 
 // Emojis is a collection of emojis.

@@ -1,7 +1,7 @@
 package autolink_pages
 
 import (
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
@@ -9,7 +9,7 @@ var KindPageLink = ast.NewNodeKind("PageLink")
 
 type PageLink struct {
 	ast.BaseInline
-	page Page
+	page xlog.Page
 }
 
 func (*PageLink) Kind() ast.NodeKind {

@@ -11,9 +11,9 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
-var wwwURLRegxp = regexp.MustCompile(`^www\.[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]+(?:[/#?][-a-zA-Z0-9@:%_\+.~#!?&/=\(\);,'">\^{}\[\]` + "`" + `]*)?`) //nolint:golint,lll
+var wwwURLRegxp = regexp.MustCompile(`^www\.[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]+(?:[/#?][-a-zA-Z0-9@:%_\+.~#!?&/=\(\);,'">\^{}\[\]` + "`" + `]*)?`)
 
-var urlRegexp = regexp.MustCompile(`^(?:http|https|ftp)://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]+(?::\d+)?(?:[/#?][-a-zA-Z0-9@:%_+.~#$!?&/=\(\);,'">\^{}\[\]` + "`" + `]*)?`) //nolint:golint,lll
+var urlRegexp = regexp.MustCompile(`^(?:http|https|ftp)://[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-z]+(?::\d+)?(?:[/#?][-a-zA-Z0-9@:%_+.~#$!?&/=\(\);,'">\^{}\[\]` + "`" + `]*)?`)
 
 // An LinkifyConfig struct is a data structure that holds configuration of the
 // Linkify extension.
@@ -169,14 +169,14 @@ var (
 
 // tryMatchURL attempts to match a URL with protocol in the line.
 func (s *linkifyParser) tryMatchURL(line []byte) []int {
-	if s.LinkifyConfig.AllowedProtocols == nil {
+	if s.AllowedProtocols == nil {
 		if bytes.HasPrefix(line, protoHTTP) || bytes.HasPrefix(line, protoHTTPS) || bytes.HasPrefix(line, protoFTP) {
-			return s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
+			return s.URLRegexp.FindSubmatchIndex(line)
 		}
 	} else {
-		for _, prefix := range s.LinkifyConfig.AllowedProtocols {
+		for _, prefix := range s.AllowedProtocols {
 			if bytes.HasPrefix(line, prefix) {
-				return s.LinkifyConfig.URLRegexp.FindSubmatchIndex(line)
+				return s.URLRegexp.FindSubmatchIndex(line)
 			}
 		}
 	}
@@ -192,9 +192,10 @@ func (s *linkifyParser) trimURLTrailingPunctuation(line []byte, m []int) {
 	case ')':
 		closing := 0
 		for i := m[1] - 1; i >= m[0]; i-- {
-			if line[i] == ')' {
+			switch line[i] {
+			case ')':
 				closing++
-			} else if line[i] == '(' {
+			case '(':
 				closing--
 			}
 		}
@@ -223,10 +224,10 @@ func (s *linkifyParser) tryMatchEmail(line []byte) []int {
 		return nil
 	}
 	stop := -1
-	if s.LinkifyConfig.EmailRegexp == nil {
+	if s.EmailRegexp == nil {
 		stop = util.FindEmailIndex(line)
 	} else {
-		m := s.LinkifyConfig.EmailRegexp.FindSubmatchIndex(line)
+		m := s.EmailRegexp.FindSubmatchIndex(line)
 		if m != nil && m[0] == 0 {
 			stop = m[1]
 		}
@@ -283,12 +284,12 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 
 	var m []int
 	var protocol []byte
-	var typ ast.AutoLinkType = ast.AutoLinkURL
+	typ := ast.AutoLinkURL
 
 	// Try to match URL with protocol.
 	m = s.tryMatchURL(line)
 	if m == nil && bytes.HasPrefix(line, domainWWW) {
-		m = s.LinkifyConfig.WWWRegexp.FindSubmatchIndex(line)
+		m = s.WWWRegexp.FindSubmatchIndex(line)
 		protocol = []byte("http")
 	}
 	if m != nil && m[0] != 0 {

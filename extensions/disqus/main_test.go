@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
@@ -15,15 +15,15 @@ type mockPage struct {
 	name string
 }
 
-func (m mockPage) Name() string            { return m.name }
-func (m mockPage) FileName() string        { return m.name + ".md" }
-func (m mockPage) Exists() bool            { return true }
-func (m mockPage) Render() template.HTML   { return "" }
-func (m mockPage) Content() Markdown       { return Markdown("") }
-func (m mockPage) Delete() bool            { return false }
-func (m mockPage) Write(Markdown) bool     { return false }
-func (m mockPage) ModTime() time.Time      { return time.Now() }
-func (m mockPage) AST() ([]byte, ast.Node) { return []byte{}, nil }
+func (m mockPage) Name() string             { return m.name }
+func (m mockPage) FileName() string         { return m.name + ".md" }
+func (m mockPage) Exists() bool             { return true }
+func (m mockPage) Render() template.HTML    { return "" }
+func (m mockPage) Content() xlog.Markdown   { return xlog.Markdown("") }
+func (m mockPage) Delete() bool             { return false }
+func (m mockPage) Write(xlog.Markdown) bool { return false }
+func (m mockPage) ModTime() time.Time       { return time.Now() }
+func (m mockPage) AST() ([]byte, ast.Node)  { return []byte{}, nil }
 
 func TestDisqusExtensionName(t *testing.T) {
 	ext := Disqus{}
@@ -84,7 +84,7 @@ func TestDisqusWidget_EscapesPageName(t *testing.T) {
 
 	result := string(widget(page))
 
-	// Page name should be JS-escaped
+	// xlog.Page name should be JS-escaped
 	if strings.Contains(result, "<script>") && !strings.Contains(result, "\\u003Cscript\\u003E") {
 		t.Error("widget output should escape page name to prevent XSS")
 	}

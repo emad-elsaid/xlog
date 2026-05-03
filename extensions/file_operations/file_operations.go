@@ -5,37 +5,37 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
 
 func init() {
-	RegisterExtension(FileOps{})
+	xlog.RegisterExtension(FileOps{})
 }
 
 type FileOps struct{}
 
 func (FileOps) Name() string { return "file-operations" }
 func (FileOps) Init() {
-	if Config.Readonly {
+	if xlog.Config.Readonly {
 		return
 	}
 
-	RequireHTMX()
-	RegisterCommand(commands)
-	RegisterQuickCommand(commands)
-	RegisterTemplate(templates, "templates")
-	Post(`/+/file/rename`, PageRename{}.Handler)
-	Get(`/+/file/rename`, PageRename{}.Form)
-	Delete(`/+/file/delete`, PageDelete{}.Handler)
+	xlog.RequireHTMX()
+	xlog.RegisterCommand(commands)
+	xlog.RegisterQuickCommand(commands)
+	xlog.RegisterTemplate(templates, "templates")
+	xlog.Post(`/+/file/rename`, PageRename{}.Handler)
+	xlog.Get(`/+/file/rename`, PageRename{}.Form)
+	xlog.Delete(`/+/file/delete`, PageDelete{}.Handler)
 }
 
-func commands(p Page) []Command {
+func commands(p xlog.Page) []xlog.Command {
 	if len(p.FileName()) == 0 {
 		return nil
 	}
 
-	return []Command{PageDelete{p}, PageRename{p}}
+	return []xlog.Command{PageDelete{p}, PageRename{p}}
 }

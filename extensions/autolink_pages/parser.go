@@ -3,7 +3,7 @@ package autolink_pages
 import (
 	"strings"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/text"
@@ -44,7 +44,7 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		line = line[1:]
 	}
 
-	var found Page
+	var found xlog.Page
 	var m int
 	normalizedLine := strings.ToLower(string(line))
 

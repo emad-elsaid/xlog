@@ -8,29 +8,29 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
 
 func init() {
-	RegisterExtension(Recent{})
+	xlog.RegisterExtension(Recent{})
 }
 
 type Recent struct{}
 
 func (Recent) Name() string { return "recent" }
 func (Recent) Init() {
-	Get(`/+/recent`, recentHandler)
-	RegisterBuildPage("/+/recent", true)
-	RegisterTemplate(templates, "templates")
-	RegisterLink(func(Page) []Command { return []Command{links{}} })
+	xlog.Get(`/+/recent`, recentHandler)
+	xlog.RegisterBuildPage("/+/recent", true)
+	xlog.RegisterTemplate(templates, "templates")
+	xlog.RegisterLink(func(xlog.Page) []xlog.Command { return []xlog.Command{links{}} })
 }
 
-func recentHandler(r Request) Output {
-	rp := Pages(r.Context())
-	slices.SortFunc(rp, func(a, b Page) int {
+func recentHandler(r xlog.Request) xlog.Output {
+	rp := xlog.Pages(r.Context())
+	slices.SortFunc(rp, func(a, b xlog.Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
 		}
@@ -38,8 +38,8 @@ func recentHandler(r Request) Output {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	return Render("recent", Locals{
-		"page":  DynamicPage{NameVal: "Recent"},
+	return xlog.Render("recent", xlog.Locals{
+		"page":  xlog.DynamicPage{NameVal: "Recent"},
 		"pages": rp,
 	})
 }

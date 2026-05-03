@@ -55,7 +55,7 @@ func build(dest string) error {
 		)
 
 		if err != nil {
-			return fmt.Errorf("Failed to process page: %s, error: %w", p.Name(), err)
+			return fmt.Errorf("failed to process page: %s, error: %w", p.Name(), err)
 		}
 
 		return nil

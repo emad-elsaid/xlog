@@ -13,7 +13,7 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 const gb = 1 << (10 * 3)
@@ -30,24 +30,24 @@ var (
 )
 
 func init() {
-	RegisterExtension(UploadFile{})
+	xlog.RegisterExtension(UploadFile{})
 }
 
 type UploadFile struct{}
 
 func (UploadFile) Name() string { return "upload-file" }
 func (UploadFile) Init() {
-	if Config.Readonly {
+	if xlog.Config.Readonly {
 		return
 	}
 
-	RequireHTMX()
-	RegisterCommand(func(p Page) []Command {
+	xlog.RequireHTMX()
+	xlog.RegisterCommand(func(p xlog.Page) []xlog.Command {
 		if !p.Exists() {
 			return nil
 		}
 
-		return []Command{
+		return []xlog.Command{
 			Upload{p: p},
 			Screenshot{p: p},
 			RecordScreen{p: p},
@@ -56,26 +56,26 @@ func (UploadFile) Init() {
 		}
 	})
 
-	Post("/+/upload-file/form", UploadForm)
-	Post("/+/upload-file/screenshot-form", ScreenshotForm)
-	Post("/+/upload-file/record-screen-form", RecordScreenForm)
-	Post("/+/upload-file/record-camera-form", RecordCameraForm)
-	Post("/+/upload-file/record-audio-form", RecordAudioForm)
+	xlog.Post("/+/upload-file/form", UploadForm)
+	xlog.Post("/+/upload-file/screenshot-form", ScreenshotForm)
+	xlog.Post("/+/upload-file/record-screen-form", RecordScreenForm)
+	xlog.Post("/+/upload-file/record-camera-form", RecordCameraForm)
+	xlog.Post("/+/upload-file/record-audio-form", RecordAudioForm)
 
-	Post(`/+/upload-file`, uploadFileHandler)
-	RegisterTemplate(templates, "templates")
+	xlog.Post(`/+/upload-file`, uploadFileHandler)
+	xlog.RegisterTemplate(templates, "templates")
 }
 
-func uploadFileHandler(r Request) Output {
+func uploadFileHandler(r xlog.Request) xlog.Output {
 	if err := r.ParseMultipartForm(MAX_FILE_UPLOAD); err != nil {
-		return BadRequest(err.Error())
+		return xlog.BadRequest(err.Error())
 	}
 
 	fileName := r.FormValue("page")
 
-	page := NewPage(fileName)
+	page := xlog.NewPage(fileName)
 	if page == nil || (fileName != "" && !page.Exists()) {
-		return NotFound("page not found")
+		return xlog.NotFound("page not found")
 	}
 
 	var output string
@@ -89,19 +89,19 @@ func uploadFileHandler(r Request) Output {
 		mdName := filterChars(h.Filename, "[]")
 
 		if err := os.Mkdir(PUBLIC_PATH, 0700); err != nil && !os.IsExist(err) {
-			return InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 		out, err := os.Create(p)
 		if err != nil {
-			return InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
-		if _, err := f.Seek(io.SeekStart, 0); err != nil {
-			return InternalServerError(err)
+		if _, err := f.Seek(0, io.SeekStart); err != nil {
+			return xlog.InternalServerError(err)
 		}
 		_, err = io.Copy(out, f)
 		if err != nil {
-			return InternalServerError(err)
+			return xlog.InternalServerError(err)
 		}
 
 		switch {
@@ -118,11 +118,11 @@ func uploadFileHandler(r Request) Output {
 
 	if fileName != "" && page.Exists() {
 		content := strings.TrimSpace(string(page.Content())) + "\n\n" + output + "\n"
-		page.Write(Markdown(content))
-		return Redirect("/" + page.Name())
+		page.Write(xlog.Markdown(content))
+		return xlog.Redirect("/" + page.Name())
 	}
 
-	return PlainText(output)
+	return xlog.PlainText(output)
 }
 
 func filterChars(str string, exclude string) string {

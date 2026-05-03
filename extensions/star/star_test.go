@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 const (
@@ -24,13 +24,13 @@ func TestIsStarredLogic(t *testing.T) {
 		expected       bool
 	}{
 		{
-			name:           "Page is starred",
+			name:           "xlog.Page is starred",
 			starredContent: "page1.md\npage2.md\npage3.md",
 			pageName:       "page2.md",
 			expected:       true,
 		},
 		{
-			name:           "Page is not starred",
+			name:           "xlog.Page is not starred",
 			starredContent: "page1.md\npage3.md",
 			pageName:       "page2.md",
 			expected:       false,
@@ -42,7 +42,7 @@ func TestIsStarredLogic(t *testing.T) {
 			expected:       false,
 		},
 		{
-			name:           "Page with whitespace",
+			name:           "xlog.Page with whitespace",
 			starredContent: "  page1.md  \npage2.md\n  page3.md  ",
 			pageName:       "page1.md",
 			expected:       true,
@@ -117,11 +117,11 @@ func TestActionAttrs(t *testing.T) {
 
 	// Create a test page
 	testPageName := testPageFile
-	if err := os.WriteFile(testPageName, []byte("# Test Page"), 0600); err != nil {
+	if err := os.WriteFile(testPageName, []byte("# Test xlog.Page"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
-	page := NewPage(testPageName)
+	page := xlog.NewPage(testPageName)
 	if page == nil {
 		t.Fatal("Failed to create test page")
 	}
@@ -223,13 +223,13 @@ func TestIsStarred(t *testing.T) {
 		expected       bool
 	}{
 		{
-			name:           "Page is in starred list",
+			name:           "xlog.Page is in starred list",
 			starredContent: fmt.Sprintf("%s\n%s", testPage, otherPage),
 			pageName:       testPage,
 			expected:       true,
 		},
 		{
-			name:           "Page is not in starred list",
+			name:           "xlog.Page is not in starred list",
 			starredContent: otherPage,
 			pageName:       testPage,
 			expected:       false,
@@ -260,7 +260,7 @@ func TestIsStarred(t *testing.T) {
 				_ = os.Remove(STARRED_PAGES + ".md")
 			}
 
-			page := NewPage(tt.pageName)
+			page := xlog.NewPage(tt.pageName)
 			if page == nil {
 				t.Fatal("Failed to create page")
 			}
@@ -288,13 +288,13 @@ func TestStarAction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	page := NewPage("test-page") // Without .md extension
+	page := xlog.NewPage("test-page") // Without .md extension
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
 
 	if !page.Exists() {
-		t.Fatal("Page should exist")
+		t.Fatal("xlog.Page should exist")
 	}
 
 	tests := []struct {
@@ -349,7 +349,7 @@ func TestStarActionNonExistentPage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	page := NewPage("non-existent.md")
+	page := xlog.NewPage("non-existent.md")
 	if page == nil {
 		// This is expected for a non-existent page
 		t.Skip("NewPage returns nil for non-existent pages as expected")
@@ -375,7 +375,7 @@ func TestStarredPageIcon(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	page := NewPage(testPage)
+	page := xlog.NewPage(testPage)
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
@@ -406,7 +406,7 @@ func TestStarredPageName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	page := NewPage(testPage)
+	page := xlog.NewPage(testPage)
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
@@ -440,7 +440,7 @@ func TestStarredPageAttrs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	page := NewPage(testPage)
+	page := xlog.NewPage(testPage)
 	if page == nil {
 		t.Fatal("Failed to create page")
 	}
@@ -519,12 +519,12 @@ func TestStarredPages(t *testing.T) {
 			}
 
 			for _, pageName := range tt.pagesExist {
-				if err := os.WriteFile(pageName, []byte("# Page"), 0600); err != nil {
+				if err := os.WriteFile(pageName, []byte("# xlog.Page"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			}
 
-			dummyPage := NewPage("dummy.md")
+			dummyPage := xlog.NewPage("dummy.md")
 			commands := starredPages(dummyPage)
 
 			if tt.expectedLen == 0 {
@@ -600,7 +600,7 @@ func TestStarHandler(t *testing.T) {
 			testPage := testPageFile
 			pageName := "test-page"
 			if tt.setupPage {
-				if err := os.WriteFile(testPage, []byte("# Test Page"), 0600); err != nil {
+				if err := os.WriteFile(testPage, []byte("# Test xlog.Page"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			} else {
@@ -635,7 +635,7 @@ func TestStarHandler(t *testing.T) {
 			}
 
 			if tt.expectPageAdded {
-				starredPage := NewPage(STARRED_PAGES)
+				starredPage := xlog.NewPage(STARRED_PAGES)
 				if starredPage == nil {
 					t.Fatal("starred.md should exist")
 				}
@@ -645,8 +645,8 @@ func TestStarHandler(t *testing.T) {
 					t.Errorf("Expected %s in starred content, got: %s", pageName, content)
 				}
 
-				if rec.header.Get("HX-Refresh") == "" {
-					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.header)
+				if rec.Header().Get("HX-Refresh") == "" {
+					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.Header())
 				}
 			}
 
@@ -716,7 +716,7 @@ func TestUnstarHandler(t *testing.T) {
 			testPage := testPageFile
 			pageName := "test-page"
 			if tt.setupPage {
-				if err := os.WriteFile(testPage, []byte("# Test Page"), 0600); err != nil {
+				if err := os.WriteFile(testPage, []byte("# Test xlog.Page"), 0600); err != nil {
 					t.Fatal(err)
 				}
 			} else {
@@ -751,7 +751,7 @@ func TestUnstarHandler(t *testing.T) {
 			}
 
 			if tt.expectRemoved {
-				starredPage := NewPage(STARRED_PAGES)
+				starredPage := xlog.NewPage(STARRED_PAGES)
 				if starredPage == nil {
 					t.Fatal("starred.md should exist")
 				}
@@ -761,8 +761,8 @@ func TestUnstarHandler(t *testing.T) {
 					t.Errorf("Expected %s removed from starred content, still present: %s", pageName, content)
 				}
 
-				if rec.header.Get("HX-Refresh") == "" {
-					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.header)
+				if rec.Header().Get("HX-Refresh") == "" {
+					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.Header())
 				}
 			}
 

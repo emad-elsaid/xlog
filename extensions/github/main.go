@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"html/template"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 var editUrl string
 
 func init() {
 	flag.StringVar(&editUrl, "github.url", "", "Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs")
-	RegisterExtension(Github{})
+	xlog.RegisterExtension(Github{})
 }
 
 type Github struct{}
@@ -23,19 +23,19 @@ func (Github) Init() {
 		return
 	}
 
-	RegisterQuickCommand(quickCommands)
+	xlog.RegisterQuickCommand(quickCommands)
 }
 
-func quickCommands(p Page) []Command {
+func quickCommands(p xlog.Page) []xlog.Command {
 	if len(p.FileName()) == 0 {
 		return nil
 	}
 
-	return []Command{editOnGithub{page: p}}
+	return []xlog.Command{editOnGithub{page: p}}
 }
 
 type editOnGithub struct {
-	page Page
+	page xlog.Page
 }
 
 func (e editOnGithub) Icon() string { return "fa-brands fa-github" }

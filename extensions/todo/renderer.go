@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"html/template"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	east "github.com/emad-elsaid/xlog/markdown/extension/ast"
 	"github.com/emad-elsaid/xlog/markdown/renderer"
@@ -31,7 +31,7 @@ func (r *TaskCheckBoxHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source [
 		_, _ = w.WriteString(`checked="" `)
 	}
 
-	if Config.Readonly {
+	if xlog.Config.Readonly {
 		_, _ = w.WriteString(`disabled="" `)
 	} else if p.Kind() == ast.KindTextBlock {
 		if l := p.Lines(); l != nil {

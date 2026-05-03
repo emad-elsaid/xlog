@@ -5,22 +5,22 @@ import (
 	"slices"
 	"time"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
 
-func dateHandler(r Request) Output {
+func dateHandler(r xlog.Request) xlog.Output {
 	dateV := r.PathValue("date")
 	date, err := time.Parse("2-1-2006", dateV)
 	if err != nil {
-		return BadRequest(err.Error())
+		return xlog.BadRequest(err.Error())
 	}
 
-	pages := MapPage(r.Context(), func(p Page) Page {
+	pages := xlog.MapPage(r.Context(), func(p xlog.Page) xlog.Page {
 		_, tree := p.AST()
-		allDates := FindAllInAST[*DateNode](tree)
+		allDates := xlog.FindAllInAST[*DateNode](tree)
 		for _, d := range allDates {
 			if d.time.Equal(date) {
 				return p
@@ -30,22 +30,22 @@ func dateHandler(r Request) Output {
 		return nil
 	})
 
-	return Render("date", Locals{
-		"page":  DynamicPage{NameVal: date.Format("2 January 2006")},
+	return xlog.Render("date", xlog.Locals{
+		"page":  xlog.DynamicPage{NameVal: date.Format("2 January 2006")},
 		"pages": pages,
 	})
 }
 
-func calendarHandler(r Request) Output {
+func calendarHandler(r xlog.Request) xlog.Output {
 	calendar := []pair{}
 
-	EachPage(r.Context(), func(p Page) {
+	xlog.EachPage(r.Context(), func(p xlog.Page) {
 		_, ast := p.AST()
 		if ast == nil {
 			return
 		}
 
-		for _, v := range FindAllInAST[*DateNode](ast) {
+		for _, v := range xlog.FindAllInAST[*DateNode](ast) {
 			calendar = append(calendar, pair{Time: v.time, Page: p})
 		}
 	})
@@ -56,20 +56,20 @@ func calendarHandler(r Request) Output {
 		return int(b.Year) - int(a.Year)
 	})
 
-	return Render("calendar", Locals{
-		"page":     DynamicPage{NameVal: "Calendar"},
+	return xlog.Render("calendar", xlog.Locals{
+		"page":     xlog.DynamicPage{NameVal: "Calendar"},
 		"calendar": cal,
 	})
 }
 
 type pair struct {
 	Time time.Time
-	Page Page
+	Page xlog.Page
 }
 
 type Day struct {
 	Date  time.Time
-	Pages []Page
+	Pages []xlog.Page
 }
 
 type Month struct {

@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
-	gast "github.com/emad-elsaid/xlog/markdown/ast"
 	emojiAst "github.com/emad-elsaid/xlog/markdown/emoji/ast"
 )
 
@@ -31,7 +30,7 @@ var helpers = template.FuncMap{
 	"raw":            raw,
 }
 
-var ErrHelperRegistered = errors.New("Helper already registered")
+var ErrHelperRegistered = errors.New("helper already registered")
 
 // RegisterHelper registers a new helper function. all helpers are used when compiling
 // templates. so registering helpers function must happen before the server
@@ -75,31 +74,31 @@ func ago(t time.Time) string {
 		case d >= year:
 			years := d / year
 			d -= years * year
-			o.WriteString(fmt.Sprintf("%d years ", years))
+			fmt.Fprintf(&o, "%d years ", years)
 		case d >= month:
 			months := d / month
 			d -= months * month
-			o.WriteString(fmt.Sprintf("%d months ", months))
+			fmt.Fprintf(&o, "%d months ", months)
 		case d >= week:
 			weeks := d / week
 			d -= weeks * week
-			o.WriteString(fmt.Sprintf("%d weeks ", weeks))
+			fmt.Fprintf(&o, "%d weeks ", weeks)
 		case d >= day:
 			days := d / day
 			d -= days * day
-			o.WriteString(fmt.Sprintf("%d days ", days))
+			fmt.Fprintf(&o, "%d days ", days)
 		case d >= time.Hour:
 			hours := d / time.Hour
 			d -= hours * time.Hour
-			o.WriteString(fmt.Sprintf("%d hours ", hours))
+			fmt.Fprintf(&o, "%d hours ", hours)
 		case d >= time.Minute:
 			minutes := d / time.Minute
 			d -= minutes * time.Minute
-			o.WriteString(fmt.Sprintf("%d minutes ", minutes))
+			fmt.Fprintf(&o, "%d minutes ", minutes)
 		case d >= time.Second:
 			seconds := d / time.Second
 			d -= seconds * time.Second
-			o.WriteString(fmt.Sprintf("%d seconds ", seconds))
+			fmt.Fprintf(&o, "%d seconds ", seconds)
 		}
 	}
 
@@ -150,12 +149,12 @@ func Banner(p Page) string {
 	}
 
 	paragraph := a.FirstChild()
-	if paragraph == nil || paragraph.Kind() != gast.KindParagraph {
+	if paragraph == nil || paragraph.Kind() != ast.KindParagraph {
 		return ""
 	}
 
 	img := paragraph.FirstChild()
-	if img == nil || img.Kind() != gast.KindImage {
+	if img == nil || img.Kind() != ast.KindImage {
 		return ""
 	}
 
@@ -169,7 +168,7 @@ func Banner(p Page) string {
 		return ""
 	}
 
-	if !(path.IsAbs(dest) || strings.HasPrefix(dest, "http")) {
+	if !path.IsAbs(dest) && !strings.HasPrefix(dest, "http") {
 		d := path.Dir(p.FileName())
 		dest = path.Join("/", d, dest)
 	}

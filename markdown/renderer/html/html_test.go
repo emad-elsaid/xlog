@@ -10,6 +10,8 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
+const htmlEntityLT = "&lt;"
+
 // Test Config and Options
 
 func TestNewConfig(t *testing.T) {
@@ -364,8 +366,8 @@ func TestWriteNumericRefHex(t *testing.T) {
 	w.Write(writer, []byte("&#x3C;"))
 	_ = writer.Flush()
 
-	if buf.String() != "&lt;" {
-		t.Errorf("Write() = %q, want %q", buf.String(), "&lt;")
+	if buf.String() != htmlEntityLT {
+		t.Errorf("Write() = %q, want %q", buf.String(), htmlEntityLT)
 	}
 }
 
@@ -377,8 +379,8 @@ func TestWriteNumericRefDecimal(t *testing.T) {
 	w.Write(writer, []byte("&#60;"))
 	_ = writer.Flush()
 
-	if buf.String() != "&lt;" {
-		t.Errorf("Write() = %q, want %q", buf.String(), "&lt;")
+	if buf.String() != htmlEntityLT {
+		t.Errorf("Write() = %q, want %q", buf.String(), htmlEntityLT)
 	}
 }
 
@@ -387,10 +389,10 @@ func TestWriteEntityReference(t *testing.T) {
 	writer := bufio.NewWriter(&buf)
 	w := NewWriter()
 
-	w.Write(writer, []byte("&lt;"))
+	w.Write(writer, []byte(htmlEntityLT))
 	_ = writer.Flush()
 
-	expected := "&lt;"
+	expected := htmlEntityLT
 	if buf.String() != expected {
 		t.Errorf("Write() = %q, want %q", buf.String(), expected)
 	}

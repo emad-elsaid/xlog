@@ -156,8 +156,8 @@ func parseAttributeName(reader text.Reader) ([]byte, bool) {
 
 	// First character must be letter, underscore, or colon
 	c := line[0]
-	if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-		c == '_' || c == ':') {
+	isValidFirstChar := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == ':'
+	if !isValidFirstChar {
 		return nil, false
 	}
 
@@ -165,9 +165,8 @@ func parseAttributeName(reader text.Reader) ([]byte, bool) {
 	i := 0
 	for ; i < len(line); i++ {
 		c = line[i]
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-			(c >= '0' && c <= '9') ||
-			c == '_' || c == ':' || c == '.' || c == '-') {
+		isValidChar := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == ':' || c == '.' || c == '-'
+		if !isValidChar {
 			break
 		}
 	}
@@ -291,10 +290,11 @@ func scanAttributeDecimal(reader text.Reader, w io.ByteWriter) {
 func parseAttributeNumber(reader text.Reader) (float64, bool) {
 	sign := 1
 	c := reader.Peek()
-	if c == '-' {
+	switch c {
+	case '-':
 		sign = -1
 		reader.Advance(1)
-	} else if c == '+' {
+	case '+':
 		reader.Advance(1)
 	}
 	var buf bytes.Buffer
@@ -336,16 +336,15 @@ var bytesNull = []byte("null")
 func parseAttributeOthers(reader text.Reader) (any, bool) {
 	line, _ := reader.PeekLine()
 	c := line[0]
-	if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-		c == '_' || c == ':') {
+	isValidFirstChar := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == ':'
+	if !isValidFirstChar {
 		return nil, false
 	}
 	i := 0
 	for ; i < len(line); i++ {
 		c := line[i]
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-			(c >= '0' && c <= '9') ||
-			c == '_' || c == ':' || c == '.' || c == '-') {
+		isValidChar := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_' || c == ':' || c == '.' || c == '-'
+		if !isValidChar {
 			break
 		}
 	}

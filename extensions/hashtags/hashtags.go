@@ -12,7 +12,7 @@ import (
 	"unicode/utf8"
 	"unique"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/extensions/shortcode"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
@@ -26,40 +26,40 @@ var templates embed.FS
 
 func init() {
 	h := Hashtags{
-		pages: make(map[Page][]*HashTag),
+		pages: make(map[xlog.Page][]*HashTag),
 	}
 
-	RegisterExtension(&h)
+	xlog.RegisterExtension(&h)
 }
 
 type Hashtags struct {
-	pages map[Page][]*HashTag
+	pages map[xlog.Page][]*HashTag
 	mu    sync.Mutex
 }
 
 func (*Hashtags) Name() string { return "hashtags" }
 func (h *Hashtags) Init() {
-	Get(`/+/tags`, h.tagsHandler)
-	Get(`/+/tag/{tag}`, h.tagHandler)
-	RegisterWidget(WidgetAfterView, 1, h.relatedPages)
-	RegisterBuildPage("/+/tags", true)
-	RegisterLink(links)
-	RegisterTemplate(templates, "templates")
+	xlog.Get(`/+/tags`, h.tagsHandler)
+	xlog.Get(`/+/tag/{tag}`, h.tagHandler)
+	xlog.RegisterWidget(xlog.WidgetAfterView, 1, h.relatedPages)
+	xlog.RegisterBuildPage("/+/tags", true)
+	xlog.RegisterLink(links)
+	xlog.RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: h.hashtagPages})
 	shortcode.RegisterShortCode("hashtag-pages-grid", shortcode.ShortCode{Render: h.hashtagPagesGrid})
 
-	Listen(PageChanged, h.PageChanged)
-	Listen(PageDeleted, h.PageDeleted)
+	xlog.Listen(xlog.PageChanged, h.PageChanged)
+	xlog.Listen(xlog.PageDeleted, h.PageDeleted)
 
-	MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
+	xlog.MarkdownConverter().Renderer().AddOptions(renderer.WithNodeRenderers(
 		util.Prioritized(&HashTag{}, 0),
 	))
-	MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
+	xlog.MarkdownConverter().Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(&HashTag{}, 999),
 	))
 }
 
-func (h *Hashtags) PageChanged(p Page) error {
+func (h *Hashtags) PageChanged(p xlog.Page) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -68,11 +68,11 @@ func (h *Hashtags) PageChanged(p Page) error {
 	return nil
 }
 
-func (h *Hashtags) PageDeleted(p Page) error {
+func (h *Hashtags) PageDeleted(p xlog.Page) error {
 	return h.PageChanged(p)
 }
 
-func (h *Hashtags) hashtagsFor(p Page) []*HashTag {
+func (h *Hashtags) hashtagsFor(p xlog.Page) []*HashTag {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -81,20 +81,20 @@ func (h *Hashtags) hashtagsFor(p Page) []*HashTag {
 	}
 
 	_, tree := p.AST()
-	tags := FindAllInAST[*HashTag](tree)
+	tags := xlog.FindAllInAST[*HashTag](tree)
 	h.pages[p] = tags
 
 	return tags
 }
 
-func (h *Hashtags) tagsHandler(r Request) Output {
-	tags := map[string][]Page{}
+func (h *Hashtags) tagsHandler(r xlog.Request) xlog.Output {
+	tags := map[string][]xlog.Page{}
 	var lck sync.Mutex
 
-	EachPage(r.Context(), func(a Page) {
+	xlog.EachPage(r.Context(), func(a xlog.Page) {
 		set := map[string]bool{}
 		_, tree := a.AST()
-		hashes := FindAllInAST[*HashTag](tree)
+		hashes := xlog.FindAllInAST[*HashTag](tree)
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
 
@@ -109,32 +109,32 @@ func (h *Hashtags) tagsHandler(r Request) Output {
 			if ps, ok := tags[val]; ok {
 				tags[val] = append(ps, a)
 			} else {
-				tags[val] = []Page{a}
+				tags[val] = []xlog.Page{a}
 			}
 			lck.Unlock()
 		}
 	})
 
-	return Render("tags", Locals{
-		"page": DynamicPage{NameVal: "Hashtags"},
+	return xlog.Render("tags", xlog.Locals{
+		"page": xlog.DynamicPage{NameVal: "Hashtags"},
 		"tags": tags,
 	})
 }
 
-func (h *Hashtags) tagHandler(r Request) Output {
+func (h *Hashtags) tagHandler(r xlog.Request) xlog.Output {
 	tag := r.PathValue("tag")
 
-	return Render("tag", Locals{
-		"page":  DynamicPage{NameVal: "#" + tag},
+	return xlog.Render("tag", xlog.Locals{
+		"page":  xlog.DynamicPage{NameVal: "#" + tag},
 		"pages": h.tagPages(r.Context(), tag),
 	})
 }
 
-func (h *Hashtags) tagPages(ctx context.Context, hashtag string) []Page {
+func (h *Hashtags) tagPages(ctx context.Context, hashtag string) []xlog.Page {
 	uniqHandle := unique.Make(strings.ToLower(hashtag))
 
-	return MapPage(ctx, func(p Page) Page {
-		if p.Name() == Config.Index {
+	return xlog.MapPage(ctx, func(p xlog.Page) xlog.Page {
+		if p.Name() == xlog.Config.Index {
 			return nil
 		}
 
@@ -149,25 +149,25 @@ func (h *Hashtags) tagPages(ctx context.Context, hashtag string) []Page {
 	})
 }
 
-func (h *Hashtags) relatedPages(p Page) template.HTML {
-	if p.Name() == Config.Index {
+func (h *Hashtags) relatedPages(p xlog.Page) template.HTML {
+	if p.Name() == xlog.Config.Index {
 		return ""
 	}
 
 	_, tree := p.AST()
-	found_hashtags := FindAllInAST[*HashTag](tree)
+	found_hashtags := xlog.FindAllInAST[*HashTag](tree)
 	hashtags := map[unique.Handle[string]]bool{}
 	for _, v := range found_hashtags {
 		hashtags[v.unique] = true
 	}
 
-	pages := MapPage(context.Background(), func(rp Page) Page {
+	pages := xlog.MapPage(context.Background(), func(rp xlog.Page) xlog.Page {
 		if rp.Name() == p.Name() {
 			return nil
 		}
 
 		_, tree := rp.AST()
-		page_hashtags := FindAllInAST[*HashTag](tree)
+		page_hashtags := xlog.FindAllInAST[*HashTag](tree)
 		for _, h := range page_hashtags {
 			if _, ok := hashtags[h.unique]; ok {
 				return rp
@@ -177,16 +177,16 @@ func (h *Hashtags) relatedPages(p Page) template.HTML {
 		return nil
 	})
 
-	return Partial("related-hashtags-pages", Locals{
+	return xlog.Partial("related-hashtags-pages", xlog.Locals{
 		"pages": pages,
 	})
 }
 
-func (h *Hashtags) hashtagPages(hashtag Markdown) template.HTML {
+func (h *Hashtags) hashtagPages(hashtag xlog.Markdown) template.HTML {
 	hashtag_value := strings.Trim(string(hashtag), "# \n")
 	pages := h.tagPages(context.Background(), hashtag_value)
 
-	slices.SortFunc(pages, func(a, b Page) int {
+	slices.SortFunc(pages, func(a, b xlog.Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
 		}
@@ -194,15 +194,15 @@ func (h *Hashtags) hashtagPages(hashtag Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := Partial("hashtag-pages", Locals{"pages": pages})
+	output := xlog.Partial("hashtag-pages", xlog.Locals{"pages": pages})
 	return template.HTML(output)
 }
 
-func (h *Hashtags) hashtagPagesGrid(hashtag Markdown) template.HTML {
+func (h *Hashtags) hashtagPagesGrid(hashtag xlog.Markdown) template.HTML {
 	hashtag_value := strings.Trim(string(hashtag), "# \n")
 	pages := h.tagPages(context.Background(), hashtag_value)
 
-	slices.SortFunc(pages, func(a, b Page) int {
+	slices.SortFunc(pages, func(a, b xlog.Page) int {
 		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
 			return modtime
 		}
@@ -210,12 +210,12 @@ func (h *Hashtags) hashtagPagesGrid(hashtag Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := Partial("hashtag-pages-grid", Locals{"pages": pages})
+	output := xlog.Partial("hashtag-pages-grid", xlog.Locals{"pages": pages})
 	return template.HTML(output)
 }
 
-func links(Page) []Command {
-	return []Command{link{}}
+func links(xlog.Page) []xlog.Command {
+	return []xlog.Command{link{}}
 }
 
 type link struct{}
@@ -248,7 +248,7 @@ func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) a
 		return nil
 	}
 
-	var line string = string(l)
+	line := string(l)
 
 	var i int
 	for ui, c := range line {
@@ -257,7 +257,7 @@ func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) a
 			continue
 		}
 
-		if !(unicode.In(c, unicode.Letter, unicode.Number, unicode.Dash) || c == '_') || unicode.IsSpace(c) {
+		if (!unicode.In(c, unicode.Letter, unicode.Number, unicode.Dash) && c != '_') || unicode.IsSpace(c) {
 			break
 		}
 
@@ -296,7 +296,7 @@ func renderHashtag(writer util.BufWriter, source []byte, n ast.Node, entering bo
 	if _, err := fmt.Fprintf(writer, `<a href="/+/tag/%s" class="tag"><span class="icon"><i class="fa-solid fa-tag"></i></span><span>%s</span></a>`, tag.value, tag.value); err != nil {
 		return ast.WalkStop, err
 	}
-	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
-	RegisterBuildPage(fmt.Sprintf("/+/tag/%s", strings.ToLower(string(tag.value))), true)
+	xlog.RegisterBuildPage(fmt.Sprintf("/+/tag/%s", tag.value), true)
+	xlog.RegisterBuildPage(fmt.Sprintf("/+/tag/%s", strings.ToLower(string(tag.value))), true)
 	return ast.WalkContinue, nil
 }

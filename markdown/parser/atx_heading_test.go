@@ -7,6 +7,8 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
+const testHeadingID = "test"
+
 func TestATXHeadingParser_Trigger(t *testing.T) {
 	parser := NewATXHeadingParser()
 	trigger := parser.Trigger()
@@ -486,8 +488,8 @@ func TestATXHeadingParser_DuplicateIDs(t *testing.T) {
 
 	id2, _ := node2.(*ast.Heading).AttributeString("id")
 
-	if string(id1.([]byte)) != "test" {
-		t.Errorf("First ID = %q, want 'test'", id1)
+	if string(id1.([]byte)) != testHeadingID {
+		t.Errorf("First ID = %q, want %q", id1, testHeadingID)
 	}
 	if string(id2.([]byte)) != "test-1" {
 		t.Errorf("Second ID = %q, want 'test-1'", id2)

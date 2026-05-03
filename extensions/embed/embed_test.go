@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 func TestEmbedExtensionName(t *testing.T) {
@@ -34,7 +34,7 @@ func TestEmbedInit(t *testing.T) {
 func TestEmbedShortcode_NonExistentPage(t *testing.T) {
 	// Test embedding a non-existent page
 	// This test uses a name that's highly unlikely to exist
-	input := Markdown("non-existent-page-9876543210")
+	input := xlog.Markdown("non-existent-page-9876543210")
 	result := embedShortcode(input)
 
 	resultStr := string(result)
@@ -45,7 +45,7 @@ func TestEmbedShortcode_NonExistentPage(t *testing.T) {
 }
 
 func TestEmbedShortcode_EmptyInput(t *testing.T) {
-	input := Markdown("")
+	input := xlog.Markdown("")
 	result := embedShortcode(input)
 
 	expected := template.HTML("Page:  doesn't exist")
@@ -71,7 +71,7 @@ func TestEmbedShortcode_WhitespaceTrimming(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := embedShortcode(Markdown(tt.input))
+			result := embedShortcode(xlog.Markdown(tt.input))
 			resultStr := string(result)
 
 			// Should still report page doesn't exist (trimming happens for lookup)
@@ -105,7 +105,7 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 
 	// Create a test markdown page
 	testPageName := "test-embed-page"
-	testContent := "# Test Embed Page\n\nThis is test content for embedding."
+	testContent := "# Test Embed xlog.Page\n\nThis is test content for embedding."
 	testFilePath := filepath.Join(tmpDir, testPageName+".md")
 
 	if err := os.WriteFile(testFilePath, []byte(testContent), 0600); err != nil {
@@ -113,7 +113,7 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 	}
 
 	// Test embedding the page
-	input := Markdown(testPageName)
+	input := xlog.Markdown(testPageName)
 	result := embedShortcode(input)
 
 	resultStr := string(result)
@@ -129,7 +129,7 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 	}
 
 	// Verify the content is rendered (should contain heading)
-	if !strings.Contains(resultStr, "Test Embed Page") {
+	if !strings.Contains(resultStr, "Test Embed xlog.Page") {
 		t.Errorf("Expected rendered content to contain page heading, got: %s", resultStr)
 	}
 }
@@ -168,7 +168,7 @@ func TestEmbedShortcode_Integration_WithWhitespace(t *testing.T) {
 
 	for _, input := range inputs {
 		t.Run(fmt.Sprintf("input_%q", input), func(t *testing.T) {
-			result := embedShortcode(Markdown(input))
+			result := embedShortcode(xlog.Markdown(input))
 			resultStr := string(result)
 
 			if strings.Contains(resultStr, "doesn't exist") {
@@ -184,7 +184,7 @@ func TestEmbedShortcode_Integration_WithWhitespace(t *testing.T) {
 
 func TestEmbedShortcode_OutputFormat(t *testing.T) {
 	// Test that output is valid HTML (template.HTML type)
-	input := Markdown("some-page")
+	input := xlog.Markdown("some-page")
 	result := embedShortcode(input)
 
 	// Verify the result is of type template.HTML
@@ -207,7 +207,7 @@ func TestEmbedShortcode_ErrorMessageFormat(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("input_%s", tc.input), func(t *testing.T) {
-			result := embedShortcode(Markdown(tc.input))
+			result := embedShortcode(xlog.Markdown(tc.input))
 			resultStr := string(result)
 
 			// For pages that don't exist, verify error format
@@ -254,7 +254,7 @@ func TestEmbedShortcode_ComplexPageName(t *testing.T) {
 			}
 
 			// Test embedding
-			result := embedShortcode(Markdown(pageName))
+			result := embedShortcode(xlog.Markdown(pageName))
 			resultStr := string(result)
 
 			if strings.Contains(resultStr, "doesn't exist") {

@@ -11,7 +11,7 @@ import (
 
 	_ "embed"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	east "github.com/emad-elsaid/xlog/markdown/extension/ast"
 )
@@ -20,7 +20,7 @@ import (
 var templates embed.FS
 
 type NormalizedPage struct {
-	page           Page
+	page           xlog.Page
 	normalizedName string
 }
 
@@ -35,11 +35,11 @@ func (a fileInfoByNameLength) Less(i, j int) bool {
 var autolinkPages []*NormalizedPage
 var autolinkPage_lck sync.Mutex
 
-func UpdatePagesList(Page) (err error) {
+func UpdatePagesList(xlog.Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()
 
-	ps := MapPage(context.Background(), func(p Page) *NormalizedPage {
+	ps := xlog.MapPage(context.Background(), func(p xlog.Page) *NormalizedPage {
 		return &NormalizedPage{
 			page:           p,
 			normalizedName: path.Base(strings.ToLower(p.Name())),
@@ -50,9 +50,9 @@ func UpdatePagesList(Page) (err error) {
 	return
 }
 
-func countTodos(p Page) (total int, done int) {
+func countTodos(p xlog.Page) (total int, done int) {
 	_, tree := p.AST()
-	tasks := FindAllInAST[*east.TaskCheckBox](tree)
+	tasks := xlog.FindAllInAST[*east.TaskCheckBox](tree)
 	for _, v := range tasks {
 		total++
 		if v.IsChecked {
@@ -63,12 +63,12 @@ func countTodos(p Page) (total int, done int) {
 	return
 }
 
-func backlinksSection(p Page) template.HTML {
-	if p.Name() == Config.Index {
+func backlinksSection(p xlog.Page) template.HTML {
+	if p.Name() == xlog.Config.Index {
 		return ""
 	}
 
-	pages := MapPage(context.Background(), func(a Page) Page {
+	pages := xlog.MapPage(context.Background(), func(a xlog.Page) xlog.Page {
 		_, tree := a.AST()
 		if a.Name() == p.Name() || !containLinkToFrom(tree, a, p) {
 			return nil
@@ -77,12 +77,12 @@ func backlinksSection(p Page) template.HTML {
 		return a
 	})
 
-	return Partial("backlinks", Locals{"pages": pages})
+	return xlog.Partial("backlinks", xlog.Locals{"pages": pages})
 }
 
 // containLinkToFrom checks if an AST node contains a link from sourcePage to targetPage.
 // This version is aware of the source page context and can properly resolve relative links.
-func containLinkToFrom(n ast.Node, sourcePage, targetPage Page) bool {
+func containLinkToFrom(n ast.Node, sourcePage, targetPage xlog.Page) bool {
 	if n.Kind() == KindPageLink {
 		t, _ := n.(*PageLink)
 		if t.page.FileName() == targetPage.FileName() {

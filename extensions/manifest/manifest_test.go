@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	. "github.com/emad-elsaid/xlog"
+	"github.com/emad-elsaid/xlog"
 )
 
 func TestManifestExtensionName(t *testing.T) {
@@ -30,7 +30,7 @@ func TestManifestInit_DoesNotPanic(t *testing.T) {
 
 func TestManifestHead_ReturnsLinkTag(t *testing.T) {
 	// Call head widget with empty page
-	page := Page(nil)
+	page := xlog.Page(nil)
 	result := head(page)
 
 	// Check it returns link tag
@@ -41,7 +41,7 @@ func TestManifestHead_ReturnsLinkTag(t *testing.T) {
 }
 
 func TestManifestHead_HTMLFormat(t *testing.T) {
-	page := Page(nil)
+	page := xlog.Page(nil)
 	result := head(page)
 	html := string(result)
 
@@ -62,8 +62,8 @@ func TestManifestHead_HTMLFormat(t *testing.T) {
 
 func TestManifestHead_NoPageDependency(t *testing.T) {
 	// Test that head widget doesn't depend on page content
-	page1 := Page(nil)
-	page2 := Page(nil)
+	page1 := xlog.Page(nil)
+	page2 := xlog.Page(nil)
 
 	result1 := head(page1)
 	result2 := head(page2)

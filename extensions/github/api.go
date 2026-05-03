@@ -15,7 +15,7 @@ import (
 )
 
 var githubTokenPossibleVariables = []string{"GITHUB_TOKEN", "GITHUB_API_TOKEN"}
-var tokenNotAvailable = errors.New("Github token env variable not found in any of: " + strings.Join(githubTokenPossibleVariables, ", "))
+var errTokenNotAvailable = errors.New("Github token env variable not found in any of: " + strings.Join(githubTokenPossibleVariables, ", "))
 var perPage = 100
 
 func init() {
@@ -34,7 +34,7 @@ func token() (string, error) {
 		}
 	}
 
-	return "", tokenNotAvailable
+	return "", errTokenNotAvailable
 }
 
 func client() (*github.Client, error) {

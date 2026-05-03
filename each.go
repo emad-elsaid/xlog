@@ -110,10 +110,11 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 		done <- true
 	}()
 
+Loop:
 	for _, p := range cached {
 		select {
 		case <-ctx.Done():
-			break
+			break Loop
 		default:
 			grp.Go(func() (err error) {
 				val := f(p)

@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	deleteFailedErr     = errors.New("Couldn't delete original page")
-	encryptionFailedErr = errors.New("Couldn't encrypt page")
+	errDeleteFailed     = errors.New("couldn't delete original page")
+	errEncryptionFailed = errors.New("couldn't encrypt page")
 )
 
 func encryptHandler(r xlog.Request) xlog.Output {
@@ -20,11 +20,11 @@ func encryptHandler(r xlog.Request) xlog.Output {
 
 	encryptedPage := page{name: p.Name()}
 	if !encryptedPage.Write(p.Content()) {
-		return xlog.InternalServerError(encryptionFailedErr)
+		return xlog.InternalServerError(errEncryptionFailed)
 	}
 
 	if !p.Delete() {
-		return xlog.InternalServerError(deleteFailedErr)
+		return xlog.InternalServerError(errDeleteFailed)
 	}
 
 	return func(w xlog.Response, r xlog.Request) {
@@ -41,12 +41,12 @@ func decryptHandler(r xlog.Request) xlog.Output {
 
 	content := p.Content()
 	if !p.Delete() {
-		return xlog.InternalServerError(deleteFailedErr)
+		return xlog.InternalServerError(errDeleteFailed)
 	}
 
 	decryptedPage := xlog.NewPage(p.Name())
 	if decryptedPage == nil || !decryptedPage.Write(content) {
-		return xlog.InternalServerError(encryptionFailedErr)
+		return xlog.InternalServerError(errEncryptionFailed)
 	}
 
 	return func(w xlog.Response, r xlog.Request) {

@@ -121,7 +121,7 @@ func (b EastAsianLineBreaks) softLineBreak(thisLastRune rune, siblingFirstRune r
 	case EastAsianLineBreaksNone:
 		return false
 	case EastAsianLineBreaksSimple:
-		return !(util.IsEastAsianWideRune(thisLastRune) && util.IsEastAsianWideRune(siblingFirstRune))
+		return !util.IsEastAsianWideRune(thisLastRune) || !util.IsEastAsianWideRune(siblingFirstRune)
 	case EastAsianLineBreaksCSS3Draft:
 		return eastAsianLineBreaksCSS3DraftSoftLineBreak(thisLastRune, siblingFirstRune)
 	}
@@ -295,7 +295,7 @@ func (r *Renderer) writeLines(w util.BufWriter, source []byte, n ast.Node) {
 }
 
 // GlobalAttributeFilter defines attribute names which any elements can have.
-var GlobalAttributeFilter = util.NewBytesFilterString(`accesskey,autocapitalize,autofocus,class,contenteditable,dir,draggable,enterkeyhint,hidden,id,inert,inputmode,is,itemid,itemprop,itemref,itemscope,itemtype,lang,part,role,slot,spellcheck,style,tabindex,title,translate`) // nolint:lll
+var GlobalAttributeFilter = util.NewBytesFilterString(`accesskey,autocapitalize,autofocus,class,contenteditable,dir,draggable,enterkeyhint,hidden,id,inert,inputmode,is,itemid,itemprop,itemref,itemscope,itemtype,lang,part,role,slot,spellcheck,style,tabindex,title,translate`)
 
 func (r *Renderer) renderDocument(
 	w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -497,7 +497,7 @@ func (r *Renderer) renderThematicBreak(
 }
 
 // LinkAttributeFilter defines attribute names which link elements can have.
-var LinkAttributeFilter = GlobalAttributeFilter.ExtendString(`download,hreflang,media,ping,referrerpolicy,rel,shape,target`) // nolint:lll
+var LinkAttributeFilter = GlobalAttributeFilter.ExtendString(`download,hreflang,media,ping,referrerpolicy,rel,shape,target`)
 
 func (r *Renderer) renderAutoLink(
 	w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
@@ -601,7 +601,7 @@ func (r *Renderer) renderLink(w util.BufWriter, source []byte, node ast.Node, en
 }
 
 // ImageAttributeFilter defines attribute names which image elements can have.
-var ImageAttributeFilter = GlobalAttributeFilter.ExtendString(`align,border,crossorigin,decoding,height,importance,intrinsicsize,ismap,loading,referrerpolicy,sizes,srcset,usemap,width`) // nolint: lll
+var ImageAttributeFilter = GlobalAttributeFilter.ExtendString(`align,border,crossorigin,decoding,height,importance,intrinsicsize,ismap,loading,referrerpolicy,sizes,srcset,usemap,width`)
 
 func (r *Renderer) renderImage(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.WalkStatus, error) {
 	if !entering {
