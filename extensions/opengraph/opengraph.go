@@ -92,6 +92,7 @@ func opengraphTags(p xlog.Page) template.HTML {
 		escape(firstParagraph),
 	)
 
+	// #nosec G203 -- All variables (title, description, image, etc.) passed through html.EscapeString via escape() function
 	return template.HTML(ogTags + twitterTags + metaTags)
 }
 

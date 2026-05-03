@@ -51,6 +51,7 @@ func links(p xlog.Page) []xlog.Command {
 
 func metaTag(p xlog.Page) template.HTML {
 	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
+	// #nosec G203 -- Sitename is escaped via template.JSEscapeString before insertion into HTML attribute
 	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(xlog.Config.Sitename)))
 }
 

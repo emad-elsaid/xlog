@@ -98,6 +98,7 @@ func (p *page) Exists() bool {
 }
 
 func (p *page) Render() template.HTML {
+	// #nosec G203 -- Content is from .html files, explicitly trusted by user to contain raw HTML
 	return template.HTML(p.Content())
 }
 

@@ -23,6 +23,7 @@ func render(i xlog.Markdown) string {
 
 func container(cls string, content xlog.Markdown) template.HTML {
 	tpl := `<article class="message %s"><div class="message-body">%s</div></article>`
+	// #nosec G203 -- cls is a predefined CSS class constant; content passes through MarkdownConverter which sanitizes
 	return template.HTML(fmt.Sprintf(tpl, cls, render(content)))
 }
 

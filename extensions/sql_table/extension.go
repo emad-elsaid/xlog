@@ -56,5 +56,6 @@ func script(p xlog.Page) template.HTML {
 	o, _ := js.ReadFile("js/sql_table.html")
 	o = append(o, []byte(fmt.Sprintf("<script>const sqlTableThreshold = %d</script>", sqlTableThreshold))...)
 
+	// #nosec G203 -- Content is from embedded static js/sql_table.html file combined with integer constant
 	return template.HTML(o)
 }

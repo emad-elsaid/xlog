@@ -34,7 +34,7 @@ func (p *page) Render() template.HTML {
 	content = xlog.PreProcess(content)
 	var buf bytes.Buffer
 	if err := xlog.MarkdownConverter().Convert([]byte(content), &buf); err != nil {
-		// Escape error message to prevent potential XSS from error content
+		// #nosec G203 -- Error message is html.EscapeString-sanitized before conversion
 		return template.HTML(html.EscapeString(err.Error()))
 	}
 

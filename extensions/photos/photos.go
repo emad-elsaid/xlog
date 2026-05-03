@@ -136,6 +136,7 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 		})
 
 		if err != nil {
+			// #nosec G203 -- Error message from filepath.WalkDir; does not contain user-controlled HTML
 			return template.HTML(err.Error())
 		}
 

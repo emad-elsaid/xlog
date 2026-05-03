@@ -73,7 +73,7 @@ func (p *page) Render() template.HTML {
 
 	var buf bytes.Buffer
 	if err := MarkdownConverter().Renderer().Render(&buf, src, ast); err != nil {
-		// Escape error message to prevent XSS
+		// #nosec G203 -- Error message is html.EscapeString-sanitized before conversion
 		return template.HTML(html.EscapeString(err.Error()))
 	}
 
