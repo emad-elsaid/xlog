@@ -57,7 +57,7 @@ func Pages(ctx context.Context) []Page {
 }
 
 // EachPage iterates on all available pages. many extensions
-// uses it to get all pages and maybe parse them and extract needed information
+// uses it to get all pages and maybe parse them and extract needed information.
 func EachPage(ctx context.Context, f func(Page)) {
 	pagesMutex.RLock()
 	cached := pages
@@ -83,7 +83,7 @@ func EachPage(ctx context.Context, f func(Page)) {
 var concurrency = runtime.NumCPU() * 4
 
 // MapPage Similar to EachPage but iterates concurrently and accumulates
-// returns in a slice
+// returns in a slice.
 func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	pagesMutex.RLock()
 	cached := pages
