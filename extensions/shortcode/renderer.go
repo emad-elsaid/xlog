@@ -26,7 +26,9 @@ func (s *shortCodeRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 
 	content := source[node.start:node.end]
 	output := node.fun.Render(Markdown(content))
-	w.Write([]byte(output))
+	if _, err := w.Write([]byte(output)); err != nil {
+		return ast.WalkStop, err
+	}
 
 	return ast.WalkContinue, nil
 }
@@ -49,7 +51,9 @@ func (s *shortCodeRenderer) renderBlock(w util.BufWriter, source []byte, n ast.N
 	}
 
 	output := node.fun.Render(Markdown(content))
-	w.Write([]byte(output))
+	if _, err := w.Write([]byte(output)); err != nil {
+		return ast.WalkStop, err
+	}
 
 	return ast.WalkContinue, nil
 }

@@ -12,7 +12,8 @@ func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reade
 	source := reader.Source()
 	blocks := []*ast.FencedCodeBlock{}
 
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	// Error ignored: Walk errors are not expected in this transformation
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}

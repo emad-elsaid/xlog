@@ -16,7 +16,8 @@ type ShortCode struct {
 
 func render(i Markdown) string {
 	var b bytes.Buffer
-	MarkdownConverter().Convert([]byte(i), &b)
+	// Error ignored: Convert writes to buffer which doesn't fail in practice
+	_ = MarkdownConverter().Convert([]byte(i), &b)
 	return b.String()
 }
 

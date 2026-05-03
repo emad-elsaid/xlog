@@ -67,7 +67,9 @@ func TestShortCode(t *testing.T) {
 			shortcode.RegisterShortCode("test", shortcode.ShortCode{Render: handler, Default: ""})
 
 			output := bytes.NewBufferString("")
-			md.Convert([]byte(tc.input), output)
+			if err := md.Convert([]byte(tc.input), output); err != nil {
+				t.Fatalf("Convert failed: %v", err)
+			}
 			if output.String() != tc.output {
 				t.Errorf("input: %s\nexpected: %s\noutput: %s", tc.input, tc.output, output.String())
 			}
