@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 const (
@@ -132,6 +133,7 @@ func TestBuildRoute(t *testing.T) {
 						t.Errorf("Failed to write response: %v", err)
 					}
 				}),
+				ReadHeaderTimeout: 5 * time.Second,
 			}
 
 			err := buildRoute(srv, tc.route, tc.dir, tc.file)
