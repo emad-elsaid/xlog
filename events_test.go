@@ -15,15 +15,15 @@ type testPage struct {
 	modTime time.Time
 }
 
-func (t *testPage) Name() string                   { return t.name }
-func (t *testPage) FileName() string               { return t.name + ".md" }
-func (t *testPage) Exists() bool                   { return true }
-func (t *testPage) Render() template.HTML          { return "" }
-func (t *testPage) Content() Markdown              { return "" }
-func (t *testPage) Delete() bool                   { return false }
-func (t *testPage) Write(Markdown) bool            { return false }
-func (t *testPage) ModTime() time.Time             { return t.modTime }
-func (t *testPage) AST() ([]byte, ast.Node)        { return nil, nil }
+func (t *testPage) Name() string            { return t.name }
+func (t *testPage) FileName() string        { return t.name + ".md" }
+func (t *testPage) Exists() bool            { return true }
+func (t *testPage) Render() template.HTML   { return "" }
+func (t *testPage) Content() Markdown       { return "" }
+func (t *testPage) Delete() bool            { return false }
+func (t *testPage) Write(Markdown) bool     { return false }
+func (t *testPage) ModTime() time.Time      { return t.modTime }
+func (t *testPage) AST() ([]byte, ast.Node) { return nil, nil }
 
 func TestListen(t *testing.T) {
 	// Clear any existing handlers to isolate test
@@ -149,7 +149,7 @@ func TestTriggerWithError(t *testing.T) {
 	Listen(PageChanged, successHandler)
 
 	testP := &testPage{name: "test"}
-	
+
 	// Trigger should not panic even if a handler returns an error
 	Trigger(PageChanged, testP)
 
@@ -229,7 +229,7 @@ func TestTriggerEmptyHandlerList(t *testing.T) {
 	}
 
 	testP := &testPage{name: "test"}
-	
+
 	// Should not panic with empty handler list
 	Trigger(PageChanged, testP)
 }

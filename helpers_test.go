@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/emad-elsaid/xlog/markdown/text"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBanner(t *testing.T) {

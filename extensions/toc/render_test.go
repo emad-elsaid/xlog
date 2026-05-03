@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/ast"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type list []*listItem

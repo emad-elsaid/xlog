@@ -61,10 +61,14 @@ func Start(ctx context.Context) {
 
 	go func() {
 		<-ctx.Done()
-		srv.Close()
+		if err := srv.Close(); err != nil {
+			slog.Error("Failed to close server", "error", err)
+		}
 	}()
 
-	srv.ListenAndServe()
+	if err := srv.ListenAndServe(); err != nil {
+		slog.Error("Server error", "error", err)
+	}
 }
 
 // Redirect to `/index` to render the index page.

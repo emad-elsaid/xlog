@@ -784,13 +784,13 @@ func FindEmailIndex(b []byte) int {
 	if i >= len(b) {
 		return -1
 	}
-	
+
 	// Validate domain part without regex
 	// Domain format: label(.label)* where each label is alphanumeric with optional hyphens
 	// Each label: starts with alphanumeric, ends with alphanumeric, max 63 chars
 	// Labels separated by dots
 	domainStart := i
-	
+
 	for i < len(b) {
 		// Label must start with alphanumeric
 		if !IsAlphaNumeric(b[i]) {
@@ -798,7 +798,7 @@ func FindEmailIndex(b []byte) int {
 		}
 		labelStart := i
 		i++
-		
+
 		// Read through label (alphanumeric or hyphen, max 63 chars)
 		for i < len(b) && i-labelStart < 63 {
 			c := b[i]
@@ -808,12 +808,12 @@ func FindEmailIndex(b []byte) int {
 				break
 			}
 		}
-		
+
 		// Label must end with alphanumeric (not hyphen)
 		if i > labelStart+1 && b[i-1] == '-' {
 			return -1
 		}
-		
+
 		// Check what comes after the label
 		if i >= len(b) {
 			// End of input - valid if we read at least one label
@@ -822,7 +822,7 @@ func FindEmailIndex(b []byte) int {
 			}
 			return -1
 		}
-		
+
 		// If next char is a dot, continue to next label
 		if b[i] == '.' {
 			i++
@@ -832,11 +832,11 @@ func FindEmailIndex(b []byte) int {
 			}
 			continue
 		}
-		
+
 		// Any other character ends the domain
 		break
 	}
-	
+
 	// Valid if we read at least one character in the domain part
 	if i > domainStart {
 		return i

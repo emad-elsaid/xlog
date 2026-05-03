@@ -31,7 +31,11 @@ func (s *shortCodeParser) Open(parent ast.Node, reader text.Reader, pc parser.Co
 	firstWord := line[1:endOfShortcode]
 	var processor ShortCode
 	var ok bool
-	if processor, ok = shortcodes[firstWord]; !ok {
+	shortcodesMutex.RLock()
+	processor, ok = shortcodes[firstWord]
+	shortcodesMutex.RUnlock()
+
+	if !ok {
 		return nil, parser.Close
 	}
 

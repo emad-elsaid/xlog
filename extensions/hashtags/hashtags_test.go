@@ -87,21 +87,21 @@ func TestHashTagParse(t *testing.T) {
 			reader := text.NewReader([]byte(tt.input))
 			// Note: Parse is called AFTER the trigger character is already consumed
 			// by the parser, so we don't need to skip it manually
-			
+
 			result := h.Parse(nil, reader, parser.NewContext())
-			
+
 			if tt.valid {
 				if result == nil {
 					t.Errorf("Expected valid hashtag, got nil")
 					return
 				}
-				
+
 				tag, ok := result.(*HashTag)
 				if !ok {
 					t.Errorf("Expected *HashTag, got %T", result)
 					return
 				}
-				
+
 				if string(tag.value) != tt.expected {
 					t.Errorf("Expected tag value %q, got %q", tt.expected, string(tag.value))
 				}
@@ -158,28 +158,28 @@ func TestHashTagRender(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := markdown.New()
-			
+
 			// Register hashtag parser
 			h := &HashTag{}
 			md.Parser().AddOptions(parser.WithInlineParsers(
 				util.Prioritized(h, 999),
 			))
-			
+
 			// Register hashtag renderer
 			md.Renderer().AddOptions(renderer.WithNodeRenderers(
 				util.Prioritized(h, 0),
 			))
-			
+
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
-			
+
 			var buf bytes.Buffer
 			err := md.Renderer().Render(&buf, []byte(tt.markdown), doc)
 			if err != nil {
 				t.Fatalf("Render error: %v", err)
 			}
-			
+
 			htmlOutput := buf.String()
-			
+
 			for _, expected := range tt.contains {
 				if !strings.Contains(htmlOutput, expected) {
 					t.Errorf("Expected HTML to contain %q, got:\n%s", expected, htmlOutput)
@@ -199,7 +199,7 @@ func TestHashTagKind(t *testing.T) {
 func TestHashTagTrigger(t *testing.T) {
 	h := &HashTag{}
 	trigger := h.Trigger()
-	
+
 	if len(trigger) != 1 || trigger[0] != '#' {
 		t.Errorf("Expected trigger to be ['#'], got %v", trigger)
 	}
@@ -209,14 +209,14 @@ func TestHashTagDump(t *testing.T) {
 	tag := &HashTag{
 		value: []byte("testTag"),
 	}
-	
+
 	// Just ensure it doesn't panic
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("Dump panicked: %v", r)
 		}
 	}()
-	
+
 	tag.Dump([]byte("#testTag"), 0)
 }
 
@@ -256,7 +256,7 @@ func TestHashTagUniqueness(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &HashTag{}
-			
+
 			// Parse first tag
 			reader1 := text.NewReader([]byte("#" + tt.tag1))
 			result1 := h.Parse(nil, reader1, parser.NewContext())
@@ -264,7 +264,7 @@ func TestHashTagUniqueness(t *testing.T) {
 			if !ok {
 				t.Fatalf("Failed to parse first tag")
 			}
-			
+
 			// Parse second tag
 			reader2 := text.NewReader([]byte("#" + tt.tag2))
 			result2 := h.Parse(nil, reader2, parser.NewContext())
@@ -272,7 +272,7 @@ func TestHashTagUniqueness(t *testing.T) {
 			if !ok {
 				t.Fatalf("Failed to parse second tag")
 			}
-			
+
 			isSame := tag1.unique == tag2.unique
 			if isSame != tt.expected {
 				t.Errorf("Expected unique handles to be same=%v, got same=%v (tag1=%v, tag2=%v)",
@@ -332,7 +332,7 @@ func TestHashTagInMarkdownContext(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			md := markdown.New()
 			h := &HashTag{}
-			
+
 			// Register hashtag parser and renderer
 			md.Parser().AddOptions(parser.WithInlineParsers(
 				util.Prioritized(h, 999),
@@ -340,21 +340,21 @@ func TestHashTagInMarkdownContext(t *testing.T) {
 			md.Renderer().AddOptions(renderer.WithNodeRenderers(
 				util.Prioritized(h, 0),
 			))
-			
+
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
-			
+
 			var buf bytes.Buffer
 			err := md.Renderer().Render(&buf, []byte(tt.markdown), doc)
 			if err != nil {
 				t.Fatalf("Render error: %v", err)
 			}
-			
+
 			htmlOutput := buf.String()
-			
+
 			if tt.contains != "" && !strings.Contains(htmlOutput, tt.contains) {
 				t.Errorf("Expected HTML to contain %q, got:\n%s", tt.contains, htmlOutput)
 			}
-			
+
 			if tt.notContains != "" && strings.Contains(htmlOutput, tt.notContains) {
 				t.Errorf("Expected HTML NOT to contain %q, but it does:\n%s", tt.notContains, htmlOutput)
 			}
@@ -405,21 +405,21 @@ func TestHashTagEdgeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			h := &HashTag{}
 			reader := text.NewReader([]byte(tt.input))
-			
+
 			result := h.Parse(nil, reader, parser.NewContext())
-			
+
 			if tt.valid {
 				if result == nil {
 					t.Errorf("Expected valid hashtag, got nil for input %q", tt.input)
 					return
 				}
-				
+
 				tag, ok := result.(*HashTag)
 				if !ok {
 					t.Errorf("Expected *HashTag, got %T", result)
 					return
 				}
-				
+
 				if string(tag.value) != tt.expected {
 					t.Errorf("Expected tag value %q, got %q for input %q",
 						tt.expected, string(tag.value), tt.input)

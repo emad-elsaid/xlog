@@ -26,7 +26,7 @@ func TestEmbedInit(t *testing.T) {
 			t.Errorf("Init() panicked: %v", r)
 		}
 	}()
-	
+
 	ext := Embed{}
 	ext.Init()
 }
@@ -90,44 +90,44 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 	// Create a temporary test page file for integration testing
 	// This tests the full flow with actual filesystem
 	tmpDir := t.TempDir()
-	
+
 	// Save current directory
 	oldWd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Failed to get working directory: %v", err)
 	}
 	defer os.Chdir(oldWd)
-	
+
 	// Change to temp directory
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatalf("Failed to change to temp directory: %v", err)
 	}
-	
+
 	// Create a test markdown page
 	testPageName := "test-embed-page"
 	testContent := "# Test Embed Page\n\nThis is test content for embedding."
 	testFilePath := filepath.Join(tmpDir, testPageName+".md")
-	
+
 	if err := os.WriteFile(testFilePath, []byte(testContent), 0644); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
-	
+
 	// Test embedding the page
 	input := Markdown(testPageName)
 	result := embedShortcode(input)
-	
+
 	resultStr := string(result)
-	
+
 	// Verify the result is not empty
 	if resultStr == "" {
 		t.Error("Expected non-empty result for existing page")
 	}
-	
+
 	// Verify it's not an error message
 	if strings.Contains(resultStr, "doesn't exist") {
 		t.Errorf("Expected page to be found, got error: %s", resultStr)
 	}
-	
+
 	// Verify the content is rendered (should contain heading)
 	if !strings.Contains(resultStr, "Test Embed Page") {
 		t.Errorf("Expected rendered content to contain page heading, got: %s", resultStr)
@@ -137,25 +137,25 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 func TestEmbedShortcode_Integration_WithWhitespace(t *testing.T) {
 	// Test that pages with whitespace in input are found correctly
 	tmpDir := t.TempDir()
-	
+
 	oldWd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Failed to get working directory: %v", err)
 	}
 	defer os.Chdir(oldWd)
-	
+
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatalf("Failed to change to temp directory: %v", err)
 	}
-	
+
 	testPageName := "whitespace-page"
 	testContent := "# Whitespace Test"
 	testFilePath := filepath.Join(tmpDir, testPageName+".md")
-	
+
 	if err := os.WriteFile(testFilePath, []byte(testContent), 0644); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
-	
+
 	// Test with various whitespace - trimming should make it work
 	inputs := []string{
 		"whitespace-page",
@@ -165,16 +165,16 @@ func TestEmbedShortcode_Integration_WithWhitespace(t *testing.T) {
 		"\twhitespace-page",
 		"whitespace-page\n",
 	}
-	
+
 	for _, input := range inputs {
 		t.Run(fmt.Sprintf("input_%q", input), func(t *testing.T) {
 			result := embedShortcode(Markdown(input))
 			resultStr := string(result)
-			
+
 			if strings.Contains(resultStr, "doesn't exist") {
 				t.Errorf("Expected page to be found with input %q, got error: %s", input, resultStr)
 			}
-			
+
 			if !strings.Contains(resultStr, "Whitespace Test") {
 				t.Errorf("Expected rendered content with input %q, got: %s", input, resultStr)
 			}
@@ -186,7 +186,7 @@ func TestEmbedShortcode_OutputFormat(t *testing.T) {
 	// Test that output is valid HTML (template.HTML type)
 	input := Markdown("some-page")
 	result := embedShortcode(input)
-	
+
 	// Verify the result is of type template.HTML
 	_, ok := interface{}(result).(template.HTML)
 	if !ok {
@@ -204,12 +204,12 @@ func TestEmbedShortcode_ErrorMessageFormat(t *testing.T) {
 		{"another-page-abc456", "Page: another-page-abc456 doesn't exist"},
 		{"", "Page:  doesn't exist"},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("input_%s", tc.input), func(t *testing.T) {
 			result := embedShortcode(Markdown(tc.input))
 			resultStr := string(result)
-			
+
 			// For pages that don't exist, verify error format
 			if strings.Contains(resultStr, "doesn't exist") {
 				if resultStr != tc.expected {
@@ -223,17 +223,17 @@ func TestEmbedShortcode_ErrorMessageFormat(t *testing.T) {
 func TestEmbedShortcode_ComplexPageName(t *testing.T) {
 	// Test various page name formats
 	tmpDir := t.TempDir()
-	
+
 	oldWd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("Failed to get working directory: %v", err)
 	}
 	defer os.Chdir(oldWd)
-	
+
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatalf("Failed to change to temp directory: %v", err)
 	}
-	
+
 	// Test with page name containing various characters
 	testCases := []string{
 		"simple-page",
@@ -242,25 +242,25 @@ func TestEmbedShortcode_ComplexPageName(t *testing.T) {
 		"page123",
 		"PageWithCaps",
 	}
-	
+
 	for _, pageName := range testCases {
 		t.Run(pageName, func(t *testing.T) {
 			// Create the page
 			content := fmt.Sprintf("# %s", pageName)
 			filePath := filepath.Join(tmpDir, pageName+".md")
-			
+
 			if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 				t.Fatalf("Failed to create test page: %v", err)
 			}
-			
+
 			// Test embedding
 			result := embedShortcode(Markdown(pageName))
 			resultStr := string(result)
-			
+
 			if strings.Contains(resultStr, "doesn't exist") {
 				t.Errorf("Expected page %q to be found, got error", pageName)
 			}
-			
+
 			if !strings.Contains(resultStr, pageName) {
 				t.Errorf("Expected rendered content to contain page name %q, got: %s", pageName, resultStr)
 			}

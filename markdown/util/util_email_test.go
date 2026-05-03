@@ -61,7 +61,7 @@ func TestFindEmailIndex(t *testing.T) {
 			input:    "user_name@example.com",
 			expected: 21,
 		},
-		
+
 		// Invalid emails
 		{
 			name:     "no local part",
@@ -113,7 +113,7 @@ func TestFindEmailIndex(t *testing.T) {
 			input:    "user@.example.com",
 			expected: -1,
 		},
-		
+
 		// Edge cases
 		{
 			name:     "single char local and domain",

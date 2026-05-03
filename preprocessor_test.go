@@ -93,7 +93,7 @@ func TestPreProcess_MultiplePreprocessors(t *testing.T) {
 
 	input := Markdown("hello")
 	result := PreProcess(input)
-	
+
 	// Should be: "hello" -> "PREFIX: hello" -> "PREFIX: HELLO" -> "PREFIX: HELLO :SUFFIX"
 	assert.Equal(t, Markdown("PREFIX: HELLO :SUFFIX"), result)
 }
@@ -119,7 +119,7 @@ func TestPreProcess_PreprocessorOrder(t *testing.T) {
 
 	input := Markdown("AAA")
 	result := PreProcess(input)
-	
+
 	// Should be: "AAA" -> "BBB" -> "CCC"
 	// This proves preprocessors run in order as a pipeline
 	assert.Equal(t, Markdown("CCC"), result)
@@ -144,7 +144,7 @@ func TestPreProcess_PreservesNewlines(t *testing.T) {
 
 	input := Markdown("line1\nline2\nline3")
 	result := PreProcess(input)
-	
+
 	expected := Markdown("> line1\n> line2\n> line3")
 	assert.Equal(t, expected, result)
 }
@@ -176,7 +176,7 @@ func TestPreProcess_RealWorldScenario(t *testing.T) {
 
 	input := Markdown("Visit [[Home]] and [[About]] on {{date}}")
 	result := PreProcess(input)
-	
+
 	expected := Markdown("Visit [Home](/Home) and [About](/About) on 2026-03-13")
 	assert.Equal(t, expected, result)
 }

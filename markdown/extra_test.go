@@ -22,7 +22,7 @@ func init() {
 	if err == nil {
 		testTimeoutMultiplier = m
 	}
-	
+
 	// Race detector adds significant overhead (5-10x slower)
 	// If no explicit multiplier is set, use 2.0 for race builds
 	// This is detected via a simple test that will only pass with race detector

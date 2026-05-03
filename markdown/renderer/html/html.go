@@ -730,7 +730,7 @@ func RenderAttributes(w util.BufWriter, node ast.Node, filter util.BytesFilter) 
 		_, _ = w.WriteString(" ")
 		_, _ = w.Write(attr.Name)
 		_, _ = w.WriteString(`="`)
-		
+
 		var value []byte
 		switch typed := attr.Value.(type) {
 		case []byte:

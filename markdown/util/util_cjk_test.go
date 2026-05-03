@@ -21,7 +21,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        'ん',
 			expected: true,
 		},
-		
+
 		// Katakana
 		{
 			name:     "katakana ア",
@@ -33,7 +33,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        'ン',
 			expected: true,
 		},
-		
+
 		// Han (Chinese characters)
 		{
 			name:     "Han 中",
@@ -45,7 +45,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        '文',
 			expected: true,
 		},
-		
+
 		// Hangul (Korean)
 		{
 			name:     "Hangul 한",
@@ -57,7 +57,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        '글',
 			expected: true,
 		},
-		
+
 		// CJK symbols and punctuation
 		{
 			name:     "CJK ideographic comma 、",
@@ -69,7 +69,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        '。',
 			expected: true,
 		},
-		
+
 		// Latin characters (not wide)
 		{
 			name:     "ASCII letter A",
@@ -81,7 +81,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        'z',
 			expected: false,
 		},
-		
+
 		// ASCII symbols (not wide)
 		{
 			name:     "ASCII space",
@@ -93,7 +93,7 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        '!',
 			expected: false,
 		},
-		
+
 		// Digits (not wide)
 		{
 			name:     "ASCII digit 0",
@@ -105,14 +105,14 @@ func TestIsEastAsianWideRune(t *testing.T) {
 			r:        '9',
 			expected: false,
 		},
-		
+
 		// Greek (not wide)
 		{
 			name:     "Greek alpha α",
 			r:        'α',
 			expected: false,
 		},
-		
+
 		// Cyrillic (not wide)
 		{
 			name:     "Cyrillic А",
@@ -148,14 +148,14 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        0x2EFF,
 			expected: true,
 		},
-		
+
 		// Kangxi Radicals (2F00–2FDF)
 		{
 			name:     "Kangxi Radical start",
 			r:        0x2F00,
 			expected: true,
 		},
-		
+
 		// Hiragana (3040–309F)
 		{
 			name:     "Hiragana あ",
@@ -167,7 +167,7 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        'ん',
 			expected: true,
 		},
-		
+
 		// Katakana (30A0–30FF)
 		{
 			name:     "Katakana ア",
@@ -179,7 +179,7 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        'ン',
 			expected: true,
 		},
-		
+
 		// CJK Unified Ideographs (4E00–9FFF)
 		{
 			name:     "CJK Unified Ideograph 中",
@@ -191,7 +191,7 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        '文',
 			expected: true,
 		},
-		
+
 		// CJK Unified Ideographs Extension A (3400–4DBF)
 		{
 			name:     "CJK Extension A start",
@@ -203,7 +203,7 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        0x4DBF,
 			expected: true,
 		},
-		
+
 		// CJK Unified Ideographs Extension B (20000–2A6DF)
 		{
 			name:     "CJK Extension B start",
@@ -215,14 +215,14 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        0x20001,
 			expected: true,
 		},
-		
+
 		// CJK Unified Ideographs Extension G (30000–3134F)
 		{
 			name:     "CJK Extension G start",
 			r:        0x30000,
 			expected: true,
 		},
-		
+
 		// Halfwidth and Fullwidth Forms (FF00–FFEF)
 		{
 			name:     "Fullwidth Latin A",
@@ -234,14 +234,14 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        0xFF10,
 			expected: true,
 		},
-		
+
 		// Yi Syllables (A000–A48F)
 		{
 			name:     "Yi Syllable",
 			r:        0xA000,
 			expected: true,
 		},
-		
+
 		// ASCII (not space-discarding)
 		{
 			name:     "ASCII letter A",
@@ -258,28 +258,28 @@ func TestIsSpaceDiscardingUnicodeRune(t *testing.T) {
 			r:        '5',
 			expected: false,
 		},
-		
+
 		// Latin Extended (not space-discarding)
 		{
 			name:     "Latin Extended é",
 			r:        'é',
 			expected: false,
 		},
-		
+
 		// Greek (not space-discarding)
 		{
 			name:     "Greek alpha α",
 			r:        'α',
 			expected: false,
 		},
-		
+
 		// Cyrillic (not space-discarding)
 		{
 			name:     "Cyrillic А",
 			r:        'А',
 			expected: false,
 		},
-		
+
 		// Arabic (not space-discarding)
 		{
 			name:     "Arabic alef ا",
@@ -325,7 +325,7 @@ func TestEastAsianWidth(t *testing.T) {
 			r:        0xFFE0,
 			expected: "F",
 		},
-		
+
 		// Halfwidth (H) - characters that take up half width
 		{
 			name:     "Won sign",
@@ -342,7 +342,7 @@ func TestEastAsianWidth(t *testing.T) {
 			r:        0xFFDC, // Use 0xFFDC which is in the halfwidth range
 			expected: "H",
 		},
-		
+
 		// Wide (W) - East Asian wide characters
 		{
 			name:     "Hiragana あ",
@@ -374,7 +374,7 @@ func TestEastAsianWidth(t *testing.T) {
 			r:        0x20000,
 			expected: "W",
 		},
-		
+
 		// Narrow (Na) - narrow ASCII
 		{
 			name:     "ASCII space",
@@ -411,7 +411,7 @@ func TestEastAsianWidth(t *testing.T) {
 			r:        0x00A5,
 			expected: "Na",
 		},
-		
+
 		// Ambiguous (A) - characters with ambiguous width
 		{
 			name:     "Inverted exclamation ¡",
@@ -543,7 +543,7 @@ func TestEastAsianWidth(t *testing.T) {
 			r:        0x2605,
 			expected: "A",
 		},
-		
+
 		// Neutral (N) - all other characters
 		{
 			name:     "Copyright sign ©",
@@ -590,10 +590,10 @@ func TestEastAsianWidth(t *testing.T) {
 func BenchmarkIsEastAsianWideRune(b *testing.B) {
 	testRunes := []rune{
 		'A',    // ASCII (false)
-		'あ',   // Hiragana (true)
-		'ア',   // Katakana (true)
-		'中',   // Han (true)
-		'한',   // Hangul (true)
+		'あ',    // Hiragana (true)
+		'ア',    // Katakana (true)
+		'中',    // Han (true)
+		'한',    // Hangul (true)
 		'α',    // Greek (false)
 		0x3000, // CJK space (true)
 	}
@@ -609,8 +609,8 @@ func BenchmarkIsEastAsianWideRune(b *testing.B) {
 func BenchmarkIsSpaceDiscardingUnicodeRune(b *testing.B) {
 	testRunes := []rune{
 		'A',     // ASCII (false)
-		'あ',    // Hiragana (true)
-		'中',    // CJK Unified Ideograph (true)
+		'あ',     // Hiragana (true)
+		'中',     // CJK Unified Ideograph (true)
 		0x2E80,  // CJK Radicals Supplement (true)
 		0x20000, // CJK Extension B (true)
 		'α',     // Greek (false)
@@ -627,12 +627,12 @@ func BenchmarkIsSpaceDiscardingUnicodeRune(b *testing.B) {
 
 func BenchmarkEastAsianWidth(b *testing.B) {
 	testRunes := []rune{
-		'A',     // Na
+		'A',    // Na
 		'あ',    // W
-		0x3000,  // F
-		0xFF71,  // H
-		0x00A1,  // A
-		'é',     // N
+		0x3000, // F
+		0xFF71, // H
+		0x00A1, // A
+		'é',    // N
 	}
 
 	b.ResetTimer()

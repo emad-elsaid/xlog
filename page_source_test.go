@@ -13,7 +13,7 @@ import (
 
 // mockPageSource implements PageSource for testing
 type mockPageSource struct {
-	pages map[string]Page
+	pages    map[string]Page
 	eachFunc func(context.Context, func(Page))
 }
 
@@ -36,15 +36,15 @@ type mockPage struct {
 	exists bool
 }
 
-func (m *mockPage) Name() string                   { return m.name }
-func (m *mockPage) Exists() bool                   { return m.exists }
-func (m *mockPage) FileName() string               { return m.name + ".md" }
-func (m *mockPage) Content() Markdown              { return "" }
-func (m *mockPage) Render() template.HTML          { return "" }
-func (m *mockPage) Delete() bool                   { return false }
-func (m *mockPage) Write(Markdown) bool            { return false }
-func (m *mockPage) ModTime() time.Time             { return time.Time{} }
-func (m *mockPage) AST() ([]byte, ast.Node)        { return nil, nil }
+func (m *mockPage) Name() string            { return m.name }
+func (m *mockPage) Exists() bool            { return m.exists }
+func (m *mockPage) FileName() string        { return m.name + ".md" }
+func (m *mockPage) Content() Markdown       { return "" }
+func (m *mockPage) Render() template.HTML   { return "" }
+func (m *mockPage) Delete() bool            { return false }
+func (m *mockPage) Write(Markdown) bool     { return false }
+func (m *mockPage) ModTime() time.Time      { return time.Time{} }
+func (m *mockPage) AST() ([]byte, ast.Node) { return nil, nil }
 
 func TestNewPage(t *testing.T) {
 	// Save original sources and restore after test
@@ -134,9 +134,9 @@ func TestNewPage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.setupSources()
-			
+
 			page := NewPage(tt.pageName)
-			
+
 			if tt.expectedExists {
 				require.NotNil(t, page, "Expected page to exist")
 				assert.True(t, page.Exists(), "Expected page.Exists() to return true")
@@ -220,7 +220,7 @@ func TestRegisterPageSourcePriority(t *testing.T) {
 func TestPageSourceIntegration(t *testing.T) {
 	// This test verifies that markdownFS can be used as a PageSource
 	// We use the current directory which should have some .md files
-	
+
 	// Save original sources and restore after test
 	originalSources := sources
 	defer func() { sources = originalSources }()
@@ -235,7 +235,7 @@ func TestPageSourceIntegration(t *testing.T) {
 	page := NewPage("nonexistent-test-page-12345")
 	require.NotNil(t, page, "NewPage should always return a page object")
 	assert.Equal(t, "nonexistent-test-page-12345", page.Name())
-	
+
 	// Since the page doesn't exist, Exists() should return false
 	assert.False(t, page.Exists(), "Page should not exist")
 }

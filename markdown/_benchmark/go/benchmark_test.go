@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	gomarkdown "github.com/gomarkdown/markdown"
 	"github.com/emad-elsaid/xlog/markdown"
 	"github.com/emad-elsaid/xlog/markdown/renderer/html"
 	"github.com/emad-elsaid/xlog/markdown/util"
+	gomarkdown "github.com/gomarkdown/markdown"
 	"gitlab.com/golang-commonmark/markdown"
 
 	"github.com/russross/blackfriday/v2"

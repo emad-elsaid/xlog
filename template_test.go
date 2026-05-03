@@ -159,32 +159,32 @@ func TestPartial(t *testing.T) {
 	compileTemplates()
 
 	tests := []struct {
-		name         string
-		templatePath string
-		data         Locals
+		name          string
+		templatePath  string
+		data          Locals
 		shouldContain string
-		shouldError  bool
+		shouldError   bool
 	}{
 		{
-			name:         "Simple template rendering",
-			templatePath: "emoji-favicon",
-			data:         Locals{"page": &page{name: "test"}},
+			name:          "Simple template rendering",
+			templatePath:  "emoji-favicon",
+			data:          Locals{"page": &page{name: "test"}},
 			shouldContain: "",
-			shouldError:  false,
+			shouldError:   false,
 		},
 		{
-			name:         "Non-existent template",
-			templatePath: "nonexistent-template",
-			data:         nil,
+			name:          "Non-existent template",
+			templatePath:  "nonexistent-template",
+			data:          nil,
 			shouldContain: "template nonexistent-template not found",
-			shouldError:  true,
+			shouldError:   true,
 		},
 		{
-			name:         "Nil data should create empty Locals",
-			templatePath: "emoji-favicon",
-			data:         nil,
+			name:          "Nil data should create empty Locals",
+			templatePath:  "emoji-favicon",
+			data:          nil,
 			shouldContain: "",
-			shouldError:  false,
+			shouldError:   false,
 		},
 	}
 

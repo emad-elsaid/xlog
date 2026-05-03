@@ -14,15 +14,15 @@ type testPropertyPage struct {
 	modTime time.Time
 }
 
-func (t *testPropertyPage) Name() string                 { return t.name }
-func (t *testPropertyPage) FileName() string             { return t.name + ".md" }
-func (t *testPropertyPage) Exists() bool                 { return true }
-func (t *testPropertyPage) Render() template.HTML        { return "" }
-func (t *testPropertyPage) Content() Markdown            { return "" }
-func (t *testPropertyPage) Delete() bool                 { return false }
-func (t *testPropertyPage) Write(Markdown) bool          { return false }
-func (t *testPropertyPage) ModTime() time.Time           { return t.modTime }
-func (t *testPropertyPage) AST() ([]byte, ast.Node)      { return nil, nil }
+func (t *testPropertyPage) Name() string            { return t.name }
+func (t *testPropertyPage) FileName() string        { return t.name + ".md" }
+func (t *testPropertyPage) Exists() bool            { return true }
+func (t *testPropertyPage) Render() template.HTML   { return "" }
+func (t *testPropertyPage) Content() Markdown       { return "" }
+func (t *testPropertyPage) Delete() bool            { return false }
+func (t *testPropertyPage) Write(Markdown) bool     { return false }
+func (t *testPropertyPage) ModTime() time.Time      { return t.modTime }
+func (t *testPropertyPage) AST() ([]byte, ast.Node) { return nil, nil }
 
 // testProperty is a simple property implementation for testing
 type testProperty struct {
@@ -31,9 +31,9 @@ type testProperty struct {
 	value any
 }
 
-func (tp testProperty) Icon() string  { return tp.icon }
-func (tp testProperty) Name() string  { return tp.name }
-func (tp testProperty) Value() any    { return tp.value }
+func (tp testProperty) Icon() string { return tp.icon }
+func (tp testProperty) Name() string { return tp.name }
+func (tp testProperty) Value() any   { return tp.value }
 
 func TestRegisterProperty(t *testing.T) {
 	// Save original state

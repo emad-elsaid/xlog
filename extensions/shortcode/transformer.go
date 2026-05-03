@@ -23,7 +23,11 @@ func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reade
 				continue
 			}
 
-			if _, ok := shortcodes[string(n.Language(source))]; !ok {
+			shortcodesMutex.RLock()
+			_, exists := shortcodes[string(n.Language(source))]
+			shortcodesMutex.RUnlock()
+
+			if !exists {
 				continue
 			}
 
@@ -34,9 +38,13 @@ func (t transformShortCodeBlocks) Transform(doc *ast.Document, reader text.Reade
 	})
 
 	for _, b := range blocks {
+		shortcodesMutex.RLock()
+		fn := shortcodes[string(b.Language(source))]
+		shortcodesMutex.RUnlock()
+
 		replacement := ShortCodeBlock{
 			FencedCodeBlock: *b,
-			fun:             shortcodes[string(b.Language(source))],
+			fun:             fn,
 		}
 
 		parent := b.Parent()

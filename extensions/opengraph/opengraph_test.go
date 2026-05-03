@@ -168,14 +168,14 @@ type mockTestPage struct {
 	content string
 }
 
-func (m mockTestPage) Name() string                      { return m.name }
-func (m mockTestPage) FileName() string                  { return m.name + ".md" }
-func (m mockTestPage) Exists() bool                      { return true }
-func (m mockTestPage) Render() template.HTML             { return "" }
-func (m mockTestPage) Content() Markdown                 { return Markdown(m.content) }
-func (m mockTestPage) Delete() bool                      { return false }
-func (m mockTestPage) Write(Markdown) bool               { return false }
-func (m mockTestPage) ModTime() time.Time                { return time.Now() }
+func (m mockTestPage) Name() string          { return m.name }
+func (m mockTestPage) FileName() string      { return m.name + ".md" }
+func (m mockTestPage) Exists() bool          { return true }
+func (m mockTestPage) Render() template.HTML { return "" }
+func (m mockTestPage) Content() Markdown     { return Markdown(m.content) }
+func (m mockTestPage) Delete() bool          { return false }
+func (m mockTestPage) Write(Markdown) bool   { return false }
+func (m mockTestPage) ModTime() time.Time    { return time.Now() }
 func (m mockTestPage) AST() ([]byte, ast.Node) {
 	source := []byte(m.content)
 	tree := MarkdownConverter().Parser().Parse(text.NewReader(source))

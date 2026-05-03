@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"sync"
 
 	. "github.com/emad-elsaid/xlog"
 )
@@ -24,13 +25,18 @@ func container(cls string, content Markdown) template.HTML {
 	return template.HTML(fmt.Sprintf(tpl, cls, render(content)))
 }
 
-var shortcodes = map[string]ShortCode{
-	"info":    {Render: func(c Markdown) template.HTML { return container("is-info", c) }},
-	"success": {Render: func(c Markdown) template.HTML { return container("is-success", c) }},
-	"warning": {Render: func(c Markdown) template.HTML { return container("is-warning", c) }},
-	"alert":   {Render: func(c Markdown) template.HTML { return container("is-danger", c) }},
-}
+var (
+	shortcodes = map[string]ShortCode{
+		"info":    {Render: func(c Markdown) template.HTML { return container("is-info", c) }},
+		"success": {Render: func(c Markdown) template.HTML { return container("is-success", c) }},
+		"warning": {Render: func(c Markdown) template.HTML { return container("is-warning", c) }},
+		"alert":   {Render: func(c Markdown) template.HTML { return container("is-danger", c) }},
+	}
+	shortcodesMutex sync.RWMutex
+)
 
 func RegisterShortCode(name string, shortcode ShortCode) {
+	shortcodesMutex.Lock()
+	defer shortcodesMutex.Unlock()
 	shortcodes[name] = shortcode
 }

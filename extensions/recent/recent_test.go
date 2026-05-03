@@ -69,7 +69,7 @@ func TestLinksAttrsHrefValue(t *testing.T) {
 	l := links{}
 
 	attrs := l.Attrs()
-	
+
 	// Check that href points to the recent page endpoint
 	href := attrs["href"]
 	if href == nil {

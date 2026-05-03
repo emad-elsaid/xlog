@@ -9,7 +9,7 @@ import (
 func TestConfigurationDefaults(t *testing.T) {
 	// Reset flags to ensure clean test state
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	
+
 	// Re-initialize flags
 	cwd, _ := os.Getwd()
 	flag.StringVar(&Config.Source, "source", cwd, "Directory that will act as a storage")

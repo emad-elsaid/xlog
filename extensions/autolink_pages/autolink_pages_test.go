@@ -179,13 +179,6 @@ func TestPageLinkParser_Parse(t *testing.T) {
 	}
 }
 
-
-
-
-
-
-
-
 // TestNormalizedName tests case-insensitive matching
 func TestNormalizedName(t *testing.T) {
 	// Setup pages with different casings
@@ -221,76 +214,76 @@ func TestNormalizedName(t *testing.T) {
 // TestContainLinkToFrom_RelativeWithContext tests context-aware relative link resolution
 func TestContainLinkToFrom_RelativeWithContext(t *testing.T) {
 	tests := []struct {
-		name         string
-		sourcePage   string
-		targetPage   string
-		linkDest     string
-		shouldMatch  bool
-		description  string
+		name        string
+		sourcePage  string
+		targetPage  string
+		linkDest    string
+		shouldMatch bool
+		description string
 	}{
 		{
-			name:         "Same directory - simple filename",
-			sourcePage:   "folder/source.md",
-			targetPage:   "folder/target.md",
-			linkDest:     "target.md",
-			shouldMatch:  true,
-			description:  "Relative link in same directory should match",
+			name:        "Same directory - simple filename",
+			sourcePage:  "folder/source.md",
+			targetPage:  "folder/target.md",
+			linkDest:    "target.md",
+			shouldMatch: true,
+			description: "Relative link in same directory should match",
 		},
 		{
-			name:         "Subdirectory - relative path",
-			sourcePage:   "folder/source.md",
-			targetPage:   "folder/sub/target.md",
-			linkDest:     "sub/target.md",
-			shouldMatch:  true,
-			description:  "Relative link with subdirectory should match",
+			name:        "Subdirectory - relative path",
+			sourcePage:  "folder/source.md",
+			targetPage:  "folder/sub/target.md",
+			linkDest:    "sub/target.md",
+			shouldMatch: true,
+			description: "Relative link with subdirectory should match",
 		},
 		{
-			name:         "Parent directory - relative path",
-			sourcePage:   "folder/sub/source.md",
-			targetPage:   "folder/target.md",
-			linkDest:     "../target.md",
-			shouldMatch:  true,
-			description:  "Relative link to parent directory should match",
+			name:        "Parent directory - relative path",
+			sourcePage:  "folder/sub/source.md",
+			targetPage:  "folder/target.md",
+			linkDest:    "../target.md",
+			shouldMatch: true,
+			description: "Relative link to parent directory should match",
 		},
 		{
-			name:         "Different folders - same basename",
-			sourcePage:   "folder1/source.md",
-			targetPage:   "folder2/target.md",
-			linkDest:     "target.md",
-			shouldMatch:  true, // Fallback to basename matching
-			description:  "Basename fallback should match even in different folders",
+			name:        "Different folders - same basename",
+			sourcePage:  "folder1/source.md",
+			targetPage:  "folder2/target.md",
+			linkDest:    "target.md",
+			shouldMatch: true, // Fallback to basename matching
+			description: "Basename fallback should match even in different folders",
 		},
 		{
-			name:         "Different folders - relative path",
-			sourcePage:   "folder1/source.md",
-			targetPage:   "folder2/target.md",
-			linkDest:     "../folder2/target.md",
-			shouldMatch:  true,
-			description:  "Explicit relative path to different folder should match",
+			name:        "Different folders - relative path",
+			sourcePage:  "folder1/source.md",
+			targetPage:  "folder2/target.md",
+			linkDest:    "../folder2/target.md",
+			shouldMatch: true,
+			description: "Explicit relative path to different folder should match",
 		},
 		{
-			name:         "Root level - simple filename",
-			sourcePage:   "source.md",
-			targetPage:   "target.md",
-			linkDest:     "target.md",
-			shouldMatch:  true,
-			description:  "Files at root level should match by name",
+			name:        "Root level - simple filename",
+			sourcePage:  "source.md",
+			targetPage:  "target.md",
+			linkDest:    "target.md",
+			shouldMatch: true,
+			description: "Files at root level should match by name",
 		},
 		{
-			name:         "Wrong target",
-			sourcePage:   "folder/source.md",
-			targetPage:   "folder/target.md",
-			linkDest:     "other.md",
-			shouldMatch:  false,
-			description:  "Link to different file should not match",
+			name:        "Wrong target",
+			sourcePage:  "folder/source.md",
+			targetPage:  "folder/target.md",
+			linkDest:    "other.md",
+			shouldMatch: false,
+			description: "Link to different file should not match",
 		},
 		{
-			name:         "Absolute path mismatch",
-			sourcePage:   "folder/source.md",
-			targetPage:   "folder/target.md",
-			linkDest:     "/other/target.md",
-			shouldMatch:  false,
-			description:  "Absolute path to different location should not match",
+			name:        "Absolute path mismatch",
+			sourcePage:  "folder/source.md",
+			targetPage:  "folder/target.md",
+			linkDest:    "/other/target.md",
+			shouldMatch: false,
+			description: "Absolute path to different location should not match",
 		},
 	}
 
@@ -376,7 +369,6 @@ func TestContainLinkToFrom_ComplexPath(t *testing.T) {
 		t.Error("Complex relative path should be normalized and match")
 	}
 }
-
 
 // mockPage is a minimal Page implementation for testing
 type mockPage struct {

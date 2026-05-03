@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -130,7 +129,7 @@ func (p *page) Delete() bool {
 	if p.Exists() {
 		err := os.Remove(p.FileName())
 		if err != nil {
-			fmt.Printf("Can't delete `%s`, err: %s\n", p.Name(), err)
+			slog.Error("Can't delete page", "page", p.Name(), "error", err)
 			return false
 		}
 	}
@@ -149,7 +148,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	if err := os.WriteFile(name, []byte(content), 0644); err != nil {
-		fmt.Printf("Can't write `%s`, err: %s\n", p.Name(), err)
+		slog.Error("Can't write page", "page", p.Name(), "error", err)
 		return false
 	}
 	return true

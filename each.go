@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"sync"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -34,25 +35,41 @@ func IsIgnoredPath(d string) bool {
 	return false
 }
 
-var pages []Page
+var (
+	pages      []Page
+	pagesMutex sync.RWMutex
+)
 
 func Pages(ctx context.Context) []Page {
-	if pages == nil {
+	pagesMutex.RLock()
+	cached := pages
+	pagesMutex.RUnlock()
+
+	if cached == nil {
 		populatePagesCache(ctx)
+		pagesMutex.RLock()
+		cached = pages
+		pagesMutex.RUnlock()
 	}
 
-	return pages[:]
+	return cached[:]
 }
 
 // EachPage iterates on all available pages. many extensions
 // uses it to get all pages and maybe parse them and extract needed information
 func EachPage(ctx context.Context, f func(Page)) {
-	if pages == nil {
+	pagesMutex.RLock()
+	cached := pages
+	pagesMutex.RUnlock()
+
+	if cached == nil {
 		populatePagesCache(ctx)
+		pagesMutex.RLock()
+		cached = pages
+		pagesMutex.RUnlock()
 	}
 
-	currentPages := pages
-	for _, p := range currentPages {
+	for _, p := range cached {
 		select {
 		case <-ctx.Done():
 			return
@@ -67,14 +84,21 @@ var concurrency = runtime.NumCPU() * 4
 // MapPage Similar to EachPage but iterates concurrently and accumulates
 // returns in a slice
 func MapPage[T any](ctx context.Context, f func(Page) T) []T {
-	if pages == nil {
+	pagesMutex.RLock()
+	cached := pages
+	pagesMutex.RUnlock()
+
+	if cached == nil {
 		populatePagesCache(ctx)
+		pagesMutex.RLock()
+		cached = pages
+		pagesMutex.RUnlock()
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(concurrency)
 
-	output := make([]T, 0, len(pages))
+	output := make([]T, 0, len(cached))
 	ch := make(chan T, concurrency)
 	done := make(chan bool)
 
@@ -85,7 +109,7 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 		done <- true
 	}()
 
-	for _, p := range pages {
+	for _, p := range cached {
 		select {
 		case <-ctx.Done():
 			break
@@ -125,11 +149,21 @@ func isNil[T any](t T) bool {
 }
 
 func clearPagesCache(p Page) (err error) {
+	pagesMutex.Lock()
 	pages = nil
+	pagesMutex.Unlock()
 	return nil
 }
 
 func populatePagesCache(ctx context.Context) {
+	pagesMutex.Lock()
+	defer pagesMutex.Unlock()
+
+	// Double-check after acquiring lock
+	if pages != nil {
+		return
+	}
+
 	pages = make([]Page, 0, 1000)
 	for _, s := range sources {
 		select {

@@ -88,12 +88,12 @@ func TestAutoLinkRendering(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			md := markdown.New()
-			
+
 			// Register autolink parser
 			md.Parser().AddOptions(parser.WithInlineParsers(
 				util.Prioritized(parser.NewAutoLinkParser(), 999),
 			))
-			
+
 			// Register autolink renderer
 			ext := &extension{}
 			md.Renderer().AddOptions(renderer.WithNodeRenderers(
@@ -166,7 +166,7 @@ func TestAutoLinkHTMLEscaping(t *testing.T) {
 func TestAutoLinkLabelTruncation(t *testing.T) {
 	// Test the 30-character truncation limit with ellipsis
 	longURL := "<https://example.com/this/is/a/very/long/path/that/definitely/exceeds/thirty/characters>"
-	
+
 	md := markdown.New()
 	md.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(parser.NewAutoLinkParser(), 999),
@@ -248,7 +248,7 @@ func TestAutoLinkEmailMailtoPrefix(t *testing.T) {
 
 func TestAutoLinkMultipleInSingleLine(t *testing.T) {
 	input := "Visit <https://example.com> and email <user@example.com> today"
-	
+
 	md := markdown.New()
 	md.Parser().AddOptions(parser.WithInlineParsers(
 		util.Prioritized(parser.NewAutoLinkParser(), 999),
@@ -265,7 +265,7 @@ func TestAutoLinkMultipleInSingleLine(t *testing.T) {
 	}
 
 	got := buf.String()
-	
+
 	// Should contain both links
 	if !bytes.Contains([]byte(got), []byte(`href="https://example.com"`)) {
 		t.Errorf("Expected HTTPS link, got: %q", got)
@@ -286,7 +286,7 @@ func BenchmarkAutoLinkRendering(b *testing.B) {
 	))
 
 	input := []byte("Visit <https://example.com> and contact <user@example.com> for details")
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var buf bytes.Buffer

@@ -2,7 +2,6 @@ package gpg
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"log/slog"
 	"os"
@@ -65,7 +64,7 @@ func (p *page) Delete() bool {
 	if p.Exists() {
 		err := os.Remove(p.FileName())
 		if err != nil {
-			fmt.Printf("Can't delete `%s`, err: %s\n", p.Name(), err)
+			slog.Error("Can't delete page", "page", p.Name(), "error", err)
 			return false
 		}
 	}
@@ -84,7 +83,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 
 	out, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("Can't write `%s`, out: %s, err: %s\n", p.Name(), out, err)
+		slog.Error("Can't write page", "page", p.Name(), "output", string(out), "error", err)
 		return false
 	}
 

@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"iter"
 	"sort"
+	"sync"
 )
 
 type (
@@ -27,13 +28,19 @@ var (
 )
 
 // A map to keep track of list of widget functions registered in each widget space
-var widgets = map[WidgetSpace]*priorityList[WidgetFunc]{}
+var (
+	widgets      = map[WidgetSpace]*priorityList[WidgetFunc]{}
+	widgetsMutex sync.RWMutex
+)
 
 // RegisterWidget Register a function to a widget space. functions registered
 // will be executed in order of priority lower to higher when rendering view or
 // edit page. the return values of these widgetfuncs will pass down to the
 // template and injected in reserved places.
 func RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
+	widgetsMutex.Lock()
+	defer widgetsMutex.Unlock()
+
 	pl, ok := widgets[s]
 	if !ok {
 		pl = new(priorityList[WidgetFunc])
@@ -46,7 +53,10 @@ func RegisterWidget(s WidgetSpace, priority float32, f WidgetFunc) {
 // This is used by view and edit routes to render all widgetfuncs registered for
 // specific widget space.
 func RenderWidget(s WidgetSpace, p Page) (o template.HTML) {
+	widgetsMutex.RLock()
 	w, ok := widgets[s]
+	widgetsMutex.RUnlock()
+
 	if !ok {
 		return
 	}

@@ -101,8 +101,8 @@ func TestContainsOnlyImages(t *testing.T) {
 
 func TestRemoveBreaks(t *testing.T) {
 	tests := []struct {
-		name           string
-		setup          func() *ast.Paragraph
+		name             string
+		setup            func() *ast.Paragraph
 		expectedChildren int
 	}{
 		{
@@ -157,7 +157,7 @@ func TestReplaceWithColumns(t *testing.T) {
 	p := ast.NewParagraph()
 	p.AppendChild(p, ast.NewImage(ast.NewLink()))
 	p.AppendChild(p, ast.NewImage(ast.NewLink()))
-	
+
 	section.AppendChild(section, p)
 	doc.AppendChild(doc, section)
 

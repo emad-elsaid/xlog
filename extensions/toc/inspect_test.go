@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/emad-elsaid/xlog/markdown/parser"
 	"github.com/emad-elsaid/xlog/markdown/text"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
 )
 

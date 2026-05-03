@@ -104,11 +104,11 @@ func containLinkToFrom(n ast.Node, sourcePage, targetPage Page) bool {
 			resolvedPath := path.Join(sourceDir, dst)
 			// Normalize path by cleaning it
 			resolvedPath = path.Clean(resolvedPath)
-			
+
 			if resolvedPath == targetPage.Name() {
 				return true
 			}
-			
+
 			// Fallback: also check basename for compatibility
 			// This handles cases where relative links use just the filename
 			if dst == path.Base(targetPage.Name()) {
