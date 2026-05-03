@@ -816,6 +816,7 @@ func NewWriter(opts ...WriterOption) Writer {
 
 func escapeRune(writer util.BufWriter, r rune) {
 	if r < 256 {
+		//nolint:gosec // G115: Safe conversion - r is verified < 256 on line above
 		v := util.EscapeHTMLByte(byte(r))
 		if v != nil {
 			_, _ = writer.Write(v)
@@ -901,10 +902,14 @@ func (d *defaultWriter) Write(writer util.BufWriter, source []byte) {
 						i, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsHexDecimal)
 						if ok && i < limit && source[i] == ';' && i-start < 7 {
 							v, _ := strconv.ParseUint(util.BytesToReadOnlyString(source[start:i]), 16, 32)
-							d.RawWrite(writer, source[n:pos])
-							n = i + 1
-							escapeRune(writer, rune(v))
-							continue
+							// Validate Unicode range before conversion to prevent overflow
+							// Valid Unicode: U+0000 to U+10FFFF (1,114,111 decimal)
+							if v <= 0x10FFFF {
+								d.RawWrite(writer, source[n:pos])
+								n = i + 1
+								escapeRune(writer, rune(v))
+								continue
+							}
 						}
 						// code point like #1234;
 					} else if nc >= '0' && nc <= '9' {
@@ -912,10 +917,14 @@ func (d *defaultWriter) Write(writer util.BufWriter, source []byte) {
 						i, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsNumeric)
 						if ok && i < limit && i-start < 8 && source[i] == ';' {
 							v, _ := strconv.ParseUint(util.BytesToReadOnlyString(source[start:i]), 10, 32)
-							d.RawWrite(writer, source[n:pos])
-							n = i + 1
-							escapeRune(writer, rune(v))
-							continue
+							// Validate Unicode range before conversion to prevent overflow
+							// Valid Unicode: U+0000 to U+10FFFF (1,114,111 decimal)
+							if v <= 0x10FFFF {
+								d.RawWrite(writer, source[n:pos])
+								n = i + 1
+								escapeRune(writer, rune(v))
+								continue
+							}
 						}
 					}
 				}

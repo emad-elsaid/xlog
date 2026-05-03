@@ -1438,3 +1438,76 @@ func TestRenderHTMLBlock(t *testing.T) {
 		})
 	}
 }
+
+// TestWrite_IntegerOverflowProtection tests that numeric HTML entities
+// with values exceeding valid Unicode range are handled safely without
+// integer overflow when converting to rune.
+func TestWrite_IntegerOverflowProtection(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		expect string
+	}{
+		{
+			name:   "valid hex entity within Unicode range",
+			input:  "&#x1F600;",
+			expect: "😀",
+		},
+		{
+			name:   "valid decimal entity within Unicode range",
+			input:  "&#128512;",
+			expect: "😀",
+		},
+		{
+			name:   "max valid Unicode code point (U+10FFFF)",
+			input:  "&#x10FFFF;",
+			expect: "\U0010FFFF",
+		},
+		{
+			name:   "hex entity exceeding Unicode range (overflow to negative)",
+			input:  "&#xFFFFFFFF;",
+			expect: "&amp;#xFFFFFFFF;", // Invalid entity gets HTML-escaped
+		},
+		{
+			name:   "decimal entity exceeding Unicode range",
+			input:  "&#4294967295;",
+			expect: "&amp;#4294967295;", // Invalid entity gets HTML-escaped
+		},
+		{
+			name:   "hex entity just above valid range",
+			input:  "&#x110000;",
+			expect: "&amp;#x110000;", // Invalid entity gets HTML-escaped
+		},
+		{
+			name:   "decimal entity just above valid range",
+			input:  "&#1114112;",
+			expect: "&amp;#1114112;", // Invalid entity gets HTML-escaped
+		},
+		{
+			name:   "entity exceeding int32 max (would overflow to negative rune)",
+			input:  "&#x80000000;",
+			expect: "&amp;#x80000000;", // Invalid entity gets HTML-escaped
+		},
+		{
+			name:   "valid entity with text before",
+			input:  "hello &#x1F600; world",
+			expect: "hello 😀 world",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			writer := &defaultWriter{}
+			var buf bytes.Buffer
+			bufWriter := bufio.NewWriter(&buf)
+
+			writer.Write(bufWriter, []byte(tc.input))
+			_ = bufWriter.Flush()
+
+			got := buf.String()
+			if got != tc.expect {
+				t.Errorf("Write(%q) = %q, want %q", tc.input, got, tc.expect)
+			}
+		})
+	}
+}

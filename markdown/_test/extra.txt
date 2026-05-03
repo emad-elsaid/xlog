@@ -501,11 +501,11 @@ _a[b_c_](d)
 <pre><code>\t x\n</code></pre>
 //= = = = = = = = = = = = = = = = = = = = = = = =//
 
-38: Decimal HTML entity literals should allow 7 digits
+38: Decimal HTML entity literals should allow 7 digits (exceeds Unicode range)
 //- - - - - - - - -//
 &#7654321;
 //- - - - - - - - -//
-<p>\uFFFD</p>
+<p>&amp;#7654321;</p>
 //= = = = = = = = = = = = = = = = = = = = = = = =//
 
 39: Decimal HTML entities should not be interpreted as octal when starting with a 0
