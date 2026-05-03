@@ -338,6 +338,136 @@ func TestContext_Delimiters(t *testing.T) {
 	}
 }
 
+func TestContext_PushDelimiter(t *testing.T) {
+	tests := []struct {
+		name            string
+		delimitersCount int
+		verifyFunc      func(t *testing.T, ctx *parseContext, delimiters []*Delimiter)
+	}{
+		{
+			name:            "push to empty list",
+			delimitersCount: 1,
+			verifyFunc: func(t *testing.T, ctx *parseContext, delimiters []*Delimiter) {
+				if ctx.FirstDelimiter() != delimiters[0] {
+					t.Error("FirstDelimiter should be the only delimiter")
+				}
+				if ctx.LastDelimiter() != delimiters[0] {
+					t.Error("LastDelimiter should be the only delimiter")
+				}
+				if delimiters[0].PreviousDelimiter != nil {
+					t.Error("Single delimiter should have nil PreviousDelimiter")
+				}
+				if delimiters[0].NextDelimiter != nil {
+					t.Error("Single delimiter should have nil NextDelimiter")
+				}
+			},
+		},
+		{
+			name:            "push two delimiters",
+			delimitersCount: 2,
+			verifyFunc: func(t *testing.T, ctx *parseContext, delimiters []*Delimiter) {
+				if ctx.FirstDelimiter() != delimiters[0] {
+					t.Error("FirstDelimiter should be the first pushed delimiter")
+				}
+				if ctx.LastDelimiter() != delimiters[1] {
+					t.Error("LastDelimiter should be the second pushed delimiter")
+				}
+				if delimiters[0].NextDelimiter != delimiters[1] {
+					t.Error("First delimiter NextDelimiter should point to second")
+				}
+				if delimiters[1].PreviousDelimiter != delimiters[0] {
+					t.Error("Second delimiter PreviousDelimiter should point to first")
+				}
+				if delimiters[0].PreviousDelimiter != nil {
+					t.Error("First delimiter should have nil PreviousDelimiter")
+				}
+				if delimiters[1].NextDelimiter != nil {
+					t.Error("Last delimiter should have nil NextDelimiter")
+				}
+			},
+		},
+		{
+			name:            "push three delimiters",
+			delimitersCount: 3,
+			verifyFunc: func(t *testing.T, ctx *parseContext, delimiters []*Delimiter) {
+				if ctx.FirstDelimiter() != delimiters[0] {
+					t.Error("FirstDelimiter should be the first pushed delimiter")
+				}
+				if ctx.LastDelimiter() != delimiters[2] {
+					t.Error("LastDelimiter should be the last pushed delimiter")
+				}
+
+				// Verify forward links
+				if delimiters[0].NextDelimiter != delimiters[1] {
+					t.Error("First delimiter should link to second")
+				}
+				if delimiters[1].NextDelimiter != delimiters[2] {
+					t.Error("Second delimiter should link to third")
+				}
+				if delimiters[2].NextDelimiter != nil {
+					t.Error("Third delimiter should have nil NextDelimiter")
+				}
+
+				// Verify backward links
+				if delimiters[0].PreviousDelimiter != nil {
+					t.Error("First delimiter should have nil PreviousDelimiter")
+				}
+				if delimiters[1].PreviousDelimiter != delimiters[0] {
+					t.Error("Second delimiter should link back to first")
+				}
+				if delimiters[2].PreviousDelimiter != delimiters[1] {
+					t.Error("Third delimiter should link back to second")
+				}
+			},
+		},
+		{
+			name:            "push multiple delimiters maintains list integrity",
+			delimitersCount: 5,
+			verifyFunc: func(t *testing.T, ctx *parseContext, delimiters []*Delimiter) {
+				// Verify forward traversal
+				current := ctx.FirstDelimiter()
+				for i := 0; i < len(delimiters); i++ {
+					if current != delimiters[i] {
+						t.Errorf("Forward traversal: position %d should be delimiter %d", i, i)
+					}
+					current = current.NextDelimiter
+				}
+				if current != nil {
+					t.Error("Forward traversal should end with nil")
+				}
+
+				// Verify backward traversal
+				current = ctx.LastDelimiter()
+				for i := len(delimiters) - 1; i >= 0; i-- {
+					if current != delimiters[i] {
+						t.Errorf("Backward traversal: position should be delimiter %d", i)
+					}
+					current = current.PreviousDelimiter
+				}
+				if current != nil {
+					t.Error("Backward traversal should end with nil")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := NewContext()
+			delimiters := make([]*Delimiter, tc.delimitersCount)
+
+			// Push delimiters
+			for i := 0; i < tc.delimitersCount; i++ {
+				delimiters[i] = NewDelimiter(true, true, 1, '*', nil)
+				ctx.PushDelimiter(delimiters[i])
+			}
+
+			// Run verification
+			tc.verifyFunc(t, ctx.(*parseContext), delimiters)
+		})
+	}
+}
+
 func TestContext_OpenedBlocks(t *testing.T) {
 	ctx := NewContext()
 
