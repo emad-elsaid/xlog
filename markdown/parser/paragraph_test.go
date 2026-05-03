@@ -272,8 +272,8 @@ func TestParagraphParser_Close(t *testing.T) {
 			node := ast.NewParagraph()
 			parent.AppendChild(parent, node)
 
-		// Construct full input source for proper segment handling
-		inputLines := append([]string(nil), tc.lines...)
+			// Construct full input source for proper segment handling
+			inputLines := append([]string(nil), tc.lines...)
 			var source []byte
 			for _, line := range inputLines {
 				source = append(source, []byte(line+"\n")...)
