@@ -288,7 +288,9 @@ func (r *emojiHTMLRenderer) renderEmoji(w util.BufWriter, source []byte, n ast.N
 	}
 	node := n.(*east.Emoji)
 	if !node.Value.IsUnicode() && r.Method != Func {
-		fmt.Fprintf(w, `<span title="%s">:%s:</span>`, util.EscapeHTML(util.StringToReadOnlyBytes(node.Value.Name)), node.ShortName)
+		if _, err := fmt.Fprintf(w, `<span title="%s">:%s:</span>`, util.EscapeHTML(util.StringToReadOnlyBytes(node.Value.Name)), node.ShortName); err != nil {
+			return ast.WalkStop, err
+		}
 		return ast.WalkContinue, nil
 	}
 
@@ -299,10 +301,14 @@ func (r *emojiHTMLRenderer) renderEmoji(w util.BufWriter, source []byte, n ast.N
 				_, _ = w.WriteString("&zwj;")
 				continue
 			}
-			fmt.Fprintf(w, "&#x%x;", r)
+			if _, err := fmt.Fprintf(w, "&#x%x;", r); err != nil {
+				return ast.WalkStop, err
+			}
 		}
 	case Unicode:
-		fmt.Fprintf(w, "%s", string(node.Value.Unicode))
+		if _, err := fmt.Fprintf(w, "%s", string(node.Value.Unicode)); err != nil {
+			return ast.WalkStop, err
+		}
 	case Twemoji:
 		s := slash
 		if !r.XHTML {
@@ -312,7 +318,9 @@ func (r *emojiHTMLRenderer) renderEmoji(w util.BufWriter, source []byte, n ast.N
 		for _, r := range node.Value.Unicode {
 			values = append(values, fmt.Sprintf("%x", r))
 		}
-		fmt.Fprintf(w, r.TwemojiTemplate, util.EscapeHTML(util.StringToReadOnlyBytes(node.Value.Name)), strings.Join(values, "-"), s)
+		if _, err := fmt.Fprintf(w, r.TwemojiTemplate, util.EscapeHTML(util.StringToReadOnlyBytes(node.Value.Name)), strings.Join(values, "-"), s); err != nil {
+			return ast.WalkStop, err
+		}
 	case Func:
 		r.RendererFunc(w, source, node, &r.RendererConfig)
 	}
