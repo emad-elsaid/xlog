@@ -179,12 +179,12 @@ func TestDecryptHandler(t *testing.T) {
 				if err := os.Chdir(origWd); err != nil {
 					t.Errorf("failed to restore directory: %v", err)
 				}
-		}()
+			}()
 
-		// Set GPG ID
-		gpgId = "test@example.com"
+			// Set GPG ID
+			gpgId = testGPGID
 
-		// Create encrypted test page if it should exist
+			// Create encrypted test page if it should exist
 			if tc.pageExists && tc.setupEncrypted {
 				dir := filepath.Dir(tc.pageName)
 				if err := os.MkdirAll(dir, 0700); err != nil {
@@ -322,7 +322,7 @@ func TestDecryptHandlerWriteFailure(t *testing.T) {
 	}()
 
 	// Set GPG ID
-	gpgId = "test@example.com"
+	gpgId = testGPGID
 
 	// Create encrypted test page
 	pageName := "test/decryptfail"
