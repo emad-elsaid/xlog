@@ -73,7 +73,11 @@ func TestBuildRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
 
 	tests := []struct {
 		name           string
@@ -119,7 +123,9 @@ func TestBuildRoute(t *testing.T) {
 						return
 					}
 					w.WriteHeader(http.StatusOK)
-					w.Write([]byte("<html><body>Test Content</body></html>"))
+					if _, err := w.Write([]byte("<html><body>Test Content</body></html>")); err != nil {
+						t.Errorf("Failed to write response: %v", err)
+					}
 				}),
 			}
 
@@ -164,7 +170,11 @@ func TestBuildRoute_InvalidRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
 
 	srv := &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -186,12 +196,18 @@ func TestBuildRoute_FilePermissions(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
 
 	srv := &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("content"))
+			if _, err := w.Write([]byte("content")); err != nil {
+				t.Errorf("Failed to write response: %v", err)
+			}
 		}),
 	}
 

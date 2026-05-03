@@ -51,7 +51,7 @@ func (p *htmlSource) Page(name string) xlog.Page {
 }
 
 func (p *htmlSource) Each(ctx context.Context, f func(xlog.Page)) {
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
+	if err := filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		select {
 
 		case <-ctx.Done():
@@ -74,7 +74,9 @@ func (p *htmlSource) Each(ctx context.Context, f func(xlog.Page)) {
 		}
 
 		return nil
-	})
+	}); err != nil {
+		slog.Error("Error walking directory for HTML files", "error", err)
+	}
 }
 
 type page struct {
@@ -133,7 +135,10 @@ func (p *page) Write(content xlog.Markdown) bool {
 	defer xlog.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
-	os.MkdirAll(filepath.Dir(name), 0700)
+	if err := os.MkdirAll(filepath.Dir(name), 0700); err != nil {
+		slog.Error("Can't create directory for page", "page", p.Name(), "error", err)
+		return false
+	}
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	if err := os.WriteFile(name, []byte(content), 0644); err != nil {

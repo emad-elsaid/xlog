@@ -48,7 +48,9 @@ func NotifyPageChange(p Page) error {
 	for client := range clients {
 		err := client.WriteJSON(message)
 		if err != nil {
-			client.Close()
+			if err := client.Close(); err != nil {
+				slog.Error("Failed to close websocket client", "error", err)
+			}
 			delete(clients, client)
 		}
 	}
@@ -69,7 +71,9 @@ func handleWebSocket(r Request) Output {
 				clientsMutex.Lock()
 				delete(clients, conn)
 				clientsMutex.Unlock()
-				conn.Close()
+				if err := conn.Close(); err != nil {
+					slog.Error("Failed to close websocket connection", "error", err)
+				}
 			}()
 
 			for {

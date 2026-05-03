@@ -21,13 +21,25 @@ func TestHTMLExtensionName(t *testing.T) {
 func TestHTMLSource_Page(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	// Create test HTML files
-	os.WriteFile("test.html", []byte("<h1>Test HTML</h1>"), 0644)
-	os.WriteFile("test2.htm", []byte("<h1>Test HTM</h1>"), 0644)
-	os.WriteFile("test3.xhtml", []byte("<h1>Test XHTML</h1>"), 0644)
+	if err := os.WriteFile("test.html", []byte("<h1>Test HTML</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test.html: %v", err)
+	}
+	if err := os.WriteFile("test2.htm", []byte("<h1>Test HTM</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test2.htm: %v", err)
+	}
+	if err := os.WriteFile("test3.xhtml", []byte("<h1>Test XHTML</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test3.xhtml: %v", err)
+	}
 
 	source := &htmlSource{}
 
@@ -63,15 +75,31 @@ func TestHTMLSource_Page(t *testing.T) {
 func TestHTMLSource_Each(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	// Create test HTML files in various directories
-	os.WriteFile("root.html", []byte("<h1>Root</h1>"), 0644)
-	os.MkdirAll("subdir", 0755)
-	os.WriteFile("subdir/nested.htm", []byte("<h1>Nested</h1>"), 0644)
-	os.WriteFile("another.xhtml", []byte("<h1>Another</h1>"), 0644)
-	os.WriteFile("not-html.txt", []byte("Not HTML"), 0644) // Should be ignored
+	if err := os.WriteFile("root.html", []byte("<h1>Root</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create root.html: %v", err)
+	}
+	if err := os.MkdirAll("subdir", 0755); err != nil {
+		t.Fatalf("Failed to create subdir: %v", err)
+	}
+	if err := os.WriteFile("subdir/nested.htm", []byte("<h1>Nested</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create nested.htm: %v", err)
+	}
+	if err := os.WriteFile("another.xhtml", []byte("<h1>Another</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create another.xhtml: %v", err)
+	}
+	if err := os.WriteFile("not-html.txt", []byte("Not HTML"), 0644); err != nil {
+		t.Fatalf("Failed to create not-html.txt: %v", err)
+	}
 
 	source := &htmlSource{}
 	found := make(map[string]bool)
@@ -96,12 +124,21 @@ func TestHTMLSource_Each(t *testing.T) {
 func TestHTMLSource_Each_ContextCancellation(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	// Create multiple files
 	for i := 0; i < 10; i++ {
-		os.WriteFile(filepath.Join(tmpDir, "file"+string(rune('0'+i))+".html"), []byte("<h1>Test</h1>"), 0644)
+		filename := filepath.Join(tmpDir, "file"+string(rune('0'+i))+".html")
+		if err := os.WriteFile(filename, []byte("<h1>Test</h1>"), 0644); err != nil {
+			t.Fatalf("Failed to create test file: %v", err)
+		}
 	}
 
 	source := &htmlSource{}
@@ -138,10 +175,18 @@ func TestPage_FileName(t *testing.T) {
 func TestPage_Exists(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
-	os.WriteFile("exists.html", []byte("<h1>Exists</h1>"), 0644)
+	if err := os.WriteFile("exists.html", []byte("<h1>Exists</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
 
 	tests := []struct {
 		name   string
@@ -164,11 +209,19 @@ func TestPage_Exists(t *testing.T) {
 func TestPage_Content(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	content := "<h1>Test Content</h1>"
-	os.WriteFile("test.html", []byte(content), 0644)
+	if err := os.WriteFile("test.html", []byte(content), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
 
 	p := &page{name: "test", ext: ".html"}
 	got := string(p.Content())
@@ -180,8 +233,14 @@ func TestPage_Content(t *testing.T) {
 func TestPage_Content_NonExistent(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "nonexistent", ext: ".html"}
 	content := p.Content()
@@ -193,11 +252,19 @@ func TestPage_Content_NonExistent(t *testing.T) {
 func TestPage_Render(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	htmlContent := "<h1>Test Content</h1>"
-	os.WriteFile("test.html", []byte(htmlContent), 0644)
+	if err := os.WriteFile("test.html", []byte(htmlContent), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
 
 	p := &page{name: "test", ext: ".html"}
 	rendered := p.Render()
@@ -210,11 +277,19 @@ func TestPage_Render(t *testing.T) {
 func TestPage_ModTime(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	before := time.Now().Add(-1 * time.Second)
-	os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644)
+	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
 	after := time.Now().Add(1 * time.Second)
 
 	p := &page{name: "test", ext: ".html"}
@@ -228,8 +303,14 @@ func TestPage_ModTime(t *testing.T) {
 func TestPage_ModTime_NonExistent(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "nonexistent", ext: ".html"}
 	modTime := p.ModTime()
@@ -241,8 +322,14 @@ func TestPage_ModTime_NonExistent(t *testing.T) {
 func TestPage_Write(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "test", ext: ".html"}
 	content := xlog.Markdown("<h1>New Content</h1>")
@@ -264,8 +351,14 @@ func TestPage_Write(t *testing.T) {
 func TestPage_Write_CreatesDirectory(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "subdir/nested/test", ext: ".html"}
 	content := xlog.Markdown("<h1>Nested Content</h1>")
@@ -282,8 +375,14 @@ func TestPage_Write_CreatesDirectory(t *testing.T) {
 func TestPage_Write_NormalizesLineEndings(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "test", ext: ".html"}
 	content := xlog.Markdown("<h1>Line 1</h1>\r\n<h2>Line 2</h2>")
@@ -300,10 +399,18 @@ func TestPage_Write_NormalizesLineEndings(t *testing.T) {
 func TestPage_Delete(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
-	os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644)
+	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
 
 	p := &page{name: "test", ext: ".html"}
 	if !p.Exists() {
@@ -322,8 +429,14 @@ func TestPage_Delete(t *testing.T) {
 func TestPage_Delete_NonExistent(t *testing.T) {
 	tmpDir := t.TempDir()
 	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
 
 	p := &page{name: "nonexistent", ext: ".html"}
 	if !p.Delete() {
