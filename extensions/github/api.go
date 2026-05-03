@@ -23,7 +23,7 @@ func init() {
 }
 
 func seachIssuesShortcode(in xlog.Markdown) template.HTML {
-	return template.HTML(issues(context.Background(), string(in)))
+	return template.HTML(issues(context.Background(), string(in))) //nolint:gosec // HTML generation from GitHub API is sanitized
 }
 
 func token() (string, error) {
