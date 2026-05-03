@@ -2,6 +2,7 @@ package embed
 
 import (
 	"fmt"
+	"html"
 	"html/template"
 	"strings"
 
@@ -23,7 +24,8 @@ func (Embed) Init() {
 func embedShortcode(in xlog.Markdown) template.HTML {
 	p := xlog.NewPage(strings.TrimSpace(string(in)))
 	if p == nil || !p.Exists() {
-		return template.HTML(fmt.Sprintf("Page: %s doesn't exist", in))
+		// Escape user input to prevent XSS
+		return template.HTML(fmt.Sprintf("Page: %s doesn't exist", html.EscapeString(string(in))))
 	}
 
 	return p.Render()

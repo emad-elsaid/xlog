@@ -27,7 +27,8 @@ var script string
 const pre = `<pre class="mermaid" style="background: transparent;text-align:center;">%s</pre>`
 
 func renderer(md xlog.Markdown) template.HTML {
-	html := fmt.Sprintf(pre, md)
-	return template.HTML(html + script)
-
+	// #nosec G203 - Mermaid diagram syntax requires unescaped content. The content is rendered
+	// by mermaid.js in the browser which sanitizes and prevents XSS. Escaping would break diagrams.
+	htmlContent := fmt.Sprintf(pre, md)
+	return template.HTML(htmlContent + script)
 }

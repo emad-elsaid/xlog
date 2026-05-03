@@ -195,6 +195,7 @@ func (h *Hashtags) hashtagPages(hashtag xlog.Markdown) template.HTML {
 	})
 
 	output := xlog.Partial("hashtag-pages", xlog.Locals{"pages": pages})
+	// #nosec G203 - xlog.Partial executes html/template which auto-escapes, safe to convert
 	return template.HTML(output)
 }
 
@@ -211,6 +212,7 @@ func (h *Hashtags) hashtagPagesGrid(hashtag xlog.Markdown) template.HTML {
 	})
 
 	output := xlog.Partial("hashtag-pages-grid", xlog.Locals{"pages": pages})
+	// #nosec G203 - xlog.Partial executes html/template which auto-escapes, safe to convert
 	return template.HTML(output)
 }
 

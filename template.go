@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"html"
 	"html/template"
 	"io/fs"
 	"log/slog"
@@ -69,7 +70,9 @@ func compileTemplates() {
 func Partial(path string, data Locals) template.HTML {
 	v := templates.Lookup(path)
 	if v == nil {
-		return template.HTML(fmt.Sprintf("template %s not found", path))
+		// Escape path to prevent potential XSS in error message
+		// #nosec G203 - path is escaped with html.EscapeString, safe to convert
+		return template.HTML(fmt.Sprintf("template %s not found", html.EscapeString(path)))
 	}
 
 	if data == nil {
@@ -81,8 +84,11 @@ func Partial(path string, data Locals) template.HTML {
 	w := bytes.NewBufferString("")
 
 	if err := v.Execute(w, data); err != nil {
-		return template.HTML("rendering error " + path + " " + err.Error())
+		// Escape error details to prevent potential XSS
+		// #nosec G203 - both path and err are escaped with html.EscapeString, safe to convert
+		return template.HTML("rendering error " + html.EscapeString(path) + " " + html.EscapeString(err.Error()))
 	}
 
+	// #nosec G203 - w.String() contains output from template.Execute which auto-escapes, safe to convert
 	return template.HTML(w.String())
 }

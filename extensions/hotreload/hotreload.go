@@ -94,5 +94,6 @@ func handleWebSocket(r xlog.Request) xlog.Output {
 var clientScript string
 
 func clientWidget(p xlog.Page) template.HTML {
+	// #nosec G203 - clientScript is embedded at compile-time from script.html, trusted content
 	return template.HTML(clientScript)
 }

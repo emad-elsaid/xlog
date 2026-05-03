@@ -135,6 +135,7 @@ func scripts() template.HTML {
 		fmt.Fprintf(&b, `<script src="%s" defer></script>`, f)
 	}
 
+	// #nosec G203 - js slice contains trusted paths from Config.Assets, safe to convert
 	return template.HTML(b.String())
 }
 
@@ -196,6 +197,8 @@ func dir(s string) string {
 }
 
 // raw a helper to output input string as safe HTML.
+// WARNING: This intentionally bypasses HTML escaping. Only use with trusted content.
+// #nosec G203 - intentional unsafe conversion for trusted template content
 func raw(i string) template.HTML {
 	return template.HTML(i)
 }

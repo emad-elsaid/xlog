@@ -38,6 +38,7 @@ func (p *page) Render() template.HTML {
 		return template.HTML(html.EscapeString(err.Error()))
 	}
 
+	// #nosec G203 - buf.String() contains markdown-converted output which is already escaped by MarkdownConverter
 	return template.HTML(buf.String())
 }
 

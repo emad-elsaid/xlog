@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"bytes"
+	"html"
 	"html/template"
 	"log/slog"
 	"os"
@@ -72,9 +73,11 @@ func (p *page) Render() template.HTML {
 
 	var buf bytes.Buffer
 	if err := MarkdownConverter().Renderer().Render(&buf, src, ast); err != nil {
-		return template.HTML(err.Error())
+		// Escape error message to prevent XSS
+		return template.HTML(html.EscapeString(err.Error()))
 	}
 
+	// #nosec G203 - buf.String() contains markdown-rendered HTML which is already escaped by the renderer
 	return template.HTML(buf.String())
 }
 
