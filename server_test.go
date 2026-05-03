@@ -1025,3 +1025,97 @@ func TestFuncStringer(t *testing.T) {
 		})
 	}
 }
+
+func TestCreated(t *testing.T) {
+	tests := []struct {
+		name             string
+		location         string
+		expectLocation   bool
+		expectedLocation string
+	}{
+		{
+			name:             "with location header",
+			location:         "/api/users/123",
+			expectLocation:   true,
+			expectedLocation: "/api/users/123",
+		},
+		{
+			name:           "without location header",
+			location:       "",
+			expectLocation: false,
+		},
+		{
+			name:             "with absolute URL",
+			location:         "https://example.com/resource/456",
+			expectLocation:   true,
+			expectedLocation: "https://example.com/resource/456",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodPost, "/api/users", nil)
+
+			output := Created(tc.location)
+			output(recorder, req)
+
+			if status := recorder.Code; status != http.StatusCreated {
+				t.Errorf("Created() status = %d, want %d", status, http.StatusCreated)
+			}
+
+			location := recorder.Header().Get("Location")
+			if tc.expectLocation {
+				if location != tc.expectedLocation {
+					t.Errorf("Created() Location header = %q, want %q", location, tc.expectedLocation)
+				}
+			} else {
+				if location != "" {
+					t.Errorf("Created() expected no Location header, got %q", location)
+				}
+			}
+		})
+	}
+}
+
+func TestAccepted(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		path   string
+	}{
+		{
+			name:   "async POST request",
+			method: http.MethodPost,
+			path:   "/api/async-operation",
+		},
+		{
+			name:   "async PUT request",
+			method: http.MethodPut,
+			path:   "/api/background-task",
+		},
+		{
+			name:   "async DELETE request",
+			method: http.MethodDelete,
+			path:   "/api/deferred-deletion",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+
+			output := Accepted()
+			output(recorder, req)
+
+			if status := recorder.Code; status != http.StatusAccepted {
+				t.Errorf("Accepted() status = %d, want %d", status, http.StatusAccepted)
+			}
+
+			if body := recorder.Body.String(); body != "" {
+				t.Errorf("Accepted() body = %q, want empty", body)
+			}
+		})
+	}
+}

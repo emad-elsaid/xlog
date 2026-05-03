@@ -116,6 +116,25 @@ func NoContent() Output {
 	}
 }
 
+// Created returns an output function that writes http status 201 to response
+// with optional location header for the newly created resource.
+func Created(location string) Output {
+	return func(w Response, r Request) {
+		if location != "" {
+			w.Header().Set("Location", location)
+		}
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+// Accepted returns an output function that writes http status 202 to response
+// indicating that the request has been accepted for processing but not completed.
+func Accepted() Output {
+	return func(w Response, r Request) {
+		w.WriteHeader(http.StatusAccepted)
+	}
+}
+
 // PlainText returns an output function that writes text to response writer.
 func PlainText(text string) Output {
 	return func(w Response, r Request) {
