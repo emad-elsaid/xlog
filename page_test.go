@@ -476,3 +476,157 @@ func TestMarkdownType(t *testing.T) {
 		t.Error("Markdown should convert to string properly")
 	}
 }
+
+// BenchmarkPageRender measures the performance of rendering a markdown page to HTML.
+// This is the critical hot path called on every page view.
+func BenchmarkPageRender(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		_ = os.Chdir(origDir)
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	// Create a realistic markdown page with various elements
+	content := `# Test Page
+
+This is a test page with **bold** and *italic* text.
+
+## Section 1
+
+- List item 1
+- List item 2
+- List item 3
+
+### Code Example
+
+` + "```go\nfunc main() {\n\tfmt.Println(\"Hello, World!\")\n}\n```" + `
+
+## Section 2
+
+Here is a [link](https://example.com) and an image:
+
+![Alt text](image.png)
+
+> This is a blockquote with some longer text to make it more realistic.
+> It spans multiple lines to better represent real-world content.
+
+| Header 1 | Header 2 |
+|----------|----------|
+| Cell 1   | Cell 2   |
+| Cell 3   | Cell 4   |
+`
+
+	testPage := "benchmark-page"
+	if err := os.WriteFile(testPage+".md", []byte(content), 0600); err != nil {
+		b.Fatalf("failed to create test file: %v", err)
+	}
+
+	p := &page{name: testPage}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = p.Render()
+	}
+}
+
+// BenchmarkPageAST measures the performance of parsing markdown to AST.
+// This is called by Render() and is a key parsing operation.
+func BenchmarkPageAST(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		_ = os.Chdir(origDir)
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	content := `# Heading
+
+Paragraph with **bold** and *italic* text.
+
+- List item
+- Another item
+
+` + "```go\ncode block\n```"
+
+	testPage := "benchmark-ast-page"
+	if err := os.WriteFile(testPage+".md", []byte(content), 0600); err != nil {
+		b.Fatalf("failed to create test file: %v", err)
+	}
+
+	p := &page{name: testPage}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = p.AST()
+	}
+}
+
+// BenchmarkPageContent measures raw file reading performance.
+func BenchmarkPageContent(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		_ = os.Chdir(origDir)
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	content := `# Simple Page
+
+This is simple markdown content for benchmarking file reading.
+`
+
+	testPage := "benchmark-content-page"
+	if err := os.WriteFile(testPage+".md", []byte(content), 0600); err != nil {
+		b.Fatalf("failed to create test file: %v", err)
+	}
+
+	p := &page{name: testPage}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = p.Content()
+	}
+}
+
+// BenchmarkPageRenderCached measures rendering performance with AST caching.
+// Tests the effectiveness of the internal caching mechanism.
+func BenchmarkPageRenderCached(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		_ = os.Chdir(origDir)
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	content := `# Cached Page
+
+Content that will be rendered multiple times to test caching.
+
+- Item 1
+- Item 2
+`
+
+	testPage := "benchmark-cached-page"
+	if err := os.WriteFile(testPage+".md", []byte(content), 0600); err != nil {
+		b.Fatalf("failed to create test file: %v", err)
+	}
+
+	p := &page{name: testPage}
+
+	// Prime the cache
+	_ = p.Render()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = p.Render()
+	}
+}
