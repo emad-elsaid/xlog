@@ -200,9 +200,10 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 					t.Fatalf("failed to change directory: %v", err)
 				}
 
-				// Create a read-only file
+				// Create a read-only file for testing write protection
+				// #nosec G306 - Test specifically requires readonly file to verify write error handling
 				p := &page{name: "readonly"}
-				if err := os.WriteFile(p.FileName(), []byte("original"), 0444); err != nil {
+				if err := os.WriteFile(p.FileName(), []byte("original"), 0400); err != nil {
 					t.Fatalf("failed to create read-only file: %v", err)
 				}
 

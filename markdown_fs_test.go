@@ -265,7 +265,8 @@ func TestMarkdownFS_EachWithPermissionError(t *testing.T) {
 		t.Fatalf("Failed to create restricted directory: %v", err)
 	}
 	defer func() {
-		if err := os.Chmod(restrictedDir, 0750); err != nil {
+		// #nosec G302 - Test cleanup requires restoring directory permissions to allow deletion
+		if err := os.Chmod(restrictedDir, 0700); err != nil {
 			t.Logf("Failed to restore permissions: %v", err)
 		}
 	}()
