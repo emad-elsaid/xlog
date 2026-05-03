@@ -1851,3 +1851,341 @@ func TestTrimRightSpaceLength(t *testing.T) {
 		})
 	}
 }
+
+func TestBytesFilter_Contains(t *testing.T) {
+	tests := []struct {
+		name     string
+		elements [][]byte
+		check    []byte
+		want     bool
+	}{
+		{
+			name:     "single element - found",
+			elements: [][]byte{[]byte("hello")},
+			check:    []byte("hello"),
+			want:     true,
+		},
+		{
+			name:     "single element - not found",
+			elements: [][]byte{[]byte("hello")},
+			check:    []byte("world"),
+			want:     false,
+		},
+		{
+			name:     "multiple elements - found first",
+			elements: [][]byte{[]byte("foo"), []byte("bar"), []byte("baz")},
+			check:    []byte("foo"),
+			want:     true,
+		},
+		{
+			name:     "multiple elements - found middle",
+			elements: [][]byte{[]byte("foo"), []byte("bar"), []byte("baz")},
+			check:    []byte("bar"),
+			want:     true,
+		},
+		{
+			name:     "multiple elements - found last",
+			elements: [][]byte{[]byte("foo"), []byte("bar"), []byte("baz")},
+			check:    []byte("baz"),
+			want:     true,
+		},
+		{
+			name:     "multiple elements - not found",
+			elements: [][]byte{[]byte("foo"), []byte("bar"), []byte("baz")},
+			check:    []byte("qux"),
+			want:     false,
+		},
+		{
+			name:     "empty filter - not found",
+			elements: [][]byte{},
+			check:    []byte("test"),
+			want:     false,
+		},
+		{
+			name:     "empty check - not found",
+			elements: [][]byte{[]byte("test")},
+			check:    []byte(""),
+			want:     false,
+		},
+		{
+			name:     "single byte elements",
+			elements: [][]byte{[]byte("a"), []byte("b"), []byte("c")},
+			check:    []byte("b"),
+			want:     true,
+		},
+		{
+			name:     "long elements",
+			elements: [][]byte{[]byte("this-is-a-very-long-string")},
+			check:    []byte("this-is-a-very-long-string"),
+			want:     true,
+		},
+		{
+			name:     "hash collision handling",
+			elements: [][]byte{[]byte("abc"), []byte("def")},
+			check:    []byte("ghi"),
+			want:     false,
+		},
+		{
+			name:     "unicode elements",
+			elements: [][]byte{[]byte("你好"), []byte("世界")},
+			check:    []byte("你好"),
+			want:     true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := NewBytesFilter(tc.elements...)
+			got := filter.Contains(tc.check)
+			if got != tc.want {
+				t.Errorf("Contains(%q) = %v, want %v", tc.check, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestBytesFilter_Add(t *testing.T) {
+	tests := []struct {
+		name    string
+		initial [][]byte
+		add     [][]byte
+		checks  []struct {
+			value []byte
+			want  bool
+		}
+	}{
+		{
+			name:    "add single element",
+			initial: [][]byte{},
+			add:     [][]byte{[]byte("new")},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("new"), true},
+				{[]byte("old"), false},
+			},
+		},
+		{
+			name:    "add multiple elements",
+			initial: [][]byte{[]byte("first")},
+			add:     [][]byte{[]byte("second"), []byte("third")},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("first"), true},
+				{[]byte("second"), true},
+				{[]byte("third"), true},
+			},
+		},
+		{
+			name:    "add duplicate element",
+			initial: [][]byte{[]byte("test")},
+			add:     [][]byte{[]byte("test")},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("test"), true},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := NewBytesFilter(tc.initial...)
+			for _, elem := range tc.add {
+				filter.Add(elem)
+			}
+			for _, check := range tc.checks {
+				got := filter.Contains(check.value)
+				if got != check.want {
+					t.Errorf("Contains(%q) = %v, want %v", check.value, got, check.want)
+				}
+			}
+		})
+	}
+}
+
+func TestNewBytesFilterString(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		checks []struct {
+			value []byte
+			want  bool
+		}
+	}{
+		{
+			name:  "single element",
+			input: "hello",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("hello"), true},
+				{[]byte("world"), false},
+			},
+		},
+		{
+			name:  "multiple elements",
+			input: "foo,bar,baz",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("foo"), true},
+				{[]byte("bar"), true},
+				{[]byte("baz"), true},
+				{[]byte("qux"), false},
+			},
+		},
+		{
+			name:  "empty string",
+			input: "",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("test"), false},
+			},
+		},
+		{
+			name:  "trailing comma",
+			input: "foo,bar,",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("foo"), true},
+				{[]byte("bar"), true},
+				{[]byte(""), false},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := NewBytesFilterString(tc.input)
+			for _, check := range tc.checks {
+				got := filter.Contains(check.value)
+				if got != check.want {
+					t.Errorf("Contains(%q) = %v, want %v", check.value, got, check.want)
+				}
+			}
+		})
+	}
+}
+
+func TestBytesFilter_Extend(t *testing.T) {
+	tests := []struct {
+		name    string
+		initial [][]byte
+		extend  [][]byte
+		checks  []struct {
+			value []byte
+			want  bool
+		}
+	}{
+		{
+			name:    "extend with new elements",
+			initial: [][]byte{[]byte("old")},
+			extend:  [][]byte{[]byte("new1"), []byte("new2")},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("old"), true},
+				{[]byte("new1"), true},
+				{[]byte("new2"), true},
+			},
+		},
+		{
+			name:    "extend empty filter",
+			initial: [][]byte{},
+			extend:  [][]byte{[]byte("first")},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("first"), true},
+			},
+		},
+		{
+			name:    "extend with no elements",
+			initial: [][]byte{[]byte("test")},
+			extend:  [][]byte{},
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("test"), true},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := NewBytesFilter(tc.initial...)
+			newFilter := filter.Extend(tc.extend...)
+			for _, check := range tc.checks {
+				got := newFilter.Contains(check.value)
+				if got != check.want {
+					t.Errorf("Contains(%q) = %v, want %v", check.value, got, check.want)
+				}
+			}
+		})
+	}
+}
+
+func TestBytesFilter_ExtendString(t *testing.T) {
+	tests := []struct {
+		name    string
+		initial [][]byte
+		extend  string
+		checks  []struct {
+			value []byte
+			want  bool
+		}
+	}{
+		{
+			name:    "extend with comma-separated string",
+			initial: [][]byte{[]byte("old")},
+			extend:  "new1,new2",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("old"), true},
+				{[]byte("new1"), true},
+				{[]byte("new2"), true},
+			},
+		},
+		{
+			name:    "extend with single element",
+			initial: [][]byte{[]byte("first")},
+			extend:  "second",
+			checks: []struct {
+				value []byte
+				want  bool
+			}{
+				{[]byte("first"), true},
+				{[]byte("second"), true},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filter := NewBytesFilter(tc.initial...)
+			newFilter := filter.ExtendString(tc.extend)
+			for _, check := range tc.checks {
+				got := newFilter.Contains(check.value)
+				if got != check.want {
+					t.Errorf("Contains(%q) = %v, want %v", check.value, got, check.want)
+				}
+			}
+		})
+	}
+}
