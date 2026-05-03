@@ -75,7 +75,10 @@ func (p *page) Write(content xlog.Markdown) bool {
 	defer xlog.Trigger(xlog.PageChanged, p)
 
 	name := p.FileName()
-	os.MkdirAll(filepath.Dir(name), 0700)
+	if err := os.MkdirAll(filepath.Dir(name), 0700); err != nil {
+		slog.Error("Can't create directory", "page", p.Name(), "error", err)
+		return false
+	}
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	cmd := exec.Command("gpg", "-r", gpgId, "--output", p.FileName(), "--batch", "--yes", "--encrypt")

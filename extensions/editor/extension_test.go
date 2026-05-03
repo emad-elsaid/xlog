@@ -49,7 +49,7 @@ func TestOpenEditorWithValidPage(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestOpenEditorWithEmptyEditor(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}
@@ -105,7 +105,7 @@ func TestEditorHandler(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}
@@ -149,7 +149,7 @@ func TestLinksWithValidPage(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +195,7 @@ func TestNewPageCallback(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}
@@ -219,7 +219,7 @@ func TestEditButtonStructMethods(t *testing.T) {
 	// Create a temporary directory for testing
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
+	defer func() { _ = os.Chdir(origDir) }()
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatal(err)
 	}

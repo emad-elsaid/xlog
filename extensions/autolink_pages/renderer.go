@@ -19,20 +19,26 @@ func render(w util.BufWriter, source []byte, node ast.Node, entering bool) (ast.
 		n := node.(*PageLink)
 		url := n.page.Name()
 
-		fmt.Fprintf(w,
+		if _, err := fmt.Fprintf(w,
 			`<a href="/%s">`,
 			util.EscapeHTML(util.URLEscape([]byte([]byte(url)), false)),
-		)
+		); err != nil {
+			return ast.WalkStop, err
+		}
 
 		if total, done := countTodos(n.page); total > 0 {
 			isDone := ""
 			if total == done {
 				isDone = "is-success"
 			}
-			fmt.Fprintf(w, `<span class="tag is-rounded %s">%d/%d</span> `, isDone, done, total)
+			if _, err := fmt.Fprintf(w, `<span class="tag is-rounded %s">%d/%d</span> `, isDone, done, total); err != nil {
+				return ast.WalkStop, err
+			}
 		}
 	} else {
-		w.WriteString(`</a>`)
+		if _, err := w.WriteString(`</a>`); err != nil {
+			return ast.WalkStop, err
+		}
 	}
 
 	return ast.WalkContinue, nil

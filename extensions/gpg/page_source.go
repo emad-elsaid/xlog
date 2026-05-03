@@ -32,7 +32,7 @@ func (p *encryptedPages) Each(ctx context.Context, f func(xlog.Page)) {
 		return
 	}
 
-	filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
+	_ = filepath.WalkDir(".", func(name string, d fs.DirEntry, err error) error {
 		select {
 
 		case <-ctx.Done():

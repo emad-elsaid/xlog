@@ -33,7 +33,7 @@ func (Blocks) Init() {
 }
 
 func RegisterShortCodes() {
-	fs.WalkDir(templates, "templates", func(path string, d fs.DirEntry, err error) error {
+	_ = fs.WalkDir(templates, "templates", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func RegisterShortCodes() {
 }
 
 func registerBuildFiles() {
-	fs.WalkDir(public, ".", func(path string, d fs.DirEntry, err error) error {
+	_ = fs.WalkDir(public, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

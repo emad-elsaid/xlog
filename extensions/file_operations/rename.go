@@ -44,7 +44,9 @@ func (f PageRename) Handler(r Request) Output {
 	basename := r.FormValue("new")
 	newName := basename + ext
 
-	os.Rename(old.FileName(), newName)
+	if err := os.Rename(old.FileName(), newName); err != nil {
+		return BadRequest(fmt.Sprintf("Failed to rename file: %v", err))
+	}
 	old.Write(Markdown(fmt.Sprintf("Renamed to: %s", basename)))
 
 	return func(w Response, r Request) {
