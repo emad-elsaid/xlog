@@ -949,3 +949,451 @@ func TestReader_FindClosure(t *testing.T) {
 		})
 	}
 }
+
+func TestBlockReader_NewBlockReader(t *testing.T) {
+	tests := []struct {
+		name     string
+		source   []byte
+		segments *Segments
+	}{
+		{
+			name:     "with nil segments",
+			source:   []byte("hello world"),
+			segments: nil,
+		},
+		{
+			name:   "with segments",
+			source: []byte("hello\nworld"),
+			segments: func() *Segments {
+				s := NewSegments()
+				s.Append(Segment{Start: 0, Stop: 6})
+				s.Append(Segment{Start: 6, Stop: 11})
+				return s
+			}(),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewBlockReader(tc.source, tc.segments)
+			if r == nil {
+				t.Error("NewBlockReader returned nil")
+			}
+			if string(r.Source()) != string(tc.source) {
+				t.Errorf("got source %q, want %q", r.Source(), tc.source)
+			}
+		})
+	}
+}
+
+func TestBlockReader_Reset(t *testing.T) {
+	source := []byte("hello\nworld\ntest")
+	r := NewBlockReader(source, nil)
+
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 12})
+	segments.Append(Segment{Start: 12, Stop: 16})
+
+	r.Reset(segments)
+
+	if r.Peek() != 'h' {
+		t.Errorf("after reset, got peek %c, want 'h'", r.Peek())
+	}
+}
+
+func TestBlockReader_Value(t *testing.T) {
+	tests := []struct {
+		name     string
+		source   []byte
+		segments []Segment
+		seg      Segment
+		expected string
+	}{
+		{
+			name:   "single segment",
+			source: []byte("hello world"),
+			segments: []Segment{
+				{Start: 0, Stop: 11},
+			},
+			seg:      Segment{Start: 0, Stop: 5},
+			expected: "hello",
+		},
+		{
+			name:   "across multiple segments",
+			source: []byte("hello\nworld"),
+			segments: []Segment{
+				{Start: 0, Stop: 6},
+				{Start: 6, Stop: 11},
+			},
+			seg:      Segment{Start: 0, Stop: 11},
+			expected: "hello\nworld",
+		},
+		{
+			name:   "with padding",
+			source: []byte("hello\nworld"),
+			segments: []Segment{
+				{Start: 0, Stop: 6, Padding: 0},
+				{Start: 6, Stop: 11, Padding: 2},
+			},
+			seg:      Segment{Start: 6, Stop: 11},
+			expected: "  world",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			segs := NewSegments()
+			for _, s := range tc.segments {
+				segs.Append(s)
+			}
+			r := NewBlockReader(tc.source, segs)
+			result := r.Value(tc.seg)
+			if string(result) != tc.expected {
+				t.Errorf("got %q, want %q", result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestBlockReader_ReadRune(t *testing.T) {
+	source := []byte("hello")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 5})
+
+	r := NewBlockReader(source, segments)
+
+	rn, size, err := r.ReadRune()
+	if err != nil {
+		t.Fatalf("ReadRune failed: %v", err)
+	}
+	if rn != 'h' {
+		t.Errorf("got rune %c, want 'h'", rn)
+	}
+	if size != 1 {
+		t.Errorf("got size %d, want 1", size)
+	}
+}
+
+func TestBlockReader_PrecendingCharacter(t *testing.T) {
+	tests := []struct {
+		name     string
+		source   []byte
+		segments []Segment
+		advance  int
+		expected rune
+	}{
+		{
+			name:   "at start",
+			source: []byte("hello"),
+			segments: []Segment{
+				{Start: 0, Stop: 5},
+			},
+			advance:  0,
+			expected: '\n',
+		},
+		{
+			name:   "after first char",
+			source: []byte("hello"),
+			segments: []Segment{
+				{Start: 0, Stop: 5},
+			},
+			advance:  1,
+			expected: 'h',
+		},
+		{
+			name:   "with padding",
+			source: []byte("hello"),
+			segments: []Segment{
+				{Start: 0, Stop: 5, Padding: 2},
+			},
+			advance:  0,
+			expected: ' ',
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			segs := NewSegments()
+			for _, s := range tc.segments {
+				segs.Append(s)
+			}
+			r := NewBlockReader(tc.source, segs)
+			if tc.advance > 0 {
+				r.Advance(tc.advance)
+			}
+			result := r.PrecendingCharacter()
+			if result != tc.expected {
+				t.Errorf("got %c, want %c", result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestBlockReader_Advance(t *testing.T) {
+	source := []byte("hello\nworld")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+
+	r.Advance(2)
+	if r.Peek() != 'l' {
+		t.Errorf("after advance 2, got peek %c, want 'l'", r.Peek())
+	}
+}
+
+func TestBlockReader_AdvanceLine(t *testing.T) {
+	source := []byte("hello\nworld\ntest")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 12})
+	segments.Append(Segment{Start: 12, Stop: 16})
+
+	r := NewBlockReader(source, segments)
+
+	line, _ := r.Position()
+	if line != 0 {
+		t.Errorf("initial line: got %d, want 0", line)
+	}
+
+	r.AdvanceLine()
+	line, _ = r.Position()
+	if line != 1 {
+		t.Errorf("after AdvanceLine: got %d, want 1", line)
+	}
+}
+
+func TestBlockReader_Position(t *testing.T) {
+	source := []byte("hello\nworld")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+
+	line, seg := r.Position()
+	if line != 0 {
+		t.Errorf("got line %d, want 0", line)
+	}
+	if seg.Start != 0 {
+		t.Errorf("got seg.Start %d, want 0", seg.Start)
+	}
+}
+
+func TestBlockReader_SetPosition(t *testing.T) {
+	source := []byte("hello\nworld")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+
+	newSeg := Segment{Start: 6, Stop: 11}
+	r.SetPosition(1, newSeg)
+
+	line, seg := r.Position()
+	if line != 1 {
+		t.Errorf("got line %d, want 1", line)
+	}
+	if seg.Start != 6 {
+		t.Errorf("got seg.Start %d, want 6", seg.Start)
+	}
+}
+
+func TestBlockReader_Match(t *testing.T) {
+	source := []byte("hello world")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+
+	reg := regexp.MustCompile(`hello`)
+	if !r.Match(reg) {
+		t.Error("expected match for 'hello', got no match")
+	}
+
+	if r.Peek() != ' ' {
+		t.Errorf("after match, got peek %c, want ' '", r.Peek())
+	}
+}
+
+func TestBlockReader_FindSubMatch(t *testing.T) {
+	source := []byte(":smile:")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 7})
+
+	r := NewBlockReader(source, segments)
+
+	reg := regexp.MustCompile(`:(\w+):`)
+	matches := r.FindSubMatch(reg)
+
+	if len(matches) != 2 {
+		t.Fatalf("got %d matches, want 2", len(matches))
+	}
+	if string(matches[1]) != "smile" {
+		t.Errorf("got match %q, want %q", matches[1], "smile")
+	}
+}
+
+func TestBlockReader_SkipSpaces(t *testing.T) {
+	source := []byte("   hello")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 8})
+
+	r := NewBlockReader(source, segments)
+
+	_, chars, ok := r.SkipSpaces()
+	if !ok {
+		t.Error("SkipSpaces failed")
+	}
+	if chars != 3 {
+		t.Errorf("got %d spaces skipped, want 3", chars)
+	}
+	if r.Peek() != 'h' {
+		t.Errorf("after SkipSpaces, got peek %c, want 'h'", r.Peek())
+	}
+}
+
+func TestBlockReader_SkipBlankLines(t *testing.T) {
+	source := []byte("\n\nhello")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 1})
+	segments.Append(Segment{Start: 1, Stop: 2})
+	segments.Append(Segment{Start: 2, Stop: 7})
+
+	r := NewBlockReader(source, segments)
+
+	_, lines, ok := r.SkipBlankLines()
+	if !ok {
+		t.Error("SkipBlankLines failed")
+	}
+	if lines != 2 {
+		t.Errorf("got %d blank lines skipped, want 2", lines)
+	}
+	if r.Peek() != 'h' {
+		t.Errorf("after SkipBlankLines, got peek %c, want 'h'", r.Peek())
+	}
+}
+
+func TestBlockReader_SetPadding(t *testing.T) {
+	source := []byte("hello")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 5})
+
+	r := NewBlockReader(source, segments)
+	r.SetPadding(3)
+
+	_, seg := r.Position()
+	if seg.Padding != 3 {
+		t.Errorf("got padding %d, want 3", seg.Padding)
+	}
+}
+
+func TestBlockReader_AdvanceAndSetPadding(t *testing.T) {
+	source := []byte("hello")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 5})
+
+	r := NewBlockReader(source, segments)
+	r.AdvanceAndSetPadding(2, 3)
+
+	_, seg := r.Position()
+	if seg.Start != 2 {
+		t.Errorf("got start %d, want 2", seg.Start)
+	}
+	if seg.Padding != 3 {
+		t.Errorf("got padding %d, want 3", seg.Padding)
+	}
+}
+
+func TestBlockReader_AdvanceToEOL(t *testing.T) {
+	source := []byte("hello\nworld")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+	r.AdvanceToEOL()
+
+	if r.Peek() != '\n' {
+		t.Errorf("after AdvanceToEOL, got peek %c, want newline", r.Peek())
+	}
+}
+
+func TestBlockReader_PeekLine(t *testing.T) {
+	source := []byte("hello\nworld")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 6})
+	segments.Append(Segment{Start: 6, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+
+	line, seg := r.PeekLine()
+	if string(line) != "hello\n" {
+		t.Errorf("got line %q, want %q", line, "hello\n")
+	}
+	if seg.Start != 0 || seg.Stop != 6 {
+		t.Errorf("got segment %+v, want {Start:0 Stop:6}", seg)
+	}
+}
+
+func TestBlockReader_LineOffset(t *testing.T) {
+	source := []byte("hello world")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 11})
+
+	r := NewBlockReader(source, segments)
+	r.Advance(6)
+
+	offset := r.LineOffset()
+	if offset != 6 {
+		t.Errorf("got offset %d, want 6", offset)
+	}
+}
+
+func TestBlockReader_FindClosure(t *testing.T) {
+	source := []byte("(hello)")
+	segments := NewSegments()
+	segments.Append(Segment{Start: 0, Stop: 7})
+
+	r := NewBlockReader(source, segments)
+	r.Advance(1)
+
+	_, ok := r.FindClosure('(', ')', FindClosureOptions{Advance: true})
+	if !ok {
+		t.Error("FindClosure failed to find closure")
+	}
+}
+
+func TestSegment_Between(t *testing.T) {
+	tests := []struct {
+		name     string
+		seg      Segment
+		other    Segment
+		expected Segment
+	}{
+		{
+			name:     "basic between",
+			seg:      Segment{Start: 0, Stop: 10, Padding: 5},
+			other:    Segment{Start: 3, Stop: 10, Padding: 2},
+			expected: Segment{Start: 0, Stop: 3, Padding: 3},
+		},
+		{
+			name:     "same stop different start",
+			seg:      Segment{Start: 5, Stop: 20, Padding: 4},
+			other:    Segment{Start: 10, Stop: 20, Padding: 1},
+			expected: Segment{Start: 5, Stop: 10, Padding: 3},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := tc.seg.Between(tc.other)
+			if result != tc.expected {
+				t.Errorf("got %+v, want %+v", result, tc.expected)
+			}
+		})
+	}
+}
