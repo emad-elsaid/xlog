@@ -67,12 +67,14 @@ func build(dest string) error {
 
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
+	// #nosec G304 -- File path constructed from Config.NotFoundPage (controlled config) and dest (build output dir)
 	if in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html")); err == nil {
 		defer func() {
 			if err := in.Close(); err != nil {
 				slog.Error("Failed to close input 404 file", "error", err)
 			}
 		}()
+		// #nosec G304 -- File path is controlled build output destination, not user input
 		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {
 			slog.Error("Failed to open dest/404.html", "error", err)
@@ -146,6 +148,7 @@ func build(dest string) error {
 }
 
 func buildRoute(srv *http.Server, route, dir, file string) error {
+	// #nosec G704 -- Route is internal, constructed from page names in build process, not SSRF
 	req, err := http.NewRequest(http.MethodGet, route, nil)
 	if err != nil {
 		return err
@@ -154,6 +157,7 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	rec := httptest.NewRecorder()
 	srv.Handler.ServeHTTP(rec, req)
 
+	// #nosec G703 -- Dir is controlled build output directory, no path traversal risk
 	if err := os.MkdirAll(dir, build_perms); err != nil {
 		return err
 	}
@@ -172,5 +176,6 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 		}
 	}()
 
+	// #nosec G703 -- File is controlled build output destination, no path traversal risk
 	return os.WriteFile(file, body, build_perms)
 }
