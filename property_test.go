@@ -8,7 +8,7 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
-// testPropertyPage implements the Page interface for testing properties
+// testPropertyPage implements the Page interface for testing properties.
 type testPropertyPage struct {
 	name    string
 	modTime time.Time
@@ -24,7 +24,7 @@ func (t *testPropertyPage) Write(Markdown) bool     { return false }
 func (t *testPropertyPage) ModTime() time.Time      { return t.modTime }
 func (t *testPropertyPage) AST() ([]byte, ast.Node) { return nil, nil }
 
-// testProperty is a simple property implementation for testing
+// testProperty is a simple property implementation for testing.
 type testProperty struct {
 	icon  string
 	name  string

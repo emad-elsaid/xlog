@@ -17,18 +17,18 @@ import (
 
 var (
 	router = http.NewServeMux()
-	// a function that returns the CSRF token
+	// a function that returns the CSRF token.
 	CSRF = csrf.Token
 )
 
 type (
-	// alias http.ResponseWriter for shorter handler declaration
+	// alias http.ResponseWriter for shorter handler declaration.
 	Response = http.ResponseWriter
-	// alias *http.Request for shorter handler declaration
+	// alias *http.Request for shorter handler declaration.
 	Request = *http.Request
-	// alias of http.HandlerFunc as output is expected from defined http handlers
+	// alias of http.HandlerFunc as output is expected from defined http handlers.
 	Output = http.HandlerFunc
-	// map of string to any value used for template rendering
+	// map of string to any value used for template rendering.
 	Locals map[string]any // passed to templates
 )
 
@@ -81,42 +81,42 @@ func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// NotFound returns an output function that writes 404 NotFound to http response
+// NotFound returns an output function that writes 404 NotFound to http response.
 func NotFound(msg string) Output {
 	return func(w Response, r Request) {
 		http.Error(w, "", http.StatusNotFound)
 	}
 }
 
-// BadRequest returns an output function that writes BadRequest http response
+// BadRequest returns an output function that writes BadRequest http response.
 func BadRequest(msg string) Output {
 	return func(w Response, r Request) {
 		http.Error(w, msg, http.StatusBadRequest)
 	}
 }
 
-// InternalServerError returns an output function that writes InternalServerError http response
+// InternalServerError returns an output function that writes InternalServerError http response.
 func InternalServerError(err error) Output {
 	return func(w Response, r Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-// Redirect returns an output function that writes Found http response to provided URL
+// Redirect returns an output function that writes Found http response to provided URL.
 func Redirect(url string) Output {
 	return func(w Response, r Request) {
 		http.Redirect(w, r, url, http.StatusFound)
 	}
 }
 
-// NoContent returns an output function that writes NoContent http status
+// NoContent returns an output function that writes NoContent http status.
 func NoContent() Output {
 	return func(w Response, r Request) {
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
-// PlainText returns an output function that writes text to response writer
+// PlainText returns an output function that writes text to response writer.
 func PlainText(text string) Output {
 	return func(w Response, r Request) {
 		if _, err := w.Write([]byte(text)); err != nil {
@@ -162,7 +162,7 @@ func Delete(path string, handler HandlerFunc) {
 	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
 }
 
-// Render returns an output function that renders partial with data and writes it as response
+// Render returns an output function that renders partial with data and writes it as response.
 func Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
 		if _, err := fmt.Fprint(w, Partial(path, data)); err != nil {
@@ -179,7 +179,7 @@ func requestLoggerHandler(h http.Handler) http.Handler {
 	})
 }
 
-// Cache wraps Output and adds header to instruct the browser to cache the output
+// Cache wraps Output and adds header to instruct the browser to cache the output.
 func Cache(out Output) Output {
 	return func(w Response, r Request) {
 		w.Header().Add("Cache-Control", "max-age=604800")

@@ -8,39 +8,39 @@ import (
 )
 
 const (
-	testIndexFile     = "index.md"
-	testNotFoundFile  = "404.md"
+	testIndexFile    = "index.md"
+	testNotFoundFile = "404.md"
 )
 
 func TestRegisterBuildPage(t *testing.T) {
 	tests := []struct {
-		name         string
-		path         string
-		encloseInDir bool
+		name          string
+		path          string
+		encloseInDir  bool
 		checkEnclosed bool
 	}{
 		{
-			name:         "register simple page",
-			path:         "/test-page.html",
-			encloseInDir: false,
+			name:          "register simple page",
+			path:          "/test-page.html",
+			encloseInDir:  false,
 			checkEnclosed: false,
 		},
 		{
-			name:         "register enclosed page",
-			path:         "/enclosed-page",
-			encloseInDir: true,
+			name:          "register enclosed page",
+			path:          "/enclosed-page",
+			encloseInDir:  true,
 			checkEnclosed: true,
 		},
 		{
-			name:         "register root path",
-			path:         "/",
-			encloseInDir: false,
+			name:          "register root path",
+			path:          "/",
+			encloseInDir:  false,
 			checkEnclosed: false,
 		},
 		{
-			name:         "register nested path",
-			path:         "/api/v1/endpoint",
-			encloseInDir: true,
+			name:          "register nested path",
+			path:          "/api/v1/endpoint",
+			encloseInDir:  true,
 			checkEnclosed: true,
 		},
 	}
@@ -190,7 +190,7 @@ func TestBuildRoute_InvalidRequest(t *testing.T) {
 	// Test with invalid route containing control characters
 	invalidRoute := "/test\x00invalid"
 	err = buildRoute(srv, invalidRoute, tmpDir, filepath.Join(tmpDir, "output.html"))
-	
+
 	if err == nil {
 		t.Error("expected error for invalid route with control characters")
 	}
@@ -341,7 +341,7 @@ func TestBuild_AssetCopying(t *testing.T) {
 	// The assets embed.FS should contain files; verify they're copied to destination
 	// Note: actual file verification depends on what's in the assets embed.FS
 	// This test verifies the mechanism works without knowing specific files
-	
+
 	// Just verify the function executes without panic
 	// More specific assertions would require knowing the embedded assets
 }

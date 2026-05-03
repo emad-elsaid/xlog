@@ -221,7 +221,7 @@ func TestMarkdownFS_EachWithIgnoredPaths(t *testing.T) {
 	// The actual behavior depends on how WalkDir reports paths
 	// Just verify we get some pages and don't panic
 	assert.NotEmpty(t, foundPages, "Should find some markdown files")
-	
+
 	// Verify all found pages are from .md files
 	for _, page := range foundPages {
 		// Pages should have been created with .md extension stripped
@@ -247,7 +247,7 @@ func TestMarkdownFS_EachNonExistentDirectory(t *testing.T) {
 	// before calling d.IsDir(), so this will panic.
 	// We skip this test until the underlying bug in markdown_fs.go:127 is fixed.
 	t.Skip("Skipping test that exposes nil pointer bug in Each() - see markdown_fs.go:127")
-	
+
 	mfs := newMarkdownFS("/nonexistent/directory/12345")
 	ctx := context.Background()
 

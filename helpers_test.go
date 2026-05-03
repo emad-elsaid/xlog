@@ -234,5 +234,3 @@ func TestDir(t *testing.T) {
 		})
 	}
 }
-
-

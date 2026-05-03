@@ -6,7 +6,7 @@ const (
 )
 
 // Property represent a piece of information about the current page such as last
-// update time, number of versions, number of words, reading time...etc
+// update time, number of versions, number of words, reading time...etc.
 type Property interface {
 	// Icon returns the fontawesome icon class name or emoji
 	Icon() string
@@ -19,14 +19,14 @@ type Property interface {
 var propsSources = []func(Page) []Property{defaultProps}
 
 // RegisterProperty registers a function that returns a set of properties for
-// the page
+// the page.
 func RegisterProperty(a func(Page) []Property) {
 	propsSources = append(propsSources, a)
 }
 
 // Properties return a list of properties for a page. It executes all functions
 // registered with RegisterProperty and collect results in one slice. Can be
-// passed to the view to render a page properties
+// passed to the view to render a page properties.
 func Properties(p Page) map[string]Property {
 	ps := map[string]Property{}
 	for _, source := range propsSources {

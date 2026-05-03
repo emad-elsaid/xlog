@@ -162,7 +162,7 @@ func TestOpengraphTagsForIndexPage(t *testing.T) {
 	}
 }
 
-// Mock page implementation for testing
+// Mock page implementation for testing.
 type mockTestPage struct {
 	name    string
 	content string

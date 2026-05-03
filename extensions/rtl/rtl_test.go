@@ -118,12 +118,12 @@ This is a paragraph.
 			transformer := addDirAuto{}
 			transformer.Transform(docNode, reader, parser.NewContext())
 
-		// Collect nodes that should have dir="auto"
-		var nodesWithDir []ast.Node
-		_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
-			if !entering {
-				return ast.WalkContinue, nil
-			}
+			// Collect nodes that should have dir="auto"
+			var nodesWithDir []ast.Node
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+				if !entering {
+					return ast.WalkContinue, nil
+				}
 
 				kind := node.Kind()
 				if kind == ast.KindParagraph ||
@@ -159,8 +159,8 @@ This is a paragraph.
 					dirStr = string(dirBytes)
 				}
 
-			if dirStr != dirAutoValue {
-				t.Errorf("Expected dir='auto', got dir='%s'", dirStr)
+				if dirStr != dirAutoValue {
+					t.Errorf("Expected dir='auto', got dir='%s'", dirStr)
 				}
 			}
 		})

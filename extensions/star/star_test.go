@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	testPageFile = "test-page.md"
+	testPageFile  = "test-page.md"
 	starIconClass = "fa-solid fa-star"
 )
 

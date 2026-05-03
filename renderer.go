@@ -16,7 +16,7 @@ import (
 
 // The instance of markdown renderer. this is what takes the page content and
 // converts it to HTML. it defines what features to use from goldmark and what
-// options to turn on
+// options to turn on.
 var MarkdownConverter = sync.OnceValue(func() markdown.Markdown {
 	return markdown.New(
 		markdown.WithExtensions(
@@ -46,7 +46,7 @@ var MarkdownConverter = sync.OnceValue(func() markdown.Markdown {
 
 // FindInAST takes an AST node and walks the tree depth first
 // searching for a node of a specific type can be used to find first image,
-// link, paragraph...etc
+// link, paragraph...etc.
 func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 	if n == nil {
 		return
@@ -63,7 +63,7 @@ func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 	return
 }
 
-// Extract all nodes of a specific type from the AST
+// Extract all nodes of a specific type from the AST.
 func FindAllInAST[t ast.Node](n ast.Node) (a []t) {
 	if n == nil {
 		return

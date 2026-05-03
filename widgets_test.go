@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-// Test priorityList Add and sorting
+// Test priorityList Add and sorting.
 func TestPriorityListAdd(t *testing.T) {
 	pl := &priorityList[string]{}
 
@@ -33,7 +33,7 @@ func TestPriorityListAdd(t *testing.T) {
 	}
 }
 
-// Test priorityList with equal priorities
+// Test priorityList with equal priorities.
 func TestPriorityListEqualPriorities(t *testing.T) {
 	pl := &priorityList[int]{}
 
@@ -64,7 +64,7 @@ func TestPriorityListEqualPriorities(t *testing.T) {
 	}
 }
 
-// Test priorityList with negative priorities
+// Test priorityList with negative priorities.
 func TestPriorityListNegativePriorities(t *testing.T) {
 	pl := &priorityList[string]{}
 
@@ -89,7 +89,7 @@ func TestPriorityListNegativePriorities(t *testing.T) {
 	}
 }
 
-// Test priorityList All iterator early termination
+// Test priorityList All iterator early termination.
 func TestPriorityListAllEarlyTermination(t *testing.T) {
 	pl := &priorityList[int]{}
 
@@ -116,7 +116,7 @@ func TestPriorityListAllEarlyTermination(t *testing.T) {
 	}
 }
 
-// Test RegisterWidget and RenderWidget
+// Test RegisterWidget and RenderWidget.
 func TestRegisterAndRenderWidget(t *testing.T) {
 	// Clean up widgets map after test
 	defer func() {
@@ -148,7 +148,7 @@ func TestRegisterAndRenderWidget(t *testing.T) {
 	}
 }
 
-// Test RenderWidget with non-existent space
+// Test RenderWidget with non-existent space.
 func TestRenderWidgetNonExistent(t *testing.T) {
 	// Clean up widgets map after test
 	defer func() {
@@ -165,7 +165,7 @@ func TestRenderWidgetNonExistent(t *testing.T) {
 	}
 }
 
-// Test RegisterWidget creates space if not exists
+// Test RegisterWidget creates space if not exists.
 func TestRegisterWidgetCreatesSpace(t *testing.T) {
 	// Clean up widgets map after test
 	defer func() {
@@ -192,7 +192,7 @@ func TestRegisterWidgetCreatesSpace(t *testing.T) {
 	}
 }
 
-// Test WidgetFunc receives correct page
+// Test WidgetFunc receives correct page.
 func TestWidgetFuncReceivesPage(t *testing.T) {
 	// Clean up widgets map after test
 	defer func() {
@@ -215,7 +215,7 @@ func TestWidgetFuncReceivesPage(t *testing.T) {
 	}
 }
 
-// Test multiple widgets in same space accumulate
+// Test multiple widgets in same space accumulate.
 func TestMultipleWidgetsAccumulate(t *testing.T) {
 	// Clean up widgets map after test
 	defer func() {
@@ -242,7 +242,7 @@ func TestMultipleWidgetsAccumulate(t *testing.T) {
 	}
 }
 
-// Test predefined widget spaces
+// Test predefined widget spaces.
 func TestPredefinedWidgetSpaces(t *testing.T) {
 	tests := []struct {
 		space    WidgetSpace
@@ -260,7 +260,7 @@ func TestPredefinedWidgetSpaces(t *testing.T) {
 	}
 }
 
-// Test empty priorityList
+// Test empty priorityList.
 func TestEmptyPriorityList(t *testing.T) {
 	pl := &priorityList[string]{}
 
@@ -274,7 +274,7 @@ func TestEmptyPriorityList(t *testing.T) {
 	}
 }
 
-// Test priorityList with single item
+// Test priorityList with single item.
 func TestPriorityListSingleItem(t *testing.T) {
 	pl := &priorityList[string]{}
 	pl.Add("only", 1.0)
@@ -289,7 +289,7 @@ func TestPriorityListSingleItem(t *testing.T) {
 	}
 }
 
-// Test priorityList with float precision
+// Test priorityList with float precision.
 func TestPriorityListFloatPrecision(t *testing.T) {
 	pl := &priorityList[string]{}
 

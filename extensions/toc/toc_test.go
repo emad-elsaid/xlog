@@ -291,7 +291,7 @@ func TestInspectNegativeDepthOptions(t *testing.T) {
 	assert.Equal(t, "H2", string(toc.Items[0].Items[0].Title))
 }
 
-// parseMarkdown is a helper to parse markdown with auto heading IDs enabled
+// parseMarkdown is a helper to parse markdown with auto heading IDs enabled.
 func parseMarkdown(src []byte) ast.Node {
 	return parser.NewParser(
 		parser.WithInlineParsers(parser.DefaultInlineParsers()...),

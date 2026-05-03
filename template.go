@@ -21,7 +21,7 @@ var templatesFSs []fs.FS
 // the subdirectory name that contains the templates. templates are registered
 // such that the latest registered directory override older ones. template file
 // extensions are signified by '.html' extension and the file path can
-// be used as template name without this extension
+// be used as template name without this extension.
 func RegisterTemplate(t fs.FS, subDir string) {
 	ts, _ := fs.Sub(t, subDir)
 	templatesFSs = append(templatesFSs, ts)
@@ -65,7 +65,7 @@ func compileTemplates() {
 
 // Partial executes a template by it's path name. it passes data to the
 // template. returning the output of the template. in case of an error it will
-// return the error string as the output
+// return the error string as the output.
 func Partial(path string, data Locals) template.HTML {
 	v := templates.Lookup(path)
 	if v == nil {

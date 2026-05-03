@@ -132,12 +132,12 @@ func TestRenderAttributes_NumericValues(t *testing.T) {
 			node := ast.NewTextBlock()
 			node.SetAttributeString(tt.attrName, tt.value)
 
-		var buf bytes.Buffer
-		writer := bufio.NewWriter(&buf)
-		RenderAttributes(writer, node, nil)
-		if err := writer.Flush(); err != nil {
-			t.Errorf("Failed to flush writer: %v", err)
-		}
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+			RenderAttributes(writer, node, nil)
+			if err := writer.Flush(); err != nil {
+				t.Errorf("Failed to flush writer: %v", err)
+			}
 
 			got := buf.String()
 			if got != tt.expected {
@@ -199,7 +199,7 @@ func BenchmarkRenderAttributes_NumericConversion(b *testing.B) {
 	}
 }
 
-// Helper benchmark to show old behavior would panic or produce incorrect output
+// Helper benchmark to show old behavior would panic or produce incorrect output.
 func BenchmarkFormatConversions(b *testing.B) {
 	values := []any{
 		42,

@@ -31,7 +31,7 @@ func init() {
 	}
 }
 
-// detectRaceEnabled returns true if race detector is active
+// detectRaceEnabled returns true if race detector is active.
 func detectRaceEnabled() bool {
 	// Use runtime package to detect race builds
 	// This uses a build tag approach

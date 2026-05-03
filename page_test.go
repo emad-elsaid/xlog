@@ -168,19 +168,19 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 			setup: func(t *testing.T) (string, *page) {
 				t.Helper()
 				tempDir := t.TempDir()
-				
+
 				// Create a file where we need a directory
 				dirPath := filepath.Join(tempDir, "blocked")
 				if err := os.WriteFile(dirPath, []byte("blocking"), 0644); err != nil {
 					t.Fatalf("failed to create blocking file: %v", err)
 				}
-				
+
 				// Try to write a page that needs blocked/page.md - MkdirAll will fail
 				origDir, _ := os.Getwd()
 				if err := os.Chdir(tempDir); err != nil {
 					t.Fatalf("failed to change directory: %v", err)
 				}
-				
+
 				p := &page{name: "blocked/page"}
 				return origDir, p
 			},
@@ -197,17 +197,17 @@ func TestPageWrite_ErrorPaths(t *testing.T) {
 				t.Helper()
 				tempDir := t.TempDir()
 				origDir, _ := os.Getwd()
-				
+
 				if err := os.Chdir(tempDir); err != nil {
 					t.Fatalf("failed to change directory: %v", err)
 				}
-				
+
 				// Create a read-only file
 				p := &page{name: "readonly"}
 				if err := os.WriteFile(p.FileName(), []byte("original"), 0444); err != nil {
 					t.Fatalf("failed to create read-only file: %v", err)
 				}
-				
+
 				return origDir, p
 			},
 			cleanup: func(origDir string) {

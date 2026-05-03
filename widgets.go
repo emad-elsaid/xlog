@@ -9,7 +9,7 @@ import (
 
 type (
 	// WidgetSpace used to represent a widgets spaces. it's used to register
-	// widgets to be injected in the view or edit pages
+	// widgets to be injected in the view or edit pages.
 	WidgetSpace string
 	// WidgetFunc a function that takes the current page and returns the widget.
 	// This can be used by extensions to define new widgets to be rendered in
@@ -27,7 +27,7 @@ var (
 	WidgetHead       WidgetSpace = "head"        // widgets rendered in page <head> tag
 )
 
-// A map to keep track of list of widget functions registered in each widget space
+// A map to keep track of list of widget functions registered in each widget space.
 var (
 	widgets      = map[WidgetSpace]*priorityList[WidgetFunc]{}
 	widgetsMutex sync.RWMutex
@@ -87,7 +87,7 @@ func (pl *priorityList[T]) sortByPriority() {
 	})
 }
 
-// An iterator over all items
+// An iterator over all items.
 func (pl *priorityList[T]) All() iter.Seq[T] {
 	return func(yield func(T) bool) {
 		for _, v := range pl.items {

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// mockPageSource implements PageSource for testing
+// mockPageSource implements PageSource for testing.
 type mockPageSource struct {
 	pages    map[string]Page
 	eachFunc func(context.Context, func(Page))
@@ -30,7 +30,7 @@ func (m *mockPageSource) Each(ctx context.Context, fn func(Page)) {
 	}
 }
 
-// mockPage implements Page for testing
+// mockPage implements Page for testing.
 type mockPage struct {
 	name   string
 	exists bool
@@ -137,13 +137,13 @@ func TestNewPage(t *testing.T) {
 
 			page := NewPage(tt.pageName)
 
-		if tt.expectedExists {
-			require.NotNil(t, page, "Expected page to exist")
-			assert.True(t, page.Exists(), "Expected page.Exists() to return true")
-			assert.Equal(t, tt.expectedName, page.Name(), "Page name mismatch")
-		} else if page != nil {
-			assert.False(t, page.Exists(), "Expected page.Exists() to return false")
-		}
+			if tt.expectedExists {
+				require.NotNil(t, page, "Expected page to exist")
+				assert.True(t, page.Exists(), "Expected page.Exists() to return true")
+				assert.Equal(t, tt.expectedName, page.Name(), "Page name mismatch")
+			} else if page != nil {
+				assert.False(t, page.Exists(), "Expected page.Exists() to return false")
+			}
 		})
 	}
 }

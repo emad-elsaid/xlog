@@ -14,7 +14,7 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
-// Markdown is used instead of string to make sure it's clear the string is markdown string
+// Markdown is used instead of string to make sure it's clear the string is markdown string.
 type Markdown string
 
 // a Type that represent a page.
@@ -162,7 +162,7 @@ func (p *page) clearCache() {
 }
 
 // DynamicPage implement Page interface and allow extensions to define a page to
-// be passed to templates without having underlying file on desk
+// be passed to templates without having underlying file on desk.
 type DynamicPage struct {
 	NameVal  string
 	RenderFn func() template.HTML

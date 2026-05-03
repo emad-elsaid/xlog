@@ -106,7 +106,7 @@ func newMarkdownFS(p string) *markdownFS {
 	return &m
 }
 
-// MarkdownFS a current directory markdown pages
+// MarkdownFS a current directory markdown pages.
 type markdownFS struct {
 	path  string
 	cache *lru.Cache[string, Page]
@@ -115,7 +115,7 @@ type markdownFS struct {
 }
 
 // Page Creates an instance of Page with name. if no name is passed it's assumed
-// xlog.Config.Index
+// xlog.Config.Index.
 func (m *markdownFS) Page(name string) Page {
 	m.watch()
 

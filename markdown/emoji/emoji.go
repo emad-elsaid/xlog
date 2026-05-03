@@ -29,7 +29,7 @@ type ParserConfig struct {
 
 const optEmojis parser.OptionName = "EmojiEmojis"
 
-// SetOption implements parser.SetOptioner
+// SetOption implements parser.SetOptioner.
 func (c *ParserConfig) SetOption(name parser.OptionName, value any) {
 	if name == optEmojis {
 		c.Emojis = value.(definition.Emojis)
@@ -146,7 +146,7 @@ func (o *withRenderingMethod) SetConfig(c *renderer.Config) {
 	c.Options[optRenderingMethod] = o.value
 }
 
-// SetEmojiOption implements RendererOption#SetEmojiOption
+// SetEmojiOption implements RendererOption#SetEmojiOption.
 func (o *withRenderingMethod) SetEmojiOption(c *RendererConfig) {
 	c.Method = o.value
 }
@@ -170,7 +170,7 @@ func (o *withTwemojiTemplate) SetConfig(c *renderer.Config) {
 	c.Options[optTwemojiTemplate] = o.value
 }
 
-// SetEmojiOption implements RendererOption#SetEmojiOption
+// SetEmojiOption implements RendererOption#SetEmojiOption.
 func (o *withTwemojiTemplate) SetEmojiOption(c *RendererConfig) {
 	c.TwemojiTemplate = o.value
 }
@@ -196,7 +196,7 @@ func (o *withRendererFunc) SetConfig(c *renderer.Config) {
 	c.Options[optRendererFunc] = o.value
 }
 
-// SetEmojiOption implements RendererOption#SetEmojiOption
+// SetEmojiOption implements RendererOption#SetEmojiOption.
 func (o *withRendererFunc) SetEmojiOption(c *RendererConfig) {
 	c.RendererFunc = o.value
 }
