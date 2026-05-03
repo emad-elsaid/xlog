@@ -676,3 +676,283 @@ func TestDefaultParagraphTransformers(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveDelimiter(t *testing.T) {
+	tests := []struct {
+		name        string
+		setup       func() (*parseContext, *Delimiter)
+		targetIndex int // Which delimiter to remove (0=first, 1=middle, 2=last)
+		validate    func(*testing.T, *parseContext)
+	}{
+		{
+			name: "remove single delimiter",
+			setup: func() (*parseContext, *Delimiter) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d := NewDelimiter(true, true, 1, '*', nil)
+				parent.AppendChild(parent, d)
+				pc.PushDelimiter(d)
+				return pc, d
+			},
+			targetIndex: 0,
+			validate: func(t *testing.T, pc *parseContext) {
+				if pc.FirstDelimiter() != nil {
+					t.Error("FirstDelimiter should be nil after removing single delimiter")
+				}
+				if pc.LastDelimiter() != nil {
+					t.Error("LastDelimiter should be nil after removing single delimiter")
+				}
+			},
+		},
+		{
+			name: "remove first delimiter from chain",
+			setup: func() (*parseContext, *Delimiter) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				d3 := NewDelimiter(true, true, 1, '*', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				parent.AppendChild(parent, d3)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				pc.PushDelimiter(d3)
+				return pc, d1
+			},
+			targetIndex: 0,
+			validate: func(t *testing.T, pc *parseContext) {
+				first := pc.FirstDelimiter()
+				if first == nil {
+					t.Fatal("FirstDelimiter should not be nil")
+				}
+				if first.PreviousDelimiter != nil {
+					t.Error("First delimiter should have nil PreviousDelimiter")
+				}
+				if first.NextDelimiter == nil {
+					t.Error("First delimiter should have NextDelimiter")
+				}
+			},
+		},
+		{
+			name: "remove middle delimiter from chain",
+			setup: func() (*parseContext, *Delimiter) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				d3 := NewDelimiter(true, true, 1, '*', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				parent.AppendChild(parent, d3)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				pc.PushDelimiter(d3)
+				return pc, d2
+			},
+			targetIndex: 1,
+			validate: func(t *testing.T, pc *parseContext) {
+				first := pc.FirstDelimiter()
+				last := pc.LastDelimiter()
+				if first == nil || last == nil {
+					t.Fatal("Delimiters should not be nil after removing middle")
+				}
+				if first.NextDelimiter != last {
+					t.Error("First delimiter should point to last after middle removal")
+				}
+				if last.PreviousDelimiter != first {
+					t.Error("Last delimiter should point to first after middle removal")
+				}
+			},
+		},
+		{
+			name: "remove last delimiter from chain",
+			setup: func() (*parseContext, *Delimiter) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				d3 := NewDelimiter(true, true, 1, '*', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				parent.AppendChild(parent, d3)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				pc.PushDelimiter(d3)
+				return pc, d3
+			},
+			targetIndex: 2,
+			validate: func(t *testing.T, pc *parseContext) {
+				last := pc.LastDelimiter()
+				if last == nil {
+					t.Fatal("LastDelimiter should not be nil")
+				}
+				if last.NextDelimiter != nil {
+					t.Error("Last delimiter should have nil NextDelimiter")
+				}
+				if last.PreviousDelimiter == nil {
+					t.Error("Last delimiter should have PreviousDelimiter")
+				}
+			},
+		},
+		{
+			name: "remove delimiter with zero length",
+			setup: func() (*parseContext, *Delimiter) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d := NewDelimiter(true, true, 0, '*', nil)
+				parent.AppendChild(parent, d)
+				pc.PushDelimiter(d)
+				return pc, d
+			},
+			targetIndex: 0,
+			validate: func(t *testing.T, pc *parseContext) {
+				if pc.FirstDelimiter() != nil {
+					t.Error("Delimiter with zero length should be completely removed")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			pc, target := tc.setup()
+			pc.RemoveDelimiter(target)
+			tc.validate(t, pc)
+		})
+	}
+}
+
+func TestClearDelimiters(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func() (*parseContext, ast.Node)
+		validate func(*testing.T, *parseContext)
+	}{
+		{
+			name: "clear all delimiters with nil bottom",
+			setup: func() (*parseContext, ast.Node) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				d3 := NewDelimiter(true, true, 1, '_', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				parent.AppendChild(parent, d3)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				pc.PushDelimiter(d3)
+				return pc, nil
+			},
+			validate: func(t *testing.T, pc *parseContext) {
+				if pc.FirstDelimiter() != nil {
+					t.Error("All delimiters should be cleared")
+				}
+				if pc.LastDelimiter() != nil {
+					t.Error("LastDelimiter should be nil after clearing")
+				}
+			},
+		},
+		{
+			name: "clear delimiters above bottom node",
+			setup: func() (*parseContext, ast.Node) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				d3 := NewDelimiter(true, true, 1, '_', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				parent.AppendChild(parent, d3)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				pc.PushDelimiter(d3)
+				return pc, d2
+			},
+			validate: func(t *testing.T, pc *parseContext) {
+				// d3 should be removed, d1 and d2 should remain
+				first := pc.FirstDelimiter()
+				if first == nil {
+					t.Error("First delimiter should remain")
+				}
+			},
+		},
+		{
+			name: "clear empty delimiter list",
+			setup: func() (*parseContext, ast.Node) {
+				pc := newParseContext()
+				return pc, nil
+			},
+			validate: func(t *testing.T, pc *parseContext) {
+				if pc.LastDelimiter() != nil {
+					t.Error("Should remain nil when clearing empty list")
+				}
+			},
+		},
+		{
+			name: "clear with bottom equal to last delimiter",
+			setup: func() (*parseContext, ast.Node) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, d2)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				return pc, d2
+			},
+			validate: func(t *testing.T, pc *parseContext) {
+				// Nothing above d2, so d1 and d2 should remain
+				if pc.FirstDelimiter() == nil {
+					t.Error("Delimiters should remain when bottom is last")
+				}
+			},
+		},
+		{
+			name: "clear with mixed node types",
+			setup: func() (*parseContext, ast.Node) {
+				pc := newParseContext()
+				parent := ast.NewDocument()
+				d1 := NewDelimiter(true, false, 1, '*', nil)
+				text := ast.NewString([]byte("text"))
+				d2 := NewDelimiter(false, true, 1, '*', nil)
+				parent.AppendChild(parent, d1)
+				parent.AppendChild(parent, text)
+				parent.AppendChild(parent, d2)
+				pc.PushDelimiter(d1)
+				pc.PushDelimiter(d2)
+				return pc, text
+			},
+			validate: func(t *testing.T, pc *parseContext) {
+				// d2 should be removed, d1 should remain
+				if pc.LastDelimiter() == nil {
+					t.Error("d1 should remain after clearing above text node")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			pc, bottom := tc.setup()
+			pc.ClearDelimiters(bottom)
+			tc.validate(t, pc)
+		})
+	}
+}
+
+// Helper to create a fresh parse context for testing.
+func newParseContext() *parseContext {
+	return &parseContext{
+		store:         make([]any, ContextKeyMax+1),
+		ids:           newIDs(),
+		refs:          make(map[string]Reference),
+		blockOffset:   -1,
+		blockIndent:   -1,
+		delimiters:    nil,
+		lastDelimiter: nil,
+		openedBlocks:  []Block{},
+	}
+}
