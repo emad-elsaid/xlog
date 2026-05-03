@@ -457,10 +457,10 @@ func compareAttributeValue(t *testing.T, index int, got, want any) {
 
 func TestParseAttributeString(t *testing.T) {
 	tests := []struct {
-		name    string
-		input   string
-		want    []byte
-		wantOk  bool
+		name   string
+		input  string
+		want   []byte
+		wantOk bool
 	}{
 		{
 			name:   "simple string",
@@ -621,7 +621,7 @@ func TestParseAttributeNumber(t *testing.T) {
 		{
 			name:   "uppercase E",
 			input:  "1.5E10",
-			want:   1.5E10,
+			want:   1.5e10,
 			wantOk: true,
 		},
 		{
