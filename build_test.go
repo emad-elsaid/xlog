@@ -187,6 +187,7 @@ func TestBuildRoute_InvalidRequest(t *testing.T) {
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		}),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	// Test with invalid route containing control characters
@@ -216,6 +217,7 @@ func TestBuildRoute_FilePermissions(t *testing.T) {
 				t.Errorf("Failed to write response: %v", err)
 			}
 		}),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	outputFile := filepath.Join(tmpDir, "output.html")
