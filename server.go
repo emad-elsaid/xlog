@@ -220,11 +220,18 @@ func Render(path string, data Locals) Output {
 	}
 }
 
+// sanitizeLogString removes newline and carriage return characters from log strings
+// to prevent log injection attacks where malicious input could split log entries.
+func sanitizeLogString(s string) string {
+	return strings.NewReplacer("\n", " ", "\r", " ").Replace(s)
+}
+
 func requestLoggerHandler(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w Response, r Request) {
 		start := time.Now()
 		h.ServeHTTP(w, r)
-		slog.Info(r.Method+" "+r.URL.Path, "time", time.Since(start))
+		logMsg := sanitizeLogString(r.Method + " " + r.URL.Path)
+		slog.Info(logMsg, "time", time.Since(start)) // #nosec G706 -- Input sanitized via sanitizeLogString
 	})
 }
 

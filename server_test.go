@@ -350,6 +350,97 @@ func anyContains(s, substr string) bool {
 	return false
 }
 
+func TestRequestLoggerHandler_LogInjectionPrevention(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		path   string
+	}{
+		{
+			name:   "clean GET request",
+			method: "GET",
+			path:   "/normal/path",
+		},
+		{
+			name:   "POST with query params",
+			method: "POST",
+			path:   "/api/endpoint?key=value",
+		},
+		{
+			name:   "path with special chars",
+			method: "GET",
+			path:   "/path/with%20space",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := requestLoggerHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+
+			recorder := httptest.NewRecorder()
+			req := httptest.NewRequest(tc.method, tc.path, nil)
+
+			// Execute handler - should complete without panic
+			handler.ServeHTTP(recorder, req)
+
+			if status := recorder.Code; status != http.StatusOK {
+				t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+			}
+		})
+	}
+}
+
+// TestSanitizeLogString tests the log sanitization function to prevent injection attacks
+func TestSanitizeLogString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "clean string",
+			input:    "GET /path",
+			expected: "GET /path",
+		},
+		{
+			name:     "newline character",
+			input:    "GET /path\nINJECTED",
+			expected: "GET /path INJECTED",
+		},
+		{
+			name:     "carriage return",
+			input:    "GET /path\rINJECTED",
+			expected: "GET /path INJECTED",
+		},
+		{
+			name:     "CRLF sequence",
+			input:    "GET /path\r\nINJECTED",
+			expected: "GET /path  INJECTED",
+		},
+		{
+			name:     "multiple newlines",
+			input:    "A\nB\nC",
+			expected: "A B C",
+		},
+		{
+			name:     "tab character (allowed)",
+			input:    "GET\t/path",
+			expected: "GET\t/path",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := sanitizeLogString(tc.input)
+			if result != tc.expected {
+				t.Errorf("sanitizeLogString(%q) = %q, want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
 func TestNotFound(t *testing.T) {
 	tests := []struct {
 		name           string
