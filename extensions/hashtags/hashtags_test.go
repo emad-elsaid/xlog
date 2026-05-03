@@ -428,3 +428,81 @@ func TestHashTagEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestLinkCommandInterface(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+		want   any
+	}{
+		{
+			name:   "Icon returns correct value",
+			method: "Icon",
+			want:   "fa-solid fa-tags",
+		},
+		{
+			name:   "Name returns correct value",
+			method: "Name",
+			want:   "Hashtags",
+		},
+		{
+			name:   "Attrs returns map with href",
+			method: "Attrs",
+			want:   "/+/tags",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			l := link{}
+
+			switch tt.method {
+			case "Icon":
+				got := l.Icon()
+				if got != tt.want {
+					t.Errorf("Icon() = %q, want %q", got, tt.want)
+				}
+			case "Name":
+				got := l.Name()
+				if got != tt.want {
+					t.Errorf("Name() = %q, want %q", got, tt.want)
+				}
+			case "Attrs":
+				attrs := l.Attrs()
+				href, ok := attrs["href"]
+				if !ok {
+					t.Error("Attrs() missing 'href' key")
+					return
+				}
+				if href != tt.want {
+					t.Errorf("Attrs()[\"href\"] = %q, want %q", href, tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestLinksFunction(t *testing.T) {
+	// links function should return a slice with one link command.
+	cmds := links(nil)
+
+	if len(cmds) != 1 {
+		t.Errorf("links() returned %d commands, want 1", len(cmds))
+		return
+	}
+
+	l, ok := cmds[0].(link)
+	if !ok {
+		t.Errorf("links() returned %T, want link", cmds[0])
+		return
+	}
+
+	// Verify the link has expected values.
+	if l.Icon() != "fa-solid fa-tags" {
+		t.Errorf("link.Icon() = %q, want %q", l.Icon(), "fa-solid fa-tags")
+	}
+
+	if l.Name() != "Hashtags" {
+		t.Errorf("link.Name() = %q, want %q", l.Name(), "Hashtags")
+	}
+}
