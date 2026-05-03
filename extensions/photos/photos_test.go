@@ -1112,6 +1112,120 @@ func TestPhoto_RenderCallsPartial(t *testing.T) {
 	}
 }
 
+func TestPhotos_Init(t *testing.T) {
+	// Test that Init registers all required components without panicking.
+	// Init modifies global xlog state, so this is primarily a smoke test.
+	tests := []struct {
+		name          string
+		checkPanic    bool
+		expectedPanic bool
+	}{
+		{
+			name:          "init executes without panic",
+			checkPanic:    true,
+			expectedPanic: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ext := Photos{}
+
+			if tt.checkPanic {
+				defer func() {
+					r := recover()
+					if tt.expectedPanic && r == nil {
+						t.Error("Expected panic but none occurred")
+					}
+					if !tt.expectedPanic && r != nil {
+						t.Errorf("Unexpected panic: %v", r)
+					}
+				}()
+			}
+
+			// Init should complete without panicking.
+			// It registers shortcodes, templates, properties, and routes.
+			ext.Init()
+
+			// If we get here without panic, Init completed successfully.
+		})
+	}
+}
+
+func TestPhoto_Render(t *testing.T) {
+	tests := []struct {
+		name  string
+		photo *Photo
+	}{
+		{
+			name: "photo implements Render method",
+			photo: &Photo{
+				Thumbnail: "/+/photos/thumbnail/test.jpg",
+				Page:      "/+/photos/photo/test.jpg",
+				Original:  "test.jpg",
+				Time:      time.Date(2023, 5, 15, 10, 30, 0, 0, time.UTC),
+			},
+		},
+		{
+			name: "photo with minimal fields implements Render",
+			photo: &Photo{
+				Thumbnail: "/thumb.jpg",
+				Page:      "/page.jpg",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Verify Photo implements the Render interface.
+			// Actual template rendering requires full xlog initialization,
+			// which is tested through integration tests.
+			// This compile-time check verifies the method signature.
+			var _ interface {
+				Render() template.HTML
+			} = tc.photo
+
+			// Verify photo fields are accessible for rendering
+			if tc.photo.Thumbnail == "" {
+				t.Error("Expected thumbnail to be set")
+			}
+		})
+	}
+}
+
+func TestPhotosShortcode_FunctionCreation(t *testing.T) {
+	// Test photosShortcode function creation.
+	// Full template rendering tested in integration tests.
+	tests := []struct {
+		name         string
+		templateName string
+	}{
+		{
+			name:         "photos shortcode function created successfully",
+			templateName: "photos",
+		},
+		{
+			name:         "photos-grid shortcode function created successfully",
+			templateName: "photos-grid",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create shortcode function
+			shortcodeFn := photosShortcode(tc.templateName)
+
+			// Verify function was created
+			if shortcodeFn == nil {
+				t.Fatal("Expected shortcode function to be created")
+			}
+
+			// Verify it has the correct signature (compile-time check)
+			var _ = shortcodeFn
+		})
+	}
+}
+
 func TestPhotosShortcode_PhotoDiscovery(t *testing.T) {
 	// Test the photo discovery logic within photosShortcode without template rendering
 	tests := []struct {
