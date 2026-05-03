@@ -68,16 +68,16 @@ Title
 
 	if strings.TrimSpace(buffer.String()) != strings.TrimSpace(`
 <h1>Title</h1>
-<div class="highlight"><pre class="chroma"><code><span class="line"><span class="ln">1</span><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;ok&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code><span class="line"><span class="ln">1</span><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;ok&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div>
 `) {
 		t.Error("failed to render HTML\n", buffer.String())
 	}
 
 	expected := strings.TrimSpace(`/* Background */ .bg { color: #f8f8f2; background-color: #272822; }
-/* PreWrapper */ .chroma { color: #f8f8f2; background-color: #272822; }
+/* PreWrapper */ .chroma { color: #f8f8f2; background-color: #272822; -webkit-text-size-adjust: none; }
 /* LineNumbers targeted by URL anchor */ .chroma .ln:target { color: #f8f8f2; background-color: #3c3d38 }
 /* LineNumbersTable targeted by URL anchor */ .chroma .lnt:target { color: #f8f8f2; background-color: #3c3d38 }
 /* Error */ .chroma .err { color: #960050; background-color: #1e0010 }
@@ -100,9 +100,10 @@ Title
 /* NameConstant */ .chroma .no { color: #66d9ef }
 /* NameDecorator */ .chroma .nd { color: #a6e22e }
 /* NameException */ .chroma .ne { color: #a6e22e }
-/* NameFunction */ .chroma .nf { color: #a6e22e }
 /* NameOther */ .chroma .nx { color: #a6e22e }
 /* NameTag */ .chroma .nt { color: #f92672 }
+/* NameFunction */ .chroma .nf { color: #a6e22e }
+/* NameFunctionMagic */ .chroma .fm { color: #a6e22e }
 /* Literal */ .chroma .l { color: #ae81ff }
 /* LiteralDate */ .chroma .ld { color: #e6db74 }
 /* LiteralString */ .chroma .s { color: #e6db74 }
@@ -128,6 +129,7 @@ Title
 /* LiteralNumberOct */ .chroma .mo { color: #ae81ff }
 /* Operator */ .chroma .o { color: #f92672 }
 /* OperatorWord */ .chroma .ow { color: #f92672 }
+/* OperatorReserved */ .chroma .or { color: #f92672 }
 /* Comment */ .chroma .c { color: #75715e }
 /* CommentHashbang */ .chroma .ch { color: #75715e }
 /* CommentMultiline */ .chroma .cm { color: #75715e }
@@ -214,10 +216,10 @@ int main() {
 	}
 	if strings.TrimSpace(buffer.String()) != strings.TrimSpace(`
 <h1>Title</h1>
-<pre tabindex="0" style="background-color:#fff;display:grid;"><code><pre style="background-color:#fff;display:grid;"><code><span style="display:flex; background-color:#e5e5e5"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#999;font-weight:bold;font-style:italic">#include</span> <span style="color:#999;font-weight:bold;font-style:italic">&lt;iostream&gt;</span><span style="color:#999;font-weight:bold;font-style:italic">
-</span></span></span><span style="display:flex; background-color:#e5e5e5"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#999;font-weight:bold;font-style:italic"></span><span style="color:#458;font-weight:bold">int</span> <span style="color:#900;font-weight:bold">main</span>() {
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    std<span style="color:#000;font-weight:bold">::</span>cout<span style="color:#000;font-weight:bold">&lt;&lt;</span> <span style="color:#d14">&#34;hello&#34;</span> <span style="color:#000;font-weight:bold">&lt;&lt;</span> std<span style="color:#000;font-weight:bold">::</span>endl;
-</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>}
+<pre tabindex="0" style="background-color:#fff;display:grid;"><code><pre style="background-color:#f7f7f7;-webkit-text-size-adjust:none;display:grid;"><code><span style="display:flex; background-color:#dedede"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#57606a">#include</span> <span style="color:#57606a">&lt;iostream&gt;</span><span style="color:#57606a">
+</span></span></span><span style="display:flex; background-color:#dedede"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#cf222e">int</span> <span style="color:#6639ba">main</span><span style="color:#1f2328">()</span> <span style="color:#1f2328">{</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    std<span style="color:#0550ae">::</span>cout<span style="color:#0550ae">&lt;&lt;</span> <span style="color:#0a3069">&#34;hello&#34;</span> <span style="color:#0550ae">&lt;&lt;</span> std<span style="color:#0550ae">::</span>endl<span style="color:#1f2328">;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#1f2328">}</span>
 </span></span></code></pre></code></pre>
 `) {
 		t.Error("failed to render HTML", buffer.String())
@@ -312,19 +314,18 @@ Title
 
 	if strings.TrimSpace(buffer.String()) != strings.TrimSpace(`
 <h1>Title</h1>
-<div class="highlight"><pre class="chroma"><code><span class="line"><span class="ln">1</span><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="ln">2</span><span class="cl">    <span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;ok&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div>
+<div class="highlight"><pre class="chroma"><code><span class="line"><span class="ln">1</span><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="ln">2</span><span class="cl"><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;ok&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="ln">3</span><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div>
 `) {
 		t.Error("failed to render HTML", buffer.String())
 	}
 
 	expected := strings.TrimSpace(`/* Background */ .bg { color: #cccccc; background-color: #1d1d1d; }
-/* PreWrapper */ .chroma { color: #cccccc; background-color: #1d1d1d; }
+/* PreWrapper */ .chroma { color: #cccccc; background-color: #1d1d1d; -webkit-text-size-adjust: none; }
 /* LineNumbers targeted by URL anchor */ .chroma .ln:target { color: #cccccc; background-color: #333333 }
 /* LineNumbersTable targeted by URL anchor */ .chroma .lnt:target { color: #cccccc; background-color: #333333 }
-/* Error */ .chroma .err {  }
 /* LineLink */ .chroma .lnlinks { outline: none; text-decoration: none; color: inherit }
 /* LineTableTD */ .chroma .lntd { vertical-align: top; padding: 0; margin: 0; border: 0; }
 /* LineTable */ .chroma .lntable { border-spacing: 0; padding: 0; margin: 0; border: 0; }
@@ -339,11 +340,17 @@ Title
 /* KeywordPseudo */ .chroma .kp { color: #cc99cd }
 /* KeywordReserved */ .chroma .kr { color: #cc99cd }
 /* KeywordType */ .chroma .kt { color: #cc99cd }
-/* NameBuiltin */ .chroma .nb { color: #f08d49 }
 /* NameClass */ .chroma .nc { color: #f08d49 }
 /* NameException */ .chroma .ne { color: #666699; font-weight: bold }
-/* NameFunction */ .chroma .nf { color: #f08d49 }
+/* NameBuiltin */ .chroma .nb { color: #f08d49 }
+/* NameBuiltinPseudo */ .chroma .bp { color: #f08d49 }
 /* NameVariable */ .chroma .nv { color: #00cdcd }
+/* NameVariableClass */ .chroma .vc { color: #00cdcd }
+/* NameVariableGlobal */ .chroma .vg { color: #00cdcd }
+/* NameVariableInstance */ .chroma .vi { color: #00cdcd }
+/* NameVariableMagic */ .chroma .vm { color: #00cdcd }
+/* NameFunction */ .chroma .nf { color: #f08d49 }
+/* NameFunctionMagic */ .chroma .fm { color: #f08d49 }
 /* LiteralString */ .chroma .s { color: #7ec699 }
 /* LiteralStringAffix */ .chroma .sa { color: #7ec699 }
 /* LiteralStringBacktick */ .chroma .sb { color: #7ec699 }
@@ -367,6 +374,7 @@ Title
 /* LiteralNumberOct */ .chroma .mo { color: #f08d49 }
 /* Operator */ .chroma .o { color: #67cdcc }
 /* OperatorWord */ .chroma .ow { color: #cdcd00 }
+/* OperatorReserved */ .chroma .or { color: #67cdcc }
 /* Comment */ .chroma .c { color: #999999 }
 /* CommentHashbang */ .chroma .ch { color: #999999 }
 /* CommentMultiline */ .chroma .cm { color: #999999 }
