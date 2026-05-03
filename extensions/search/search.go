@@ -11,7 +11,10 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
-const MIN_SEARCH_KEYWORD = 3
+const (
+	MIN_SEARCH_KEYWORD = 3
+	ExtensionName      = "search"
+)
 
 //go:embed templates
 var templates embed.FS
@@ -22,7 +25,7 @@ func init() {
 
 type Search struct{}
 
-func (Search) Name() string { return "search" }
+func (Search) Name() string { return ExtensionName }
 func (Search) Init() {
 	if xlog.Config.Readonly {
 		return

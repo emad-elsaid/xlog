@@ -18,8 +18,8 @@ import (
 
 func TestSearchName(t *testing.T) {
 	s := Search{}
-	if got := s.Name(); got != "search" {
-		t.Errorf("Search.Name() = %q, want %q", got, "search")
+	if got := s.Name(); got != ExtensionName {
+		t.Errorf("Search.Name() = %q, want %q", got, ExtensionName)
 	}
 }
 
@@ -298,8 +298,8 @@ func TestInit(t *testing.T) {
 			s := Search{}
 			// Cannot fully test without mocking the global xlog registration functions
 			// But we can at least verify Name() works
-			if s.Name() != "search" {
-				t.Errorf("Search.Name() = %q, want %q", s.Name(), "search")
+			if s.Name() != ExtensionName {
+				t.Errorf("Search.Name() = %q, want %q", s.Name(), ExtensionName)
 			}
 		})
 	}
