@@ -604,6 +604,20 @@ func TestRouteRegistration(t *testing.T) {
 			registerFunc:   Delete,
 			expectedMethod: http.MethodDelete,
 		},
+		{
+			name:           "PUT route registration",
+			method:         http.MethodPut,
+			path:           "/test-put",
+			registerFunc:   Put,
+			expectedMethod: http.MethodPut,
+		},
+		{
+			name:           "PATCH route registration",
+			method:         http.MethodPatch,
+			path:           "/test-patch",
+			registerFunc:   Patch,
+			expectedMethod: http.MethodPatch,
+		},
 	}
 
 	for _, tc := range tests {

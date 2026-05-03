@@ -162,6 +162,20 @@ func Delete(path string, handler HandlerFunc) {
 	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
 }
 
+// Put defines a new route that gets executed when the request matches path and
+// method is http Put.
+func Put(path string, handler HandlerFunc) {
+	slog.Info("PUT", "path", path, "func", funcStringer{handler})
+	router.HandleFunc("PUT "+path, handlerFuncToHttpHandler(handler))
+}
+
+// Patch defines a new route that gets executed when the request matches path and
+// method is http Patch.
+func Patch(path string, handler HandlerFunc) {
+	slog.Info("PATCH", "path", path, "func", funcStringer{handler})
+	router.HandleFunc("PATCH "+path, handlerFuncToHttpHandler(handler))
+}
+
 // Render returns an output function that renders partial with data and writes it as response.
 func Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
