@@ -2,8 +2,11 @@ package gpg
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/emad-elsaid/xlog"
 )
 
 // TestPageRenderErrorEscaping verifies that error messages in Render()
@@ -156,6 +159,134 @@ func TestPageModTime(t *testing.T) {
 				if modTime.IsZero() {
 					t.Errorf("ModTime() returned zero time, expected valid time")
 				}
+			}
+		})
+	}
+}
+
+// TestPageWrite verifies the Write method handles various scenarios.
+func TestPageWrite(t *testing.T) {
+	tests := []struct {
+		name        string
+		pageName    string
+		content     string
+		gpgIDSet    bool
+		expectError bool
+		createDir   bool
+	}{
+		{
+			name:        "write without GPG ID set",
+			pageName:    "test/page",
+			content:     "# Test\nContent",
+			gpgIDSet:    false,
+			expectError: true,
+			createDir:   true,
+		},
+		{
+			name:        "write creates directory if missing",
+			pageName:    "test/nested/deep/page",
+			content:     "# Nested\nContent",
+			gpgIDSet:    true,
+			expectError: false,
+			createDir:   false,
+		},
+		{
+			name:        "write normalizes CRLF to LF",
+			pageName:    "test/crlf",
+			content:     "Line1\r\nLine2\r\nLine3",
+			gpgIDSet:    true,
+			expectError: false,
+			createDir:   true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Setup test environment
+			tmpDir := t.TempDir()
+			origWd, _ := os.Getwd()
+			if err := os.Chdir(tmpDir); err != nil {
+				t.Fatalf("failed to change directory: %v", err)
+			}
+			defer func() {
+				if err := os.Chdir(origWd); err != nil {
+					t.Errorf("failed to restore directory: %v", err)
+				}
+			}()
+
+			// Set GPG ID
+			if tc.gpgIDSet {
+				gpgId = "test@example.com"
+			} else {
+				gpgId = ""
+			}
+
+			// Create directory if needed
+			if tc.createDir {
+				dir := filepath.Dir(tc.pageName)
+				if err := os.MkdirAll(dir, 0700); err != nil {
+					t.Fatalf("failed to create directory: %v", err)
+				}
+			}
+
+			p := &page{name: tc.pageName}
+
+			// Execute Write
+			result := p.Write(xlog.Markdown(tc.content))
+
+			// Verify result matches expectation
+			if tc.expectError && result {
+				t.Errorf("Write() = true, expected false due to error")
+			}
+		})
+	}
+}
+
+// TestPageAST verifies the AST method generates correct AST.
+func TestPageAST(t *testing.T) {
+	tests := []struct {
+		name     string
+		pageName string
+		content  string
+		gpgIDSet bool
+		wantNil  bool
+	}{
+		{
+			name:     "AST generation without GPG",
+			pageName: "test/ast",
+			content:  "# Heading\nParagraph text.",
+			gpgIDSet: false,
+			wantNil:  false,
+		},
+		{
+			name:     "AST caching on subsequent calls",
+			pageName: "test/cached",
+			content:  "# Cached\nContent.",
+			gpgIDSet: false,
+			wantNil:  false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			p := &page{name: tc.pageName}
+
+			// First call generates AST
+			src1, ast1 := p.AST()
+			if ast1 == nil && !tc.wantNil {
+				t.Errorf("AST() returned nil AST, expected non-nil")
+			}
+			if src1 == nil {
+				t.Errorf("AST() returned nil source, expected non-nil")
+			}
+
+			// Second call should return cached AST
+			src2, ast2 := p.AST()
+			if ast2 != ast1 {
+				t.Errorf("AST() second call returned different AST instance, expected same cached instance")
+			}
+			if string(src2) != string(src1) {
+				t.Errorf("AST() second call returned different source")
 			}
 		})
 	}
