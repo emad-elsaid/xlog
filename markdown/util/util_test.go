@@ -1035,3 +1035,233 @@ func TestIsHexDecimal(t *testing.T) {
 		})
 	}
 }
+
+func TestDedentPosition(t *testing.T) {
+	tests := []struct {
+		name            string
+		input           []byte
+		currentPos      int
+		width           int
+		expectedPos     int
+		expectedPadding int
+	}{
+		{
+			name:            "zero width",
+			input:           []byte("    text"),
+			currentPos:      0,
+			width:           0,
+			expectedPos:     0,
+			expectedPadding: 0,
+		},
+		{
+			name:            "dedent spaces",
+			input:           []byte("    text"),
+			currentPos:      0,
+			width:           2,
+			expectedPos:     4,
+			expectedPadding: 2,
+		},
+		{
+			name:            "dedent exact match",
+			input:           []byte("    text"),
+			currentPos:      0,
+			width:           4,
+			expectedPos:     4,
+			expectedPadding: 0,
+		},
+		{
+			name:            "dedent exceeds spaces",
+			input:           []byte("  text"),
+			currentPos:      0,
+			width:           5,
+			expectedPos:     2,
+			expectedPadding: 0,
+		},
+		{
+			name:            "dedent with tab",
+			input:           []byte("\ttext"),
+			currentPos:      0,
+			width:           2,
+			expectedPos:     1,
+			expectedPadding: 2,
+		},
+		{
+			name:            "dedent mixed spaces and tabs",
+			input:           []byte("  \t  text"),
+			currentPos:      0,
+			width:           4,
+			expectedPos:     5,
+			expectedPadding: 2,
+		},
+		{
+			name:            "empty input",
+			input:           []byte(""),
+			currentPos:      0,
+			width:           2,
+			expectedPos:     0,
+			expectedPadding: 0,
+		},
+		{
+			name:            "no whitespace",
+			input:           []byte("text"),
+			currentPos:      0,
+			width:           2,
+			expectedPos:     0,
+			expectedPadding: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			pos, padding := DedentPosition(tc.input, tc.currentPos, tc.width)
+			if pos != tc.expectedPos {
+				t.Errorf("expected pos %d, got %d", tc.expectedPos, pos)
+			}
+			if padding != tc.expectedPadding {
+				t.Errorf("expected padding %d, got %d", tc.expectedPadding, padding)
+			}
+		})
+	}
+}
+
+func TestIndentWidth(t *testing.T) {
+	tests := []struct {
+		name          string
+		input         []byte
+		currentPos    int
+		expectedWidth int
+		expectedPos   int
+	}{
+		{
+			name:          "no indentation",
+			input:         []byte("text"),
+			currentPos:    0,
+			expectedWidth: 0,
+			expectedPos:   0,
+		},
+		{
+			name:          "spaces only",
+			input:         []byte("    text"),
+			currentPos:    0,
+			expectedWidth: 4,
+			expectedPos:   4,
+		},
+		{
+			name:          "single tab",
+			input:         []byte("\ttext"),
+			currentPos:    0,
+			expectedWidth: 4,
+			expectedPos:   1,
+		},
+		{
+			name:          "tab at position 1",
+			input:         []byte("\ttext"),
+			currentPos:    1,
+			expectedWidth: 3,
+			expectedPos:   1,
+		},
+		{
+			name:          "tab at position 2",
+			input:         []byte("\ttext"),
+			currentPos:    2,
+			expectedWidth: 2,
+			expectedPos:   1,
+		},
+		{
+			name:          "mixed spaces and tabs",
+			input:         []byte("  \t  text"),
+			currentPos:    0,
+			expectedWidth: 6,
+			expectedPos:   5,
+		},
+		{
+			name:          "empty input",
+			input:         []byte(""),
+			currentPos:    0,
+			expectedWidth: 0,
+			expectedPos:   0,
+		},
+		{
+			name:          "all whitespace",
+			input:         []byte("    \t  "),
+			currentPos:    0,
+			expectedWidth: 10,
+			expectedPos:   7,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			width, pos := IndentWidth(tc.input, tc.currentPos)
+			if width != tc.expectedWidth {
+				t.Errorf("expected width %d, got %d", tc.expectedWidth, width)
+			}
+			if pos != tc.expectedPos {
+				t.Errorf("expected pos %d, got %d", tc.expectedPos, pos)
+			}
+		})
+	}
+}
+
+func TestFirstNonSpacePosition(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []byte
+		expected int
+	}{
+		{
+			name:     "no leading whitespace",
+			input:    []byte("text"),
+			expected: 0,
+		},
+		{
+			name:     "spaces before text",
+			input:    []byte("    text"),
+			expected: 4,
+		},
+		{
+			name:     "tabs before text",
+			input:    []byte("\t\ttext"),
+			expected: 2,
+		},
+		{
+			name:     "mixed whitespace",
+			input:    []byte("  \t  text"),
+			expected: 5,
+		},
+		{
+			name:     "newline only",
+			input:    []byte("\n"),
+			expected: -1,
+		},
+		{
+			name:     "spaces then newline",
+			input:    []byte("  \n"),
+			expected: -1,
+		},
+		{
+			name:     "empty input",
+			input:    []byte(""),
+			expected: -1,
+		},
+		{
+			name:     "only spaces",
+			input:    []byte("    "),
+			expected: -1,
+		},
+		{
+			name:     "only tabs",
+			input:    []byte("\t\t"),
+			expected: -1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := FirstNonSpacePosition(tc.input)
+			if result != tc.expected {
+				t.Errorf("expected %d, got %d", tc.expected, result)
+			}
+		})
+	}
+}
