@@ -13,7 +13,7 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
-// TestNormalizedPageSorting tests that pages are sorted by name length (descending)
+// TestNormalizedPageSorting tests that pages are sorted by name length (descending).
 func TestNormalizedPageSorting(t *testing.T) {
 	pages := []*NormalizedPage{
 		{normalizedName: "a"},
@@ -39,7 +39,7 @@ func TestNormalizedPageSorting(t *testing.T) {
 	}
 }
 
-// TestFileInfoByNameLength tests the sort interface implementation
+// TestFileInfoByNameLength tests the sort interface implementation.
 func TestFileInfoByNameLength(t *testing.T) {
 	pages := []*NormalizedPage{
 		{normalizedName: "short"},
@@ -72,7 +72,7 @@ func TestFileInfoByNameLength(t *testing.T) {
 	}
 }
 
-// TestPageLinkNode tests the PageLink AST node
+// TestPageLinkNode tests the PageLink AST node.
 func TestPageLinkNode(t *testing.T) {
 	// Create a mock page (we just need something with a Name)
 	mockPage := &mockPage{name: "test-page.md"}
@@ -95,7 +95,7 @@ func TestPageLinkNode(t *testing.T) {
 	link.Dump([]byte("test source"), 0)
 }
 
-// TestPageLinkParser_Trigger tests the parser triggers
+// TestPageLinkParser_Trigger tests the parser triggers.
 func TestPageLinkParser_Trigger(t *testing.T) {
 	parser := &pageLinkParser{}
 	triggers := parser.Trigger()
@@ -112,7 +112,7 @@ func TestPageLinkParser_Trigger(t *testing.T) {
 	}
 }
 
-// TestPageLinkParser_Parse tests the parser with various scenarios
+// TestPageLinkParser_Parse tests the parser with various scenarios.
 func TestPageLinkParser_Parse(t *testing.T) {
 	// Setup mock pages
 	autolinkPage_lck.Lock()
@@ -179,7 +179,7 @@ func TestPageLinkParser_Parse(t *testing.T) {
 	}
 }
 
-// TestNormalizedName tests case-insensitive matching
+// TestNormalizedName tests case-insensitive matching.
 func TestNormalizedName(t *testing.T) {
 	// Setup pages with different casings
 	autolinkPage_lck.Lock()
@@ -211,7 +211,7 @@ func TestNormalizedName(t *testing.T) {
 	}
 }
 
-// TestContainLinkToFrom_RelativeWithContext tests context-aware relative link resolution
+// TestContainLinkToFrom_RelativeWithContext tests context-aware relative link resolution.
 func TestContainLinkToFrom_RelativeWithContext(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -312,7 +312,7 @@ func TestContainLinkToFrom_RelativeWithContext(t *testing.T) {
 	}
 }
 
-// TestContainLinkToFrom_AbsoluteLink tests absolute link handling with context
+// TestContainLinkToFrom_AbsoluteLink tests absolute link handling with context.
 func TestContainLinkToFrom_AbsoluteLink(t *testing.T) {
 	sourcePage := &mockPage{name: "folder/source.md", filename: "folder/source.md"}
 	targetPage := &mockPage{name: "other/target.md", filename: "other/target.md"}
@@ -331,7 +331,7 @@ func TestContainLinkToFrom_AbsoluteLink(t *testing.T) {
 	}
 }
 
-// TestContainLinkToFrom_PageLink tests PageLink handling with context
+// TestContainLinkToFrom_PageLink tests PageLink handling with context.
 func TestContainLinkToFrom_PageLink(t *testing.T) {
 	sourcePage := &mockPage{name: "folder/source.md", filename: "folder/source.md"}
 	targetPage := &mockPage{name: "folder/target.md", filename: "folder/target.md"}
@@ -351,7 +351,7 @@ func TestContainLinkToFrom_PageLink(t *testing.T) {
 	}
 }
 
-// TestContainLinkToFrom_ComplexPath tests path normalization
+// TestContainLinkToFrom_ComplexPath tests path normalization.
 func TestContainLinkToFrom_ComplexPath(t *testing.T) {
 	sourcePage := &mockPage{name: "a/b/c/source.md", filename: "a/b/c/source.md"}
 	targetPage := &mockPage{name: "a/b/target.md", filename: "a/b/target.md"}
@@ -370,7 +370,7 @@ func TestContainLinkToFrom_ComplexPath(t *testing.T) {
 	}
 }
 
-// mockPage is a minimal Page implementation for testing
+// mockPage is a minimal Page implementation for testing.
 type mockPage struct {
 	name     string
 	filename string
