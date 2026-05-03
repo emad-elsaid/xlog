@@ -82,6 +82,7 @@ func TestResizeHandler_ErrorHandling(t *testing.T) {
 			}
 
 			// Test cache file handling
+			// #nosec G304 -- Test code using controlled cache file path
 			_, err := os.ReadFile(cacheFile)
 			if err == nil && tc.expectError {
 				t.Error("Expected error reading cache, but got none")
@@ -715,6 +716,35 @@ func createTestPNG(t *testing.T) string {
 	return tmpFile
 }
 
+// createTestPNGRelative creates a test PNG in the current directory with a relative path.
+// This is used for handler tests that require relative paths due to security validation.
+func createTestPNGRelative(t *testing.T) string {
+	t.Helper()
+
+	// Use a unique filename in current directory
+	tmpFile := fmt.Sprintf("test_image_%d.png", time.Now().UnixNano())
+
+	// Create a simple 100x100 red image
+	img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+	red := color.RGBA{255, 0, 0, 255}
+	for y := 0; y < 100; y++ {
+		for x := 0; x < 100; x++ {
+			img.Set(x, y, red)
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		t.Fatalf("Failed to encode PNG: %v", err)
+	}
+
+	if err := os.WriteFile(tmpFile, buf.Bytes(), 0600); err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	return tmpFile
+}
+
 // Helper to create PNG in specific directory with given filename.
 func createTestPNGInDir(t *testing.T, dir, filename string) string {
 	t.Helper()
@@ -750,7 +780,7 @@ func TestResizeHandler_WithHTTPRequest(t *testing.T) {
 	}{
 		{
 			name:          "valid photo returns resized PNG",
-			setupPhoto:    createTestPNG,
+			setupPhoto:    createTestPNGRelative,
 			expectSuccess: true,
 			validateResp: func(t *testing.T, body []byte) {
 				if len(body) == 0 {
@@ -771,7 +801,7 @@ func TestResizeHandler_WithHTTPRequest(t *testing.T) {
 		{
 			name: "nonexistent photo returns error message",
 			setupPhoto: func(t *testing.T) string {
-				return "/nonexistent/photo.png"
+				return "nonexistent_photo.png"
 			},
 			expectSuccess: false,
 			validateResp: func(t *testing.T, body []byte) {
@@ -783,7 +813,7 @@ func TestResizeHandler_WithHTTPRequest(t *testing.T) {
 		{
 			name: "cached photo served from cache",
 			setupPhoto: func(t *testing.T) string {
-				photoPath := createTestPNG(t)
+				photoPath := createTestPNGRelative(t)
 
 				// Pre-populate cache
 				const cacheDir = ".cache"
@@ -845,13 +875,13 @@ func TestPhotoHandler_WithHTTPRequest(t *testing.T) {
 	}{
 		{
 			name:          "valid photo path returns output function",
-			setupPhoto:    createTestPNG,
+			setupPhoto:    createTestPNGRelative,
 			expectSuccess: true,
 		},
 		{
 			name: "nonexistent photo returns error output",
 			setupPhoto: func(t *testing.T) string {
-				return "/nonexistent/photo.png"
+				return "nonexistent_photo.png"
 			},
 			expectSuccess: false,
 		},
@@ -890,7 +920,7 @@ func TestResizeHandler_ImageDecodingErrors(t *testing.T) {
 		{
 			name: "corrupted image file fails gracefully",
 			setupFile: func(t *testing.T) string {
-				tmpFile := filepath.Join(t.TempDir(), "corrupted.png")
+				tmpFile := fmt.Sprintf("corrupted_%d.png", time.Now().UnixNano())
 				// Write invalid PNG data
 				if err := os.WriteFile(tmpFile, []byte("not a real png file"), 0600); err != nil {
 					t.Fatalf("Failed to create corrupted file: %v", err)
@@ -901,7 +931,7 @@ func TestResizeHandler_ImageDecodingErrors(t *testing.T) {
 		},
 		{
 			name:       "valid PNG decodes and resizes successfully",
-			setupFile:  createTestPNG,
+			setupFile:  createTestPNGRelative,
 			expectFail: false,
 		},
 	}
@@ -974,8 +1004,8 @@ func TestResizeHandler_AspectRatioPreservation(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create test image with specific dimensions
-			tmpFile := filepath.Join(t.TempDir(), "aspect_test.png")
+			// Create test image with specific dimensions in current directory
+			tmpFile := fmt.Sprintf("aspect_test_%d.png", time.Now().UnixNano())
 			img := image.NewRGBA(image.Rect(0, 0, tc.originalWidth, tc.originalHeight))
 
 			// Fill with color
@@ -1026,7 +1056,7 @@ func TestResizeHandler_AspectRatioPreservation(t *testing.T) {
 
 func TestResizeHandler_CacheWriteFailure(t *testing.T) {
 	// Test that handler continues even if cache write fails
-	photoPath := createTestPNG(t)
+	photoPath := createTestPNGRelative(t)
 	defer func() {
 		_ = os.Remove(photoPath)
 	}()
@@ -1037,6 +1067,7 @@ func TestResizeHandler_CacheWriteFailure(t *testing.T) {
 		t.Fatalf("Failed to create cache dir: %v", err)
 	}
 	defer func() {
+		// #nosec G302 -- Test cleanup restoring directory permissions
 		_ = os.Chmod(cacheDir, 0700)
 		_ = os.RemoveAll(cacheDir)
 	}()

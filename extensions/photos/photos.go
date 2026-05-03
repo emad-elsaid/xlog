@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"embed"
+	"errors"
 	"fmt"
 	"html/template"
 	"image"
@@ -75,12 +76,50 @@ func (p *Photo) Render() template.HTML {
 	return xlog.Partial("photo", xlog.Locals{"photo": p})
 }
 
+// validatePath ensures the provided path is safe and does not contain path traversal attacks.
+// It blocks:
+//   - Absolute paths (starting with /)
+//   - Paths containing .. that would escape the current directory
+//   - Empty paths
+//   - Paths with null bytes
+func validatePath(p string) error {
+	if p == "" {
+		return errors.New("invalid path: empty path not allowed")
+	}
+
+	// Block null byte injection
+	if strings.Contains(p, "\x00") {
+		return errors.New("invalid path: null bytes not allowed")
+	}
+
+	// Block absolute paths
+	if filepath.IsAbs(p) {
+		return errors.New("invalid path: absolute paths not allowed")
+	}
+
+	// Clean the path and check for traversal
+	cleaned := filepath.Clean(p)
+
+	// Check for .. as a complete path component (not just prefix of filename)
+	// Split by separator and look for exactly ".." as an element
+	parts := strings.Split(cleaned, string(filepath.Separator))
+	for _, part := range parts {
+		if part == ".." {
+			return errors.New("invalid path: path traversal detected")
+		}
+	}
+
+	return nil
+}
+
 func NewPhoto(path string) (*Photo, error) {
+	// #nosec G304 -- Caller is responsible for path validation
 	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
 
+	// #nosec G304 -- Caller is responsible for path validation
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -153,12 +192,22 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 func resizeHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
 
+	// Validate path for security before any file operations
+	if err := validatePath(photo_path); err != nil {
+		return func(w xlog.Response, r xlog.Request) {
+			if _, writeErr := fmt.Fprintf(w, "Error: %v", err); writeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
+			}
+		}
+	}
+
 	const cacheDir = ".cache"
 	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
 		return xlog.InternalServerError(err)
 	}
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photo_path))))
+	// #nosec G304 -- Cache file path is constructed from hash, not user input
 	cache, err := os.ReadFile(cacheFile)
 	if err == nil {
 		return func(w xlog.Response, r xlog.Request) {
@@ -170,6 +219,7 @@ func resizeHandler(r xlog.Request) xlog.Output {
 	}
 
 	return func(w xlog.Response, r xlog.Request) {
+		// #nosec G304 -- Path validated via validatePath before this point
 		inputImage, err := os.Open(photo_path)
 		if err != nil {
 			if _, writeErr := fmt.Fprint(w, err.Error()); writeErr != nil {
@@ -222,6 +272,16 @@ func resizeHandler(r xlog.Request) xlog.Output {
 
 func photoHandler(r xlog.Request) xlog.Output {
 	photo_path := r.PathValue("path")
+
+	// Validate path for security before creating Photo
+	if err := validatePath(photo_path); err != nil {
+		return func(w xlog.Response, r xlog.Request) {
+			if _, writeErr := fmt.Fprintf(w, "Error: %v", err); writeErr != nil {
+				fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
+			}
+		}
+	}
+
 	photo, err := NewPhoto(photo_path)
 	if err != nil {
 		return xlog.InternalServerError(err)
