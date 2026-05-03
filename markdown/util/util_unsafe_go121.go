@@ -9,10 +9,12 @@ import (
 
 // BytesToReadOnlyString returns a string converted from given bytes.
 func BytesToReadOnlyString(b []byte) string {
+	// #nosec G103 -- Intentional unsafe optimization for zero-copy string conversion (Go 1.21+)
 	return unsafe.String(unsafe.SliceData(b), len(b))
 }
 
 // StringToReadOnlyBytes returns bytes converted from given string.
 func StringToReadOnlyBytes(s string) []byte {
+	// #nosec G103 -- Intentional unsafe optimization for zero-copy byte conversion (Go 1.21+)
 	return unsafe.Slice(unsafe.StringData(s), len(s))
 }

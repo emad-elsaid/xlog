@@ -87,6 +87,7 @@ func ParseCliCaseArg() []int {
 
 // DoTestCaseFile runs test cases in a given file.
 func DoTestCaseFile(m markdown.Markdown, filename string, t TestingT, no ...int) {
+	// #nosec G304 -- Test utility intentionally opens test data files by variable path
 	fp, err := os.Open(filename)
 	if err != nil {
 		panic(err)
