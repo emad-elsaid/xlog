@@ -241,23 +241,53 @@ func TestMarkdownFS_WatchInitialization(t *testing.T) {
 }
 
 func TestMarkdownFS_EachNonExistentDirectory(t *testing.T) {
-	// Create a markdownFS with non-existent directory
-	// WalkDir will call the callback with err != nil and d == nil
-	// The current implementation has a bug where it doesn't check if d is nil
-	// before calling d.IsDir(), so this will panic.
-	// We skip this test until the underlying bug in markdown_fs.go:127 is fixed.
-	t.Skip("Skipping test that exposes nil pointer bug in Each() - see markdown_fs.go:127")
-
 	mfs := newMarkdownFS("/nonexistent/directory/12345")
 	ctx := context.Background()
 
 	var callCount int
-	// This currently panics due to bug in Each() implementation
-	mfs.Each(ctx, func(p Page) {
-		callCount++
+	// Should handle non-existent directory gracefully without panic
+	assert.NotPanics(t, func() {
+		mfs.Each(ctx, func(p Page) {
+			callCount++
+		})
 	})
 
 	assert.Equal(t, 0, callCount, "Should not process any pages for non-existent directory")
+}
+
+func TestMarkdownFS_EachWithPermissionError(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create a directory with no read permissions
+	restrictedDir := filepath.Join(tmpDir, "restricted")
+	if err := os.MkdirAll(restrictedDir, 0000); err != nil {
+		t.Fatalf("Failed to create restricted directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chmod(restrictedDir, 0750); err != nil {
+			t.Logf("Failed to restore permissions: %v", err)
+		}
+	}()
+
+	// Create a normal file to verify we still process accessible files
+	normalFile := filepath.Join(tmpDir, "normal.md")
+	if err := os.WriteFile(normalFile, []byte("test"), 0600); err != nil {
+		t.Fatalf("Failed to create normal file: %v", err)
+	}
+
+	mfs := newMarkdownFS(tmpDir)
+	ctx := context.Background()
+
+	var pages []Page
+	// Should not panic when encountering permission errors
+	assert.NotPanics(t, func() {
+		mfs.Each(ctx, func(p Page) {
+			pages = append(pages, p)
+		})
+	})
+
+	// Should still process the accessible file
+	assert.GreaterOrEqual(t, len(pages), 1, "Should process accessible files despite errors")
 }
 
 func TestMarkdownFS_EachWithTimeout(t *testing.T) {

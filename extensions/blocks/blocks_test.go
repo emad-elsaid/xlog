@@ -234,7 +234,7 @@ func TestBlockErrorMessageEscaping(t *testing.T) {
 	// Test that errors are properly escaped before being rendered as HTML.
 	// While current YAML errors don't contain user input, this ensures
 	// defense-in-depth against future error types or error message changes.
-	
+
 	tests := []struct {
 		name     string
 		yamlData string
@@ -263,7 +263,7 @@ func TestBlockErrorMessageEscaping(t *testing.T) {
 			if !containsAny(resultStr, []string{"yaml", "did not find", "line", "mapping"}) {
 				t.Errorf("Expected YAML error message, got: %q", resultStr)
 			}
-			
+
 			// Error output should never contain raw HTML tags that could cause XSS
 			// html.EscapeString converts < to &lt; and > to &gt;
 			if containsAny(resultStr, []string{"<test>", "<script>", "<img"}) {

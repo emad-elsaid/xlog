@@ -124,6 +124,10 @@ func (m *markdownFS) Page(name string) Page {
 
 func (m *markdownFS) Each(ctx context.Context, f func(Page)) {
 	_ = filepath.WalkDir(m.path, func(name string, d fs.DirEntry, err error) error {
+		if err != nil || d == nil {
+			return nil
+		}
+
 		if name != "." && d.IsDir() && IsIgnoredPath(name) {
 			return fs.SkipDir
 		}
