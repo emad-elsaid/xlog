@@ -156,6 +156,86 @@ func TestPageWriteNormalizesLineEndings(t *testing.T) {
 	}
 }
 
+func TestPageWrite_ErrorPaths(t *testing.T) {
+	tests := []struct {
+		name    string
+		setup   func(t *testing.T) (string, *page)
+		cleanup func(string)
+		wantErr bool
+	}{
+		{
+			name: "write fails when directory creation fails",
+			setup: func(t *testing.T) (string, *page) {
+				t.Helper()
+				tempDir := t.TempDir()
+				
+				// Create a file where we need a directory
+				dirPath := filepath.Join(tempDir, "blocked")
+				if err := os.WriteFile(dirPath, []byte("blocking"), 0644); err != nil {
+					t.Fatalf("failed to create blocking file: %v", err)
+				}
+				
+				// Try to write a page that needs blocked/page.md - MkdirAll will fail
+				origDir, _ := os.Getwd()
+				if err := os.Chdir(tempDir); err != nil {
+					t.Fatalf("failed to change directory: %v", err)
+				}
+				
+				p := &page{name: "blocked/page"}
+				return origDir, p
+			},
+			cleanup: func(origDir string) {
+				if err := os.Chdir(origDir); err != nil {
+					// Log but don't fail cleanup
+				}
+			},
+			wantErr: true,
+		},
+		{
+			name: "write fails when file is read-only",
+			setup: func(t *testing.T) (string, *page) {
+				t.Helper()
+				tempDir := t.TempDir()
+				origDir, _ := os.Getwd()
+				
+				if err := os.Chdir(tempDir); err != nil {
+					t.Fatalf("failed to change directory: %v", err)
+				}
+				
+				// Create a read-only file
+				p := &page{name: "readonly"}
+				if err := os.WriteFile(p.FileName(), []byte("original"), 0444); err != nil {
+					t.Fatalf("failed to create read-only file: %v", err)
+				}
+				
+				return origDir, p
+			},
+			cleanup: func(origDir string) {
+				if err := os.Chdir(origDir); err != nil {
+					// Log but don't fail cleanup
+				}
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			origDir, p := tc.setup(t)
+			defer tc.cleanup(origDir)
+
+			result := p.Write(Markdown("test content"))
+
+			if tc.wantErr && result {
+				t.Error("Expected Write to fail, but it succeeded")
+			}
+			if !tc.wantErr && !result {
+				t.Error("Expected Write to succeed, but it failed")
+			}
+		})
+	}
+}
+
 func TestPageDelete(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
