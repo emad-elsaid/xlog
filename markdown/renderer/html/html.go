@@ -861,9 +861,87 @@ func (d *defaultWriter) RawWrite(writer util.BufWriter, source []byte) {
 	}
 }
 
+// processNumericEntity handles numeric HTML entities (&#123; or &#xAB;).
+// Returns the new position and whether the entity was successfully processed.
+func (d *defaultWriter) processNumericEntity(writer util.BufWriter, source []byte, i, n, limit int) (newPos, newN int, processed bool) {
+	next := i + 1
+	if next >= limit || source[next] != '#' {
+		return i, n, false
+	}
+
+	nnext := next + 1
+	if nnext >= limit {
+		return i, n, false
+	}
+
+	nc := source[nnext]
+	var start int
+	var base int
+	var maxLen int
+	var ok bool
+
+	switch {
+	case nc == 'x' || nc == 'X':
+		// Hex entity: &#x22; or &#X22;
+		start = nnext + 1
+		base = 16
+		maxLen = 7
+		newPos, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsHexDecimal)
+		if !ok || newPos >= limit || source[newPos] != ';' || newPos-start >= maxLen {
+			return i, n, false
+		}
+	case nc >= '0' && nc <= '9':
+		// Decimal entity: &#123;
+		start = nnext
+		base = 10
+		maxLen = 8
+		newPos, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsNumeric)
+		if !ok || newPos >= limit || source[newPos] != ';' || newPos-start >= maxLen {
+			return i, n, false
+		}
+	default:
+		return i, n, false
+	}
+
+	v, _ := strconv.ParseUint(util.BytesToReadOnlyString(source[start:newPos]), base, 32)
+	// Validate Unicode range: U+0000 to U+10FFFF
+	if v > 0x10FFFF {
+		return i, n, false
+	}
+
+	d.RawWrite(writer, source[n:i])
+	escapeRune(writer, rune(v))
+	return newPos, newPos + 1, true
+}
+
+// processNamedEntity handles named HTML entities (&amp;, &lt;, etc.).
+// Returns the new position and whether the entity was successfully processed.
+func (d *defaultWriter) processNamedEntity(writer util.BufWriter, source []byte, i, n, limit int) (newPos, newN int, processed bool) {
+	next := i + 1
+	if next >= limit {
+		return i, n, false
+	}
+
+	start := next
+	var ok bool
+	newPos, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsAlphaNumeric)
+	if !ok || newPos >= limit || source[newPos] != ';' {
+		return i, n, false
+	}
+
+	name := util.BytesToReadOnlyString(source[start:newPos])
+	entity, ok := util.LookUpHTML5EntityByName(name)
+	if !ok {
+		return i, n, false
+	}
+
+	d.RawWrite(writer, source[n:i])
+	d.RawWrite(writer, entity.Characters)
+	return newPos, newPos + 1, true
+}
+
 func (d *defaultWriter) Write(writer util.BufWriter, source []byte) {
 	escaped := false
-	var ok bool
 	limit := len(source)
 	n := 0
 	for i := 0; i < limit; i++ {
@@ -890,60 +968,20 @@ func (d *defaultWriter) Write(writer util.BufWriter, source []byte) {
 			continue
 		}
 		if c == '&' {
-			pos := i
-			next := i + 1
-			if next < limit && source[next] == '#' {
-				nnext := next + 1
-				if nnext < limit {
-					nc := source[nnext]
-					// code point like #x22;
-					if nnext < limit && nc == 'x' || nc == 'X' {
-						start := nnext + 1
-						i, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsHexDecimal)
-						if ok && i < limit && source[i] == ';' && i-start < 7 {
-							v, _ := strconv.ParseUint(util.BytesToReadOnlyString(source[start:i]), 16, 32)
-							// Validate Unicode range before conversion to prevent overflow
-							// Valid Unicode: U+0000 to U+10FFFF (1,114,111 decimal)
-							if v <= 0x10FFFF {
-								d.RawWrite(writer, source[n:pos])
-								n = i + 1
-								escapeRune(writer, rune(v))
-								continue
-							}
-						}
-						// code point like #1234;
-					} else if nc >= '0' && nc <= '9' {
-						start := nnext
-						i, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsNumeric)
-						if ok && i < limit && i-start < 8 && source[i] == ';' {
-							v, _ := strconv.ParseUint(util.BytesToReadOnlyString(source[start:i]), 10, 32)
-							// Validate Unicode range before conversion to prevent overflow
-							// Valid Unicode: U+0000 to U+10FFFF (1,114,111 decimal)
-							if v <= 0x10FFFF {
-								d.RawWrite(writer, source[n:pos])
-								n = i + 1
-								escapeRune(writer, rune(v))
-								continue
-							}
-						}
-					}
-				}
-			} else {
-				start := next
-				i, ok = util.ReadWhile(source, [2]int{start, limit}, util.IsAlphaNumeric)
-				// entity reference
-				if ok && i < limit && source[i] == ';' {
-					name := util.BytesToReadOnlyString(source[start:i])
-					entity, ok := util.LookUpHTML5EntityByName(name)
-					if ok {
-						d.RawWrite(writer, source[n:pos])
-						n = i + 1
-						d.RawWrite(writer, entity.Characters)
-						continue
-					}
-				}
+			// Try numeric entity first (&#123; or &#xAB;)
+			if newPos, newN, ok := d.processNumericEntity(writer, source, i, n, limit); ok {
+				i = newPos
+				n = newN
+				escaped = false
+				continue
 			}
-			i = next - 1
+			// Try named entity (&amp;, &lt;, etc.)
+			if newPos, newN, ok := d.processNamedEntity(writer, source, i, n, limit); ok {
+				i = newPos
+				n = newN
+				escaped = false
+				continue
+			}
 		}
 		if c == '\\' {
 			escaped = true
