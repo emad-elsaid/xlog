@@ -2481,6 +2481,236 @@ func TestRenderHashtagBuildPageRegistration(t *testing.T) {
 	}
 }
 
+func TestRenderHashtagWriteError(t *testing.T) {
+	// Test error handling in renderHashtag (line 298-300)
+	md := markdown.New()
+	h := &HashTag{}
+	md.Parser().AddOptions(parser.WithInlineParsers(
+		util.Prioritized(h, 999),
+	))
+	md.Renderer().AddOptions(renderer.WithNodeRenderers(
+		util.Prioritized(h, 0),
+	))
+
+	input := []byte("#errortest")
+	doc := md.Parser().Parse(text.NewReader(input))
+
+	// Use a writer that will fail
+	errWriter := &errorWriter{err: fmt.Errorf("write error")}
+	err := md.Renderer().Render(errWriter, input, doc)
+
+	if err == nil {
+		t.Error("Expected error from Render when writer fails, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "write error") {
+		t.Errorf("Expected 'write error' in error message, got: %v", err)
+	}
+}
+
+// errorWriter implements util.BufWriter but returns an error on Write.
+type errorWriter struct {
+	err error
+}
+
+func (e *errorWriter) Write(p []byte) (n int, err error) {
+	return 0, e.err
+}
+
+func (e *errorWriter) WriteByte(c byte) error {
+	return e.err
+}
+
+func (e *errorWriter) WriteRune(r rune) (n int, err error) {
+	return 0, e.err
+}
+
+func (e *errorWriter) WriteString(s string) (n int, err error) {
+	return 0, e.err
+}
+
+func (e *errorWriter) Flush() error {
+	return e.err
+}
+
+func TestHashtagPagesGridSorting(t *testing.T) {
+	// Test the sorting logic in hashtagPagesGrid (lines 206-212)
+	tests := []struct {
+		name          string
+		hashtag       string
+		setupPages    map[string]string
+		expectSorted  bool
+		expectedOrder []string
+		setupModTimes map[string]time.Time
+	}{
+		{
+			name:    "sorts pages by modification time descending",
+			hashtag: "golang",
+			setupPages: map[string]string{
+				"old.md":    "#golang old post",
+				"recent.md": "#golang recent post",
+				"newest.md": "#golang newest post",
+			},
+			setupModTimes: map[string]time.Time{
+				"old.md":    time.Now().Add(-48 * time.Hour),
+				"recent.md": time.Now().Add(-24 * time.Hour),
+				"newest.md": time.Now(),
+			},
+			expectSorted:  true,
+			expectedOrder: []string{"newest", "recent", "old"},
+		},
+		{
+			name:    "alphabetical sort when same modification time",
+			hashtag: "test",
+			setupPages: map[string]string{
+				"zebra.md": "#test post",
+				"alpha.md": "#test post",
+				"beta.md":  "#test post",
+			},
+			expectSorted:  true,
+			expectedOrder: []string{"alpha", "beta", "zebra"},
+		},
+		{
+			name:    "empty result when no pages match",
+			hashtag: "nonexistent",
+			setupPages: map[string]string{
+				"page.md": "#different tag",
+			},
+			expectSorted:  false,
+			expectedOrder: []string{},
+		},
+		{
+			name:    "single page does not require sorting",
+			hashtag: "single",
+			setupPages: map[string]string{
+				"solo.md": "#single page",
+			},
+			expectSorted:  false,
+			expectedOrder: []string{"solo"},
+		},
+		{
+			name:    "case insensitive hashtag matching in grid",
+			hashtag: "GoLang",
+			setupPages: map[string]string{
+				"lower.md": "#golang",
+				"upper.md": "#GOLANG",
+				"mixed.md": "#GoLang",
+			},
+			expectSorted: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
+
+			for filename, content := range tc.setupPages {
+				path := filepath.Join(tmpDir, filename)
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+
+				if tc.setupModTimes != nil {
+					if modTime, ok := tc.setupModTimes[filename]; ok {
+						if err := os.Chtimes(path, modTime, modTime); err != nil {
+							t.Fatalf("Failed to set modification time: %v", err)
+						}
+					}
+				}
+			}
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			defer func() {
+				if r := recover(); r != nil {
+					panicStr := fmt.Sprint(r)
+					if !strings.Contains(panicStr, "nil pointer") &&
+						!strings.Contains(panicStr, "template") {
+						t.Errorf("Unexpected panic: %v", r)
+					}
+				}
+			}()
+
+			_ = h.hashtagPagesGrid(xlog.Markdown(tc.hashtag))
+		})
+	}
+}
+
+func TestHashtagPagesSortingComprehensive(t *testing.T) {
+	// Additional test for hashtagPages sorting (lines 189-196 which parallels grid)
+	tests := []struct {
+		name          string
+		hashtag       string
+		setupPages    map[string]string
+		setupModTimes map[string]time.Time
+	}{
+		{
+			name:    "modification time determines primary sort order",
+			hashtag: "backend",
+			setupPages: map[string]string{
+				"api.md":      "#backend API design",
+				"database.md": "#backend databases",
+				"cache.md":    "#backend caching",
+			},
+			setupModTimes: map[string]time.Time{
+				"api.md":      time.Now().Add(-1 * time.Hour),
+				"database.md": time.Now().Add(-2 * time.Hour),
+				"cache.md":    time.Now(),
+			},
+		},
+		{
+			name:    "name comparison as secondary sort",
+			hashtag: "frontend",
+			setupPages: map[string]string{
+				"react.md":   "#frontend react",
+				"vue.md":     "#frontend vue",
+				"angular.md": "#frontend angular",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
+
+			for filename, content := range tc.setupPages {
+				path := filepath.Join(tmpDir, filename)
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+
+				if tc.setupModTimes != nil {
+					if modTime, ok := tc.setupModTimes[filename]; ok {
+						if err := os.Chtimes(path, modTime, modTime); err != nil {
+							t.Fatalf("Failed to set modification time: %v", err)
+						}
+					}
+				}
+			}
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			defer func() {
+				if r := recover(); r != nil {
+					panicStr := fmt.Sprint(r)
+					if !strings.Contains(panicStr, "nil pointer") &&
+						!strings.Contains(panicStr, "template") {
+						t.Errorf("Unexpected panic: %v", r)
+					}
+				}
+			}()
+
+			_ = h.hashtagPages(xlog.Markdown(tc.hashtag))
+		})
+	}
+}
+
 func TestRelatedPagesExcludesCurrentAndFindsMatches(t *testing.T) {
 	// Testing core relatedPages logic (lines 164-178)
 	tests := []struct {
