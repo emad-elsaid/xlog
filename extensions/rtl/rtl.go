@@ -28,7 +28,7 @@ type addDirAuto struct{}
 func (t addDirAuto) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
 	tags := []ast.Node{}
 
-	ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		kind := node.Kind()
 		if kind == ast.KindParagraph ||
 			kind == ast.KindHeading ||
