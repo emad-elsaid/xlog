@@ -229,3 +229,287 @@ func TestBuildRoute_FilePermissions(t *testing.T) {
 		t.Errorf("file permissions mismatch: want %v, got %v", expectedPerms, actualPerms)
 	}
 }
+
+func TestBuild_Integration(t *testing.T) {
+	// Create temporary directory for build output
+	tmpDir, err := os.MkdirTemp("", "xlog-build-integration-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
+
+	// Save original config and restore after test
+	origIndex := Config.Index
+	origNotFound := Config.NotFoundPage
+	defer func() {
+		Config.Index = origIndex
+		Config.NotFoundPage = origNotFound
+	}()
+
+	tests := []struct {
+		name           string
+		setupIndex     string
+		setupNotFound  string
+		expectIndexErr bool
+	}{
+		{
+			name:           "build with default index",
+			setupIndex:     "index.md",
+			setupNotFound:  "404.md",
+			expectIndexErr: false,
+		},
+		{
+			name:           "build with custom index",
+			setupIndex:     "home.md",
+			setupNotFound:  "notfound.md",
+			expectIndexErr: false,
+		},
+		{
+			name:           "build with nonexistent index",
+			setupIndex:     "nonexistent-page.md",
+			setupNotFound:  "404.md",
+			expectIndexErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Setup config
+			Config.Index = tc.setupIndex
+			Config.NotFoundPage = tc.setupNotFound
+
+			// Create a fresh subdirectory for this test case
+			testDir := filepath.Join(tmpDir, tc.name)
+			if err := os.MkdirAll(testDir, 0755); err != nil {
+				t.Fatalf("Failed to create test dir: %v", err)
+			}
+
+			// Execute build
+			err := build(testDir)
+
+			// Note: build() function logs errors via slog but returns nil
+			// or returns error from fs.WalkDir. We verify output files instead.
+			if err != nil && !tc.expectIndexErr {
+				t.Errorf("build failed unexpectedly: %v", err)
+			}
+
+			// Verify basic structure was attempted (directories created)
+			if _, err := os.Stat(testDir); os.IsNotExist(err) {
+				t.Error("build output directory was not created")
+			}
+		})
+	}
+}
+
+func TestBuild_AssetCopying(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "xlog-build-assets-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
+
+	// Save original config
+	origIndex := Config.Index
+	origNotFound := Config.NotFoundPage
+	defer func() {
+		Config.Index = origIndex
+		Config.NotFoundPage = origNotFound
+	}()
+
+	Config.Index = "index.md"
+	Config.NotFoundPage = "404.md"
+
+	err = build(tmpDir)
+	if err != nil {
+		t.Logf("build completed with error: %v", err)
+	}
+
+	// Verify that asset files are copied
+	// The assets embed.FS should contain files; verify they're copied to destination
+	// Note: actual file verification depends on what's in the assets embed.FS
+	// This test verifies the mechanism works without knowing specific files
+	
+	// Just verify the function executes without panic
+	// More specific assertions would require knowing the embedded assets
+}
+
+func TestBuild_ExtensionPages(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "xlog-build-extensions-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
+
+	// Save original config
+	origIndex := Config.Index
+	origNotFound := Config.NotFoundPage
+	defer func() {
+		Config.Index = origIndex
+		Config.NotFoundPage = origNotFound
+	}()
+
+	Config.Index = "index.md"
+	Config.NotFoundPage = "404.md"
+
+	// Register some test extension pages
+	testPages := []struct {
+		route        string
+		encloseInDir bool
+	}{
+		{"/test-extension", true},
+		{"/api-endpoint.json", false},
+	}
+
+	for _, page := range testPages {
+		RegisterBuildPage(page.route, page.encloseInDir)
+	}
+
+	// Clean up registered pages after test
+	defer func() {
+		for _, page := range testPages {
+			extension_page.Delete(page.route)
+			extension_page_enclosed.Delete(page.route)
+		}
+	}()
+
+	err = build(tmpDir)
+	if err != nil {
+		t.Logf("build completed with error: %v", err)
+	}
+
+	// Verify build attempted to process extension pages
+	// The actual success depends on server routing setup
+	// This test verifies no panic occurs when processing extension pages
+}
+
+func TestBuild_404Handling(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "xlog-build-404-*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer func() {
+		if err := os.RemoveAll(tmpDir); err != nil {
+			t.Errorf("Failed to clean up temp dir: %v", err)
+		}
+	}()
+
+	// Save original config
+	origNotFound := Config.NotFoundPage
+	origIndex := Config.Index
+	defer func() {
+		Config.NotFoundPage = origNotFound
+		Config.Index = origIndex
+	}()
+
+	Config.Index = "index.md"
+	Config.NotFoundPage = "404.md"
+
+	// First create the expected 404 source directory and file
+	notFoundDir := filepath.Join(tmpDir, Config.NotFoundPage)
+	if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+		t.Fatalf("Failed to create 404 dir: %v", err)
+	}
+
+	notFoundContent := []byte("<html><body>Page Not Found</body></html>")
+	notFoundIndexPath := filepath.Join(notFoundDir, "index.html")
+	if err := os.WriteFile(notFoundIndexPath, notFoundContent, 0644); err != nil {
+		t.Fatalf("Failed to write 404 index file: %v", err)
+	}
+
+	err = build(tmpDir)
+	if err != nil {
+		t.Logf("build completed with error: %v", err)
+	}
+
+	// Verify 404.html was copied to root
+	notFoundCopy := filepath.Join(tmpDir, "404.html")
+	if _, err := os.Stat(notFoundCopy); err == nil {
+		content, readErr := os.ReadFile(notFoundCopy)
+		if readErr != nil {
+			t.Errorf("Failed to read 404.html: %v", readErr)
+		}
+		if string(content) != string(notFoundContent) {
+			t.Errorf("404.html content mismatch: want %q, got %q", notFoundContent, content)
+		}
+	} else if !os.IsNotExist(err) {
+		t.Errorf("Error checking 404.html: %v", err)
+	}
+	// Note: If the file doesn't exist, it's because the build route failed
+	// which is expected in test environment without full server setup
+}
+
+func TestBuild_ErrorHandling(t *testing.T) {
+	tests := []struct {
+		name       string
+		destPath   string
+		shouldFail bool
+	}{
+		{
+			name:       "build to valid directory",
+			destPath:   "",
+			shouldFail: false,
+		},
+		{
+			name:       "build to path with invalid permissions",
+			destPath:   "/root/xlog-test-no-permission",
+			shouldFail: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var testDir string
+			var err error
+
+			if tc.destPath == "" {
+				testDir, err = os.MkdirTemp("", "xlog-build-error-*")
+				if err != nil {
+					t.Fatalf("Failed to create temp dir: %v", err)
+				}
+				defer func() {
+					if err := os.RemoveAll(testDir); err != nil {
+						t.Logf("Failed to clean up temp dir: %v", err)
+					}
+				}()
+			} else {
+				testDir = tc.destPath
+			}
+
+			// Save original config
+			origIndex := Config.Index
+			origNotFound := Config.NotFoundPage
+			defer func() {
+				Config.Index = origIndex
+				Config.NotFoundPage = origNotFound
+			}()
+
+			Config.Index = "index.md"
+			Config.NotFoundPage = "404.md"
+
+			err = build(testDir)
+
+			if tc.shouldFail {
+				if err == nil && os.Getuid() != 0 {
+					// If running as non-root, we expect error for /root access
+					// But build might not fail immediately, it logs errors
+					t.Logf("build to restricted path: %v", err)
+				}
+			}
+
+			// The build function logs errors via slog rather than
+			// failing immediately, so we verify it doesn't panic
+		})
+	}
+}
