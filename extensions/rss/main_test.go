@@ -30,8 +30,12 @@ func setupTestEnv(t *testing.T) func() {
 	}
 
 	// Create test pages
-	os.WriteFile("page1.md", []byte("# Page 1\nContent 1"), 0644)
-	os.WriteFile("page2.md", []byte("# Page 2\nContent 2"), 0644)
+	if err := os.WriteFile("page1.md", []byte("# Page 1\nContent 1"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
+	if err := os.WriteFile("page2.md", []byte("# Page 2\nContent 2"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
 
 	// Save original values
 	originalDomain := domain
@@ -46,7 +50,9 @@ func setupTestEnv(t *testing.T) func() {
 	Config.Sitename = "Test Site"
 
 	cleanup := func() {
-		os.Chdir(wd)
+		if err := os.Chdir(wd); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
 		domain = originalDomain
 		description = originalDescription
 		limit = originalLimit
@@ -108,7 +114,9 @@ func TestFeedItemsCount(t *testing.T) {
 	limit = 2
 
 	// Create a third page
-	os.WriteFile("page3.md", []byte("# Page 3\nContent 3"), 0644)
+	if err := os.WriteFile("page3.md", []byte("# Page 3\nContent 3"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
 
 	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
 	w := httptest.NewRecorder()
@@ -135,13 +143,17 @@ func TestFeedItemsSortedByModTime(t *testing.T) {
 	defer cleanup()
 
 	// Create old page first
-	os.WriteFile("old.md", []byte("Old content"), 0644)
+	if err := os.WriteFile("old.md", []byte("Old content"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
 
 	// Sleep to ensure different modtimes
 	time.Sleep(10 * time.Millisecond)
 
 	// Create new page
-	os.WriteFile("new.md", []byte("New content"), 0644)
+	if err := os.WriteFile("new.md", []byte("New content"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
 
 	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
 	w := httptest.NewRecorder()
@@ -176,7 +188,9 @@ func TestFeedItemContent(t *testing.T) {
 	defer cleanup()
 
 	// Create a specific test page
-	os.WriteFile("test-page.md", []byte("# Test Content\n\nSome content here"), 0644)
+	if err := os.WriteFile("test-page.md", []byte("# Test Content\n\nSome content here"), 0644); err != nil {
+		t.Fatalf("failed to write test file: %v", err)
+	}
 
 	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
 	w := httptest.NewRecorder()
