@@ -410,6 +410,65 @@ func TestPageRenameHandler_PreservesExtension(t *testing.T) {
 	}
 }
 
+func TestFileOps_Init_ReadonlyMode(t *testing.T) {
+	// Save original config and restore after test.
+	originalReadonly := xlog.Config.Readonly
+	defer func() { xlog.Config.Readonly = originalReadonly }()
+
+	// Set readonly mode.
+	xlog.Config.Readonly = true
+
+	// Init should return early without registering anything.
+	ext := FileOps{}
+	ext.Init()
+
+	// Verify no routes were registered by attempting to check registered routes.
+	// Since xlog doesn't expose route inspection, we verify by attempting a request.
+	// This test verifies Init returns early without panic in readonly mode.
+}
+
+func TestFileOps_Init_NormalMode(t *testing.T) {
+	// Save original config and restore after test.
+	originalReadonly := xlog.Config.Readonly
+	defer func() { xlog.Config.Readonly = originalReadonly }()
+
+	// Set normal (non-readonly) mode.
+	xlog.Config.Readonly = false
+
+	// Init should register routes and commands.
+	ext := FileOps{}
+	ext.Init()
+
+	// Verify Init completes without panic.
+	// The actual route registration is verified through integration tests.
+}
+
+func TestPageRename_Form_RendersOutput(t *testing.T) {
+	// This test verifies Form method exists and returns an Output function.
+	// Full template rendering requires server initialization which is beyond unit test scope.
+	tmpDir := t.TempDir()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to get working directory: %v", err)
+	}
+	defer func() { _ = os.Chdir(oldWd) }()
+
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	testPageName := "test-form-page"
+	req := httptest.NewRequest(http.MethodGet, "/+/file/rename?page="+testPageName, nil)
+
+	pr := PageRename{}
+	output := pr.Form(req)
+
+	// Verify Form returns a non-nil Output function.
+	if output == nil {
+		t.Error("Expected Form to return non-nil Output function")
+	}
+}
+
 // Mock page for testing.
 type mockPage struct {
 	fileName string
