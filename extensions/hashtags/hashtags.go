@@ -60,6 +60,9 @@ func (h *Hashtags) Init() {
 }
 
 func (h *Hashtags) PageChanged(p Page) error {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	delete(h.pages, p)
 
 	return nil
