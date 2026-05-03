@@ -730,3 +730,711 @@ func TestRenderStringRaw(t *testing.T) {
 		t.Errorf("renderString(raw) = %q, want %q", buf.String(), "&lt;tag&gt;")
 	}
 }
+
+// TestRenderParagraph tests paragraph rendering.
+func TestRenderParagraph(t *testing.T) {
+	tests := []struct {
+		name     string
+		attrs    bool
+		entering bool
+		want     string
+	}{
+		{"entering without attrs", false, true, "<p>"},
+		{"exiting", false, false, "</p>\n"},
+		{"entering with attrs", true, true, "<p"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			p := ast.NewParagraph()
+			if tc.attrs {
+				p.SetAttribute([]byte("class"), []byte("test"))
+			}
+
+			_, _ = renderer.renderParagraph(writer, []byte{}, p, tc.entering)
+			_ = writer.Flush()
+
+			result := buf.String()
+			if tc.attrs && tc.entering {
+				if !bytes.HasPrefix([]byte(result), []byte(tc.want)) {
+					t.Errorf("renderParagraph() = %q, want prefix %q", result, tc.want)
+				}
+			} else if result != tc.want {
+				t.Errorf("renderParagraph() = %q, want %q", result, tc.want)
+			}
+		})
+	}
+}
+
+// TestRenderTextBlock tests text block rendering.
+func TestRenderTextBlock(t *testing.T) {
+	tests := []struct {
+		name       string
+		entering   bool
+		hasNextSib bool
+		hasChild   bool
+		want       string
+	}{
+		{"entering", true, false, false, ""},
+		{"exiting no sibling", false, false, false, ""},
+		{"exiting with sibling and child", false, true, true, "\n"},
+		{"exiting with sibling no child", false, true, false, ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			tb := ast.NewTextBlock()
+			if tc.hasChild {
+				tb.AppendChild(tb, ast.NewText())
+			}
+			if tc.hasNextSib {
+				parent := ast.NewParagraph()
+				parent.AppendChild(parent, tb)
+				parent.AppendChild(parent, ast.NewText())
+			}
+
+			_, _ = renderer.renderTextBlock(writer, []byte{}, tb, tc.entering)
+			_ = writer.Flush()
+
+			if buf.String() != tc.want {
+				t.Errorf("renderTextBlock() = %q, want %q", buf.String(), tc.want)
+			}
+		})
+	}
+}
+
+// TestRenderAutoLink tests auto link rendering.
+func TestRenderAutoLink(t *testing.T) {
+	tests := []struct {
+		name        string
+		url         string
+		linkType    ast.AutoLinkType
+		hasProtocol bool
+		wantContain string
+	}{
+		{
+			name:        "regular URL",
+			url:         "https://example.com",
+			linkType:    ast.AutoLinkURL,
+			wantContain: `<a href="https://example.com">`,
+		},
+		{
+			name:        "email without mailto",
+			url:         "user@example.com",
+			linkType:    ast.AutoLinkEmail,
+			wantContain: `<a href="mailto:user@example.com">`,
+		},
+		{
+			name:        "email with mailto protocol",
+			url:         "user@example.com",
+			linkType:    ast.AutoLinkEmail,
+			hasProtocol: true,
+			wantContain: `href="mailto:`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			source := []byte(tc.url)
+			txt := ast.NewText()
+			txt.Segment = text.NewSegment(0, len(tc.url))
+			
+			al := ast.NewAutoLink(tc.linkType, txt)
+			if tc.hasProtocol {
+				al.Protocol = []byte("mailto")
+			}
+
+			_, _ = renderer.renderAutoLink(writer, source, al, true)
+			_ = writer.Flush()
+
+			if !bytes.Contains(buf.Bytes(), []byte(tc.wantContain)) {
+				t.Errorf("renderAutoLink() = %q, want to contain %q", buf.String(), tc.wantContain)
+			}
+		})
+	}
+}
+
+// TestRenderCodeSpan tests code span rendering.
+func TestRenderCodeSpan(t *testing.T) {
+	tests := []struct {
+		name     string
+		text     string
+		entering bool
+		want     string
+	}{
+		{"entering", "code", true, "<code>code"},
+		{"exiting", "", false, "</code>"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			cs := ast.NewCodeSpan()
+			if tc.text != "" {
+				source := []byte(tc.text)
+				txt := ast.NewTextSegment(text.NewSegment(0, len(source)))
+				cs.AppendChild(cs, txt)
+				_, _ = renderer.renderCodeSpan(writer, source, cs, tc.entering)
+			} else {
+				_, _ = renderer.renderCodeSpan(writer, []byte{}, cs, tc.entering)
+			}
+			_ = writer.Flush()
+
+			if buf.String() != tc.want {
+				t.Errorf("renderCodeSpan() = %q, want %q", buf.String(), tc.want)
+			}
+		})
+	}
+}
+
+// TestRenderLink tests link rendering.
+func TestRenderLink(t *testing.T) {
+	tests := []struct {
+		name     string
+		dest     string
+		title    string
+		entering bool
+		unsafe   bool
+		wantPart string
+	}{
+		{
+			name:     "entering safe URL",
+			dest:     "https://example.com",
+			title:    "Example",
+			entering: true,
+			unsafe:   false,
+			wantPart: `<a href="https://example.com" title="Example">`,
+		},
+		{
+			name:     "exiting",
+			entering: false,
+			wantPart: `</a>`,
+		},
+		{
+			name:     "dangerous URL blocked",
+			dest:     "javascript:alert(1)",
+			entering: true,
+			unsafe:   false,
+			wantPart: `<a href="">`,
+		},
+		{
+			name:     "dangerous URL allowed when unsafe",
+			dest:     "javascript:alert(1)",
+			entering: true,
+			unsafe:   true,
+			wantPart: `<a href="javascript:alert(1)">`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer(WithUnsafe())
+			renderer := r.(*Renderer)
+			renderer.Unsafe = tc.unsafe
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			link := ast.NewLink()
+			link.Destination = []byte(tc.dest)
+			if tc.title != "" {
+				link.Title = []byte(tc.title)
+			}
+
+			_, _ = renderer.renderLink(writer, []byte{}, link, tc.entering)
+			_ = writer.Flush()
+
+			if !bytes.Contains(buf.Bytes(), []byte(tc.wantPart)) {
+				t.Errorf("renderLink() = %q, want to contain %q", buf.String(), tc.wantPart)
+			}
+		})
+	}
+}
+
+// TestRenderImage tests image rendering.
+func TestRenderImage(t *testing.T) {
+	tests := []struct {
+		name     string
+		dest     string
+		title    string
+		alt      string
+		xhtml    bool
+		unsafe   bool
+		wantPart string
+	}{
+		{
+			name:     "basic image",
+			dest:     "/img/test.png",
+			title:    "Test Image",
+			alt:      "test",
+			xhtml:    false,
+			wantPart: `<img src="/img/test.png" alt="test" title="Test Image">`,
+		},
+		{
+			name:     "XHTML image",
+			dest:     "/img/test.png",
+			xhtml:    true,
+			wantPart: `<img src="/img/test.png" alt="" />`,
+		},
+		{
+			name:     "dangerous URL blocked",
+			dest:     "javascript:alert(1)",
+			unsafe:   false,
+			wantPart: `<img src="" alt="">`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var opts []Option
+			if tc.xhtml {
+				opts = append(opts, WithXHTML())
+			}
+			if tc.unsafe {
+				opts = append(opts, WithUnsafe())
+			}
+			r := NewRenderer(opts...)
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			link := ast.NewLink()
+			link.Destination = []byte(tc.dest)
+			if tc.title != "" {
+				link.Title = []byte(tc.title)
+			}
+			
+			img := ast.NewImage(link)
+			if tc.alt != "" {
+				txt := ast.NewText()
+				txt.Segment = text.NewSegment(0, len(tc.alt))
+				img.AppendChild(img, txt)
+			}
+
+			source := []byte(tc.alt)
+			_, _ = renderer.renderImage(writer, source, img, true)
+			_ = writer.Flush()
+
+			if !bytes.Contains(buf.Bytes(), []byte(tc.wantPart)) {
+				t.Errorf("renderImage() = %q, want to contain %q", buf.String(), tc.wantPart)
+			}
+		})
+	}
+}
+
+// TestRenderRawHTML tests raw HTML rendering.
+func TestRenderRawHTML(t *testing.T) {
+	tests := []struct {
+		name     string
+		html     string
+		unsafe   bool
+		entering bool
+		want     string
+	}{
+		{
+			name:     "unsafe mode entering",
+			html:     "<div>test</div>",
+			unsafe:   true,
+			entering: true,
+			want:     "<div>test</div>",
+		},
+		{
+			name:     "safe mode entering",
+			html:     "<div>test</div>",
+			unsafe:   false,
+			entering: true,
+			want:     "<!-- raw HTML omitted -->",
+		},
+		{
+			name:     "exiting",
+			html:     "",
+			unsafe:   false,
+			entering: false,
+			want:     "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var opts []Option
+			if tc.unsafe {
+				opts = append(opts, WithUnsafe())
+			}
+			r := NewRenderer(opts...)
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			source := []byte(tc.html)
+			raw := ast.NewRawHTML()
+			if tc.html != "" {
+				raw.Segments.Append(text.NewSegment(0, len(source)))
+			}
+
+			_, _ = renderer.renderRawHTML(writer, source, raw, tc.entering)
+			_ = writer.Flush()
+
+			if buf.String() != tc.want {
+				t.Errorf("renderRawHTML() = %q, want %q", buf.String(), tc.want)
+			}
+		})
+	}
+}
+
+// TestRenderText tests text rendering.
+func TestRenderText(t *testing.T) {
+	tests := []struct {
+		name         string
+		text         string
+		raw          bool
+		hardBreak    bool
+		softBreak    bool
+		hardWraps    bool
+		xhtml        bool
+		entering     bool
+		wantContains string
+	}{
+		{
+			name:         "normal text entering",
+			text:         "hello world",
+			entering:     true,
+			wantContains: "hello world",
+		},
+		{
+			name:     "exiting",
+			entering: false,
+		},
+		{
+			name:         "raw text",
+			text:         "plain",
+			raw:          true,
+			entering:     true,
+			wantContains: "plain",
+		},
+		{
+			name:         "hard line break",
+			text:         "text",
+			hardBreak:    true,
+			entering:     true,
+			wantContains: "<br>",
+		},
+		{
+			name:         "hard line break XHTML",
+			text:         "text",
+			hardBreak:    true,
+			xhtml:        true,
+			entering:     true,
+			wantContains: "<br />",
+		},
+		{
+			name:         "soft break with hardwraps",
+			text:         "text",
+			softBreak:    true,
+			hardWraps:    true,
+			entering:     true,
+			wantContains: "<br>",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var opts []Option
+			if tc.xhtml {
+				opts = append(opts, WithXHTML())
+			}
+			if tc.hardWraps {
+				opts = append(opts, WithHardWraps())
+			}
+			r := NewRenderer(opts...)
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			source := []byte(tc.text)
+			txt := ast.NewText()
+			if tc.text != "" {
+				txt.Segment = text.NewSegment(0, len(source))
+			}
+			if tc.raw {
+				txt.SetRaw(true)
+			}
+			if tc.hardBreak {
+				txt.SetHardLineBreak(true)
+			}
+			if tc.softBreak {
+				txt.SetSoftLineBreak(true)
+			}
+
+			_, _ = renderer.renderText(writer, source, txt, tc.entering)
+			_ = writer.Flush()
+
+			if tc.entering && tc.wantContains != "" {
+				if !bytes.Contains(buf.Bytes(), []byte(tc.wantContains)) {
+					t.Errorf("renderText() = %q, want to contain %q", buf.String(), tc.wantContains)
+				}
+			}
+		})
+	}
+}
+
+// TestRenderTexts tests renderTexts helper.
+func TestRenderTexts(t *testing.T) {
+	r := NewRenderer()
+	renderer := r.(*Renderer)
+
+	var buf bytes.Buffer
+	writer := bufio.NewWriter(&buf)
+
+	parent := ast.NewParagraph()
+	source := []byte("hello world")
+	
+	txt := ast.NewText()
+	txt.Segment = text.NewSegment(0, 5)
+	parent.AppendChild(parent, txt)
+	
+	str := ast.NewString([]byte(" world"))
+	parent.AppendChild(parent, str)
+
+	renderer.renderTexts(writer, source, parent)
+	_ = writer.Flush()
+
+	if !bytes.Contains(buf.Bytes(), []byte("hello")) {
+		t.Errorf("renderTexts() = %q, want to contain 'hello'", buf.String())
+	}
+}
+
+// TestRenderList tests list rendering.
+func TestRenderList(t *testing.T) {
+	tests := []struct {
+		name     string
+		ordered  bool
+		start    int
+		entering bool
+		want     string
+	}{
+		{
+			name:     "unordered entering",
+			ordered:  false,
+			entering: true,
+			want:     "<ul>\n",
+		},
+		{
+			name:     "unordered exiting",
+			ordered:  false,
+			entering: false,
+			want:     "</ul>\n",
+		},
+		{
+			name:     "ordered entering default start",
+			ordered:  true,
+			start:    1,
+			entering: true,
+			want:     "<ol>\n",
+		},
+		{
+			name:     "ordered entering custom start",
+			ordered:  true,
+			start:    5,
+			entering: true,
+			want:     `<ol start="5"`,
+		},
+		{
+			name:     "ordered exiting",
+			ordered:  true,
+			entering: false,
+			want:     "</ol>\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			list := ast.NewList(0)
+			if tc.ordered {
+				list.Marker = '.'
+			}
+			list.Start = tc.start
+
+			_, _ = renderer.renderList(writer, []byte{}, list, tc.entering)
+			_ = writer.Flush()
+
+			result := buf.String()
+			if !bytes.Contains([]byte(result), []byte(tc.want)) {
+				t.Errorf("renderList() = %q, want to contain %q", result, tc.want)
+			}
+		})
+	}
+}
+
+// TestRenderListItem tests list item rendering.
+func TestRenderListItem(t *testing.T) {
+	tests := []struct {
+		name       string
+		hasChild   bool
+		textBlock  bool
+		entering   bool
+		wantPrefix string
+	}{
+		{
+			name:       "entering without attrs",
+			entering:   true,
+			wantPrefix: "<li>",
+		},
+		{
+			name:     "exiting",
+			entering: false,
+		},
+		{
+			name:       "with text block child",
+			hasChild:   true,
+			textBlock:  true,
+			entering:   true,
+			wantPrefix: "<li>",
+		},
+		{
+			name:       "with paragraph child",
+			hasChild:   true,
+			textBlock:  false,
+			entering:   true,
+			wantPrefix: "<li>\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := NewRenderer()
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			li := ast.NewListItem(0)
+			if tc.hasChild {
+				if tc.textBlock {
+					li.AppendChild(li, ast.NewTextBlock())
+				} else {
+					li.AppendChild(li, ast.NewParagraph())
+				}
+			}
+
+			_, _ = renderer.renderListItem(writer, []byte{}, li, tc.entering)
+			_ = writer.Flush()
+
+			result := buf.String()
+			if tc.entering && tc.wantPrefix != "" {
+				if !bytes.HasPrefix([]byte(result), []byte(tc.wantPrefix)) {
+					t.Errorf("renderListItem() = %q, want prefix %q", result, tc.wantPrefix)
+				}
+			} else if !tc.entering {
+				if result != "</li>\n" {
+					t.Errorf("renderListItem() exiting = %q, want %q", result, "</li>\n")
+				}
+			}
+		})
+	}
+}
+
+// TestRenderHTMLBlock tests HTML block rendering.
+func TestRenderHTMLBlock(t *testing.T) {
+	tests := []struct {
+		name       string
+		html       string
+		hasClosure bool
+		unsafe     bool
+		entering   bool
+		want       string
+	}{
+		{
+			name:     "unsafe entering",
+			html:     "<div>\n",
+			unsafe:   true,
+			entering: true,
+			want:     "<div>\n",
+		},
+		{
+			name:     "safe entering",
+			html:     "<div>\n",
+			unsafe:   false,
+			entering: true,
+			want:     "<!-- raw HTML omitted -->\n",
+		},
+		{
+			name:       "unsafe exiting with closure",
+			html:       "</div>\n",
+			hasClosure: true,
+			unsafe:     true,
+			entering:   false,
+			want:       "</div>\n",
+		},
+		{
+			name:       "safe exiting with closure",
+			html:       "</div>\n",
+			hasClosure: true,
+			unsafe:     false,
+			entering:   false,
+			want:       "<!-- raw HTML omitted -->\n",
+		},
+		{
+			name:     "exiting without closure",
+			entering: false,
+			want:     "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var opts []Option
+			if tc.unsafe {
+				opts = append(opts, WithUnsafe())
+			}
+			r := NewRenderer(opts...)
+			renderer := r.(*Renderer)
+
+			var buf bytes.Buffer
+			writer := bufio.NewWriter(&buf)
+
+			source := []byte(tc.html)
+			block := ast.NewHTMLBlock(ast.HTMLBlockType1)
+			if tc.entering && tc.html != "" {
+				block.Lines().Append(text.NewSegment(0, len(source)))
+			}
+			if tc.hasClosure {
+				block.ClosureLine = text.NewSegment(0, len(source))
+			}
+
+			_, _ = renderer.renderHTMLBlock(writer, source, block, tc.entering)
+			_ = writer.Flush()
+
+			if buf.String() != tc.want {
+				t.Errorf("renderHTMLBlock() = %q, want %q", buf.String(), tc.want)
+			}
+		})
+	}
+}
