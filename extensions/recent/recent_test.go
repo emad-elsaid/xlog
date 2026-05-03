@@ -147,13 +147,6 @@ func TestRecent_Handler(t *testing.T) {
 }
 
 func TestRecent_HandlerSorting(t *testing.T) {
-	tmpDir := t.TempDir()
-	origDir, _ := os.Getwd()
-	defer func() { _ = os.Chdir(origDir) }()
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatal(err)
-	}
-
 	tests := []struct {
 		name  string
 		pages []struct {
@@ -203,6 +196,15 @@ func TestRecent_HandlerSorting(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			// Create isolated temp directory for this sub-test
+			tmpDir := t.TempDir()
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+			if err := os.Chdir(tmpDir); err != nil {
+				t.Fatal(err)
+			}
+
+			// Create test files
 			for _, p := range tc.pages {
 				pagePath := filepath.Join(tmpDir, p.name)
 				if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
@@ -213,15 +215,12 @@ func TestRecent_HandlerSorting(t *testing.T) {
 				}
 			}
 
+			// Run handler (files must exist during execution for Pages() to find them)
 			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
 			output := recentHandler(r)
 
 			if output == nil {
 				t.Error("recentHandler() returned nil")
-			}
-
-			for _, p := range tc.pages {
-				_ = os.Remove(filepath.Join(tmpDir, p.name))
 			}
 		})
 	}
@@ -248,6 +247,27 @@ func TestRecent_TemplatesEmbedded(t *testing.T) {
 			if tc.wantNonEmptyDir && len(entries) == 0 {
 				t.Error("templates directory is empty, want at least one file")
 			}
+		})
+	}
+}
+
+func TestRecent_Init(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{"Init does not panic"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("Init() panicked: %v", r)
+				}
+			}()
+
+			ext := Recent{}
+			ext.Init()
 		})
 	}
 }
