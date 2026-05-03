@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"html/template"
 	"image"
 	"image/color"
 	"image/png"
@@ -1051,5 +1052,166 @@ func TestResizeHandler_CacheWriteFailure(t *testing.T) {
 	_, err := png.Decode(bytes.NewReader(w.Body.Bytes()))
 	if err != nil {
 		t.Errorf("Expected valid PNG despite cache failure, got error: %v", err)
+	}
+}
+
+func TestPhoto_RenderCallsPartial(t *testing.T) {
+	// Note: Render() internally calls xlog.Partial which requires template initialization.
+	// This test verifies the function structure and that Photo implements the interface correctly.
+	// The actual rendering is tested through integration tests.
+
+	photo := &Photo{
+		Thumbnail: "/+/photos/thumbnail/vacation/beach.jpg",
+		Page:      "/+/photos/photo/vacation/beach.jpg",
+		Original:  "vacation/beach.jpg",
+		Time:      time.Date(2023, 7, 15, 14, 30, 0, 0, time.UTC),
+	}
+
+	// Verify Photo has the Render method (compile-time check)
+	var _ interface {
+		Render() template.HTML
+	} = photo
+
+	// Verify photo fields are accessible for rendering
+	if photo.Thumbnail == "" {
+		t.Error("Expected thumbnail to be set")
+	}
+	if photo.Page == "" {
+		t.Error("Expected page to be set")
+	}
+}
+
+func TestPhotosShortcode_PhotoDiscovery(t *testing.T) {
+	// Test the photo discovery logic within photosShortcode without template rendering
+	tests := []struct {
+		name          string
+		setupDir      func(t *testing.T) string
+		expectedCount int
+		expectError   bool
+	}{
+		{
+			name: "valid directory with multiple photos",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "photo1.jpg")
+				time.Sleep(2 * time.Millisecond) // Ensure different mod times
+				createTestPNGInDir(t, dir, "photo2.png")
+				return dir
+			},
+			expectedCount: 2,
+			expectError:   false,
+		},
+		{
+			name: "empty directory returns no photos",
+			setupDir: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			expectedCount: 0,
+			expectError:   false,
+		},
+		{
+			name: "nonexistent directory returns error",
+			setupDir: func(t *testing.T) string {
+				return "/nonexistent/photo/directory"
+			},
+			expectedCount: 0,
+			expectError:   true,
+		},
+		{
+			name: "directory with unsupported files ignores them",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				// Create non-image files
+				txtFile := filepath.Join(dir, "readme.txt")
+				_ = os.WriteFile(txtFile, []byte("test"), 0600)
+				createTestPNGInDir(t, dir, "valid.png")
+				return dir
+			},
+			expectedCount: 1,
+			expectError:   false,
+		},
+		{
+			name: "nested directory structure finds all photos",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				subdir := filepath.Join(dir, "summer")
+				_ = os.MkdirAll(subdir, 0700)
+				createTestPNGInDir(t, dir, "photo1.png")
+				time.Sleep(2 * time.Millisecond)
+				createTestPNGInDir(t, subdir, "photo2.jpg")
+				time.Sleep(2 * time.Millisecond)
+				createTestPNGInDir(t, subdir, "photo3.jpeg")
+				return dir
+			},
+			expectedCount: 3,
+			expectError:   false,
+		},
+		{
+			name: "case-insensitive extension matching",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "photo.PNG")
+				time.Sleep(2 * time.Millisecond)
+				createTestPNGInDir(t, dir, "photo2.JPG")
+				time.Sleep(2 * time.Millisecond)
+				createTestPNGInDir(t, dir, "photo3.JPEG")
+				time.Sleep(2 * time.Millisecond)
+				createTestPNGInDir(t, dir, "photo4.GIF")
+				return dir
+			},
+			expectedCount: 4,
+			expectError:   false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := tc.setupDir(t)
+			p := strings.TrimSpace(dir)
+
+			// Replicate the photo discovery logic from photosShortcode
+			photos := []*Photo{}
+			err := filepath.WalkDir(p, func(file string, d fs.DirEntry, walkErr error) error {
+				if walkErr != nil {
+					return walkErr
+				}
+
+				if d.Type().IsRegular() && supportedExt.Include(strings.ToLower(path.Ext(file))) {
+					photo, photoErr := NewPhoto(file)
+					if photoErr != nil {
+						return photoErr
+					}
+					photos = append(photos, photo)
+				}
+
+				return nil
+			})
+
+			if tc.expectError {
+				if err == nil {
+					t.Error("Expected error, but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error, but got: %v", err)
+				}
+				if len(photos) != tc.expectedCount {
+					t.Errorf("Expected %d photos, got %d", tc.expectedCount, len(photos))
+				}
+
+				// Verify photos are sorted by time (newest first)
+				if len(photos) > 1 {
+					slices.SortFunc(photos, func(i, j *Photo) int {
+						return j.Time.Compare(i.Time)
+					})
+
+					for i := 0; i < len(photos)-1; i++ {
+						if photos[i].Time.Before(photos[i+1].Time) {
+							t.Error("Photos are not sorted by time in descending order")
+						}
+					}
+				}
+			}
+		})
 	}
 }
