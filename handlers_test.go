@@ -355,3 +355,62 @@ func TestStart_ServerContext(t *testing.T) {
 		t.Error("Context should be done after cancel")
 	}
 }
+
+func TestStart_BuildModeExecution(t *testing.T) {
+	// Test Start() in build mode - it should build and exit without starting server
+	tempDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+
+	sourceDir := filepath.Join(tempDir, "source")
+	buildDir := filepath.Join(tempDir, "build")
+	if err := os.Mkdir(sourceDir, 0750); err != nil {
+		t.Fatalf("Failed to create source directory: %v", err)
+	}
+	if err := os.Mkdir(buildDir, 0750); err != nil {
+		t.Fatalf("Failed to create build directory: %v", err)
+	}
+
+	// Create test page in source
+	testPage := filepath.Join(sourceDir, "index.md")
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
+		t.Fatalf("Failed to create test page: %v", err)
+	}
+
+	oldConfig := Config
+	oldArgs := os.Args
+	defer func() {
+		Config = oldConfig
+		os.Args = oldArgs
+	}()
+
+	Config.Source = sourceDir
+	Config.Build = buildDir
+	Config.Readonly = false
+	Config.Index = "index"
+
+	// Reset flags for testing
+	os.Args = []string{"xlog"}
+
+	ctx := context.Background()
+	Start(ctx)
+
+	// Verify readonly was set due to build mode
+	if !Config.Readonly {
+		t.Error("Expected Readonly to be true in build mode")
+	}
+
+	// Verify build directory was created and contains files
+	entries, err := os.ReadDir(buildDir)
+	if err != nil {
+		t.Fatalf("Failed to read build directory: %v", err)
+	}
+
+	if len(entries) == 0 {
+		t.Error("Expected build directory to contain generated files")
+	}
+}
