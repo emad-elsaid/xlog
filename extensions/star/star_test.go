@@ -3,6 +3,7 @@ package star
 import (
 	"fmt"
 	"html/template"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -424,4 +425,378 @@ func TestStarExtensionName(t *testing.T) {
 	if ext.Name() != "star" {
 		t.Errorf("Expected name 'star', got '%s'", ext.Name())
 	}
+}
+
+func TestStarredPageAttrs(t *testing.T) {
+	tmpDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	testPage := testPageFile
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	page := NewPage(testPage)
+	if page == nil {
+		t.Fatal("Failed to create page")
+	}
+
+	sp := starredPage{page}
+	attrs := sp.Attrs()
+
+	if _, exists := attrs["href"]; !exists {
+		t.Error("Expected href attribute not found")
+	}
+
+	expectedHref := "/" + page.Name()
+	if actualHref, ok := attrs["href"].(string); ok {
+		if actualHref != expectedHref {
+			t.Errorf("Expected href %s, got %s", expectedHref, actualHref)
+		}
+	} else {
+		t.Error("href attribute is not a string")
+	}
+}
+
+func TestStarredPages(t *testing.T) {
+	tmpDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name           string
+		starredContent string
+		pagesExist     []string
+		expectedLen    int
+	}{
+		{
+			name:           "No starred page file",
+			starredContent: "",
+			pagesExist:     nil,
+			expectedLen:    0,
+		},
+		{
+			name:           "Empty starred page",
+			starredContent: "   \n\n  ",
+			pagesExist:     nil,
+			expectedLen:    0,
+		},
+		{
+			name:           "Single starred page",
+			starredContent: "test-page.md",
+			pagesExist:     []string{"test-page.md"},
+			expectedLen:    1,
+		},
+		{
+			name:           "Multiple starred pages",
+			starredContent: "page1.md\npage2.md\npage3.md",
+			pagesExist:     []string{"page1.md", "page2.md", "page3.md"},
+			expectedLen:    3,
+		},
+		{
+			name:           "Starred pages with whitespace",
+			starredContent: "\npage1.md\n\npage2.md\n",
+			pagesExist:     []string{"page1.md", "page2.md"},
+			expectedLen:    3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.starredContent != "" {
+				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				_ = os.Remove(STARRED_PAGES + ".md")
+			}
+
+			for _, pageName := range tt.pagesExist {
+				if err := os.WriteFile(pageName, []byte("# Page"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			dummyPage := NewPage("dummy.md")
+			commands := starredPages(dummyPage)
+
+			if tt.expectedLen == 0 {
+				if commands != nil {
+					t.Errorf("Expected nil commands, got %d commands", len(commands))
+				}
+			} else {
+				if commands == nil {
+					t.Fatalf("Expected %d commands, got nil", tt.expectedLen)
+				}
+				if len(commands) != tt.expectedLen {
+					t.Errorf("Expected %d commands, got %d", tt.expectedLen, len(commands))
+				}
+			}
+
+			for _, pageName := range tt.pagesExist {
+				_ = os.Remove(pageName)
+			}
+		})
+	}
+}
+
+func TestStarHandler(t *testing.T) {
+	tmpDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name            string
+		setupPage       bool
+		setupStarred    bool
+		starredContent  string
+		expectRedirect  bool
+		expectPageAdded bool
+	}{
+		{
+			name:            "Star existing page with starred.md present",
+			setupPage:       true,
+			setupStarred:    true,
+			starredContent:  "",
+			expectRedirect:  false,
+			expectPageAdded: true,
+		},
+		{
+			name:            "Star page adds to existing starred list",
+			setupPage:       true,
+			setupStarred:    true,
+			starredContent:  "other-page.md",
+			expectRedirect:  false,
+			expectPageAdded: true,
+		},
+		{
+			name:           "Star non-existent page redirects",
+			setupPage:      false,
+			setupStarred:   true,
+			starredContent: "",
+			expectRedirect: true,
+		},
+		{
+			name:           "Star page without starred.md file redirects",
+			setupPage:      true,
+			setupStarred:   false,
+			starredContent: "",
+			expectRedirect: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testPage := testPageFile
+			pageName := "test-page"
+			if tt.setupPage {
+				if err := os.WriteFile(testPage, []byte("# Test Page"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				_ = os.Remove(testPage)
+			}
+
+			if tt.setupStarred {
+				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				_ = os.Remove(STARRED_PAGES + ".md")
+			}
+
+			req := newRequestWithPath(pageName)
+			output := starHandler(req)
+
+			if output == nil {
+				t.Fatal("Expected non-nil output")
+			}
+
+			rec := newRecorder()
+			output(rec, req)
+
+			if tt.expectRedirect {
+				if rec.redirectCalled {
+					return
+				}
+				if rec.statusCode != 303 && rec.statusCode != 0 {
+					return
+				}
+			}
+
+			if tt.expectPageAdded {
+				starredPage := NewPage(STARRED_PAGES)
+				if starredPage == nil {
+					t.Fatal("starred.md should exist")
+				}
+
+				content := string(starredPage.Content())
+				if !strings.Contains(content, pageName) {
+					t.Errorf("Expected %s in starred content, got: %s", pageName, content)
+				}
+
+				if rec.header.Get("HX-Refresh") == "" {
+					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.header)
+				}
+			}
+
+			_ = os.Remove(testPage)
+		})
+	}
+}
+
+func TestUnstarHandler(t *testing.T) {
+	tmpDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name           string
+		setupPage      bool
+		setupStarred   bool
+		starredContent string
+		expectRedirect bool
+		expectRemoved  bool
+	}{
+		{
+			name:           "Unstar existing page",
+			setupPage:      true,
+			setupStarred:   true,
+			starredContent: "test-page",
+			expectRedirect: false,
+			expectRemoved:  true,
+		},
+		{
+			name:           "Unstar page not in list",
+			setupPage:      true,
+			setupStarred:   true,
+			starredContent: "other-page.md",
+			expectRedirect: false,
+			expectRemoved:  false,
+		},
+		{
+			name:           "Unstar with multiple pages in list",
+			setupPage:      true,
+			setupStarred:   true,
+			starredContent: "page1.md\ntest-page\npage3.md",
+			expectRedirect: false,
+			expectRemoved:  true,
+		},
+		{
+			name:           "Unstar non-existent page redirects",
+			setupPage:      false,
+			setupStarred:   true,
+			starredContent: "test-page",
+			expectRedirect: true,
+		},
+		{
+			name:           "Unstar without starred.md redirects",
+			setupPage:      true,
+			setupStarred:   false,
+			starredContent: "",
+			expectRedirect: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testPage := testPageFile
+			pageName := "test-page"
+			if tt.setupPage {
+				if err := os.WriteFile(testPage, []byte("# Test Page"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				_ = os.Remove(testPage)
+			}
+
+			if tt.setupStarred {
+				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				_ = os.Remove(STARRED_PAGES + ".md")
+			}
+
+			req := newRequestWithPath(pageName)
+			output := unstarHandler(req)
+
+			if output == nil {
+				t.Fatal("Expected non-nil output")
+			}
+
+			rec := newRecorder()
+			output(rec, req)
+
+			if tt.expectRedirect {
+				if rec.redirectCalled {
+					return
+				}
+				if rec.statusCode != 303 && rec.statusCode != 0 {
+					return
+				}
+			}
+
+			if tt.expectRemoved {
+				starredPage := NewPage(STARRED_PAGES)
+				if starredPage == nil {
+					t.Fatal("starred.md should exist")
+				}
+
+				content := strings.TrimSpace(string(starredPage.Content()))
+				if strings.Contains(content, pageName) {
+					t.Errorf("Expected %s removed from starred content, still present: %s", pageName, content)
+				}
+
+				if rec.header.Get("HX-Refresh") == "" {
+					t.Errorf("Expected HX-Refresh header to be set, headers: %v", rec.header)
+				}
+			}
+
+			_ = os.Remove(testPage)
+		})
+	}
+}
+
+type testRecorder struct {
+	header         http.Header
+	statusCode     int
+	redirectCalled bool
+}
+
+func newRecorder() *testRecorder {
+	return &testRecorder{
+		header: make(http.Header),
+	}
+}
+
+func (r *testRecorder) Header() http.Header {
+	return r.header
+}
+
+func (r *testRecorder) WriteHeader(code int) {
+	r.statusCode = code
+}
+
+func (r *testRecorder) Write([]byte) (int, error) {
+	return 0, nil
+}
+
+func newRequestWithPath(pathValue string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
+	req.SetPathValue("page", pathValue)
+	return req
 }
