@@ -548,6 +548,218 @@ func TestHandlerFuncToHttpHandler(t *testing.T) {
 	}
 }
 
+func TestRouteRegistration(t *testing.T) {
+	// Save original router and restore after test
+	originalRouter := router
+	defer func() { router = originalRouter }()
+
+	tests := []struct {
+		name           string
+		method         string
+		path           string
+		registerFunc   func(string, HandlerFunc)
+		expectedMethod string
+	}{
+		{
+			name:           "GET route registration",
+			method:         http.MethodGet,
+			path:           "/test-get",
+			registerFunc:   Get,
+			expectedMethod: http.MethodGet,
+		},
+		{
+			name:           "POST route registration",
+			method:         http.MethodPost,
+			path:           "/test-post",
+			registerFunc:   Post,
+			expectedMethod: http.MethodPost,
+		},
+		{
+			name:           "DELETE route registration",
+			method:         http.MethodDelete,
+			path:           "/test-delete",
+			registerFunc:   Delete,
+			expectedMethod: http.MethodDelete,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create fresh router for each test
+			router = http.NewServeMux()
+
+			// Register route
+			tc.registerFunc(tc.path, func(r Request) Output {
+				return PlainText("handler executed")
+			})
+
+			// Test route works with correct method
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(tc.expectedMethod, tc.path, nil)
+			router.ServeHTTP(w, r)
+
+			if w.Code != http.StatusOK {
+				t.Errorf("expected status %d for %s %s, got %d",
+					http.StatusOK, tc.expectedMethod, tc.path, w.Code)
+			}
+
+			if w.Body.String() != "handler executed" {
+				t.Errorf("expected body %q, got %q",
+					"handler executed", w.Body.String())
+			}
+
+			// Test route does not respond to wrong method
+			wrongMethod := http.MethodPost
+			if tc.expectedMethod == http.MethodPost {
+				wrongMethod = http.MethodGet
+			}
+
+			w2 := httptest.NewRecorder()
+			r2 := httptest.NewRequest(wrongMethod, tc.path, nil)
+			router.ServeHTTP(w2, r2)
+
+			if w2.Code != http.StatusMethodNotAllowed {
+				t.Errorf("expected status %d for wrong method %s %s, got %d",
+					http.StatusMethodNotAllowed, wrongMethod, tc.path, w2.Code)
+			}
+		})
+	}
+}
+
+func TestPlainTextOutput(t *testing.T) {
+	tests := []struct {
+		name         string
+		text         string
+		expectedBody string
+	}{
+		{
+			name:         "simple text",
+			text:         "hello world",
+			expectedBody: "hello world",
+		},
+		{
+			name:         "empty text",
+			text:         "",
+			expectedBody: "",
+		},
+		{
+			name:         "text with special characters",
+			text:         "<html>&special</html>",
+			expectedBody: "<html>&special</html>",
+		},
+		{
+			name:         "multiline text",
+			text:         "line1\nline2\nline3",
+			expectedBody: "line1\nline2\nline3",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := PlainText(tc.text)
+			handler.ServeHTTP(w, r)
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestJsonResponseOutput(t *testing.T) {
+	tests := []struct {
+		name         string
+		data         any
+		expectedBody string
+		shouldError  bool
+	}{
+		{
+			name:         "simple object",
+			data:         map[string]string{"key": "value"},
+			expectedBody: `{"key":"value"}`,
+			shouldError:  false,
+		},
+		{
+			name:         "empty object",
+			data:         map[string]string{},
+			expectedBody: `{}`,
+			shouldError:  false,
+		},
+		{
+			name:         "array",
+			data:         []int{1, 2, 3},
+			expectedBody: `[1,2,3]`,
+			shouldError:  false,
+		},
+		{
+			name:         "null value",
+			data:         nil,
+			expectedBody: `null`,
+			shouldError:  false,
+		},
+		{
+			name:         "unmarshalable value",
+			data:         make(chan int),
+			expectedBody: "json: unsupported type: chan int",
+			shouldError:  true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := JsonResponse(tc.data)
+			handler.ServeHTTP(w, r)
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestRenderOutput(t *testing.T) {
+	tests := []struct {
+		name         string
+		templatePath string
+		data         Locals
+		shouldFind   string
+	}{
+		{
+			name:         "render missing template shows error",
+			templatePath: "nonexistent-template-path",
+			data:         Locals{},
+			shouldFind:   "template nonexistent-template-path not found",
+		},
+		{
+			name:         "render with nil data",
+			templatePath: "missing",
+			data:         nil,
+			shouldFind:   "template missing not found",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+
+			handler := Render(tc.templatePath, tc.data)
+			handler.ServeHTTP(w, r)
+
+			if tc.shouldFind != "" && !contains(w.Body.String(), tc.shouldFind) {
+				t.Errorf("expected response to contain %q, got %q",
+					tc.shouldFind, w.Body.String())
+			}
+		})
+	}
+}
+
 func TestFuncStringer(t *testing.T) {
 	tests := []struct {
 		name          string
