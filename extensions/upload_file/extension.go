@@ -91,7 +91,7 @@ func uploadFileHandler(r xlog.Request) xlog.Output {
 		if err := os.Mkdir(PUBLIC_PATH, 0700); err != nil && !os.IsExist(err) {
 			return xlog.InternalServerError(err)
 		}
-		out, err := os.Create(p)
+		out, err := os.Create(p) // #nosec G304 -- Path is Join(PUBLIC_PATH, sha256+ext); sha256 prevents traversal (never starts with ..)
 		if err != nil {
 			return xlog.InternalServerError(err)
 		}

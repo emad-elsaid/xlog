@@ -144,7 +144,7 @@ func getUrlMeta(url string) (*Meta, error) {
 	}
 
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))
-	cache, err := os.ReadFile(cacheFile)
+	cache, err := os.ReadFile(cacheFile) // #nosec G304 -- Cache filename is SHA256-based, path traversal impossible
 	var meta Meta
 	if err == nil {
 		if err := json.Unmarshal(cache, &meta); err == nil {
@@ -152,7 +152,7 @@ func getUrlMeta(url string) (*Meta, error) {
 		}
 	}
 
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // #nosec G107 -- SSRF is intended feature behavior. URLs from markdown; user=admin in personal wiki context
 	if resp == nil || err != nil {
 		return nil, err
 	}

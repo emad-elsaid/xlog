@@ -41,11 +41,10 @@ func (CustomWidget) Init() {
 }
 
 var readFile = memoize.New(func(f string) template.HTML {
-	b, err := os.ReadFile(f)
+	b, err := os.ReadFile(f) // #nosec G304 -- File path controlled by admin via command-line flags, not user input
 	if err != nil {
 		panic(err)
 	}
 
-	// #nosec G203 -- File path is controlled by admin via command-line flags, content is trusted admin HTML
-	return template.HTML(b)
+	return template.HTML(b) // #nosec G203 -- Content is trusted admin HTML from admin-controlled file
 })

@@ -62,7 +62,7 @@ func openEditor(page xlog.Page) {
 	cmdArgs := make([]string, 0, len(segments))
 	cmdArgs = append(cmdArgs, segments[1:]...)
 	cmdArgs = append(cmdArgs, page.FileName())
-	cmd := exec.Command(name, cmdArgs...)
+	cmd := exec.Command(name, cmdArgs...) // #nosec G204 -- Command configured by admin via EDITOR env var or flag, not user input
 
 	if err := cmd.Start(); err != nil {
 		slog.Error("Error start command", "command", cmd.String(), "error", err)

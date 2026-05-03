@@ -97,7 +97,7 @@ func (p *page) Exists() bool {
 }
 
 func (p *page) Render() template.HTML {
-	cmd := exec.Command("pandoc", "-f", p.ext[1:], "-t", "html", p.FileName(), "--output", "-")
+	cmd := exec.Command("pandoc", "-f", p.ext[1:], "-t", "html", p.FileName(), "--output", "-") // #nosec G204 -- FileName from trusted page system, ext from registered extensions
 	html, err := cmd.Output()
 	if err != nil {
 		slog.Error("Couldn't parse file to markdown using pandoc", "file", p.FileName(), "error", err)

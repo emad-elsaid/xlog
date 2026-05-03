@@ -43,7 +43,7 @@ func (p *page) Render() template.HTML {
 }
 
 func (p *page) Content() xlog.Markdown {
-	cmd := exec.Command("gpg", "--decrypt", p.FileName())
+	cmd := exec.Command("gpg", "--decrypt", p.FileName()) // #nosec G204 -- FileName is from trusted page system, not direct user input
 	out, err := cmd.Output()
 	if err != nil {
 		slog.Error("Coudln't decrypt", "file", p.FileName(), "error", err)
@@ -84,7 +84,7 @@ func (p *page) Write(content xlog.Markdown) bool {
 	}
 
 	content = xlog.Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
-	cmd := exec.Command("gpg", "-r", gpgId, "--output", p.FileName(), "--batch", "--yes", "--encrypt")
+	cmd := exec.Command("gpg", "-r", gpgId, "--output", p.FileName(), "--batch", "--yes", "--encrypt") // #nosec G204 -- FileName is from trusted page system, gpgId from config
 	cmd.Stdin = bytes.NewBuffer([]byte(content))
 
 	out, err := cmd.Output()
