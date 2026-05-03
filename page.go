@@ -122,7 +122,10 @@ func (p *page) Write(content Markdown) bool {
 
 	p.clearCache()
 	name := p.FileName()
-	os.MkdirAll(filepath.Dir(name), 0700)
+	if err := os.MkdirAll(filepath.Dir(name), 0700); err != nil {
+		slog.Error("Can't create page directory", "page", p.Name(), "error", err)
+		return false
+	}
 
 	content = Markdown(strings.ReplaceAll(string(content), "\r\n", "\n"))
 	if err := os.WriteFile(name, []byte(content), 0644); err != nil {

@@ -40,7 +40,7 @@ func compileTemplates() {
 
 	templates = template.New("")
 	for _, tfs := range templatesFSs {
-		fs.WalkDir(tfs, ".", func(p string, d fs.DirEntry, err error) error {
+		_ = fs.WalkDir(tfs, ".", func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}

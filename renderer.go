@@ -52,7 +52,7 @@ func FindInAST[t ast.Node](n ast.Node) (found t, ok bool) {
 		return
 	}
 
-	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if found, ok = n.(t); ok {
 			return ast.WalkStop, nil
 		}
@@ -69,7 +69,7 @@ func FindAllInAST[t ast.Node](n ast.Node) (a []t) {
 		return
 	}
 
-	ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	_ = ast.Walk(n, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}

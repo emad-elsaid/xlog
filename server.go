@@ -119,7 +119,9 @@ func NoContent() Output {
 // PlainText returns an output function that writes text to response writer
 func PlainText(text string) Output {
 	return func(w Response, r Request) {
-		w.Write([]byte(text))
+		if _, err := w.Write([]byte(text)); err != nil {
+			slog.Error("failed to write plain text response", "error", err)
+		}
 	}
 }
 
@@ -127,11 +129,15 @@ func JsonResponse(a any) Output {
 	return func(w Response, r Request) {
 		b, err := json.Marshal(a)
 		if err != nil {
-			w.Write([]byte(err.Error()))
+			if _, writeErr := w.Write([]byte(err.Error())); writeErr != nil {
+				slog.Error("failed to write error response", "error", writeErr)
+			}
 			return
 		}
 
-		w.Write(b)
+		if _, err := w.Write(b); err != nil {
+			slog.Error("failed to write JSON response", "error", err)
+		}
 	}
 }
 
@@ -159,7 +165,9 @@ func Delete(path string, handler HandlerFunc) {
 // Render returns an output function that renders partial with data and writes it as response
 func Render(path string, data Locals) Output {
 	return func(w Response, r Request) {
-		fmt.Fprint(w, Partial(path, data))
+		if _, err := fmt.Fprint(w, Partial(path, data)); err != nil {
+			slog.Error("failed to render template", "path", path, "error", err)
+		}
 	}
 }
 

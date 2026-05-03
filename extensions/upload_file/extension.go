@@ -96,7 +96,9 @@ func uploadFileHandler(r Request) Output {
 			return InternalServerError(err)
 		}
 
-		f.Seek(io.SeekStart, 0)
+		if _, err := f.Seek(io.SeekStart, 0); err != nil {
+			return InternalServerError(err)
+		}
 		_, err = io.Copy(out, f)
 		if err != nil {
 			return InternalServerError(err)
