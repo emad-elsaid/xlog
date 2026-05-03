@@ -2189,3 +2189,106 @@ func TestBytesFilter_ExtendString(t *testing.T) {
 		})
 	}
 }
+
+func TestURLEscape(t *testing.T) {
+	tests := []struct {
+		name             string
+		input            []byte
+		resolveReference bool
+		want             string
+	}{
+		{
+			name:             "empty string",
+			input:            []byte(""),
+			resolveReference: false,
+			want:             "",
+		},
+		{
+			name:             "ascii only safe chars",
+			input:            []byte("hello"),
+			resolveReference: false,
+			want:             "hello",
+		},
+		{
+			name:             "space to %20",
+			input:            []byte("hello world"),
+			resolveReference: false,
+			want:             "hello%20world",
+		},
+		{
+			name:             "special chars",
+			input:            []byte("a<b>c&d"),
+			resolveReference: false,
+			want:             "a%3Cb%3Ec&d",
+		},
+		{
+			name:             "multibyte utf8 2-byte",
+			input:            []byte("café"),
+			resolveReference: false,
+			want:             "caf%C3%A9",
+		},
+		{
+			name:             "multibyte utf8 3-byte",
+			input:            []byte("日本語"),
+			resolveReference: false,
+			want:             "%E6%97%A5%E6%9C%AC%E8%AA%9E",
+		},
+		{
+			name:             "multibyte utf8 4-byte emoji",
+			input:            []byte("test😀end"),
+			resolveReference: false,
+			want:             "test%F0%9F%98%80end",
+		},
+		{
+			name:             "truncated utf8 at buffer end 2-byte",
+			input:            []byte("test\xc3"),
+			resolveReference: false,
+			want:             "test%C3",
+		},
+		{
+			name:             "truncated utf8 at buffer end 3-byte partial",
+			input:            []byte("test\xe6\x97"),
+			resolveReference: false,
+			want:             "test%E6%97",
+		},
+		{
+			name:             "truncated utf8 at buffer end 4-byte partial",
+			input:            []byte("test\xf0\x9f\x98"),
+			resolveReference: false,
+			want:             "test%F0%9F%98",
+		},
+		{
+			name:             "already escaped percent kept",
+			input:            []byte("test%20value"),
+			resolveReference: false,
+			want:             "test%20value",
+		},
+		{
+			name:             "numeric reference resolved hex",
+			input:            []byte("test&#x41;end"),
+			resolveReference: true,
+			want:             "testAend",
+		},
+		{
+			name:             "numeric reference resolved decimal",
+			input:            []byte("test&#65;end"),
+			resolveReference: true,
+			want:             "testAend",
+		},
+		{
+			name:             "mixed ascii and multibyte",
+			input:            []byte("hello 世界 test"),
+			resolveReference: false,
+			want:             "hello%20%E4%B8%96%E7%95%8C%20test",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := string(URLEscape(tc.input, tc.resolveReference))
+			if got != tc.want {
+				t.Errorf("URLEscape(%q, %v) = %q, want %q", tc.input, tc.resolveReference, got, tc.want)
+			}
+		})
+	}
+}

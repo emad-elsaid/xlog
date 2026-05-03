@@ -618,7 +618,7 @@ func ResolveNumericReferences(source []byte) []byte {
 							v, _ := strconv.ParseUint(BytesToReadOnlyString(source[start:i]), 16, 32)
 							cob.Write(source[n:pos])
 							n = i + 1
-							runeSize := utf8.EncodeRune(buf, ToValidRune(rune(v)))
+							runeSize := utf8.EncodeRune(buf, ToValidRune(rune(v))) //nolint:gosec // G115: ToValidRune validates uint64->rune conversion
 							cob.Write(buf[:runeSize])
 							continue
 						}
@@ -630,7 +630,7 @@ func ResolveNumericReferences(source []byte) []byte {
 							v, _ := strconv.ParseUint(BytesToReadOnlyString(source[start:i]), 0, 32)
 							cob.Write(source[n:pos])
 							n = i + 1
-							runeSize := utf8.EncodeRune(buf, ToValidRune(rune(v)))
+							runeSize := utf8.EncodeRune(buf, ToValidRune(rune(v))) //nolint:gosec // G115: ToValidRune validates uint64->rune conversion
 							cob.Write(buf[:runeSize])
 							continue
 						}
@@ -720,8 +720,15 @@ func URLEscape(v []byte, resolveReference bool) []byte {
 			n = i
 			continue
 		}
-		if int(u8len) > len(v) {
-			u8len = int8(len(v) - 1)
+		remaining := len(v) - i
+		if int(u8len) > remaining {
+			// Truncated UTF-8 sequence at buffer end - escape remaining bytes individually
+			cob.Write(v[n:i])
+			for j := i; j < len(v); j++ {
+				cob.Write(StringToReadOnlyBytes(url.QueryEscape(string([]byte{v[j]}))))
+			}
+			n = len(v)
+			break
 		}
 		if u8len == 0 {
 			i++
@@ -729,13 +736,7 @@ func URLEscape(v []byte, resolveReference bool) []byte {
 			continue
 		}
 		cob.Write(v[n:i])
-		stop := i + int(u8len)
-		if stop > len(v) {
-			i++
-			n = i
-			continue
-		}
-		cob.Write(StringToReadOnlyBytes(url.QueryEscape(string(v[i:stop]))))
+		cob.Write(StringToReadOnlyBytes(url.QueryEscape(string(v[i : i+int(u8len)]))))
 		i += int(u8len)
 		n = i
 	}
@@ -892,7 +893,7 @@ func IsSpace(c byte) bool {
 
 // IsSpaceRune returns true if the given rune is a space, otherwise false.
 func IsSpaceRune(r rune) bool {
-	return int32(r) <= 256 && IsSpace(byte(r)) || unicode.IsSpace(r)
+	return r <= 256 && IsSpace(byte(r)) || unicode.IsSpace(r) //nolint:gosec // G115: r <= 256 check prevents overflow
 }
 
 // IsNumeric returns true if the given character is a numeric, otherwise false.
