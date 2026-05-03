@@ -1,12 +1,12 @@
 package main
 
 import (
-	// Core
+	// Core.
 	"context"
 
 	"github.com/emad-elsaid/xlog"
 
-	// All official extensions
+	// All official extensions.
 	_ "github.com/emad-elsaid/xlog/extensions/all"
 )
 
