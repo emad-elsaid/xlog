@@ -234,3 +234,54 @@ func TestDir(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkBanner(b *testing.B) {
+	tests := []struct {
+		name    string
+		path    string
+		content string
+	}{
+		{
+			name:    "simple banner",
+			path:    "post.md",
+			content: "![](banner.jpg)",
+		},
+		{
+			name:    "banner in subdirectory",
+			path:    "posts/article.md",
+			content: "![](./images/banner.png)",
+		},
+		{
+			name:    "absolute URL banner",
+			path:    "post.md",
+			content: "![](https://example.com/banner.jpg)",
+		},
+		{
+			name:    "no banner",
+			path:    "post.md",
+			content: "Just plain text without image",
+		},
+		{
+			name:    "large document with banner",
+			path:    "docs/guide.md",
+			content: "![](hero.jpg)\n\n" + string(make([]byte, 10000)),
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			reader := text.NewReader([]byte(tc.content))
+			p := page{
+				name:       tc.path,
+				lastUpdate: time.Time{},
+				ast:        MarkdownConverter().Parser().Parse(reader),
+				content:    (*Markdown)(&tc.content),
+			}
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_ = Banner(&p)
+			}
+		})
+	}
+}
