@@ -23,10 +23,10 @@ func setupTestEnv(t *testing.T) (string, func()) {
 	}
 
 	// Create test pages
-	if err := os.WriteFile("test-page.md", []byte("# Test Page\n\nContent"), 0644); err != nil {
+	if err := os.WriteFile("test-page.md", []byte("# Test Page\n\nContent"), 0600); err != nil {
 		t.Fatalf("failed to create test-page.md: %v", err)
 	}
-	if err := os.WriteFile("another-page.md", []byte("# Another Page\n\nMore content"), 0644); err != nil {
+	if err := os.WriteFile("another-page.md", []byte("# Another Page\n\nMore content"), 0600); err != nil {
 		t.Fatalf("failed to create another-page.md: %v", err)
 	}
 

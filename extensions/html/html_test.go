@@ -31,13 +31,13 @@ func TestHTMLSource_Page(t *testing.T) {
 	}()
 
 	// Create test HTML files
-	if err := os.WriteFile("test.html", []byte("<h1>Test HTML</h1>"), 0644); err != nil {
+	if err := os.WriteFile("test.html", []byte("<h1>Test HTML</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test.html: %v", err)
 	}
-	if err := os.WriteFile("test2.htm", []byte("<h1>Test HTM</h1>"), 0644); err != nil {
+	if err := os.WriteFile("test2.htm", []byte("<h1>Test HTM</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test2.htm: %v", err)
 	}
-	if err := os.WriteFile("test3.xhtml", []byte("<h1>Test XHTML</h1>"), 0644); err != nil {
+	if err := os.WriteFile("test3.xhtml", []byte("<h1>Test XHTML</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test3.xhtml: %v", err)
 	}
 
@@ -85,19 +85,19 @@ func TestHTMLSource_Each(t *testing.T) {
 	}()
 
 	// Create test HTML files in various directories
-	if err := os.WriteFile("root.html", []byte("<h1>Root</h1>"), 0644); err != nil {
+	if err := os.WriteFile("root.html", []byte("<h1>Root</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create root.html: %v", err)
 	}
-	if err := os.MkdirAll("subdir", 0755); err != nil {
+	if err := os.MkdirAll("subdir", 0750); err != nil {
 		t.Fatalf("Failed to create subdir: %v", err)
 	}
-	if err := os.WriteFile("subdir/nested.htm", []byte("<h1>Nested</h1>"), 0644); err != nil {
+	if err := os.WriteFile("subdir/nested.htm", []byte("<h1>Nested</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create nested.htm: %v", err)
 	}
-	if err := os.WriteFile("another.xhtml", []byte("<h1>Another</h1>"), 0644); err != nil {
+	if err := os.WriteFile("another.xhtml", []byte("<h1>Another</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create another.xhtml: %v", err)
 	}
-	if err := os.WriteFile("not-html.txt", []byte("Not HTML"), 0644); err != nil {
+	if err := os.WriteFile("not-html.txt", []byte("Not HTML"), 0600); err != nil {
 		t.Fatalf("Failed to create not-html.txt: %v", err)
 	}
 
@@ -136,7 +136,7 @@ func TestHTMLSource_Each_ContextCancellation(t *testing.T) {
 	// Create multiple files
 	for i := 0; i < 10; i++ {
 		filename := filepath.Join(tmpDir, "file"+string(rune('0'+i))+".html")
-		if err := os.WriteFile(filename, []byte("<h1>Test</h1>"), 0644); err != nil {
+		if err := os.WriteFile(filename, []byte("<h1>Test</h1>"), 0600); err != nil {
 			t.Fatalf("Failed to create test file: %v", err)
 		}
 	}
@@ -184,7 +184,7 @@ func TestPage_Exists(t *testing.T) {
 		}
 	}()
 
-	if err := os.WriteFile("exists.html", []byte("<h1>Exists</h1>"), 0644); err != nil {
+	if err := os.WriteFile("exists.html", []byte("<h1>Exists</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -219,7 +219,7 @@ func TestPage_Content(t *testing.T) {
 	}()
 
 	content := "<h1>Test Content</h1>"
-	if err := os.WriteFile("test.html", []byte(content), 0644); err != nil {
+	if err := os.WriteFile("test.html", []byte(content), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -262,7 +262,7 @@ func TestPage_Render(t *testing.T) {
 	}()
 
 	htmlContent := "<h1>Test Content</h1>"
-	if err := os.WriteFile("test.html", []byte(htmlContent), 0644); err != nil {
+	if err := os.WriteFile("test.html", []byte(htmlContent), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -287,7 +287,7 @@ func TestPage_ModTime(t *testing.T) {
 	}()
 
 	before := time.Now().Add(-1 * time.Second)
-	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644); err != nil {
+	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 	after := time.Now().Add(1 * time.Second)
@@ -408,7 +408,7 @@ func TestPage_Delete(t *testing.T) {
 		}
 	}()
 
-	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0644); err != nil {
+	if err := os.WriteFile("test.html", []byte("<h1>Test</h1>"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 

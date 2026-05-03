@@ -116,7 +116,7 @@ func TestStaticHandler(t *testing.T) {
 	testFile := filepath.Join(tempDir, "test.txt")
 	testContent := []byte("test content")
 
-	if err := os.WriteFile(testFile, testContent, 0644); err != nil {
+	if err := os.WriteFile(testFile, testContent, 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -209,7 +209,7 @@ func TestStaticHandlerPriority(t *testing.T) {
 	localFile := filepath.Join(tempDir, "override.txt")
 	localContent := []byte("local override")
 
-	if err := os.WriteFile(localFile, localContent, 0644); err != nil {
+	if err := os.WriteFile(localFile, localContent, 0600); err != nil {
 		t.Fatalf("Failed to create local file: %v", err)
 	}
 

@@ -111,7 +111,7 @@ func TestActionAttrs(t *testing.T) {
 
 	// Create a test page
 	testPageName := "test-page.md"
-	if err := os.WriteFile(testPageName, []byte("# Test Page"), 0644); err != nil {
+	if err := os.WriteFile(testPageName, []byte("# Test Page"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -201,12 +201,12 @@ func TestIsStarred(t *testing.T) {
 
 	// Create test pages
 	testPage := "test-page.md"
-	if err := os.WriteFile(testPage, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
 	otherPage := "other-page.md"
-	if err := os.WriteFile(otherPage, []byte("# Other"), 0644); err != nil {
+	if err := os.WriteFile(otherPage, []byte("# Other"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -246,7 +246,7 @@ func TestIsStarred(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create or update starred.md
 			if tt.starredContent != "" {
-				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0644); err != nil {
+				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0600); err != nil {
 					t.Fatal(err)
 				}
 			} else {
@@ -278,7 +278,7 @@ func TestStarAction(t *testing.T) {
 
 	// Create a test page
 	testPage := "test-page.md"
-	if err := os.WriteFile(testPage, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -314,7 +314,7 @@ func TestStarAction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.starredContent != "" {
-				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0644); err != nil {
+				if err := os.WriteFile(STARRED_PAGES+".md", []byte(tt.starredContent), 0600); err != nil {
 					t.Fatal(err)
 				}
 			} else {
@@ -365,7 +365,7 @@ func TestStarredPageIcon(t *testing.T) {
 
 	// Create a test page without emoji
 	testPage := "test-page.md"
-	if err := os.WriteFile(testPage, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -392,11 +392,11 @@ func TestStarredPageName(t *testing.T) {
 
 	// Create a test page with path
 	testPage := "folder/test-page.md"
-	if err := os.MkdirAll("folder", 0755); err != nil {
+	if err := os.MkdirAll("folder", 0750); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := os.WriteFile(testPage, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(testPage, []byte("# Test"), 0600); err != nil {
 		t.Fatal(err)
 	}
 

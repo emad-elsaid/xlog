@@ -54,7 +54,7 @@ func TestPageExists(t *testing.T) {
 	}
 
 	// Create a page file
-	if err := os.WriteFile("test.md", []byte("content"), 0644); err != nil {
+	if err := os.WriteFile("test.md", []byte("content"), 0600); err != nil {
 		t.Fatalf("failed to create test file: %v", err)
 	}
 	p2 := &page{name: "test"}
@@ -76,7 +76,7 @@ func TestPageContent(t *testing.T) {
 	}
 
 	content := "# Test Page\n\nThis is test content."
-	if err := os.WriteFile("test.md", []byte(content), 0644); err != nil {
+	if err := os.WriteFile("test.md", []byte(content), 0600); err != nil {
 		t.Fatalf("failed to create test file: %v", err)
 	}
 

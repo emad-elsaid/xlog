@@ -32,7 +32,7 @@ func TestSitemapHandler(t *testing.T) {
 	testPages := []string{"home", "about", "contact"}
 	for _, pageName := range testPages {
 		filename := pageName + ".md"
-		if err := os.WriteFile(filename, []byte("# "+pageName), 0644); err != nil {
+		if err := os.WriteFile(filename, []byte("# "+pageName), 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -143,7 +143,7 @@ func TestSitemapHandlerDifferentDomain(t *testing.T) {
 	}
 
 	// Create test page
-	if err := os.WriteFile("test.md", []byte("# test"), 0644); err != nil {
+	if err := os.WriteFile("test.md", []byte("# test"), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -187,7 +187,7 @@ func TestSitemapHandlerHTTPS(t *testing.T) {
 	}
 
 	// Create a test page
-	if err := os.WriteFile("secure.md", []byte("# secure page"), 0644); err != nil {
+	if err := os.WriteFile("secure.md", []byte("# secure page"), 0600); err != nil {
 		t.Fatal(err)
 	}
 

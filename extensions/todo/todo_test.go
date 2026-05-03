@@ -118,7 +118,7 @@ func TestToggleHandler(t *testing.T) {
 	// Create test page
 	testPageName := "test-page"
 	testContent := "# Test\n[ ] Task 1\n[x] Task 2\n"
-	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -169,7 +169,7 @@ func TestToggleHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Reset test page content for each test
-			if err := os.WriteFile(testPageName+".md", []byte(testContent), 0644); err != nil {
+			if err := os.WriteFile(testPageName+".md", []byte(testContent), 0600); err != nil {
 				t.Fatalf("Failed to reset test page: %v", err)
 			}
 

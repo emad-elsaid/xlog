@@ -30,10 +30,10 @@ func setupTestEnv(t *testing.T) func() {
 	}
 
 	// Create test pages
-	if err := os.WriteFile("page1.md", []byte("# Page 1\nContent 1"), 0644); err != nil {
+	if err := os.WriteFile("page1.md", []byte("# Page 1\nContent 1"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
-	if err := os.WriteFile("page2.md", []byte("# Page 2\nContent 2"), 0644); err != nil {
+	if err := os.WriteFile("page2.md", []byte("# Page 2\nContent 2"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -114,7 +114,7 @@ func TestFeedItemsCount(t *testing.T) {
 	limit = 2
 
 	// Create a third page
-	if err := os.WriteFile("page3.md", []byte("# Page 3\nContent 3"), 0644); err != nil {
+	if err := os.WriteFile("page3.md", []byte("# Page 3\nContent 3"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -143,7 +143,7 @@ func TestFeedItemsSortedByModTime(t *testing.T) {
 	defer cleanup()
 
 	// Create old page first
-	if err := os.WriteFile("old.md", []byte("Old content"), 0644); err != nil {
+	if err := os.WriteFile("old.md", []byte("Old content"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -151,7 +151,7 @@ func TestFeedItemsSortedByModTime(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	// Create new page
-	if err := os.WriteFile("new.md", []byte("New content"), 0644); err != nil {
+	if err := os.WriteFile("new.md", []byte("New content"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
@@ -188,7 +188,7 @@ func TestFeedItemContent(t *testing.T) {
 	defer cleanup()
 
 	// Create a specific test page
-	if err := os.WriteFile("test-page.md", []byte("# Test Content\n\nSome content here"), 0644); err != nil {
+	if err := os.WriteFile("test-page.md", []byte("# Test Content\n\nSome content here"), 0600); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 

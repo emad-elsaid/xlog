@@ -57,7 +57,7 @@ func TestOpenEditorWithValidPage(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -85,7 +85,7 @@ func TestOpenEditorWithEmptyEditor(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -113,7 +113,7 @@ func TestEditorHandler(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -157,7 +157,7 @@ func TestLinksWithValidPage(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -203,7 +203,7 @@ func TestNewPageCallback(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -227,7 +227,7 @@ func TestEditButtonStructMethods(t *testing.T) {
 	// Create a test page
 	pageName := "test-page.md"
 	pagePath := filepath.Join(tmpDir, pageName)
-	if err := os.WriteFile(pagePath, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(pagePath, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 

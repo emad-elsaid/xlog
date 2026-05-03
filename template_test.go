@@ -76,14 +76,14 @@ func TestCompileTemplatesWithThemeDirectory(t *testing.T) {
 	// Create a temporary theme directory
 	tmpDir := t.TempDir()
 	themeDir := filepath.Join(tmpDir, "theme")
-	if err := os.Mkdir(themeDir, 0755); err != nil {
+	if err := os.Mkdir(themeDir, 0750); err != nil {
 		t.Fatalf("Failed to create theme directory: %v", err)
 	}
 
 	// Create a custom template in the theme directory
 	customTemplate := `<div>Custom Theme Template</div>`
 	customTemplatePath := filepath.Join(themeDir, "custom.html")
-	if err := os.WriteFile(customTemplatePath, []byte(customTemplate), 0644); err != nil {
+	if err := os.WriteFile(customTemplatePath, []byte(customTemplate), 0600); err != nil {
 		t.Fatalf("Failed to write custom template: %v", err)
 	}
 

@@ -67,7 +67,7 @@ func TestGetPageHandler_ExistingPage(t *testing.T) {
 	// Create test page
 	testPageName := "testpage"
 	testContent := "# Test Page\n\nTest content"
-	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -138,7 +138,7 @@ func TestGetPageHandler_Directory(t *testing.T) {
 
 	// Create a directory
 	dirName := "testdir"
-	if err := os.Mkdir(dirName, 0755); err != nil {
+	if err := os.Mkdir(dirName, 0750); err != nil {
 		t.Fatalf("Failed to create test directory: %v", err)
 	}
 
@@ -215,13 +215,13 @@ func TestGetPageHandler_StaticFile(t *testing.T) {
 
 	// Create public directory and static file
 	publicDir := "public"
-	if err := os.Mkdir(publicDir, 0755); err != nil {
+	if err := os.Mkdir(publicDir, 0750); err != nil {
 		t.Fatalf("Failed to create public directory: %v", err)
 	}
 
 	testFile := "test.txt"
 	testContent := "static content"
-	if err := os.WriteFile(filepath.Join(publicDir, testFile), []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(publicDir, testFile), []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create static file: %v", err)
 	}
 
@@ -248,7 +248,7 @@ func TestStart_BuildMode(t *testing.T) {
 	// Create minimal structure
 	sourceDir := filepath.Join(tempDir, "source")
 	buildDir := filepath.Join(tempDir, "build")
-	os.Mkdir(sourceDir, 0755)
+	os.Mkdir(sourceDir, 0750)
 
 	oldConfig := Config
 	defer func() { Config = oldConfig }()

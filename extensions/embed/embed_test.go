@@ -108,7 +108,7 @@ func TestEmbedShortcode_Integration(t *testing.T) {
 	testContent := "# Test Embed Page\n\nThis is test content for embedding."
 	testFilePath := filepath.Join(tmpDir, testPageName+".md")
 
-	if err := os.WriteFile(testFilePath, []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(testFilePath, []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -152,7 +152,7 @@ func TestEmbedShortcode_Integration_WithWhitespace(t *testing.T) {
 	testContent := "# Whitespace Test"
 	testFilePath := filepath.Join(tmpDir, testPageName+".md")
 
-	if err := os.WriteFile(testFilePath, []byte(testContent), 0644); err != nil {
+	if err := os.WriteFile(testFilePath, []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create test page: %v", err)
 	}
 
@@ -249,7 +249,7 @@ func TestEmbedShortcode_ComplexPageName(t *testing.T) {
 			content := fmt.Sprintf("# %s", pageName)
 			filePath := filepath.Join(tmpDir, pageName+".md")
 
-			if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			if err := os.WriteFile(filePath, []byte(content), 0600); err != nil {
 				t.Fatalf("Failed to create test page: %v", err)
 			}
 

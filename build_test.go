@@ -284,7 +284,7 @@ func TestBuild_Integration(t *testing.T) {
 
 			// Create a fresh subdirectory for this test case
 			testDir := filepath.Join(tmpDir, tc.name)
-			if err := os.MkdirAll(testDir, 0755); err != nil {
+			if err := os.MkdirAll(testDir, 0750); err != nil {
 				t.Fatalf("Failed to create test dir: %v", err)
 			}
 
@@ -418,13 +418,13 @@ func TestBuild_404Handling(t *testing.T) {
 
 	// First create the expected 404 source directory and file
 	notFoundDir := filepath.Join(tmpDir, Config.NotFoundPage)
-	if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+	if err := os.MkdirAll(notFoundDir, 0750); err != nil {
 		t.Fatalf("Failed to create 404 dir: %v", err)
 	}
 
 	notFoundContent := []byte("<html><body>Page Not Found</body></html>")
 	notFoundIndexPath := filepath.Join(notFoundDir, "index.html")
-	if err := os.WriteFile(notFoundIndexPath, notFoundContent, 0644); err != nil {
+	if err := os.WriteFile(notFoundIndexPath, notFoundContent, 0600); err != nil {
 		t.Fatalf("Failed to write 404 index file: %v", err)
 	}
 

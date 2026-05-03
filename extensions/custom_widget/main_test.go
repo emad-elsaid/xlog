@@ -46,7 +46,7 @@ func TestCustomWidgetInit_WithHeadFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	headFile := filepath.Join(tmpDir, "head.html")
 	headContent := "<meta name=\"test\" content=\"value\">"
-	if err := os.WriteFile(headFile, []byte(headContent), 0644); err != nil {
+	if err := os.WriteFile(headFile, []byte(headContent), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -76,7 +76,7 @@ func TestCustomWidgetInit_WithBeforeViewFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	beforeFile := filepath.Join(tmpDir, "before.html")
 	beforeContent := "<div class=\"before-content\">Before</div>"
-	if err := os.WriteFile(beforeFile, []byte(beforeContent), 0644); err != nil {
+	if err := os.WriteFile(beforeFile, []byte(beforeContent), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -106,7 +106,7 @@ func TestCustomWidgetInit_WithAfterViewFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	afterFile := filepath.Join(tmpDir, "after.html")
 	afterContent := "<div class=\"after-content\">After</div>"
-	if err := os.WriteFile(afterFile, []byte(afterContent), 0644); err != nil {
+	if err := os.WriteFile(afterFile, []byte(afterContent), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -142,13 +142,13 @@ func TestCustomWidgetInit_WithMultipleFiles(t *testing.T) {
 	beforeContent := "<div>Before</div>"
 	afterContent := "<div>After</div>"
 
-	if err := os.WriteFile(headFile, []byte(headContent), 0644); err != nil {
+	if err := os.WriteFile(headFile, []byte(headContent), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(beforeFile, []byte(beforeContent), 0644); err != nil {
+	if err := os.WriteFile(beforeFile, []byte(beforeContent), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(afterFile, []byte(afterContent), 0644); err != nil {
+	if err := os.WriteFile(afterFile, []byte(afterContent), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -197,7 +197,7 @@ func TestReadFile_ValidFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "test.html")
 	content := "<div>Test Content</div>"
-	if err := os.WriteFile(testFile, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte(content), 0600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -223,7 +223,7 @@ func TestReadFile_EmptyFile(t *testing.T) {
 	// Create temporary empty file
 	tmpDir := t.TempDir()
 	testFile := filepath.Join(tmpDir, "empty.html")
-	if err := os.WriteFile(testFile, []byte(""), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte(""), 0600); err != nil {
 		t.Fatal(err)
 	}
 
