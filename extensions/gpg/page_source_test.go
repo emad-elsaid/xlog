@@ -288,7 +288,7 @@ func TestEncryptedPages_Each_IgnoresNonEncryptedFiles(t *testing.T) {
 // TestPGPExtension_Name verifies the extension name.
 func TestPGPExtension_Name(t *testing.T) {
 	ext := PGP{}
-	if name := ext.Name(); name != "pgp" {
-		t.Errorf("Name() = %q, want %q", name, "pgp")
+	if name := ext.Name(); name != ExtensionName {
+		t.Errorf("Name() = %q, want %q", name, ExtensionName)
 	}
 }

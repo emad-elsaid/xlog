@@ -6,7 +6,10 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
-const EXT = ".md.pgp"
+const (
+	EXT           = ".md.pgp"
+	ExtensionName = "pgp"
+)
 
 var gpgId string
 
@@ -17,7 +20,7 @@ func init() {
 
 type PGP struct{}
 
-func (PGP) Name() string { return "pgp" }
+func (PGP) Name() string { return ExtensionName }
 func (PGP) Init() {
 	xlog.RegisterPageSource(new(encryptedPages))
 

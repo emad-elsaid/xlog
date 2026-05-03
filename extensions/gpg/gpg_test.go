@@ -7,8 +7,8 @@ import (
 // TestPGPName verifies the PGP extension name.
 func TestPGPName(t *testing.T) {
 	ext := PGP{}
-	if got := ext.Name(); got != "pgp" {
-		t.Errorf("Name() = %q, want %q", got, "pgp")
+	if got := ext.Name(); got != ExtensionName {
+		t.Errorf("Name() = %q, want %q", got, ExtensionName)
 	}
 }
 
