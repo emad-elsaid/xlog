@@ -47,5 +47,6 @@ func widget(p xlog.Page) template.HTML {
 	}
 
 	script := fmt.Sprintf(tmpl, template.JSEscapeString(p.Name()), domain)
+	// #nosec G203 -- Template string is constant, page name is JS-escaped, domain is admin-controlled flag
 	return template.HTML(script)
 }

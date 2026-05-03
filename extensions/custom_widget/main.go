@@ -46,5 +46,6 @@ var readFile = memoize.New(func(f string) template.HTML {
 		panic(err)
 	}
 
+	// #nosec G203 -- File path is controlled by admin via command-line flags, content is trusted admin HTML
 	return template.HTML(b)
 })

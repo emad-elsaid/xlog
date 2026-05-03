@@ -51,6 +51,7 @@ func meta(p xlog.Page) template.HTML {
 
 	o := fmt.Sprintf(`<link href='https://%s/+/activitypub/@%s' rel='alternate' type='application/activity+json'>`, domain, username)
 
+	// #nosec G203 -- Domain and username are admin-controlled flags, output is ActivityPub metadata link
 	return template.HTML(o)
 }
 
