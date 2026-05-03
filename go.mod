@@ -1,6 +1,6 @@
 module github.com/emad-elsaid/xlog
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/alecthomas/chroma/v2 v2.24.1
@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd
-	golang.org/x/image v0.18.0
+	golang.org/x/image v0.39.0
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 
 require (
 	github.com/ProtonMail/go-crypto v1.4.1 // indirect
-	github.com/cloudflare/circl v1.6.2 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/google/go-github/v53 v53.2.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
