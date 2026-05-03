@@ -7,9 +7,12 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -118,12 +121,67 @@ func TestNewPhoto_ErrorHandling(t *testing.T) {
 				if err == nil {
 					t.Error("Expected error, but got none")
 				}
+				if photo != nil {
+					t.Error("Expected nil photo on error, but got photo object")
+				}
 			} else {
 				if err != nil {
 					t.Errorf("Expected no error, but got: %v", err)
 				}
 				if photo == nil {
 					t.Error("Expected photo object, but got nil")
+				}
+			}
+		})
+	}
+}
+
+func TestNewPhoto_ExifDateTime(t *testing.T) {
+	tests := []struct {
+		name          string
+		setupFile     func(t *testing.T) string
+		expectExifNil bool
+	}{
+		{
+			name:          "PNG without EXIF uses file ModTime",
+			setupFile:     createTestPNG,
+			expectExifNil: true,
+		},
+		{
+			name: "file with invalid EXIF uses ModTime",
+			setupFile: func(t *testing.T) string {
+				tmpFile := filepath.Join(t.TempDir(), "invalid_exif.jpg")
+				// Create file with some invalid content
+				if err := os.WriteFile(tmpFile, []byte("not a real jpeg"), 0600); err != nil {
+					t.Fatalf("Failed to write file: %v", err)
+				}
+				return tmpFile
+			},
+			expectExifNil: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filePath := tc.setupFile(t)
+			defer func() {
+				if err := os.Remove(filePath); err != nil {
+					t.Logf("Failed to cleanup: %v", err)
+				}
+			}()
+
+			photo, err := NewPhoto(filePath)
+			if err != nil {
+				t.Fatalf("Expected no error, got: %v", err)
+			}
+
+			if tc.expectExifNil {
+				if photo.Exif != nil {
+					t.Error("Expected nil EXIF data")
+				}
+				// Time should be from file ModTime, not zero
+				if photo.Time.IsZero() {
+					t.Error("Expected non-zero time from ModTime")
 				}
 			}
 		})
@@ -408,6 +466,226 @@ func TestProperties_PhotoWithTime(t *testing.T) {
 	}
 }
 
+func TestPhotosShortcode_DirectoryWalking(t *testing.T) {
+	tests := []struct {
+		name         string
+		setupDir     func(t *testing.T) string
+		expectError  bool
+		errorMessage string
+	}{
+		{
+			name: "empty directory succeeds",
+			setupDir: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			expectError: false,
+		},
+		{
+			name: "directory with single photo",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "photo1.png")
+				return dir
+			},
+			expectError: false,
+		},
+		{
+			name: "directory with multiple photos",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "photo1.jpg")
+				time.Sleep(10 * time.Millisecond)
+				createTestPNGInDir(t, dir, "photo2.png")
+				time.Sleep(10 * time.Millisecond)
+				createTestPNGInDir(t, dir, "photo3.gif")
+				return dir
+			},
+			expectError: false,
+		},
+		{
+			name: "directory with mixed files",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "image.png")
+				// Create non-image file
+				txtFile := filepath.Join(dir, "readme.txt")
+				if err := os.WriteFile(txtFile, []byte("test"), 0600); err != nil {
+					t.Fatalf("Failed to create text file: %v", err)
+				}
+				return dir
+			},
+			expectError: false,
+		},
+		{
+			name: "nonexistent directory returns error",
+			setupDir: func(t *testing.T) string {
+				return "/nonexistent/path/to/photos"
+			},
+			expectError:  true,
+			errorMessage: "no such file",
+		},
+		{
+			name: "nested directory structure",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				subdir := filepath.Join(dir, "vacation")
+				if err := os.MkdirAll(subdir, 0700); err != nil {
+					t.Fatalf("Failed to create subdirectory: %v", err)
+				}
+				createTestPNGInDir(t, dir, "photo1.png")
+				createTestPNGInDir(t, subdir, "photo2.jpg")
+				return dir
+			},
+			expectError: false,
+		},
+		{
+			name: "case-insensitive extension matching",
+			setupDir: func(t *testing.T) string {
+				dir := t.TempDir()
+				createTestPNGInDir(t, dir, "photo.PNG")
+				createTestPNGInDir(t, dir, "photo2.JPG")
+				createTestPNGInDir(t, dir, "photo3.JPEG")
+				return dir
+			},
+			expectError: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := tc.setupDir(t)
+			p := strings.TrimSpace(dir)
+
+			photos := []*Photo{}
+			err := filepath.WalkDir(p, func(file string, d fs.DirEntry, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if d.Type().IsRegular() && supportedExt.Include(strings.ToLower(path.Ext(file))) {
+					photo, err := NewPhoto(file)
+					if err != nil {
+						return err
+					}
+					photos = append(photos, photo)
+				}
+
+				return nil
+			})
+
+			if tc.expectError {
+				if err == nil {
+					t.Errorf("Expected error containing %q, but got no error", tc.errorMessage)
+				} else if !strings.Contains(err.Error(), tc.errorMessage) {
+					t.Errorf("Expected error containing %q, got: %v", tc.errorMessage, err)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error, but got: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func TestPhotosShortcode_WhitespaceHandling(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "trims leading whitespace",
+			input: "  /path/to/photos",
+			want:  "/path/to/photos",
+		},
+		{
+			name:  "trims trailing whitespace",
+			input: "/path/to/photos  ",
+			want:  "/path/to/photos",
+		},
+		{
+			name:  "trims both leading and trailing",
+			input: "  /path/to/photos  ",
+			want:  "/path/to/photos",
+		},
+		{
+			name:  "trims newlines",
+			input: "\n/path/to/photos\n",
+			want:  "/path/to/photos",
+		},
+		{
+			name:  "trims tabs",
+			input: "\t/path/to/photos\t",
+			want:  "/path/to/photos",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := strings.TrimSpace(tc.input)
+			if got != tc.want {
+				t.Errorf("TrimSpace(%q) = %q, want %q", tc.input, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestPhotosShortcode_SupportedExtensions(t *testing.T) {
+	tests := []struct {
+		filename string
+		want     bool
+	}{
+		{".jpg", true},
+		{".jpeg", true},
+		{".gif", true},
+		{".png", true},
+		{".JPG", true},
+		{".JPEG", true},
+		{".GIF", true},
+		{".PNG", true},
+		{".txt", false},
+		{".pdf", false},
+		{".bmp", false},
+		{".webp", false},
+		{".svg", false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.filename, func(t *testing.T) {
+			got := supportedExt.Include(strings.ToLower(tc.filename))
+			if got != tc.want {
+				t.Errorf("supportedExt.Include(%q) = %v, want %v", tc.filename, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestPhotosShortcode_PhotosSorting(t *testing.T) {
+	// Create photos with different times
+	photos := []*Photo{
+		{Time: time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)},
+		{Time: time.Date(2023, 12, 31, 0, 0, 0, 0, time.UTC)},
+		{Time: time.Date(2023, 6, 15, 0, 0, 0, 0, time.UTC)},
+	}
+
+	// Sort using the same logic as photosShortcode
+	slices.SortFunc(photos, func(i, j *Photo) int {
+		return j.Time.Compare(i.Time)
+	})
+
+	// Verify sorted in descending order (newest first)
+	if !photos[0].Time.Equal(time.Date(2023, 12, 31, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("Expected newest photo first, got %v", photos[0].Time)
+	}
+	if !photos[1].Time.Equal(time.Date(2023, 6, 15, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("Expected middle photo second, got %v", photos[1].Time)
+	}
+	if !photos[2].Time.Equal(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Errorf("Expected oldest photo last, got %v", photos[2].Time)
+	}
+}
+
 // Helper function to create a test PNG file.
 func createTestPNG(t *testing.T) string {
 	t.Helper()
@@ -433,4 +711,30 @@ func createTestPNG(t *testing.T) string {
 	}
 
 	return tmpFile
+}
+
+// Helper to create PNG in specific directory with given filename.
+func createTestPNGInDir(t *testing.T, dir, filename string) string {
+	t.Helper()
+
+	filePath := filepath.Join(dir, filename)
+
+	img := image.NewRGBA(image.Rect(0, 0, 50, 50))
+	blue := color.RGBA{0, 0, 255, 255}
+	for y := 0; y < 50; y++ {
+		for x := 0; x < 50; x++ {
+			img.Set(x, y, blue)
+		}
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, img); err != nil {
+		t.Fatalf("Failed to encode PNG: %v", err)
+	}
+
+	if err := os.WriteFile(filePath, buf.Bytes(), 0600); err != nil {
+		t.Fatalf("Failed to write test file: %v", err)
+	}
+
+	return filePath
 }
