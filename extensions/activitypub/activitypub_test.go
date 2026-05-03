@@ -23,8 +23,12 @@ func setupTestEnv(t *testing.T) (string, func()) {
 	}
 
 	// Create test pages
-	os.WriteFile("test-page.md", []byte("# Test Page\n\nContent"), 0644)
-	os.WriteFile("another-page.md", []byte("# Another Page\n\nMore content"), 0644)
+	if err := os.WriteFile("test-page.md", []byte("# Test Page\n\nContent"), 0644); err != nil {
+		t.Fatalf("failed to create test-page.md: %v", err)
+	}
+	if err := os.WriteFile("another-page.md", []byte("# Another Page\n\nMore content"), 0644); err != nil {
+		t.Fatalf("failed to create another-page.md: %v", err)
+	}
 
 	// Set ActivityPub flags
 	domain = "example.com"
@@ -34,7 +38,9 @@ func setupTestEnv(t *testing.T) (string, func()) {
 	image = "/public/image.png"
 
 	cleanup := func() {
-		os.Chdir(wd)
+		if err := os.Chdir(wd); err != nil {
+			t.Errorf("failed to change back to original directory: %v", err)
+		}
 		domain = ""
 		username = ""
 		summary = ""
@@ -316,7 +322,9 @@ func TestOutboxPageResponse(t *testing.T) {
 
 	// Set a known modtime for predictable sorting
 	modTime := time.Now().Add(-1 * time.Hour)
-	os.Chtimes(filepath.Join(tmpDir, "test-page.md"), modTime, modTime)
+	if err := os.Chtimes(filepath.Join(tmpDir, "test-page.md"), modTime, modTime); err != nil {
+		t.Fatalf("failed to set file modtime: %v", err)
+	}
 
 	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/1", nil)
 	req.SetPathValue("user", "@testuser")

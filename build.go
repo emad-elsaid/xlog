@@ -68,13 +68,23 @@ func build(dest string) error {
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
 	if in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html")); err == nil {
-		defer in.Close()
+		defer func() {
+			if err := in.Close(); err != nil {
+				slog.Error("Failed to close input 404 file", "error", err)
+			}
+		}()
 		out, err := os.Create(path.Join(dest, "404.html"))
 		if err != nil {
 			slog.Error("Failed to open dest/404.html", "error", err)
 		}
-		defer out.Close()
-		io.Copy(out, in)
+		defer func() {
+			if err := out.Close(); err != nil {
+				slog.Error("Failed to close output 404 file", "error", err)
+			}
+		}()
+		if _, err := io.Copy(out, in); err != nil {
+			slog.Error("Failed to copy 404 file", "error", err)
+		}
 	}
 
 	extension_page_enclosed.Range(func(route string, _ bool) bool {
@@ -156,7 +166,11 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	if err != nil {
 		return err
 	}
-	defer rec.Result().Body.Close()
+	defer func() {
+		if err := rec.Result().Body.Close(); err != nil {
+			slog.Error("Failed to close response body", "error", err)
+		}
+	}()
 
 	return os.WriteFile(file, body, build_perms)
 }

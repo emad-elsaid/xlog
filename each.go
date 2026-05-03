@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"context"
+	"log/slog"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -127,7 +128,9 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 		}
 	}
 
-	grp.Wait()
+	if err := grp.Wait(); err != nil {
+		slog.Error("Error during parallel page iteration", "error", err)
+	}
 	close(ch)
 	<-done
 

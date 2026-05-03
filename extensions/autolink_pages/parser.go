@@ -23,7 +23,10 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 
 	if autolinkPages == nil {
-		UpdatePagesList(nil)
+		if err := UpdatePagesList(nil); err != nil {
+			// If we fail to initialize pages list, we can't parse autolinks
+			return nil
+		}
 	}
 
 	line, segment := block.PeekLine()
