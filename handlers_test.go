@@ -24,11 +24,11 @@ func TestRootHandler(t *testing.T) {
 		configIndex  string
 		expectedPath string
 	}{
-	{
-		name:         "default index redirect",
-		configIndex:  testIndexPage,
-		expectedPath: "/index",
-	},
+		{
+			name:         "default index redirect",
+			configIndex:  testIndexPage,
+			expectedPath: "/index",
+		},
 		{
 			name:         "custom index redirect",
 			configIndex:  "home",
