@@ -69,10 +69,8 @@ func TestContainsOnlyImages(t *testing.T) {
 			expected: false,
 		},
 		{
-			name: "empty paragraph returns false",
-			setup: func() *ast.Paragraph {
-				return ast.NewParagraph()
-			},
+			name:     "empty paragraph returns false",
+			setup:    ast.NewParagraph,
 			expected: false,
 		},
 		{

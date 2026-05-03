@@ -91,7 +91,7 @@ func (n *Text) SetSoftLineBreak(v bool) {
 	if v {
 		n.flags |= textSoftLineBreak
 	} else {
-		n.flags = n.flags &^ textSoftLineBreak
+		n.flags &^= textSoftLineBreak
 	}
 }
 
@@ -106,7 +106,7 @@ func (n *Text) SetRaw(v bool) {
 	if v {
 		n.flags |= textRaw
 	} else {
-		n.flags = n.flags &^ textRaw
+		n.flags &^= textRaw
 	}
 }
 
@@ -121,7 +121,7 @@ func (n *Text) SetHardLineBreak(v bool) {
 	if v {
 		n.flags |= textHardLineBreak
 	} else {
-		n.flags = n.flags &^ textHardLineBreak
+		n.flags &^= textHardLineBreak
 	}
 }
 
@@ -246,7 +246,7 @@ func (n *String) SetRaw(v bool) {
 	if v {
 		n.flags |= textRaw
 	} else {
-		n.flags = n.flags &^ textRaw
+		n.flags &^= textRaw
 	}
 }
 

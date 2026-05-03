@@ -104,13 +104,14 @@ func uploadFileHandler(r Request) Output {
 			return InternalServerError(err)
 		}
 
-		if slices.Contains(IMAGES_EXTENSIONS, ext) {
+		switch {
+		case slices.Contains(IMAGES_EXTENSIONS, ext):
 			output = fmt.Sprintf("![](/%s)", p)
-		} else if slices.Contains(VIDEOS_EXTENSIONS, ext) {
+		case slices.Contains(VIDEOS_EXTENSIONS, ext):
 			output = fmt.Sprintf("<video controls src=\"/%s\"></video>", p)
-		} else if slices.Contains(AUDIO_EXTENSIONS, ext) {
+		case slices.Contains(AUDIO_EXTENSIONS, ext):
 			output = fmt.Sprintf("<audio controls src=\"/%s\"></audio>", p)
-		} else {
+		default:
 			output = fmt.Sprintf("[%s](/%s)", mdName, p)
 		}
 	}

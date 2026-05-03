@@ -97,19 +97,17 @@ func TestHashTagParse(t *testing.T) {
 				}
 
 				tag, ok := result.(*HashTag)
-				if !ok {
-					t.Errorf("Expected *HashTag, got %T", result)
-					return
-				}
-
-				if string(tag.value) != tt.expected {
-					t.Errorf("Expected tag value %q, got %q", tt.expected, string(tag.value))
-				}
-			} else {
-				if result != nil {
-					t.Errorf("Expected invalid hashtag (nil), got %v", result)
-				}
+			if !ok {
+				t.Errorf("Expected *HashTag, got %T", result)
+				return
 			}
+
+			if string(tag.value) != tt.expected {
+				t.Errorf("Expected tag value %q, got %q", tt.expected, string(tag.value))
+			}
+		} else if result != nil {
+			t.Errorf("Expected invalid hashtag (nil), got %v", result)
+		}
 		})
 	}
 }
@@ -420,15 +418,13 @@ func TestHashTagEdgeCases(t *testing.T) {
 					return
 				}
 
-				if string(tag.value) != tt.expected {
-					t.Errorf("Expected tag value %q, got %q for input %q",
-						tt.expected, string(tag.value), tt.input)
-				}
-			} else {
-				if result != nil {
-					t.Errorf("Expected invalid hashtag (nil), got %v for input %q", result, tt.input)
-				}
+			if string(tag.value) != tt.expected {
+				t.Errorf("Expected tag value %q, got %q for input %q",
+					tt.expected, string(tag.value), tt.input)
 			}
+		} else if result != nil {
+			t.Errorf("Expected invalid hashtag (nil), got %v for input %q", result, tt.input)
+		}
 		})
 	}
 }
