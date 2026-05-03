@@ -105,15 +105,15 @@ func getPageHandler(r Request) Output {
 		// opening an editor or something
 		Trigger(PageNotFound, page)
 
-	page = DynamicPage{
-		NameVal: page.Name(),
-		RenderFn: func() template.HTML {
-			str := "Page doesn't exist"
+		page = DynamicPage{
+			NameVal: page.Name(),
+			RenderFn: func() template.HTML {
+				str := "Page doesn't exist"
 
-			// #nosec G203 - str is a constant string literal, safe to convert
-			return template.HTML(str)
-		},
-	}
+				// #nosec G203 - str is a constant string literal, safe to convert
+				return template.HTML(str)
+			},
+		}
 	}
 
 	return Render("page", Locals{
