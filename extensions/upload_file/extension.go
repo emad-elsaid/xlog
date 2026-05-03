@@ -67,7 +67,9 @@ func (UploadFile) Init() {
 }
 
 func uploadFileHandler(r Request) Output {
-	r.ParseMultipartForm(MAX_FILE_UPLOAD)
+	if err := r.ParseMultipartForm(MAX_FILE_UPLOAD); err != nil {
+		return BadRequest(err.Error())
+	}
 
 	fileName := r.FormValue("page")
 
@@ -79,14 +81,16 @@ func uploadFileHandler(r Request) Output {
 	var output string
 	f, h, _ := r.FormFile("file")
 	if f != nil && h != nil {
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		c, _ := io.ReadAll(f)
 		ext := strings.ToLower(path.Ext(h.Filename))
 		name := fmt.Sprintf("%x%s", sha256.Sum256(c), ext)
 		p := path.Join(PUBLIC_PATH, name)
 		mdName := filterChars(h.Filename, "[]")
 
-		os.Mkdir(PUBLIC_PATH, 0700)
+		if err := os.Mkdir(PUBLIC_PATH, 0700); err != nil && !os.IsExist(err) {
+			return InternalServerError(err)
+		}
 		out, err := os.Create(p)
 		if err != nil {
 			return InternalServerError(err)

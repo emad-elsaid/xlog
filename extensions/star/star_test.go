@@ -251,7 +251,7 @@ func TestIsStarred(t *testing.T) {
 				}
 			} else {
 				// Remove starred.md if empty content
-				os.Remove(STARRED_PAGES + ".md")
+				_ = os.Remove(STARRED_PAGES + ".md")
 			}
 
 			page := NewPage(tt.pageName)
@@ -271,8 +271,10 @@ func TestIsStarred(t *testing.T) {
 func TestStarAction(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tmpDir)
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// Create a test page
 	testPage := "test-page.md"
@@ -316,7 +318,7 @@ func TestStarAction(t *testing.T) {
 					t.Fatal(err)
 				}
 			} else {
-				os.Remove(STARRED_PAGES + ".md")
+				_ = os.Remove(STARRED_PAGES + ".md")
 			}
 
 			commands := starAction(page)
@@ -336,8 +338,10 @@ func TestStarAction(t *testing.T) {
 func TestStarActionNonExistentPage(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tmpDir)
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	page := NewPage("non-existent.md")
 	if page == nil {
@@ -354,8 +358,10 @@ func TestStarActionNonExistentPage(t *testing.T) {
 func TestStarredPageIcon(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tmpDir)
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// Create a test page without emoji
 	testPage := "test-page.md"
@@ -379,8 +385,10 @@ func TestStarredPageIcon(t *testing.T) {
 func TestStarredPageName(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tmpDir)
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// Create a test page with path
 	testPage := "folder/test-page.md"

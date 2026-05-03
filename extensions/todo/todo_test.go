@@ -110,8 +110,10 @@ func TestToggleHandler(t *testing.T) {
 	// Create temp directory for test pages
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tmpDir)
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
 
 	// Create test page
 	testPageName := "test-page"
@@ -249,7 +251,9 @@ func TestTaskCheckBoxHTMLRenderer_NotEntering(t *testing.T) {
 		t.Errorf("Expected WalkContinue, got %v", status)
 	}
 
-	writer.Flush()
+	if err := writer.Flush(); err != nil {
+		t.Fatalf("Failed to flush writer: %v", err)
+	}
 
 	// Should produce no output when not entering
 	if buf.Len() > 0 {
@@ -319,7 +323,9 @@ func TestTaskCheckBoxHTMLRenderer_Basic(t *testing.T) {
 				t.Errorf("Expected WalkContinue, got %v", status)
 			}
 
-			writer.Flush()
+			if err := writer.Flush(); err != nil {
+				t.Fatalf("Failed to flush writer: %v", err)
+			}
 			output := buf.String()
 
 			for _, exp := range tt.expected {
