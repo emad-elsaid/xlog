@@ -38,8 +38,14 @@ func TestPageFileName(t *testing.T) {
 func TestPageExists(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	// Test non-existent page
 	p := &page{name: "nonexistent"}
@@ -48,7 +54,9 @@ func TestPageExists(t *testing.T) {
 	}
 
 	// Create a page file
-	os.WriteFile("test.md", []byte("content"), 0644)
+	if err := os.WriteFile("test.md", []byte("content"), 0644); err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
 	p2 := &page{name: "test"}
 	if !p2.Exists() {
 		t.Error("Expected page to exist")
@@ -58,11 +66,19 @@ func TestPageExists(t *testing.T) {
 func TestPageContent(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	content := "# Test Page\n\nThis is test content."
-	os.WriteFile("test.md", []byte(content), 0644)
+	if err := os.WriteFile("test.md", []byte(content), 0644); err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
 
 	p := &page{name: "test"}
 	got := p.Content()
@@ -80,8 +96,14 @@ func TestPageContent(t *testing.T) {
 func TestPageWrite(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	// Write new page
 	p := &page{name: "test"}
@@ -114,8 +136,14 @@ func TestPageWrite(t *testing.T) {
 func TestPageWriteNormalizesLineEndings(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	p := &page{name: "test"}
 	content := Markdown("line1\r\nline2\r\nline3")
@@ -131,8 +159,14 @@ func TestPageWriteNormalizesLineEndings(t *testing.T) {
 func TestPageDelete(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	// Create a page
 	p := &page{name: "test"}
@@ -161,8 +195,14 @@ func TestPageDelete(t *testing.T) {
 func TestPageModTime(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	// Non-existent page returns zero time
 	p := &page{name: "test"}
@@ -184,8 +224,14 @@ func TestPageModTime(t *testing.T) {
 func TestPageRender(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	// Simple markdown rendering
 	p := &page{name: "test"}
@@ -206,8 +252,14 @@ func TestPageRender(t *testing.T) {
 func TestPageAST(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	p := &page{name: "test"}
 	content := Markdown("# Heading\n\nSome text.")
@@ -225,8 +277,14 @@ func TestPageAST(t *testing.T) {
 func TestPageCaching(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()
-	defer os.Chdir(origDir)
-	os.Chdir(tempDir)
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
 
 	p := &page{name: "test"}
 	p.Write(Markdown("# Original"))
