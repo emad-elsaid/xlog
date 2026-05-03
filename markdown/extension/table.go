@@ -174,9 +174,9 @@ func (b *tableParagraphTransformer) Transform(node *gast.Paragraph, reader text.
 		if node.Lines().Len() == 0 {
 			node.Parent().RemoveChild(node.Parent(), node)
 		} else {
-			last := node.Lines().At(i - 2)
-			last.Stop = last.Stop - 1 // trim last newline(\n)
-			node.Lines().Set(i-2, last)
+		last := node.Lines().At(i - 2)
+		last.Stop-- // trim last newline(\n)
+		node.Lines().Set(i-2, last)
 		}
 	}
 }
@@ -262,15 +262,16 @@ func (b *tableParagraphTransformer) parseDelimiter(segment text.Segment, reader 
 
 	var alignments []ast.Alignment
 	for _, col := range cols {
-		if tableDelimLeft.Match(col) {
+		switch {
+		case tableDelimLeft.Match(col):
 			alignments = append(alignments, ast.AlignLeft)
-		} else if tableDelimRight.Match(col) {
+		case tableDelimRight.Match(col):
 			alignments = append(alignments, ast.AlignRight)
-		} else if tableDelimCenter.Match(col) {
+		case tableDelimCenter.Match(col):
 			alignments = append(alignments, ast.AlignCenter)
-		} else if tableDelimNone.Match(col) {
+		case tableDelimNone.Match(col):
 			alignments = append(alignments, ast.AlignNone)
-		} else {
+		default:
 			return nil
 		}
 	}

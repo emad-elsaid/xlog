@@ -159,7 +159,7 @@ func DoTestCaseFile(m markdown.Markdown, filename string, t TestingT, no ...int)
 		}
 		c.Expected = strings.Join(buf, "\n")
 		if len(c.Expected) != 0 {
-			c.Expected = c.Expected + "\n"
+			c.Expected += "\n"
 		}
 		shouldAdd := len(no) == 0
 		if !shouldAdd {

@@ -261,7 +261,7 @@ func (n *String) SetCode(v bool) {
 	if v {
 		n.flags |= textCode
 	} else {
-		n.flags = n.flags &^ textCode
+		n.flags &^= textCode
 	}
 }
 

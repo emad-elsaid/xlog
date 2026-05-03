@@ -126,13 +126,13 @@ func IsBlank(bs []byte) bool {
 
 // VisualizeSpaces visualize invisible space characters.
 func VisualizeSpaces(bs []byte) []byte {
-	bs = bytes.Replace(bs, []byte(" "), []byte("[SPACE]"), -1)
-	bs = bytes.Replace(bs, []byte("\t"), []byte("[TAB]"), -1)
-	bs = bytes.Replace(bs, []byte("\n"), []byte("[NEWLINE]\n"), -1)
-	bs = bytes.Replace(bs, []byte("\r"), []byte("[CR]"), -1)
-	bs = bytes.Replace(bs, []byte("\v"), []byte("[VTAB]"), -1)
-	bs = bytes.Replace(bs, []byte("\x00"), []byte("[NUL]"), -1)
-	bs = bytes.Replace(bs, []byte("\ufffd"), []byte("[U+FFFD]"), -1)
+	bs = bytes.ReplaceAll(bs, []byte(" "), []byte("[SPACE]"))
+	bs = bytes.ReplaceAll(bs, []byte("\t"), []byte("[TAB]"))
+	bs = bytes.ReplaceAll(bs, []byte("\n"), []byte("[NEWLINE]\n"))
+	bs = bytes.ReplaceAll(bs, []byte("\r"), []byte("[CR]"))
+	bs = bytes.ReplaceAll(bs, []byte("\v"), []byte("[VTAB]"))
+	bs = bytes.ReplaceAll(bs, []byte("\x00"), []byte("[NUL]"))
+	bs = bytes.ReplaceAll(bs, []byte("\ufffd"), []byte("[U+FFFD]"))
 	return bs
 }
 

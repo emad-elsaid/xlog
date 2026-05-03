@@ -108,7 +108,7 @@ const optEastAsianLineBreaks renderer.OptionName = "EastAsianLineBreaks"
 type EastAsianLineBreaks int
 
 const (
-	//EastAsianLineBreaksNone renders line breaks as it is.
+	// EastAsianLineBreaksNone renders line breaks as it is.
 	EastAsianLineBreaksNone EastAsianLineBreaks = iota
 	// EastAsianLineBreaksSimple follows east_asian_line_breaks in Pandoc.
 	EastAsianLineBreaksSimple

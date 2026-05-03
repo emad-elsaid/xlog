@@ -84,8 +84,7 @@ func newDefaultSubstitutions() [][]byte {
 
 // SetOption implements SetOptioner.
 func (b *TypographerConfig) SetOption(name parser.OptionName, value any) {
-	switch name {
-	case optTypographicSubstitutions:
+	if name == optTypographicSubstitutions {
 		b.Substitutions = value.([][]byte)
 	}
 }
@@ -185,7 +184,8 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 		}
 	}
 	if len(line) > 1 {
-		if c == '<' {
+		switch c {
+		case '<':
 			if s.Substitutions[LeftAngleQuote] != nil && line[1] == '<' { // <<
 				node := gast.NewString(s.Substitutions[LeftAngleQuote])
 				node.SetCode(true)
@@ -193,7 +193,7 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 				return node
 			}
 			return nil
-		} else if c == '>' {
+		case '>':
 			if s.Substitutions[RightAngleQuote] != nil && line[1] == '>' { // >>
 				node := gast.NewString(s.Substitutions[RightAngleQuote])
 				node.SetCode(true)
@@ -201,11 +201,13 @@ func (s *typographerParser) Parse(parent gast.Node, block text.Reader, pc parser
 				return node
 			}
 			return nil
-		} else if s.Substitutions[EnDash] != nil && c == '-' && line[1] == '-' { // --
-			node := gast.NewString(s.Substitutions[EnDash])
-			node.SetCode(true)
-			block.Advance(2)
-			return node
+		case '-':
+			if s.Substitutions[EnDash] != nil && line[1] == '-' { // --
+				node := gast.NewString(s.Substitutions[EnDash])
+				node.SetCode(true)
+				block.Advance(2)
+				return node
+			}
 		}
 	}
 	if c == '\'' || c == '"' {

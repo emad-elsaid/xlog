@@ -31,8 +31,7 @@ const optEmojis parser.OptionName = "EmojiEmojis"
 
 // SetOption implements parser.SetOptioner
 func (c *ParserConfig) SetOption(name parser.OptionName, value any) {
-	switch name {
-	case optEmojis:
+	if name == optEmojis {
 		c.Emojis = value.(definition.Emojis)
 	}
 }

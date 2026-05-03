@@ -13,7 +13,7 @@ type CJKOption func(*cjk)
 type EastAsianLineBreaks int
 
 const (
-	//EastAsianLineBreaksNone renders line breaks as it is.
+	// EastAsianLineBreaksNone renders line breaks as it is.
 	EastAsianLineBreaksNone EastAsianLineBreaks = iota
 	// EastAsianLineBreaksSimple is a style where soft line breaks are ignored
 	// if both sides of the break are east asian wide characters.

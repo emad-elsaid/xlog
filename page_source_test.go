@@ -137,15 +137,13 @@ func TestNewPage(t *testing.T) {
 
 			page := NewPage(tt.pageName)
 
-			if tt.expectedExists {
-				require.NotNil(t, page, "Expected page to exist")
-				assert.True(t, page.Exists(), "Expected page.Exists() to return true")
-				assert.Equal(t, tt.expectedName, page.Name(), "Page name mismatch")
-			} else {
-				if page != nil {
-					assert.False(t, page.Exists(), "Expected page.Exists() to return false")
-				}
-			}
+		if tt.expectedExists {
+			require.NotNil(t, page, "Expected page to exist")
+			assert.True(t, page.Exists(), "Expected page.Exists() to return true")
+			assert.Equal(t, tt.expectedName, page.Name(), "Page name mismatch")
+		} else if page != nil {
+			assert.False(t, page.Exists(), "Expected page.Exists() to return false")
+		}
 		})
 	}
 }

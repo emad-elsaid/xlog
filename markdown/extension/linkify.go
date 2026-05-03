@@ -206,9 +206,10 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 	}
 	if m != nil && m[0] == 0 {
 		lastChar := line[m[1]-1]
-		if lastChar == '.' {
+		switch lastChar {
+		case '.':
 			m[1]--
-		} else if lastChar == ')' {
+		case ')':
 			closing := 0
 			for i := m[1] - 1; i >= m[0]; i-- {
 				if line[i] == ')' {
@@ -220,7 +221,7 @@ func (s *linkifyParser) Parse(parent ast.Node, block text.Reader, pc parser.Cont
 			if closing > 0 {
 				m[1] -= closing
 			}
-		} else if lastChar == ';' {
+		case ';':
 			i := m[1] - 2
 			for ; i >= m[0]; i-- {
 				if util.IsAlphaNumeric(line[i]) {

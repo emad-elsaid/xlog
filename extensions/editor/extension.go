@@ -59,7 +59,9 @@ func openEditor(page xlog.Page) {
 	}
 
 	name := segments[0]
-	cmdArgs := append(segments[1:], page.FileName())
+	cmdArgs := make([]string, 0, len(segments))
+	cmdArgs = append(cmdArgs, segments[1:]...)
+	cmdArgs = append(cmdArgs, page.FileName())
 	cmd := exec.Command(name, cmdArgs...)
 
 	if err := cmd.Start(); err != nil {
