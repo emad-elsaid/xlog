@@ -4422,3 +4422,131 @@ func TestTagsHandlerIntegrationWithRealPages(t *testing.T) {
 		})
 	}
 }
+
+// TestTagsHandlerEdgeCases provides additional edge case testing for tagsHandler.
+// Focuses on execution paths and edge conditions.
+func TestTagsHandlerEdgeCases(t *testing.T) {
+	tests := []struct {
+		name   string
+		method string
+	}{
+		{
+			name:   "GET request",
+			method: http.MethodGet,
+		},
+		{
+			name:   "POST request (should still work)",
+			method: http.MethodPost,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			// Create HTTP request
+			req := httptest.NewRequest(tc.method, "/+/tags", http.NoBody)
+			req = req.WithContext(context.Background())
+
+			// Execute handler - verify it doesn't panic
+			output := h.tagsHandler(req)
+
+			// Verify output is not nil
+			if output == nil {
+				t.Error("tagsHandler returned nil output")
+			}
+		})
+	}
+}
+
+// TestTagPagesEdgeCases provides additional edge case testing for tagPages.
+// This test focuses on boundary conditions and error scenarios.
+func TestTagPagesEdgeCases(t *testing.T) {
+	tests := []struct {
+		name         string
+		searchTag    string
+		mockIndex    string
+		expectNonNil bool
+	}{
+		{
+			name:         "empty tag search",
+			searchTag:    "",
+			mockIndex:    "index",
+			expectNonNil: true,
+		},
+		{
+			name:         "special characters in tag",
+			searchTag:    "tag-with-dash",
+			mockIndex:    "index",
+			expectNonNil: true,
+		},
+		{
+			name:         "numeric tag",
+			searchTag:    "123",
+			mockIndex:    "index",
+			expectNonNil: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Set config
+			origIndex := xlog.Config.Index
+			xlog.Config.Index = tc.mockIndex
+			t.Cleanup(func() { xlog.Config.Index = origIndex })
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			// Call tagPages - primarily checking it doesn't panic
+			result := h.tagPages(context.Background(), tc.searchTag)
+
+			if tc.expectNonNil && result == nil {
+				t.Error("Expected non-nil result")
+			}
+		})
+	}
+}
+
+// TestTagHandlerEdgeCases tests the tagHandler endpoint edge cases.
+func TestTagHandlerEdgeCases(t *testing.T) {
+	tests := []struct {
+		name    string
+		tagPath string
+	}{
+		{
+			name:    "normal tag",
+			tagPath: "programming",
+		},
+		{
+			name:    "tag with dash",
+			tagPath: "go-lang",
+		},
+		{
+			name:    "numeric tag",
+			tagPath: "123",
+		},
+		{
+			name:    "uppercase tag",
+			tagPath: "GOLANG",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			// Create mock request with path value
+			req := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tagPath, http.NoBody)
+			req = req.WithContext(context.Background())
+			req.SetPathValue("tag", tc.tagPath)
+
+			// Call handler - verify no panic
+			output := h.tagHandler(req)
+
+			// Verify output
+			if output == nil {
+				t.Error("tagHandler returned nil output")
+			}
+		})
+	}
+}
