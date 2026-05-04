@@ -18,11 +18,6 @@ linters:
     - godot
     - goconst
 
-formatters:
-  enable:
-    - gofmt
-
-linters:
   settings:
     errcheck:
       check-blank: false
@@ -62,6 +57,10 @@ linters:
       - path: (_benchmark|_tools)/
         linters:
           - forbidigo
+
+formatters:
+  enable:
+    - gofmt
 
 issues:
   max-issues-per-linter: 0
