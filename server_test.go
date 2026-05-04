@@ -83,6 +83,110 @@ func TestBadRequest(t *testing.T) {
 	}
 }
 
+func TestUnauthorized(t *testing.T) {
+	tests := []struct {
+		name           string
+		message        string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "missing credentials",
+			message:        "authentication required",
+			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   "authentication required\n",
+		},
+		{
+			name:           "invalid token",
+			message:        "invalid authentication token",
+			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   "invalid authentication token\n",
+		},
+		{
+			name:           "expired session",
+			message:        "session expired",
+			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   "session expired\n",
+		},
+		{
+			name:           "empty message",
+			message:        "",
+			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   "\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+
+			handler := Unauthorized(tc.message)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestForbidden(t *testing.T) {
+	tests := []struct {
+		name           string
+		message        string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "insufficient permissions",
+			message:        "insufficient permissions",
+			expectedStatus: http.StatusForbidden,
+			expectedBody:   "insufficient permissions\n",
+		},
+		{
+			name:           "access denied",
+			message:        "access denied to resource",
+			expectedStatus: http.StatusForbidden,
+			expectedBody:   "access denied to resource\n",
+		},
+		{
+			name:           "operation not allowed",
+			message:        "delete operation not permitted",
+			expectedStatus: http.StatusForbidden,
+			expectedBody:   "delete operation not permitted\n",
+		},
+		{
+			name:           "empty message",
+			message:        "",
+			expectedStatus: http.StatusForbidden,
+			expectedBody:   "\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+
+			handler := Forbidden(tc.message)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
 func TestInternalServerError(t *testing.T) {
 	tests := []struct {
 		name           string

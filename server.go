@@ -95,6 +95,22 @@ func BadRequest(msg string) Output {
 	}
 }
 
+// Unauthorized returns an output function that writes 401 Unauthorized http response.
+// Commonly used when authentication credentials are missing or invalid.
+func Unauthorized(msg string) Output {
+	return func(w Response, r Request) {
+		http.Error(w, msg, http.StatusUnauthorized)
+	}
+}
+
+// Forbidden returns an output function that writes 403 Forbidden http response.
+// Used when the client is authenticated but lacks permission to access the resource.
+func Forbidden(msg string) Output {
+	return func(w Response, r Request) {
+		http.Error(w, msg, http.StatusForbidden)
+	}
+}
+
 // InternalServerError returns an output function that writes InternalServerError http response.
 func InternalServerError(err error) Output {
 	return func(w Response, r Request) {
