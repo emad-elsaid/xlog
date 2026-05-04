@@ -3,6 +3,7 @@ package xlog
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -325,5 +326,44 @@ func TestFindHubPages(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// BenchmarkFindHubPages_Small benchmarks hub page finding with small dataset.
+func BenchmarkFindHubPages_Small(b *testing.B) {
+	links := make(map[string]int)
+	for i := 0; i < 10; i++ {
+		links[fmt.Sprintf("page%d", i)] = i * 3
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = findHubPages(links, 3)
+	}
+}
+
+// BenchmarkFindHubPages_Medium benchmarks with medium-sized garden (100 pages).
+func BenchmarkFindHubPages_Medium(b *testing.B) {
+	links := make(map[string]int)
+	for i := 0; i < 100; i++ {
+		links[fmt.Sprintf("page%d", i)] = (i * 17) % 50 // Varied link counts
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = findHubPages(links, 3)
+	}
+}
+
+// BenchmarkFindHubPages_Large benchmarks with large garden (1000 pages).
+func BenchmarkFindHubPages_Large(b *testing.B) {
+	links := make(map[string]int)
+	for i := 0; i < 1000; i++ {
+		links[fmt.Sprintf("page%d", i)] = (i * 37) % 100 // Varied link counts
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = findHubPages(links, 3)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/emad-elsaid/xlog/markdown/ast"
@@ -130,14 +131,10 @@ func findHubPages(incomingLinks map[string]int, topN int) []string {
 		}
 	}
 
-	// Sort by count descending
-	for i := 0; i < len(pages); i++ {
-		for j := i + 1; j < len(pages); j++ {
-			if pages[j].count > pages[i].count {
-				pages[i], pages[j] = pages[j], pages[i]
-			}
-		}
-	}
+	// Sort by count descending using stdlib sort for O(n log n) performance
+	sort.Slice(pages, func(i, j int) bool {
+		return pages[i].count > pages[j].count
+	})
 
 	// Take top N
 	result := []string{}
