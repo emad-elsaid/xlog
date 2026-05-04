@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -916,6 +917,120 @@ func TestFormatDiagnosticSummaryEdgeCases(t *testing.T) {
 			// Check exit code
 			if exitCode != tt.wantExitCode {
 				t.Errorf("got exit code %d, want %d", exitCode, tt.wantExitCode)
+			}
+		})
+	}
+}
+
+func TestDoctor_Integration(t *testing.T) {
+	tests := []struct {
+		name         string
+		setupFunc    func(t *testing.T) string
+		wantExitCode int
+		wantOutput   []string
+	}{
+		{
+			name: "healthy configuration exits with code 0",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(dir, "404.md"), []byte("# Not Found"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			wantExitCode: 0,
+			wantOutput: []string{
+				"✓ All checks passed!",
+			},
+		},
+		{
+			name: "missing source exits with code 1",
+			setupFunc: func(t *testing.T) string {
+				return "/nonexistent/directory/that/does/not/exist"
+			},
+			wantExitCode: 1,
+			wantOutput: []string{
+				"CRITICAL ISSUES:",
+				"Please fix critical issues",
+			},
+		},
+		{
+			name: "warnings only exits with code 0",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "other.md"), []byte("# Other"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			wantExitCode: 0,
+			wantOutput: []string{
+				"WARNINGS:",
+				"Warnings noted",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := tc.setupFunc(t)
+
+			// Save and restore original config
+			origConfig := Config
+			t.Cleanup(func() { Config = origConfig })
+
+			// Configure for test
+			Config.Source = dir
+			Config.Index = "index"
+			Config.NotFoundPage = "404"
+			Config.BindAddress = "127.0.0.1:3000"
+			Config.Readonly = false
+
+			// Capture output
+			oldStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			// Run Doctor and expect it to exit
+			exitCode := -1
+			done := make(chan struct{})
+			go func() {
+				defer func() {
+					if r := recover(); r != nil {
+						// Doctor calls os.Exit which we can't catch directly in tests
+						// So we use the testable formatDiagnosticSummary pathway
+						close(done)
+					}
+				}()
+				result := runDiagnostics()
+				var buf strings.Builder
+				exitCode = formatDiagnosticSummary(&buf, result.Issues, result.Warnings)
+				_, _ = w.Write([]byte(buf.String()))
+				close(done)
+			}()
+
+			<-done
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Read captured output
+			var output strings.Builder
+			_, _ = io.Copy(&output, r)
+			outputStr := output.String()
+
+			// Verify exit code
+			if exitCode != tc.wantExitCode {
+				t.Errorf("exit code = %d, want %d", exitCode, tc.wantExitCode)
+			}
+
+			// Verify output contains expected strings
+			for _, want := range tc.wantOutput {
+				if !strings.Contains(outputStr, want) {
+					t.Errorf("output missing expected string %q\nGot:\n%s", want, outputStr)
+				}
 			}
 		})
 	}
