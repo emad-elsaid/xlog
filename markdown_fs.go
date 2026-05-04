@@ -18,10 +18,13 @@ import (
 )
 
 func newMarkdownFS(p string) *markdownFS {
+	// LRU cache with 1000 capacity. This should never fail with valid capacity,
+	// but if it does, we log the error and create a minimal fallback system.
 	cache, err := lru.New[string, Page](1000)
 	if err != nil {
-		slog.Error("Can't create cache for pages", "error", err)
-		panic("Can't continue without cache instance")
+		slog.Error("Failed to create LRU cache for pages - falling back to uncached mode", "error", err)
+		// Create minimal cache (size 1) to prevent nil pointer dereference
+		cache, _ = lru.New[string, Page](1)
 	}
 
 	m := markdownFS{
