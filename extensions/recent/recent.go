@@ -30,18 +30,22 @@ func (Recent) Init() {
 
 func recentHandler(r xlog.Request) xlog.Output {
 	rp := xlog.Pages(r.Context())
-	slices.SortFunc(rp, func(a, b xlog.Page) int {
-		if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
-			return modtime
-		}
-
-		return strings.Compare(a.Name(), b.Name())
-	})
+	slices.SortFunc(rp, comparePagesByRecency)
 
 	return xlog.Render("recent", xlog.Locals{
 		"page":  xlog.DynamicPage{NameVal: "Recent"},
 		"pages": rp,
 	})
+}
+
+// comparePagesByRecency sorts pages by modification time (newest first),
+// then alphabetically by name for pages with identical modification times.
+func comparePagesByRecency(a, b xlog.Page) int {
+	if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+		return modtime
+	}
+
+	return strings.Compare(a.Name(), b.Name())
 }
 
 type links struct{}
