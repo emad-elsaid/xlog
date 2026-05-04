@@ -513,3 +513,159 @@ func TestStart_BuildConfigurationEffect(t *testing.T) {
 		})
 	}
 }
+
+// BenchmarkRootHandler measures the performance of the root handler redirect.
+func BenchmarkRootHandler(b *testing.B) {
+	oldIndex := Config.Index
+	defer func() { Config.Index = oldIndex }()
+	Config.Index = testIndexPage
+
+	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		w := httptest.NewRecorder()
+		output := rootHandler(req)
+		output(w, req)
+	}
+}
+
+// BenchmarkGetPageHandler_ExistingPage measures page rendering performance for existing pages.
+func BenchmarkGetPageHandler_ExistingPage(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			b.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	// Create test page with realistic content
+	testPageName := "benchmark-page"
+	testContent := `# Benchmark Page
+
+This is a test page for benchmarking the page handler.
+
+## Section 1
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+## Section 2
+* Item 1
+* Item 2
+* Item 3
+
+Code example:
+` + "```go\nfunc main() {\n    fmt.Println(\"Hello\")\n}\n```"
+
+	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0600); err != nil {
+		b.Fatalf("Failed to create test page: %v", err)
+	}
+
+	// Setup CSRF middleware
+	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key-for-test"))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest(http.MethodGet, "/"+testPageName, http.NoBody)
+		req.SetPathValue("page", testPageName)
+		w := httptest.NewRecorder()
+
+		// Wrap in CSRF middleware
+		handler := csrfMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			output := getPageHandler(r)
+			output(w, r)
+		}))
+
+		handler.ServeHTTP(w, req)
+	}
+}
+
+// BenchmarkGetPageHandler_NonExistentPage measures performance when page doesn't exist.
+func BenchmarkGetPageHandler_NonExistentPage(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			b.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	oldReadonly := Config.Readonly
+	defer func() { Config.Readonly = oldReadonly }()
+	Config.Readonly = false
+
+	// Setup CSRF middleware
+	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key-for-test"))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest(http.MethodGet, "/nonexistent", http.NoBody)
+		req.SetPathValue("page", "nonexistent")
+		w := httptest.NewRecorder()
+
+		// Wrap in CSRF middleware
+		handler := csrfMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			output := getPageHandler(r)
+			output(w, r)
+		}))
+
+		handler.ServeHTTP(w, req)
+	}
+}
+
+// BenchmarkGetPageHandler_CachedPage measures performance with page caching.
+func BenchmarkGetPageHandler_CachedPage(b *testing.B) {
+	tempDir := b.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			b.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		b.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	// Create test page
+	testPageName := "cached-page"
+	testContent := "# Cached Page\n\nTest content for caching."
+	if err := os.WriteFile(testPageName+".md", []byte(testContent), 0600); err != nil {
+		b.Fatalf("Failed to create test page: %v", err)
+	}
+
+	// Pre-warm cache by rendering once
+	page := NewPage(testPageName)
+	_ = page.Render()
+
+	// Setup CSRF middleware
+	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key-for-test"))
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		req := httptest.NewRequest(http.MethodGet, "/"+testPageName, http.NoBody)
+		req.SetPathValue("page", testPageName)
+		w := httptest.NewRecorder()
+
+		// Wrap in CSRF middleware
+		handler := csrfMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			output := getPageHandler(r)
+			output(w, r)
+		}))
+
+		handler.ServeHTTP(w, req)
+	}
+}
