@@ -1,3 +1,37 @@
+// Package blocks provides customizable content blocks through YAML-based shortcodes.
+//
+// This extension allows you to create rich, styled content blocks in your markdown
+// pages using YAML syntax combined with HTML templates. Each template in the
+// templates/ directory automatically becomes available as a shortcode.
+//
+// # Usage
+//
+// In your markdown, use the shortcode syntax with YAML data:
+//
+//	{{% blockname %}}
+//	title: Example Block
+//	content: This is my content
+//	highlight: true
+//	{{% /blockname %}}
+//
+// The extension will parse the YAML data and render it using the corresponding
+// template (templates/blockname.html). Template data is accessible as variables.
+//
+// # Creating Custom Blocks
+//
+// 1. Add a template file: templates/myblock.html
+// 2. Use Go template syntax: {{.title}}, {{.content}}, etc.
+// 3. The block becomes immediately available as {{% myblock %}}
+//
+// # Built-in Styling
+//
+// The extension includes blocks.css automatically in all pages via the head widget.
+// Custom block templates can reference CSS classes defined in public/blocks.css.
+//
+// # Error Handling
+//
+// If YAML parsing fails, the error message is safely HTML-escaped and displayed
+// inline, making debugging straightforward without breaking page rendering.
 package blocks
 
 import (
