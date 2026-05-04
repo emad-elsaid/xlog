@@ -12,6 +12,11 @@ type PageLink struct {
 	page xlog.Page
 }
 
+// Page returns the linked page.
+func (p *PageLink) Page() xlog.Page {
+	return p.page
+}
+
 func (*PageLink) Kind() ast.NodeKind {
 	return KindPageLink
 }
