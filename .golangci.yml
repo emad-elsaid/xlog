@@ -51,6 +51,7 @@ linters:
         linters:
           - gosec
           - errcheck
+          - goconst
       - path: markdown/
         linters:
           - all
