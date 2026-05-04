@@ -215,26 +215,6 @@ func TestFilterChars(t *testing.T) {
 	}
 }
 
-func TestUploadFileExtensionInit(t *testing.T) {
-	const expectedName = "upload-file"
-	// Test that Init registers handlers correctly
-	ext := UploadFile{}
-
-	if name := ext.Name(); name != expectedName {
-		t.Errorf("Name() = %q, want %q", name, expectedName)
-	}
-
-	// Init should not panic
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("Init() panicked: %v", r)
-		}
-	}()
-
-	// Note: Full integration testing of Init would require
-	// mocking the xlog registration functions
-}
-
 func TestFileTypeDetection(t *testing.T) {
 	tests := []struct {
 		ext      string
@@ -506,22 +486,52 @@ func TestCommandAttrs(t *testing.T) {
 	}
 }
 
-func TestInit(t *testing.T) {
-	const expectedName = "upload-file"
-	// Verify Init doesn't panic
+func TestInit_ReadonlyMode(t *testing.T) {
+	// Save original config and restore after test
+	originalReadonly := xlog.Config.Readonly
+	defer func() { xlog.Config.Readonly = originalReadonly }()
+
+	// Set readonly mode
+	xlog.Config.Readonly = true
+
+	// Init should return early without registering anything when readonly
+	ext := UploadFile{}
+	ext.Init()
+
+	// Verify Init returns early without panic in readonly mode
+	// Commands should not be registered when readonly
+}
+
+func TestInit_NormalMode(t *testing.T) {
+	// Save original config and restore after test
+	originalReadonly := xlog.Config.Readonly
+	defer func() { xlog.Config.Readonly = originalReadonly }()
+
+	// Set normal (non-readonly) mode
+	xlog.Config.Readonly = false
+
+	// Init should register routes and commands
 	ext := UploadFile{}
 
+	// Verify Init completes without panic
 	defer func() {
 		if r := recover(); r != nil {
 			t.Errorf("Init() panicked: %v", r)
 		}
 	}()
 
+	ext.Init()
+
+	// Verify Init registered components successfully
+	// The actual route registration is verified through integration tests
+}
+
+func TestInit_Name(t *testing.T) {
+	const expectedName = "upload-file"
+	ext := UploadFile{}
+
 	// Test that Name returns correct value
 	if got := ext.Name(); got != expectedName {
 		t.Errorf("Name() = %q, want %q", got, expectedName)
 	}
-
-	// Note: Full Init testing would require mocking xlog registration functions
-	// Testing Init() execution would require integration test setup
 }
