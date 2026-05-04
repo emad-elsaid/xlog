@@ -53,15 +53,9 @@ linters:
           - errcheck
           - goconst
           - gocyclo
-      - path: markdown/
-        linters:
-          - all
-      - path: ^markdown/
-        linters:
-          - all  
-      - path: (_benchmark|_tools)/
-        linters:
-          - forbidigo
+    paths:
+      - markdown/
+      - (_benchmark|_tools)/
 
 formatters:
   enable:
