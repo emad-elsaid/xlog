@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -801,6 +802,121 @@ func TestPrintDiagnosticSummary_OutputFormat(t *testing.T) {
 			var buf strings.Builder
 			formatDiagnosticSummary(&buf, tc.issues, tc.warnings)
 			tc.validate(t, buf.String())
+		})
+	}
+}
+
+func TestFormatDiagnosticSummaryEdgeCases(t *testing.T) {
+	tests := []struct {
+		name         string
+		issues       []string
+		warnings     []string
+		wantContains []string
+		wantExitCode int
+	}{
+		{
+			name:     "handles very long issue messages",
+			issues:   []string{"✗ Source directory path is extremely long and contains many nested subdirectories which might cause issues on some filesystems: /very/long/path/that/goes/on/and/on"},
+			warnings: []string{},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"/very/long/path/",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "handles multiple lines in single issue",
+			issues:   []string{"✗ Critical:\n  Nested detail line 1\n  Nested detail line 2"},
+			warnings: []string{},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"Nested detail line 1",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "handles empty string issue",
+			issues:   []string{""},
+			warnings: []string{},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "handles unicode in messages",
+			issues:   []string{"✗ ファイルが見つかりません (file not found)"},
+			warnings: []string{"⚠ 警告: Configuration parameter使用してください"},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"ファイルが見つかりません",
+				"WARNINGS:",
+				"警告",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "handles large number of issues",
+			issues:   make([]string, 50),
+			warnings: []string{},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"Please fix critical issues",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "handles large number of warnings without issues",
+			issues:   []string{},
+			warnings: make([]string, 30),
+			wantContains: []string{
+				"WARNINGS:",
+				"Warnings noted",
+			},
+			wantExitCode: 0,
+		},
+		{
+			name:     "handles messages with special characters",
+			issues:   []string{"✗ Path contains special chars: ~!@#$%^&*()_+-={}[]|\\:\";<>?,./"},
+			warnings: []string{},
+			wantContains: []string{
+				"special chars",
+				"~!@#$%^&*",
+			},
+			wantExitCode: 1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Fill arrays with content if they were created with make()
+			for i := range tt.issues {
+				if tt.issues[i] == "" {
+					tt.issues[i] = fmt.Sprintf("✗ Issue #%d", i+1)
+				}
+			}
+			for i := range tt.warnings {
+				if tt.warnings[i] == "" {
+					tt.warnings[i] = fmt.Sprintf("⚠ Warning #%d", i+1)
+				}
+			}
+
+			var buf strings.Builder
+			exitCode := formatDiagnosticSummary(&buf, tt.issues, tt.warnings)
+
+			output := buf.String()
+
+			// Check expected strings
+			for _, want := range tt.wantContains {
+				if !strings.Contains(output, want) {
+					t.Errorf("output missing expected string %q", want)
+				}
+			}
+
+			// Check exit code
+			if exitCode != tt.wantExitCode {
+				t.Errorf("got exit code %d, want %d", exitCode, tt.wantExitCode)
+			}
 		})
 	}
 }
