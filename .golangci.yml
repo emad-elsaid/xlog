@@ -1,29 +1,21 @@
-version: 2
-
 run:
   timeout: 5m
   modules-download-mode: readonly
 
 linters:
   enable:
-    # Default linters (explicitly listed for clarity)
-    - errcheck      # Check for unchecked errors
-    - govet         # Vet examines Go source code
-    - ineffassign   # Detect ineffectual assignments
-    - staticcheck   # Advanced Go linter
-    - unused        # Check for unused constants, variables, functions and types
-    
-    # Additional enabled linters
-    - misspell      # Find commonly misspelled English words in comments
-    - gosec         # Inspects source code for security problems
-    - gocritic      # Provides diagnostics for bugs, performance and style issues
-    - gocyclo       # Computes cyclomatic complexity
-    - godot         # Check if comments end in a period
-    - goconst       # Finds repeated strings that could be constants
-
-formatters:
-  enable:
-    - gofmt         # Check whether code was gofmt-ed
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - gosec
+    - gocritic
+    - gocyclo
+    - godot
+    - goconst
+    - gofmt
 
 linters-settings:
   errcheck:
@@ -33,7 +25,7 @@ linters-settings:
   govet:
     enable-all: true
     disable:
-      - fieldalignment  # Too pedantic for most codebases
+      - fieldalignment
   
   gocyclo:
     min-complexity: 15
@@ -54,18 +46,13 @@ linters-settings:
 
 issues:
   exclude-rules:
-    # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
         - gosec
         - errcheck
-    
-    # Ignore vendored/generated code
     - path: markdown/
       linters:
         - all
-    
-    # Allow fmt.Printf in benchmark and tool code
     - path: (_benchmark|_tools)/
       linters:
         - forbidigo
