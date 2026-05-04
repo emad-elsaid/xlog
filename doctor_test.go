@@ -616,3 +616,88 @@ func TestDoctor_Integration(t *testing.T) {
 		t.Errorf("Expected diagnostic log message in output, got: %s", output)
 	}
 }
+
+func TestCheckBrokenLinks(t *testing.T) {
+	tests := []struct {
+		name        string
+		files       map[string]string
+		expectWarn  bool
+		warnPattern string
+	}{
+		{
+			name: "no broken links produces no warning",
+			files: map[string]string{
+				"page1.md": "# Page 1\n[Link to page2](page2)\n",
+				"page2.md": "# Page 2\nContent here",
+			},
+			expectWarn: false,
+		},
+		{
+			name: "single broken link produces warning",
+			files: map[string]string{
+				"page1.md": "# Page 1\n[Broken link](nonexistent)\n",
+			},
+			expectWarn:  true,
+			warnPattern: "1 broken internal link",
+		},
+		{
+			name: "multiple broken links reports correct count",
+			files: map[string]string{
+				"page1.md": "# Page 1\n[Link 1](missing1)\n[Link 2](missing2)\n",
+			},
+			expectWarn:  true,
+			warnPattern: "2 broken internal link",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Use chdir approach like broken_links_test.go
+			tmpDir := t.TempDir()
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+
+			if err := os.Chdir(tmpDir); err != nil {
+				t.Fatalf("Failed to change to temp dir: %v", err)
+			}
+
+			// Create test files
+			for filename, content := range tc.files {
+				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			// Clear cache and set config
+			_ = clearPagesCache(nil)
+			originalConfig := Config
+			Config.Source = tmpDir
+			defer func() { Config = originalConfig }()
+
+			// Test checkBrokenLinks
+			warnings := []string{}
+			checkBrokenLinks(&warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+
+			if tc.warnPattern != "" {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnPattern) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnPattern, warnings)
+				}
+			}
+		})
+	}
+}

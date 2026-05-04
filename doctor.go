@@ -1,6 +1,7 @@
 package xlog
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log/slog"
@@ -46,6 +47,7 @@ func runDiagnostics() DiagnosticResult {
 	checkWritePermissions(&issues)
 	checkBindAddress(&issues)
 	checkThemeValue(&warnings)
+	checkBrokenLinks(&warnings)
 
 	return DiagnosticResult{
 		Issues:   issues,
@@ -141,6 +143,32 @@ func checkThemeValue(warnings *[]string) {
 	}
 
 	*warnings = append(*warnings, fmt.Sprintf("⚠ Invalid theme '%s' (valid options: light, dark). Will fall back to system preference.", Config.Theme))
+}
+
+func checkBrokenLinks(warnings *[]string) {
+	broken := FindBrokenLinks(context.Background())
+
+	if len(broken) == 0 {
+		slog.Info("✓ No broken internal links found")
+		return
+	}
+
+	// Group by source page to create a concise warning message
+	bySource := make(map[string]int)
+	for _, bl := range broken {
+		bySource[bl.SourcePage]++
+	}
+
+	totalBroken := len(broken)
+	affectedPages := len(bySource)
+
+	if totalBroken == 1 {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found 1 broken internal link in %d page(s). Run with -list flag to see details.", affectedPages))
+	} else {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found %d broken internal link(s) in %d page(s). Run with -list flag to see details.", totalBroken, affectedPages))
+	}
+
+	slog.Warn("Broken internal links detected", "total", totalBroken, "affected_pages", affectedPages)
 }
 
 func printDiagnosticSummary(issues, warnings []string) {
