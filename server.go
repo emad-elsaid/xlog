@@ -106,6 +106,14 @@ func Forbidden(msg string) Output {
 	}
 }
 
+// MethodNotAllowed returns an output function that writes 405 Method Not Allowed http response.
+// Used when the HTTP method is not supported for the requested resource.
+func MethodNotAllowed(msg string) Output {
+	return func(w Response, r Request) {
+		http.Error(w, msg, http.StatusMethodNotAllowed)
+	}
+}
+
 // InternalServerError returns an output function that writes InternalServerError http response.
 func InternalServerError(err error) Output {
 	return func(w Response, r Request) {

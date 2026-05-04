@@ -187,6 +187,58 @@ func TestForbidden(t *testing.T) {
 	}
 }
 
+func TestMethodNotAllowed(t *testing.T) {
+	tests := []struct {
+		name           string
+		message        string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "simple method not allowed",
+			message:        "method not allowed",
+			expectedStatus: http.StatusMethodNotAllowed,
+			expectedBody:   "method not allowed\n",
+		},
+		{
+			name:           "specific method detail",
+			message:        "POST method not allowed for this endpoint",
+			expectedStatus: http.StatusMethodNotAllowed,
+			expectedBody:   "POST method not allowed for this endpoint\n",
+		},
+		{
+			name:           "with allowed methods hint",
+			message:        "method not allowed, use GET or POST",
+			expectedStatus: http.StatusMethodNotAllowed,
+			expectedBody:   "method not allowed, use GET or POST\n",
+		},
+		{
+			name:           "empty message",
+			message:        "",
+			expectedStatus: http.StatusMethodNotAllowed,
+			expectedBody:   "\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+
+			handler := MethodNotAllowed(tc.message)
+			handler.ServeHTTP(w, r)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("status code: want %d, got %d", tc.expectedStatus, w.Code)
+			}
+
+			if w.Body.String() != tc.expectedBody {
+				t.Errorf("body: want %q, got %q", tc.expectedBody, w.Body.String())
+			}
+		})
+	}
+}
+
 func TestInternalServerError(t *testing.T) {
 	tests := []struct {
 		name           string
