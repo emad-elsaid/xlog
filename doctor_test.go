@@ -257,6 +257,41 @@ func TestRunDiagnostics(t *testing.T) {
 				}
 			},
 		},
+		{
+			name: "invalid theme produces warning",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(dir, "404.md"), []byte("# Not Found"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = false
+				Config.Theme = "invalid-theme"
+			},
+			wantIssues:   0,
+			wantWarnings: 1,
+			checkWarnings: func(t *testing.T, warnings []string) {
+				found := false
+				for _, warning := range warnings {
+					if strings.Contains(warning, "Invalid theme 'invalid-theme'") {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("expected invalid theme warning, got: %v", warnings)
+				}
+			},
+		},
 	}
 
 	for _, tc := range tests {
@@ -918,6 +953,90 @@ func TestFormatDiagnosticSummaryEdgeCases(t *testing.T) {
 			if exitCode != tt.wantExitCode {
 				t.Errorf("got exit code %d, want %d", exitCode, tt.wantExitCode)
 			}
+		})
+	}
+}
+
+func TestCheckThemeValue(t *testing.T) {
+	tests := []struct {
+		name         string
+		theme        string
+		wantWarnings int
+		checkWarning func(t *testing.T, warnings []string)
+	}{
+		{
+			name:         "empty theme is valid (uses system preference)",
+			theme:        "",
+			wantWarnings: 0,
+		},
+		{
+			name:         "light theme is valid",
+			theme:        "light",
+			wantWarnings: 0,
+		},
+		{
+			name:         "dark theme is valid",
+			theme:        "dark",
+			wantWarnings: 0,
+		},
+		{
+			name:         "invalid theme produces warning",
+			theme:        "blue",
+			wantWarnings: 1,
+			checkWarning: func(t *testing.T, warnings []string) {
+				if len(warnings) != 1 {
+					t.Fatalf("expected 1 warning, got %d", len(warnings))
+				}
+				want := "⚠ Invalid theme 'blue' (valid options: light, dark). Will fall back to system preference."
+				if warnings[0] != want {
+					t.Errorf("got warning %q, want %q", warnings[0], want)
+				}
+			},
+		},
+		{
+			name:         "uppercase theme produces warning",
+			theme:        "Light",
+			wantWarnings: 1,
+			checkWarning: func(t *testing.T, warnings []string) {
+				if !strings.Contains(warnings[0], "Invalid theme 'Light'") {
+					t.Errorf("warning should mention invalid theme 'Light', got: %q", warnings[0])
+				}
+			},
+		},
+		{
+			name:         "random value produces warning",
+			theme:        "rainbow",
+			wantWarnings: 1,
+		},
+		{
+			name:         "numeric value produces warning",
+			theme:        "123",
+			wantWarnings: 1,
+		},
+		{
+			name:         "special characters produce warning",
+			theme:        "light-dark",
+			wantWarnings: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			origTheme := Config.Theme
+			Config.Theme = tc.theme
+
+			warnings := []string{}
+			checkThemeValue(&warnings)
+
+			if len(warnings) != tc.wantWarnings {
+				t.Errorf("got %d warnings, want %d. Warnings: %v", len(warnings), tc.wantWarnings, warnings)
+			}
+
+			if tc.checkWarning != nil {
+				tc.checkWarning(t, warnings)
+			}
+
+			Config.Theme = origTheme
 		})
 	}
 }

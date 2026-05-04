@@ -45,6 +45,7 @@ func runDiagnostics() DiagnosticResult {
 	checkMarkdownFiles(&warnings)
 	checkWritePermissions(&issues)
 	checkBindAddress(&issues)
+	checkThemeValue(&warnings)
 
 	return DiagnosticResult{
 		Issues:   issues,
@@ -123,6 +124,23 @@ func checkBindAddress(issues *[]string) {
 	} else {
 		slog.Info("✓ Bind address configured", "address", Config.BindAddress)
 	}
+}
+
+func checkThemeValue(warnings *[]string) {
+	if Config.Theme == "" {
+		slog.Info("✓ Theme not set (will use system preference)")
+		return
+	}
+
+	validThemes := []string{"light", "dark"}
+	for _, valid := range validThemes {
+		if Config.Theme == valid {
+			slog.Info("✓ Theme is valid", "theme", Config.Theme)
+			return
+		}
+	}
+
+	*warnings = append(*warnings, fmt.Sprintf("⚠ Invalid theme '%s' (valid options: light, dark). Will fall back to system preference.", Config.Theme))
 }
 
 func printDiagnosticSummary(issues, warnings []string) {
