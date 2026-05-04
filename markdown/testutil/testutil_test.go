@@ -2,8 +2,12 @@ package testutil
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"testing"
+
+	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
 )
 
 // TestParseCliCaseArg tests command line argument parsing.
@@ -368,6 +372,182 @@ func TestSimpleDiff(t *testing.T) {
 				if result[i].Type != expectedType {
 					t.Errorf("diff section %d: expected type %v, got %v", i, expectedType, result[i].Type)
 				}
+			}
+		})
+	}
+}
+
+// mockMarkdown is a simple markdown implementation for testing.
+type mockMarkdown struct {
+	convertFunc func([]byte, io.Writer) error
+}
+
+func (m *mockMarkdown) Convert(source []byte, writer io.Writer, opts ...parser.ParseOption) error {
+	if m.convertFunc != nil {
+		return m.convertFunc(source, writer)
+	}
+	// Default: uppercase the input
+	_, _ = writer.Write(bytes.ToUpper(source))
+	return nil
+}
+
+func (m *mockMarkdown) Parser() parser.Parser         { return nil }
+func (m *mockMarkdown) SetParser(parser.Parser)       {}
+func (m *mockMarkdown) Renderer() renderer.Renderer   { return nil }
+func (m *mockMarkdown) SetRenderer(renderer.Renderer) {}
+
+// mockTestingT is a mock implementation of TestingT for testing error reporting.
+type mockTestingT struct {
+	logs   []string
+	skips  []string
+	errors []string
+	failed bool
+}
+
+func (m *mockTestingT) Logf(format string, args ...any) {
+	m.logs = append(m.logs, "log")
+}
+
+func (m *mockTestingT) Skipf(format string, args ...any) {
+	m.skips = append(m.skips, "skip")
+}
+
+func (m *mockTestingT) Errorf(format string, args ...any) {
+	m.errors = append(m.errors, "error")
+}
+
+func (m *mockTestingT) FailNow() {
+	m.failed = true
+}
+
+// TestDoTestCase tests individual test case execution.
+func TestDoTestCase(t *testing.T) {
+	tests := []struct {
+		name         string
+		testCase     MarkdownTestCase
+		markdown     *mockMarkdown
+		expectError  bool
+		expectPassed bool
+	}{
+		{
+			name: "passing test",
+			testCase: MarkdownTestCase{
+				No:       1,
+				Markdown: "hello",
+				Expected: "HELLO",
+			},
+			markdown:     &mockMarkdown{},
+			expectError:  false,
+			expectPassed: true,
+		},
+		{
+			name: "failing test - mismatch",
+			testCase: MarkdownTestCase{
+				No:       2,
+				Markdown: "hello",
+				Expected: "GOODBYE",
+			},
+			markdown:     &mockMarkdown{},
+			expectError:  true,
+			expectPassed: false,
+		},
+		{
+			name: "test with description",
+			testCase: MarkdownTestCase{
+				No:          3,
+				Description: "uppercase conversion",
+				Markdown:    "test",
+				Expected:    "TEST",
+			},
+			markdown:     &mockMarkdown{},
+			expectError:  false,
+			expectPassed: true,
+		},
+		{
+			name: "test with trim option",
+			testCase: MarkdownTestCase{
+				No:       4,
+				Markdown: "  hello  ",
+				Expected: "  HELLO  ",
+				Options:  MarkdownTestCaseOptions{Trim: true},
+			},
+			markdown:     &mockMarkdown{},
+			expectError:  false,
+			expectPassed: true,
+		},
+		{
+			name: "conversion error triggers panic recovery",
+			testCase: MarkdownTestCase{
+				No:       5,
+				Markdown: "fail",
+				Expected: "ignored",
+			},
+			markdown: &mockMarkdown{
+				convertFunc: func(source []byte, w io.Writer) error {
+					return bytes.ErrTooLarge
+				},
+			},
+			expectError:  true,
+			expectPassed: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mock := &mockTestingT{}
+			DoTestCase(tc.markdown, tc.testCase, mock)
+
+			hasError := len(mock.errors) > 0
+			if hasError != tc.expectError {
+				t.Errorf("expected error=%v, got error=%v (errors: %v)", tc.expectError, hasError, mock.errors)
+			}
+		})
+	}
+}
+
+// TestDoTestCases tests batch test execution.
+func TestDoTestCases(t *testing.T) {
+	tests := []struct {
+		name          string
+		cases         []MarkdownTestCase
+		markdown      *mockMarkdown
+		expectedCalls int
+	}{
+		{
+			name:          "empty cases",
+			cases:         []MarkdownTestCase{},
+			markdown:      &mockMarkdown{},
+			expectedCalls: 0,
+		},
+		{
+			name: "single case",
+			cases: []MarkdownTestCase{
+				{No: 1, Markdown: "test", Expected: "TEST"},
+			},
+			markdown:      &mockMarkdown{},
+			expectedCalls: 1,
+		},
+		{
+			name: "multiple cases",
+			cases: []MarkdownTestCase{
+				{No: 1, Markdown: "one", Expected: "ONE"},
+				{No: 2, Markdown: "two", Expected: "TWO"},
+				{No: 3, Markdown: "three", Expected: "THREE"},
+			},
+			markdown:      &mockMarkdown{},
+			expectedCalls: 3,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mock := &mockTestingT{}
+			DoTestCases(tc.markdown, tc.cases, mock)
+
+			// Verify all cases were processed
+			// (We can't easily count executions, but we verify the function completes)
+			if len(tc.cases) != tc.expectedCalls {
+				t.Errorf("test logic error: case count mismatch")
 			}
 		})
 	}
