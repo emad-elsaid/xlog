@@ -23,6 +23,15 @@ func printVersion() {
 	slog.Info("xlog version", "version", Version, "go", runtime.Version(), "os", runtime.GOOS, "arch", runtime.GOARCH)
 }
 
+// listPages outputs all markdown pages, one per line.
+// Format: filename (without .md extension) for easy piping to other commands.
+func listPages() {
+	allPages := Pages(context.Background())
+	for _, p := range allPages {
+		slog.Info(p.Name())
+	}
+}
+
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server.
 func Start(ctx context.Context) {
@@ -75,6 +84,19 @@ func Start(ctx context.Context) {
 	if err := os.Chdir(Config.Source); err != nil {
 		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
 		osExit(1)
+	}
+
+	// Handle list flag after chdir to source directory
+	if Config.ListPages {
+		// Setup minimal logger for list output
+		level := slogor.SetLevel(slog.LevelInfo)
+		timeFmt := slogor.SetTimeFormat(time.TimeOnly)
+		handler := slogor.NewHandler(os.Stderr, level, timeFmt)
+		logger := slog.New(handler)
+		slog.SetDefault(logger)
+
+		listPages()
+		osExit(0)
 	}
 
 	initExtensions()

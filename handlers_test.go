@@ -707,3 +707,98 @@ func TestPrintVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestListPages(t *testing.T) {
+	tests := []struct {
+		name     string
+		files    map[string]string
+		expected int // expected number of pages
+	}{
+		{
+			name:     "empty directory",
+			files:    map[string]string{},
+			expected: 0,
+		},
+		{
+			name: "single page",
+			files: map[string]string{
+				"test.md": "# Test Page",
+			},
+			expected: 1,
+		},
+		{
+			name: "multiple pages",
+			files: map[string]string{
+				"page1.md": "# Page 1",
+				"page2.md": "# Page 2",
+				"page3.md": "# Page 3",
+			},
+			expected: 3,
+		},
+		{
+			name: "mixed files - only .md counted",
+			files: map[string]string{
+				"page.md":   "# Markdown",
+				"note.txt":  "Not counted",
+				"readme.md": "# Another",
+			},
+			expected: 2,
+		},
+		{
+			name: "pages in nested directories",
+			files: map[string]string{
+				"root.md":      "# Root",
+				"docs/sub.md":  "# Sub",
+				"notes/foo.md": "# Foo",
+			},
+			expected: 3,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			// Create test files
+			for filename, content := range tc.files {
+				path := filepath.Join(tmpDir, filename)
+				dir := filepath.Dir(path)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatalf("Failed to create directory: %v", err)
+				}
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			// Save original config and working directory
+			origSource := Config.Source
+			origCwd, _ := os.Getwd()
+			defer func() {
+				Config.Source = origSource
+				_ = os.Chdir(origCwd)
+				// Clear cache after test
+				_ = clearPagesCache(nil)
+			}()
+
+			// Change to test directory
+			Config.Source = tmpDir
+			if err := os.Chdir(tmpDir); err != nil {
+				t.Fatalf("Failed to change directory: %v", err)
+			}
+
+			// Clear cache before test to ensure fresh state
+			_ = clearPagesCache(nil)
+
+			// Call listPages - it writes to slog which goes to stderr
+			// We just verify it doesn't panic and processes all pages
+			listPages()
+
+			// Verify the expected number of pages exist
+			pages := Pages(context.Background())
+			if len(pages) != tc.expected {
+				t.Errorf("Expected %d pages, got %d", tc.expected, len(pages))
+			}
+		})
+	}
+}

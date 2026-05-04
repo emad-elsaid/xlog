@@ -25,6 +25,7 @@ type Configuration struct {
 	ServeInsecure      bool   // should the server use https for cookie
 	RunDoctor          bool   // run configuration diagnostics
 	ShowVersion        bool   // display version information and exit
+	ListPages          bool   // list all pages and exit
 }
 
 var Config Configuration
@@ -49,4 +50,5 @@ func init() {
 	flag.StringVar(&Config.Completion, "completion", "", "generate shell completion script (bash, zsh, fish)")
 	flag.BoolVar(&Config.RunDoctor, "doctor", false, "Run diagnostics to check xlog configuration and environment")
 	flag.BoolVar(&Config.ShowVersion, "version", false, "Print version information and exit")
+	flag.BoolVar(&Config.ListPages, "list", false, "List all markdown pages and exit")
 }

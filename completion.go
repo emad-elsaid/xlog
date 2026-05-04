@@ -32,12 +32,12 @@ _xlog_completion() {
     opts="-activitypub.domain -activitypub.icon -activitypub.image -activitypub.summary -activitypub.username"
     opts="$opts -bind -build -codestyle -completion -csrf-cookie"
     opts="$opts -custom.after_view -custom.before_view -custom.head"
-    opts="$opts -disabled-extensions -disqus -editor"
-    opts="$opts -github.url -gpg -html -index -notfoundpage"
+    opts="$opts -disabled-extensions -disqus -doctor -editor"
+    opts="$opts -github.url -gpg -html -index -list -notfoundpage"
     opts="$opts -og.domain -pandoc -readonly"
     opts="$opts -rss.description -rss.domain -rss.limit"
     opts="$opts -serve-insecure -sitemap.domain -sitename -source"
-    opts="$opts -sql-table.threshold -theme -twitter.username"
+    opts="$opts -sql-table.threshold -theme -twitter.username -version"
 
     # Flag-specific completions
     case "${prev}" in
@@ -99,11 +99,13 @@ _xlog() {
         '-custom.head[Path to file included in every page <head> tag]:file:_files'
         '-disabled-extensions[Disable list of extensions by name, comma separated]:extensions:(all)'
         '-disqus[Disqus domain name]:domain:'
+        '-doctor[Run diagnostics to check xlog configuration and environment]'
         '-editor[Command to use to open pages for editing]:command:'
         '-github.url[Repository URL for edit on GitHub quick action]:url:'
         '-gpg[PGP key ID to decrypt and edit .md.pgp files]:key-id:'
         '-html[Consider HTML files as pages]'
         '-index[Index file name used as home page]:filename:'
+        '-list[List all markdown pages and exit]'
         '-notfoundpage[Custom not found page]:filename:'
         '-og.domain[Domain for OpenGraph meta tags]:domain:'
         '-pandoc[Path to pandoc binary for converting various formats]:path:_files'
@@ -118,6 +120,7 @@ _xlog() {
         '-sql-table.threshold[Minimum rows to render SQL table]:threshold:'
         '-theme[Bulma theme to use]:theme:(light dark)'
         '-twitter.username[Twitter username for Twitter card meta tags]:username:'
+        '-version[Print version information and exit]'
     )
 
     _arguments -s $flags
@@ -155,6 +158,7 @@ complete -c xlog -l custom.head -d 'Path to file included in every page <head> t
 # Extension and integration flags
 complete -c xlog -l disabled-extensions -d 'Disable list of extensions by name, comma separated' -r -a 'all'
 complete -c xlog -l disqus -d 'Disqus domain name' -r
+complete -c xlog -l doctor -d 'Run diagnostics to check xlog configuration and environment'
 complete -c xlog -l editor -d 'Command to use to open pages for editing' -r
 
 # GitHub and encryption flags
@@ -166,6 +170,7 @@ complete -c xlog -l html -d 'Consider HTML files as pages'
 
 # Page configuration flags
 complete -c xlog -l index -d 'Index file name used as home page' -r
+complete -c xlog -l list -d 'List all markdown pages and exit'
 complete -c xlog -l notfoundpage -d 'Custom not found page' -r
 
 # SEO and metadata flags
@@ -190,6 +195,7 @@ complete -c xlog -l sql-table.threshold -d 'Minimum rows to render SQL table' -r
 # Theme and social flags
 complete -c xlog -l theme -d 'Bulma theme to use' -r -a 'light dark'
 complete -c xlog -l twitter.username -d 'Twitter username for Twitter card meta tags' -r
+complete -c xlog -l version -d 'Print version information and exit'
 
 # Installation:
 # Save to ~/.config/fish/completions/xlog.fish
