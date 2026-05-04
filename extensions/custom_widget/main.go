@@ -43,7 +43,9 @@ func (CustomWidget) Init() {
 var readFile = memoize.New(func(f string) template.HTML {
 	b, err := os.ReadFile(f) // #nosec G304 -- File path controlled by admin via command-line flags, not user input
 	if err != nil {
-		panic(err)
+		// Return error message as HTML comment instead of crashing server
+		// #nosec G203 -- Error message is HTMLEscapeString-sanitized before template.HTML conversion
+		return template.HTML("<!-- custom widget error: " + template.HTMLEscapeString(err.Error()) + " -->")
 	}
 
 	return template.HTML(b) // #nosec G203 -- Content is trusted admin HTML from admin-controlled file

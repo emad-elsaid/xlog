@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -216,14 +217,20 @@ func TestReadFile_ValidFile(t *testing.T) {
 }
 
 func TestReadFile_InvalidFile(t *testing.T) {
-	// Test with non-existent file
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected readFile to panic with non-existent file")
-		}
-	}()
+	// Test with non-existent file - should return error comment instead of panicking
+	result := readFile("/nonexistent/file.html")
 
-	readFile("/nonexistent/file.html")
+	// Check that result contains an error comment
+	resultStr := string(result)
+	if !strings.HasPrefix(resultStr, "<!-- custom widget error:") {
+		t.Errorf("Expected error comment, got: %q", result)
+	}
+	if !strings.Contains(resultStr, "no such file or directory") && !strings.Contains(resultStr, "cannot find") {
+		t.Errorf("Expected error message about missing file, got: %q", result)
+	}
+	if !strings.HasSuffix(resultStr, "-->") {
+		t.Errorf("Expected HTML comment to be closed, got: %q", result)
+	}
 }
 
 func TestReadFile_EmptyFile(t *testing.T) {

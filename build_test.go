@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -729,6 +730,72 @@ func TestCopyAssets(t *testing.T) {
 				// Verify destination directory was created
 				if _, statErr := os.Stat(destDir); os.IsNotExist(statErr) {
 					t.Error("Expected destination directory to be created")
+				}
+			}
+		})
+	}
+}
+
+func TestCopyAssets_ErrorPaths(t *testing.T) {
+	tests := []struct {
+		name        string
+		setup       func(t *testing.T) string
+		expectError bool
+		errorSubstr string
+	}{
+		{
+			name: "handles write error when destination is read-only",
+			setup: func(t *testing.T) string {
+				tmpDir := t.TempDir()
+				destDir := filepath.Join(tmpDir, "readonly-dest")
+				if err := os.MkdirAll(destDir, 0o755); err != nil {
+					t.Fatalf("Failed to create dest dir: %v", err)
+				}
+				// Make the directory read-only to trigger write errors
+				if err := os.Chmod(destDir, 0o444); err != nil {
+					t.Fatalf("Failed to chmod dest dir: %v", err)
+				}
+				return destDir
+			},
+			expectError: true,
+			errorSubstr: "failed to",
+		},
+		{
+			name: "handles mkdir error when destination is a file",
+			setup: func(t *testing.T) string {
+				tmpDir := t.TempDir()
+				destDir := filepath.Join(tmpDir, "file-not-dir")
+				// Create a regular file instead of directory
+				if err := os.WriteFile(destDir, []byte("blocking"), 0o644); err != nil {
+					t.Fatalf("Failed to create blocking file: %v", err)
+				}
+				return destDir
+			},
+			expectError: true,
+			errorSubstr: "failed to",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			destDir := tc.setup(t)
+
+			// Restore permissions for cleanup
+			defer func() {
+				_ = os.Chmod(destDir, 0o755)
+			}()
+
+			err := copyAssets(destDir)
+
+			if tc.expectError && err == nil {
+				t.Error("Expected error but got none")
+			}
+			if !tc.expectError && err != nil {
+				t.Errorf("Expected no error but got: %v", err)
+			}
+			if tc.expectError && err != nil && tc.errorSubstr != "" {
+				if !strings.Contains(err.Error(), tc.errorSubstr) {
+					t.Errorf("Expected error containing %q but got: %v", tc.errorSubstr, err)
 				}
 			}
 		})
