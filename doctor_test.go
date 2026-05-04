@@ -778,3 +778,128 @@ func TestCheckBrokenLinks(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckDuplicateContent(t *testing.T) {
+	tests := []struct {
+		name        string
+		files       map[string]string
+		expectWarn  bool
+		warnPattern string
+	}{
+		{
+			name: "no duplicate content produces no warning",
+			files: map[string]string{
+				"page1.md": "# Page 1\nUnique content here",
+				"page2.md": "# Page 2\nDifferent content",
+				"page3.md": "# Page 3\nCompletely different",
+			},
+			expectWarn: false,
+		},
+		{
+			name: "identical content produces warning",
+			files: map[string]string{
+				"page1.md": "# Same Title\nSame content here",
+				"page2.md": "# Same Title\nSame content here",
+			},
+			expectWarn:  true,
+			warnPattern: "duplicate or similar content",
+		},
+		{
+			name: "similar content (>90% match) produces warning",
+			files: map[string]string{
+				"article1.md": "# Introduction to Go\nGo is a programming language. " +
+					"It was created by Google. It is statically typed. " +
+					"Go has excellent concurrency support with goroutines.",
+				"article2.md": "# Introduction to Go\nGo is a programming language. " +
+					"It was created by Google. It is statically typed. " +
+					"Go has great concurrency support with goroutines.",
+			},
+			expectWarn:  true,
+			warnPattern: "similar content",
+		},
+		{
+			name: "different length content not flagged",
+			files: map[string]string{
+				"short.md": "# Short\nBrief.",
+				"long.md":  "# Long\nThis is much longer content with many more words and details",
+			},
+			expectWarn: false,
+		},
+		{
+			name: "multiple duplicate pairs reported correctly",
+			files: map[string]string{
+				"a1.md": "# Test\nContent A",
+				"a2.md": "# Test\nContent A",
+				"b1.md": "# Test\nContent B",
+				"b2.md": "# Test\nContent B",
+			},
+			expectWarn:  true,
+			warnPattern: "duplicate",
+		},
+		{
+			name: "case insensitive comparison",
+			files: map[string]string{
+				"upper.md": "# TITLE\nCONTENT HERE",
+				"lower.md": "# title\ncontent here",
+			},
+			expectWarn:  true,
+			warnPattern: "duplicate",
+		},
+		{
+			name: "whitespace normalized",
+			files: map[string]string{
+				"spaced.md":  "# Title\nContent   with   spaces",
+				"compact.md": "# Title\nContent with spaces",
+			},
+			expectWarn:  true,
+			warnPattern: "duplicate",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+
+			if err := os.Chdir(tmpDir); err != nil {
+				t.Fatalf("Failed to change to temp dir: %v", err)
+			}
+
+			for filename, content := range tc.files {
+				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			_ = clearPagesCache(nil)
+			originalConfig := Config
+			Config.Source = tmpDir
+			defer func() { Config = originalConfig }()
+
+			warnings := []string{}
+			checkDuplicateContent(&warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+
+			if tc.warnPattern != "" {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnPattern) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnPattern, warnings)
+				}
+			}
+		})
+	}
+}

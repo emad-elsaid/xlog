@@ -7,6 +7,8 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 )
 
 // DiagnosticResult holds the results of running diagnostics.
@@ -49,6 +51,7 @@ func runDiagnostics() DiagnosticResult {
 	checkThemeValue(&warnings)
 	checkBrokenLinks(&warnings)
 	checkOrphanPages(&warnings)
+	checkDuplicateContent(&warnings)
 
 	return DiagnosticResult{
 		Issues:   issues,
@@ -187,6 +190,158 @@ func checkOrphanPages(warnings *[]string) {
 	}
 
 	slog.Warn("Orphaned pages detected", "count", stats.OrphanedPages)
+}
+
+func checkDuplicateContent(warnings *[]string) {
+	duplicates := findDuplicateContent(context.Background())
+
+	if len(duplicates) == 0 {
+		slog.Info("✓ No duplicate or similar content found")
+		return
+	}
+
+	// Count total pairs
+	totalPairs := len(duplicates)
+
+	if totalPairs == 1 {
+		*warnings = append(*warnings, "⚠ Found 1 pair of pages with duplicate or similar content. Review and consolidate if appropriate.")
+	} else {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found %d pair(s) of pages with duplicate or similar content. Review and consolidate if appropriate.", totalPairs))
+	}
+
+	slog.Warn("Duplicate content detected", "pairs", totalPairs)
+}
+
+// DuplicatePair represents two pages with duplicate or highly similar content.
+type DuplicatePair struct {
+	Page1      string
+	Page2      string
+	Similarity float64
+}
+
+// findDuplicateContent scans all pages and identifies pairs with duplicate or highly similar content.
+// Similarity threshold is 0.9 (90% match).
+func findDuplicateContent(ctx context.Context) []DuplicatePair {
+	const similarityThreshold = 0.9
+	duplicates := []DuplicatePair{}
+	seen := make(map[string]bool)
+
+	// Collect all pages with their normalized content
+	type pageContent struct {
+		name    string
+		content string
+	}
+	var pages []pageContent
+	var mu sync.Mutex
+
+	MapPage(ctx, func(p Page) Page {
+		// Skip index page
+		if p.Name() == Config.Index {
+			return nil
+		}
+
+		normalized := normalizeContent(string(p.Content()))
+		if normalized != "" {
+			mu.Lock()
+			pages = append(pages, pageContent{
+				name:    p.Name(),
+				content: normalized,
+			})
+			mu.Unlock()
+		}
+		return nil
+	})
+
+	// Compare each pair of pages
+	for i := 0; i < len(pages); i++ {
+		for j := i + 1; j < len(pages); j++ {
+			p1, p2 := pages[i], pages[j]
+
+			// Create unique key for this pair
+			pairKey := p1.name + "|" + p2.name
+			if seen[pairKey] {
+				continue
+			}
+
+			similarity := calculateSimilarity(p1.content, p2.content)
+			if similarity >= similarityThreshold {
+				duplicates = append(duplicates, DuplicatePair{
+					Page1:      p1.name,
+					Page2:      p2.name,
+					Similarity: similarity,
+				})
+				seen[pairKey] = true
+			}
+		}
+	}
+
+	return duplicates
+}
+
+// normalizeContent normalizes page content for comparison by:
+//   - Converting to lowercase
+//   - Normalizing whitespace (multiple spaces/newlines to single space)
+//   - Trimming leading/trailing whitespace.
+func normalizeContent(content string) string {
+	// Convert to lowercase
+	normalized := strings.ToLower(content)
+
+	// Replace multiple whitespace with single space
+	normalized = strings.Join(strings.Fields(normalized), " ")
+
+	return strings.TrimSpace(normalized)
+}
+
+// calculateSimilarity computes a similarity score between two strings.
+// Returns a value between 0.0 (completely different) and 1.0 (identical).
+// Uses a simple Jaccard similarity on word sets.
+func calculateSimilarity(s1, s2 string) float64 {
+	// Handle edge cases
+	if s1 == s2 {
+		return 1.0
+	}
+	if s1 == "" || s2 == "" {
+		return 0.0
+	}
+
+	// Split into word sets
+	words1 := strings.Fields(s1)
+	words2 := strings.Fields(s2)
+
+	if len(words1) == 0 || len(words2) == 0 {
+		return 0.0
+	}
+
+	// Create word frequency maps
+	set1 := make(map[string]int)
+	set2 := make(map[string]int)
+
+	for _, w := range words1 {
+		set1[w]++
+	}
+	for _, w := range words2 {
+		set2[w]++
+	}
+
+	// Calculate intersection and union
+	intersection := 0
+	for word, count1 := range set1 {
+		if count2, exists := set2[word]; exists {
+			if count1 < count2 {
+				intersection += count1
+			} else {
+				intersection += count2
+			}
+		}
+	}
+
+	union := len(words1) + len(words2) - intersection
+
+	if union == 0 {
+		return 0.0
+	}
+
+	return float64(intersection) / float64(union)
 }
 
 func printDiagnosticSummary(issues, warnings []string) {
