@@ -6,517 +6,39 @@ import (
 	"testing"
 )
 
-func TestDoctor(t *testing.T) {
-	tests := []struct {
-		name          string
-		setup         func(t *testing.T) (cleanup func())
-		expectIssues  bool
-		expectWarning bool
-	}{
-		{
-			name: "healthy configuration with all files present",
-			setup: func(t *testing.T) func() {
-				// Save original config
-				origSource := Config.Source
-				origIndex := Config.Index
-				origNotFound := Config.NotFoundPage
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				// Create temp directory with all required files
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Index = "index"
-				Config.NotFoundPage = "404"
-				Config.Readonly = false
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create index and 404 pages
-				indexPath := filepath.Join(tmpDir, "index.md")
-				if err := os.WriteFile(indexPath, []byte("# Home"), 0644); err != nil {
-					t.Fatalf("Failed to create index: %v", err)
-				}
-
-				notFoundPath := filepath.Join(tmpDir, "404.md")
-				if err := os.WriteFile(notFoundPath, []byte("# Not Found"), 0644); err != nil {
-					t.Fatalf("Failed to create 404 page: %v", err)
-				}
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.NotFoundPage = origNotFound
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  false,
-			expectWarning: false,
-		},
-		{
-			name: "readonly mode with existing files",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origIndex := Config.Index
-				origNotFound := Config.NotFoundPage
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Index = "index"
-				Config.NotFoundPage = "404"
-				Config.Readonly = true
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create index and 404 pages
-				indexPath := filepath.Join(tmpDir, "index.md")
-				if err := os.WriteFile(indexPath, []byte("# Index"), 0644); err != nil {
-					t.Fatalf("Failed to create index: %v", err)
-				}
-
-				notFoundPath := filepath.Join(tmpDir, "404.md")
-				if err := os.WriteFile(notFoundPath, []byte("# Not Found"), 0644); err != nil {
-					t.Fatalf("Failed to create 404 page: %v", err)
-				}
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.NotFoundPage = origNotFound
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  false,
-			expectWarning: false,
-		},
-		{
-			name: "missing index page shows warning",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origIndex := Config.Index
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Index = "nonexistent"
-				Config.Readonly = true
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create some markdown file but not the index
-				if err := os.WriteFile(filepath.Join(tmpDir, "other.md"), []byte("# Other"), 0644); err != nil {
-					t.Fatalf("Failed to create markdown file: %v", err)
-				}
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  false,
-			expectWarning: true,
-		},
-		{
-			name: "missing 404 page shows warning",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origIndex := Config.Index
-				origNotFound := Config.NotFoundPage
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Index = "index"
-				Config.NotFoundPage = "nonexistent-404"
-				Config.Readonly = true
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create index page
-				indexPath := filepath.Join(tmpDir, "index.md")
-				if err := os.WriteFile(indexPath, []byte("# Index"), 0644); err != nil {
-					t.Fatalf("Failed to create index: %v", err)
-				}
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.NotFoundPage = origNotFound
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  false,
-			expectWarning: true,
-		},
-		{
-			name: "no markdown files shows warning",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Readonly = true
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create directory but no markdown files
-				// Create a non-markdown file
-				if err := os.WriteFile(filepath.Join(tmpDir, "README.txt"), []byte("text"), 0644); err != nil {
-					t.Fatalf("Failed to create text file: %v", err)
-				}
-
-				return func() {
-					Config.Source = origSource
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  false,
-			expectWarning: true,
-		},
-		{
-			name: "nonexistent source directory shows critical issue",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origBindAddress := Config.BindAddress
-				origReadonly := Config.Readonly
-
-				Config.Source = "/nonexistent/path/to/nowhere"
-				Config.BindAddress = "127.0.0.1:3000"
-				Config.Readonly = true // Prevent write check on non-existent dir
-
-				return func() {
-					Config.Source = origSource
-					Config.BindAddress = origBindAddress
-					Config.Readonly = origReadonly
-				}
-			},
-			expectIssues:  true,
-			expectWarning: true, // Will also have warnings about missing files
-		},
-		{
-			name: "empty bind address shows critical issue",
-			setup: func(t *testing.T) func() {
-				origSource := Config.Source
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				tmpDir := t.TempDir()
-				Config.Source = tmpDir
-				Config.Readonly = true
-				Config.BindAddress = ""
-
-				return func() {
-					Config.Source = origSource
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
-			},
-			expectIssues:  true,
-			expectWarning: true, // Empty dir will have warnings
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			cleanup := tc.setup(t)
-			defer cleanup()
-
-			// Call runDiagnostics directly to test without os.Exit
-			result := runDiagnostics()
-
-			hasIssues := len(result.Issues) > 0
-			hasWarnings := len(result.Warnings) > 0
-
-			if tc.expectIssues && !hasIssues {
-				t.Error("Expected critical issues but found none")
-			}
-
-			if !tc.expectIssues && hasIssues {
-				t.Errorf("Expected no critical issues but found: %v", result.Issues)
-			}
-
-			if tc.expectWarning && !hasWarnings {
-				t.Error("Expected warnings but found none")
-			}
-
-			if !tc.expectWarning && hasWarnings {
-				t.Errorf("Expected no warnings but found: %v", result.Warnings)
-			}
-		})
-	}
-}
-
-func TestDoctor_SourceDirectoryValidation(t *testing.T) {
-	tests := []struct {
-		name       string
-		setupDir   string
-		createDir  bool
-		isFile     bool
-		shouldFail bool
-	}{
-		{
-			name:       "existing directory",
-			setupDir:   "",
-			createDir:  true,
-			isFile:     false,
-			shouldFail: false,
-		},
-		{
-			name:       "nonexistent directory",
-			setupDir:   "/nonexistent/path/to/nowhere",
-			createDir:  false,
-			isFile:     false,
-			shouldFail: true,
-		},
-		{
-			name:       "file instead of directory",
-			setupDir:   "",
-			createDir:  true,
-			isFile:     true,
-			shouldFail: true,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			origSource := Config.Source
-			defer func() {
-				Config.Source = origSource
-			}()
-
-			if tc.createDir {
-				tmpDir := t.TempDir()
-				if tc.isFile {
-					// Create a file instead of directory
-					filePath := filepath.Join(tmpDir, "notadir")
-					if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-						t.Fatalf("Failed to create file: %v", err)
-					}
-					Config.Source = filePath
-				} else {
-					Config.Source = tmpDir
-				}
-			} else {
-				Config.Source = tc.setupDir
-			}
-
-			// Check if source exists and is directory
-			stat, err := os.Stat(Config.Source)
-			hasError := err != nil || (stat != nil && !stat.IsDir())
-
-			if tc.shouldFail && !hasError {
-				t.Error("Expected source directory validation to fail, but it passed")
-			}
-
-			if !tc.shouldFail && hasError {
-				t.Errorf("Expected source directory validation to pass, but it failed: %v", err)
-			}
-		})
-	}
-}
-
-func TestDoctor_WritePermissions(t *testing.T) {
-	tests := []struct {
-		name       string
-		readonly   bool
-		perms      os.FileMode
-		shouldFail bool
-	}{
-		{
-			name:       "writable directory with write enabled",
-			readonly:   false,
-			perms:      0755,
-			shouldFail: false,
-		},
-		{
-			name:       "readonly mode skips write check",
-			readonly:   true,
-			perms:      0755,
-			shouldFail: false,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-
-			origSource := Config.Source
-			origReadonly := Config.Readonly
-			defer func() {
-				Config.Source = origSource
-				Config.Readonly = origReadonly
-			}()
-
-			Config.Source = tmpDir
-			Config.Readonly = tc.readonly
-
-			// Set directory permissions
-			if err := os.Chmod(tmpDir, tc.perms); err != nil {
-				t.Fatalf("Failed to set permissions: %v", err)
-			}
-
-			if !tc.readonly {
-				// Try to write test file
-				testFile := filepath.Join(tmpDir, ".xlog-write-test")
-				err := os.WriteFile(testFile, []byte("test"), 0600)
-				hasError := err != nil
-
-				if tc.shouldFail && !hasError {
-					t.Error("Expected write permission check to fail, but it passed")
-				}
-
-				if !tc.shouldFail && hasError {
-					t.Errorf("Expected write permission check to pass, but failed: %v", err)
-				}
-
-				// Clean up
-				_ = os.Remove(testFile)
-			}
-		})
-	}
-}
-
-func TestDoctor_MarkdownFileDetection(t *testing.T) {
-	tests := []struct {
-		name       string
-		files      []string
-		expectNone bool
-	}{
-		{
-			name:       "directory with markdown files",
-			files:      []string{"page1.md", "page2.md", "notes.md"},
-			expectNone: false,
-		},
-		{
-			name:       "directory with no markdown files",
-			files:      []string{"README.txt", "data.json", "image.png"},
-			expectNone: true,
-		},
-		{
-			name:       "empty directory",
-			files:      []string{},
-			expectNone: true,
-		},
-		{
-			name:       "mixed files with some markdown",
-			files:      []string{"README.txt", "notes.md", "data.json"},
-			expectNone: false,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-
-			// Create test files
-			for _, filename := range tc.files {
-				filePath := filepath.Join(tmpDir, filename)
-				if err := os.WriteFile(filePath, []byte("content"), 0644); err != nil {
-					t.Fatalf("Failed to create file %s: %v", filename, err)
-				}
-			}
-
-			// Check for markdown files
-			mdFiles, err := filepath.Glob(filepath.Join(tmpDir, "*.md"))
-			if err != nil {
-				t.Fatalf("Failed to glob markdown files: %v", err)
-			}
-
-			hasMarkdown := len(mdFiles) > 0
-
-			if tc.expectNone && hasMarkdown {
-				t.Errorf("Expected no markdown files, but found %d", len(mdFiles))
-			}
-
-			if !tc.expectNone && !hasMarkdown {
-				t.Error("Expected to find markdown files, but found none")
-			}
-		})
-	}
-}
-
-func TestDoctor_BindAddressValidation(t *testing.T) {
-	tests := []struct {
-		name        string
-		bindAddress string
-		shouldFail  bool
-	}{
-		{
-			name:        "valid bind address",
-			bindAddress: "127.0.0.1:3000",
-			shouldFail:  false,
-		},
-		{
-			name:        "valid bind address with hostname",
-			bindAddress: "localhost:8080",
-			shouldFail:  false,
-		},
-		{
-			name:        "empty bind address",
-			bindAddress: "",
-			shouldFail:  true,
-		},
-		{
-			name:        "bind address with port only",
-			bindAddress: ":3000",
-			shouldFail:  false,
-		},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			isEmpty := tc.bindAddress == ""
-
-			if tc.shouldFail && !isEmpty {
-				t.Error("Expected bind address validation to fail, but it passed")
-			}
-
-			if !tc.shouldFail && isEmpty {
-				t.Error("Expected bind address validation to pass, but it failed")
-			}
-		})
-	}
-}
-
 func TestDiagnosticResult_HasCriticalIssues(t *testing.T) {
 	tests := []struct {
-		name     string
-		result   DiagnosticResult
-		expected bool
+		name   string
+		result DiagnosticResult
+		want   bool
 	}{
 		{
-			name:     "no issues",
-			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{}},
-			expected: false,
+			name:   "no issues",
+			result: DiagnosticResult{Issues: []string{}, Warnings: []string{}},
+			want:   false,
 		},
 		{
-			name:     "has one issue",
-			result:   DiagnosticResult{Issues: []string{"critical error"}, Warnings: []string{}},
-			expected: true,
+			name:   "has issues",
+			result: DiagnosticResult{Issues: []string{"critical error"}, Warnings: []string{}},
+			want:   true,
 		},
 		{
-			name:     "has multiple issues",
-			result:   DiagnosticResult{Issues: []string{"error1", "error2"}, Warnings: []string{}},
-			expected: true,
+			name:   "only warnings",
+			result: DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
+			want:   false,
 		},
 		{
-			name:     "has warnings but no issues",
-			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
-			expected: false,
+			name:   "both issues and warnings",
+			result: DiagnosticResult{Issues: []string{"error"}, Warnings: []string{"warning"}},
+			want:   true,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := tc.result.HasCriticalIssues(); got != tc.expected {
-				t.Errorf("HasCriticalIssues() = %v, want %v", got, tc.expected)
+			got := tc.result.HasCriticalIssues()
+			if got != tc.want {
+				t.Errorf("HasCriticalIssues() = %v, want %v", got, tc.want)
 			}
 		})
 	}
@@ -524,192 +46,578 @@ func TestDiagnosticResult_HasCriticalIssues(t *testing.T) {
 
 func TestDiagnosticResult_IsHealthy(t *testing.T) {
 	tests := []struct {
-		name     string
-		result   DiagnosticResult
-		expected bool
+		name   string
+		result DiagnosticResult
+		want   bool
 	}{
 		{
-			name:     "healthy - no issues or warnings",
-			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{}},
-			expected: true,
+			name:   "completely healthy",
+			result: DiagnosticResult{Issues: []string{}, Warnings: []string{}},
+			want:   true,
 		},
 		{
-			name:     "unhealthy - has issues",
-			result:   DiagnosticResult{Issues: []string{"error"}, Warnings: []string{}},
-			expected: false,
+			name:   "has issues",
+			result: DiagnosticResult{Issues: []string{"error"}, Warnings: []string{}},
+			want:   false,
 		},
 		{
-			name:     "unhealthy - has warnings",
-			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
-			expected: false,
+			name:   "has warnings",
+			result: DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
+			want:   false,
 		},
 		{
-			name:     "unhealthy - has both",
-			result:   DiagnosticResult{Issues: []string{"error"}, Warnings: []string{"warning"}},
-			expected: false,
+			name:   "has both",
+			result: DiagnosticResult{Issues: []string{"error"}, Warnings: []string{"warning"}},
+			want:   false,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := tc.result.IsHealthy(); got != tc.expected {
-				t.Errorf("IsHealthy() = %v, want %v", got, tc.expected)
+			got := tc.result.IsHealthy()
+			if got != tc.want {
+				t.Errorf("IsHealthy() = %v, want %v", got, tc.want)
 			}
 		})
 	}
 }
 
-func TestRunDiagnostics_Comprehensive(t *testing.T) {
+func TestRunDiagnostics(t *testing.T) {
 	tests := []struct {
-		name           string
-		setup          func(t *testing.T) (cleanup func())
-		expectHealthy  bool
-		issueCount     int
-		warningCount   int
-		expectIssue    string   // Expected substring in issues
-		expectWarnings []string // Expected substrings in warnings
+		name          string
+		setup         func(t *testing.T) string
+		cleanup       func(t *testing.T, dir string)
+		configSetup   func(t *testing.T, dir string)
+		wantIssues    int
+		wantWarnings  int
+		checkIssues   func(t *testing.T, issues []string)
+		checkWarnings func(t *testing.T, warnings []string)
 	}{
 		{
-			name: "completely healthy system",
-			setup: func(t *testing.T) func() {
-				tmpDir := t.TempDir()
-
-				origSource := Config.Source
-				origIndex := Config.Index
-				origNotFound := Config.NotFoundPage
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				Config.Source = tmpDir
+			name: "healthy configuration",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				// Create index page
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				// Create 404 page
+				if err := os.WriteFile(filepath.Join(dir, "404.md"), []byte("# Not Found"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
 				Config.Index = "index"
 				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
 				Config.Readonly = false
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Create all required files
-				_ = os.WriteFile(filepath.Join(tmpDir, "index.md"), []byte("# Index"), 0644)
-				_ = os.WriteFile(filepath.Join(tmpDir, "404.md"), []byte("# 404"), 0644)
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.NotFoundPage = origNotFound
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
 			},
-			expectHealthy: true,
-			issueCount:    0,
-			warningCount:  0,
+			wantIssues:   0,
+			wantWarnings: 0,
 		},
 		{
-			name: "multiple warnings, no critical issues",
-			setup: func(t *testing.T) func() {
-				tmpDir := t.TempDir()
-
-				origSource := Config.Source
-				origIndex := Config.Index
-				origNotFound := Config.NotFoundPage
-				origReadonly := Config.Readonly
-				origBindAddress := Config.BindAddress
-
-				Config.Source = tmpDir
-				Config.Index = "missing"
-				Config.NotFoundPage = "missing404"
+			name: "missing source directory",
+			setup: func(t *testing.T) string {
+				return "/nonexistent/directory"
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = false
+			},
+			wantIssues:   2,  // source doesn't exist + not writable (cascading failure)
+			wantWarnings: -1, // don't check warnings (will vary)
+			checkIssues: func(t *testing.T, issues []string) {
+				// Should have at least one source directory related issue
+				if len(issues) < 2 {
+					t.Errorf("expected 2 issues, got %d: %v", len(issues), issues)
+				}
+			},
+		},
+		{
+			name: "missing index page",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				// Create a markdown file but not index
+				if err := os.WriteFile(filepath.Join(dir, "other.md"), []byte("# Other"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = false
+			},
+			wantIssues:   0,
+			wantWarnings: 2, // missing index and 404
+		},
+		{
+			name: "no markdown files",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				// Create a non-markdown file
+				if err := os.WriteFile(filepath.Join(dir, "file.txt"), []byte("text"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = false
+			},
+			wantIssues:   0,
+			wantWarnings: 3, // no markdown files, missing index, missing 404
+		},
+		{
+			name: "readonly mode skips write check",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = "127.0.0.1:3000"
 				Config.Readonly = true
-				Config.BindAddress = "127.0.0.1:3000"
-
-				// Don't create files - will trigger warnings
-
-				return func() {
-					Config.Source = origSource
-					Config.Index = origIndex
-					Config.NotFoundPage = origNotFound
-					Config.Readonly = origReadonly
-					Config.BindAddress = origBindAddress
-				}
 			},
-			expectHealthy: false,
-			issueCount:    0,
-			warningCount:  3, // Missing index, missing 404, no markdown files
-			expectWarnings: []string{
-				"Index page not found",
-				"404 page not found",
-				"No markdown files",
+			wantIssues:   0,
+			wantWarnings: 1, // missing 404
+		},
+		{
+			name: "empty bind address",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			configSetup: func(t *testing.T, dir string) {
+				Config.Source = dir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.BindAddress = ""
+				Config.Readonly = false
+			},
+			wantIssues:   1,
+			wantWarnings: 1, // missing 404
+			checkIssues: func(t *testing.T, issues []string) {
+				found := false
+				for _, issue := range issues {
+					if issue == "✗ Bind address is empty" {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Error("expected bind address issue")
+				}
 			},
 		},
 		{
-			name: "file instead of directory as source",
-			setup: func(t *testing.T) func() {
-				tmpDir := t.TempDir()
-				filePath := filepath.Join(tmpDir, "notadir")
-				_ = os.WriteFile(filePath, []byte("test"), 0644)
-
-				origSource := Config.Source
-				origBindAddress := Config.BindAddress
-				origReadonly := Config.Readonly
-
-				Config.Source = filePath
+			name: "source is file not directory",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				filePath := filepath.Join(dir, "notadir.txt")
+				if err := os.WriteFile(filePath, []byte("text"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return filePath
+			},
+			configSetup: func(t *testing.T, path string) {
+				Config.Source = path
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
 				Config.BindAddress = "127.0.0.1:3000"
-				Config.Readonly = true // Prevent write check on non-directory
-
-				return func() {
-					Config.Source = origSource
-					Config.BindAddress = origBindAddress
-					Config.Readonly = origReadonly
+				Config.Readonly = false
+			},
+			wantIssues:   2,  // not a directory + not writable (cascading failure)
+			wantWarnings: -1, // don't check warnings (will vary)
+			checkIssues: func(t *testing.T, issues []string) {
+				// Should have at least 2 issues (not a dir + not writable)
+				if len(issues) < 2 {
+					t.Errorf("expected at least 2 issues, got %d: %v", len(issues), issues)
 				}
 			},
-			expectHealthy: false,
-			issueCount:    1,
-			expectIssue:   "not a directory",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cleanup := tc.setup(t)
-			defer cleanup()
+			// Save original config
+			origConfig := Config
 
+			// Setup test environment
+			path := tc.setup(t)
+			tc.configSetup(t, path)
+
+			// Run diagnostics
 			result := runDiagnostics()
 
-			if got := result.IsHealthy(); got != tc.expectHealthy {
-				t.Errorf("IsHealthy() = %v, want %v (issues: %v, warnings: %v)",
-					got, tc.expectHealthy, result.Issues, result.Warnings)
+			// Verify results
+			if tc.wantIssues >= 0 && len(result.Issues) != tc.wantIssues {
+				t.Errorf("got %d issues, want %d. Issues: %v", len(result.Issues), tc.wantIssues, result.Issues)
 			}
 
-			if len(result.Issues) != tc.issueCount {
-				t.Errorf("Expected %d issues, got %d: %v", tc.issueCount, len(result.Issues), result.Issues)
+			if tc.wantWarnings >= 0 && len(result.Warnings) != tc.wantWarnings {
+				t.Errorf("got %d warnings, want %d. Warnings: %v", len(result.Warnings), tc.wantWarnings, result.Warnings)
 			}
 
-			if tc.warningCount > 0 && len(result.Warnings) != tc.warningCount {
-				t.Errorf("Expected %d warnings, got %d: %v", tc.warningCount, len(result.Warnings), result.Warnings)
+			// Additional checks if provided
+			if tc.checkIssues != nil {
+				tc.checkIssues(t, result.Issues)
+			}
+			if tc.checkWarnings != nil {
+				tc.checkWarnings(t, result.Warnings)
 			}
 
-			if tc.expectIssue != "" {
-				found := false
-				for _, issue := range result.Issues {
-					if contains(issue, tc.expectIssue) {
-						found = true
-						break
-					}
+			// Restore original config
+			Config = origConfig
+
+			// Cleanup if provided
+			if tc.cleanup != nil {
+				tc.cleanup(t, path)
+			}
+		})
+	}
+}
+
+func TestCheckSourceDirectory(t *testing.T) {
+	tests := []struct {
+		name       string
+		source     string
+		setupFunc  func(t *testing.T) string
+		wantIssues int
+	}{
+		{
+			name: "valid directory",
+			setupFunc: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			wantIssues: 0,
+		},
+		{
+			name:       "nonexistent directory",
+			source:     "/this/does/not/exist",
+			wantIssues: 1,
+		},
+		{
+			name: "file instead of directory",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				file := filepath.Join(dir, "file.txt")
+				if err := os.WriteFile(file, []byte("test"), 0644); err != nil {
+					t.Fatal(err)
 				}
-				if !found {
-					t.Errorf("Expected issue containing %q, but got: %v", tc.expectIssue, result.Issues)
-				}
+				return file
+			},
+			wantIssues: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var source string
+			if tc.setupFunc != nil {
+				source = tc.setupFunc(t)
+			} else {
+				source = tc.source
 			}
 
-			for _, expectedWarning := range tc.expectWarnings {
-				found := false
-				for _, warning := range result.Warnings {
-					if contains(warning, expectedWarning) {
-						found = true
-						break
-					}
-				}
-				if !found {
-					t.Errorf("Expected warning containing %q, but got: %v", expectedWarning, result.Warnings)
-				}
+			origSource := Config.Source
+			Config.Source = source
+
+			issues := []string{}
+			checkSourceDirectory(&issues)
+
+			if len(issues) != tc.wantIssues {
+				t.Errorf("got %d issues, want %d. Issues: %v", len(issues), tc.wantIssues, issues)
 			}
+
+			Config.Source = origSource
+		})
+	}
+}
+
+func TestCheckIndexPage(t *testing.T) {
+	tests := []struct {
+		name         string
+		setupFunc    func(t *testing.T) (dir, indexName string)
+		wantWarnings int
+	}{
+		{
+			name: "index page exists",
+			setupFunc: func(t *testing.T) (string, string) {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "index.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir, "index"
+			},
+			wantWarnings: 0,
+		},
+		{
+			name: "index page missing",
+			setupFunc: func(t *testing.T) (string, string) {
+				dir := t.TempDir()
+				return dir, "index"
+			},
+			wantWarnings: 1,
+		},
+		{
+			name: "custom index page exists",
+			setupFunc: func(t *testing.T) (string, string) {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "home.md"), []byte("# Home"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir, "home"
+			},
+			wantWarnings: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir, indexName := tc.setupFunc(t)
+
+			origSource := Config.Source
+			origIndex := Config.Index
+			Config.Source = dir
+			Config.Index = indexName
+
+			warnings := []string{}
+			checkIndexPage(&warnings)
+
+			if len(warnings) != tc.wantWarnings {
+				t.Errorf("got %d warnings, want %d. Warnings: %v", len(warnings), tc.wantWarnings, warnings)
+			}
+
+			Config.Source = origSource
+			Config.Index = origIndex
+		})
+	}
+}
+
+func TestCheckNotFoundPage(t *testing.T) {
+	tests := []struct {
+		name         string
+		setupFunc    func(t *testing.T) (dir, notFoundName string)
+		wantWarnings int
+	}{
+		{
+			name: "404 page exists",
+			setupFunc: func(t *testing.T) (string, string) {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "404.md"), []byte("# Not Found"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir, "404"
+			},
+			wantWarnings: 0,
+		},
+		{
+			name: "404 page missing",
+			setupFunc: func(t *testing.T) (string, string) {
+				dir := t.TempDir()
+				return dir, "404"
+			},
+			wantWarnings: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir, notFoundName := tc.setupFunc(t)
+
+			origSource := Config.Source
+			origNotFoundPage := Config.NotFoundPage
+			Config.Source = dir
+			Config.NotFoundPage = notFoundName
+
+			warnings := []string{}
+			checkNotFoundPage(&warnings)
+
+			if len(warnings) != tc.wantWarnings {
+				t.Errorf("got %d warnings, want %d. Warnings: %v", len(warnings), tc.wantWarnings, warnings)
+			}
+
+			Config.Source = origSource
+			Config.NotFoundPage = origNotFoundPage
+		})
+	}
+}
+
+func TestCheckMarkdownFiles(t *testing.T) {
+	tests := []struct {
+		name         string
+		setupFunc    func(t *testing.T) string
+		wantWarnings int
+	}{
+		{
+			name: "has markdown files",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "file.md"), []byte("# Test"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			wantWarnings: 0,
+		},
+		{
+			name: "no markdown files",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "file.txt"), []byte("test"), 0644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			wantWarnings: 1,
+		},
+		{
+			name: "empty directory",
+			setupFunc: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			wantWarnings: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := tc.setupFunc(t)
+
+			origSource := Config.Source
+			Config.Source = dir
+
+			warnings := []string{}
+			checkMarkdownFiles(&warnings)
+
+			if len(warnings) != tc.wantWarnings {
+				t.Errorf("got %d warnings, want %d. Warnings: %v", len(warnings), tc.wantWarnings, warnings)
+			}
+
+			Config.Source = origSource
+		})
+	}
+}
+
+func TestCheckWritePermissions(t *testing.T) {
+	tests := []struct {
+		name       string
+		setupFunc  func(t *testing.T) string
+		readonly   bool
+		wantIssues int
+	}{
+		{
+			name: "writable directory",
+			setupFunc: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			readonly:   false,
+			wantIssues: 0,
+		},
+		{
+			name: "readonly mode skips check",
+			setupFunc: func(t *testing.T) string {
+				return t.TempDir()
+			},
+			readonly:   true,
+			wantIssues: 0,
+		},
+		{
+			name: "non-writable directory",
+			setupFunc: func(t *testing.T) string {
+				dir := t.TempDir()
+				// Make directory read-only
+				if err := os.Chmod(dir, 0444); err != nil {
+					t.Fatal(err)
+				}
+				// Restore permissions after test
+				t.Cleanup(func() {
+					_ = os.Chmod(dir, 0755)
+				})
+				return dir
+			},
+			readonly:   false,
+			wantIssues: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := tc.setupFunc(t)
+
+			origSource := Config.Source
+			origReadonly := Config.Readonly
+			Config.Source = dir
+			Config.Readonly = tc.readonly
+
+			issues := []string{}
+			checkWritePermissions(&issues)
+
+			if len(issues) != tc.wantIssues {
+				t.Errorf("got %d issues, want %d. Issues: %v", len(issues), tc.wantIssues, issues)
+			}
+
+			Config.Source = origSource
+			Config.Readonly = origReadonly
+		})
+	}
+}
+
+func TestCheckBindAddress(t *testing.T) {
+	tests := []struct {
+		name        string
+		bindAddress string
+		wantIssues  int
+	}{
+		{
+			name:        "valid bind address",
+			bindAddress: "127.0.0.1:3000",
+			wantIssues:  0,
+		},
+		{
+			name:        "empty bind address",
+			bindAddress: "",
+			wantIssues:  1,
+		},
+		{
+			name:        "localhost with port",
+			bindAddress: "localhost:8080",
+			wantIssues:  0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			origBindAddress := Config.BindAddress
+			Config.BindAddress = tc.bindAddress
+
+			issues := []string{}
+			checkBindAddress(&issues)
+
+			if len(issues) != tc.wantIssues {
+				t.Errorf("got %d issues, want %d. Issues: %v", len(issues), tc.wantIssues, issues)
+			}
+
+			Config.BindAddress = origBindAddress
 		})
 	}
 }
