@@ -70,12 +70,47 @@ type Channel struct {
 	Items       []Item `xml:"item"`
 }
 
+type GUID struct {
+	IsPermaLink bool   `xml:"isPermaLink,attr"`
+	Value       string `xml:",chardata"`
+}
+
+type RFC822Time struct {
+	time.Time
+}
+
+func (t RFC822Time) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	if t.IsZero() {
+		return nil
+	}
+	// RFC 822 format as per RSS spec
+	formatted := t.Format(time.RFC1123Z)
+	return e.EncodeElement(formatted, start)
+}
+
+func (t *RFC822Time) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var v string
+	if err := d.DecodeElement(&v, &start); err != nil {
+		return err
+	}
+	parsed, err := time.Parse(time.RFC1123Z, v)
+	if err != nil {
+		// Try RFC1123 without timezone
+		parsed, err = time.Parse(time.RFC1123, v)
+		if err != nil {
+			return err
+		}
+	}
+	*t = RFC822Time{parsed}
+	return nil
+}
+
 type Item struct {
-	Title       string    `xml:"title"`
-	Description string    `xml:"description"`
-	PubDate     time.Time `xml:"pubDate"`
-	GUID        string    `xml:"guid"`
-	Link        string    `xml:"link"`
+	Title       string     `xml:"title"`
+	Description string     `xml:"description"`
+	PubDate     RFC822Time `xml:"pubDate"`
+	GUID        GUID       `xml:"guid"`
+	Link        string     `xml:"link"`
 }
 
 func feed(r xlog.Request) xlog.Output {
@@ -111,8 +146,11 @@ func feed(r xlog.Request) xlog.Output {
 		f.Channel.Items = append(f.Channel.Items, Item{
 			Title:       p.Name(),
 			Description: string(p.Render()),
-			PubDate:     p.ModTime(),
-			GUID:        p.Name(),
+			PubDate:     RFC822Time{p.ModTime()},
+			GUID: GUID{
+				IsPermaLink: false,
+				Value:       p.Name(),
+			},
 			Link: (&url.URL{
 				Scheme: "https",
 				Host:   domain,

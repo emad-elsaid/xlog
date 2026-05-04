@@ -180,8 +180,8 @@ func TestFeedItemsSortedByModTime(t *testing.T) {
 
 	// First item should be the newest (most recently modified)
 	// The feed is sorted by ModTime descending
-	firstPubDate := rssData.Channel.Items[0].PubDate
-	secondPubDate := rssData.Channel.Items[1].PubDate
+	firstPubDate := rssData.Channel.Items[0].PubDate.Time
+	secondPubDate := rssData.Channel.Items[1].PubDate.Time
 
 	if !firstPubDate.After(secondPubDate) && !firstPubDate.Equal(secondPubDate) {
 		t.Errorf("Expected items to be sorted by modification time (newest first)")
@@ -221,8 +221,12 @@ func TestFeedItemContent(t *testing.T) {
 			t.Error("Expected item to have a title")
 		}
 
-		if item.GUID == "" {
+		if item.GUID.Value == "" {
 			t.Error("Expected item to have a GUID")
+		}
+
+		if item.GUID.IsPermaLink {
+			t.Error("Expected GUID isPermaLink to be false")
 		}
 
 		if !strings.Contains(item.Link, "example.com") {
@@ -351,5 +355,75 @@ func TestRSSLinkInterface(t *testing.T) {
 	attrs := link.Attrs()
 	if href, ok := attrs["href"]; !ok || href != "/+/feed.rss" {
 		t.Errorf("Expected href '/+/feed.rss', got %v", href)
+	}
+}
+
+func TestRFC822TimeFormat(t *testing.T) {
+	cleanup := setupTestEnv(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
+	w := httptest.NewRecorder()
+
+	result := feed(req)
+	result(w, req)
+
+	body := w.Body.String()
+
+	// Verify RFC-822 format in raw XML
+	if !strings.Contains(body, "<pubDate>") {
+		t.Error("Expected pubDate element in RSS feed")
+	}
+
+	// Parse XML
+	var rssData rss
+	if err := xml.Unmarshal([]byte(body), &rssData); err != nil {
+		t.Fatalf("Failed to parse RSS XML: %v", err)
+	}
+
+	if len(rssData.Channel.Items) < 1 {
+		t.Fatal("Expected at least 1 item")
+	}
+
+	// Verify the date is not zero
+	if rssData.Channel.Items[0].PubDate.IsZero() {
+		t.Error("Expected item to have a valid pubDate")
+	}
+}
+
+func TestGUIDIsPermaLinkAttribute(t *testing.T) {
+	cleanup := setupTestEnv(t)
+	defer cleanup()
+
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
+	w := httptest.NewRecorder()
+
+	result := feed(req)
+	result(w, req)
+
+	body := w.Body.String()
+
+	// Verify isPermaLink="false" in raw XML
+	if !strings.Contains(body, `isPermaLink="false"`) {
+		t.Error("Expected guid element to have isPermaLink=\"false\" attribute")
+	}
+
+	// Parse XML and verify structure
+	var rssData rss
+	if err := xml.Unmarshal([]byte(body), &rssData); err != nil {
+		t.Fatalf("Failed to parse RSS XML: %v", err)
+	}
+
+	if len(rssData.Channel.Items) < 1 {
+		t.Fatal("Expected at least 1 item")
+	}
+
+	item := rssData.Channel.Items[0]
+	if item.GUID.IsPermaLink {
+		t.Error("Expected GUID.IsPermaLink to be false")
+	}
+
+	if item.GUID.Value == "" {
+		t.Error("Expected GUID to have a value")
 	}
 }
