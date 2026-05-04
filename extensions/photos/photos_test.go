@@ -420,6 +420,7 @@ func TestNewPhoto_WithExifData(t *testing.T) {
 
 	if photo == nil {
 		t.Fatal("Expected photo object, got nil")
+		return
 	}
 
 	// Verify Photo fields are populated correctly

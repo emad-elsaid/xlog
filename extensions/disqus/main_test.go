@@ -100,6 +100,7 @@ func TestDisqusFlagRegistration(t *testing.T) {
 	f := flag.Lookup("disqus")
 	if f == nil {
 		t.Fatal("disqus flag should be registered")
+		return
 	}
 
 	if f.Usage != "Disqus domain name for example: xlog-emadelsaid.disqus.com" {

@@ -270,6 +270,7 @@ func TestFlagRegistration(t *testing.T) {
 	f := flag.Lookup("sql-table.threshold")
 	if f == nil {
 		t.Fatal("Flag 'sql-table.threshold' not registered")
+		return
 	}
 
 	if f.DefValue != "100" {
