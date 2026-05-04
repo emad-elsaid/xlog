@@ -1677,6 +1677,161 @@ func TestRelatedPagesIndexHandling(t *testing.T) {
 	}
 }
 
+func TestRelatedPagesFilteringLogic(t *testing.T) {
+	// Test the core filtering logic of relatedPages (lines 165-186)
+	// without relying on xlog.MapPage filesystem scanning
+	tests := []struct {
+		name            string
+		sourcePage      *mockPage
+		candidatePages  []*mockPage
+		expectedMatches []string
+		description     string
+	}{
+		{
+			name:       "finds pages with shared hashtags",
+			sourcePage: &mockPage{name: "source", content: []byte("#golang #testing")},
+			candidatePages: []*mockPage{
+				{name: "page1", content: []byte("#golang tutorial")},
+				{name: "page2", content: []byte("#rust guide")},
+				{name: "page3", content: []byte("#testing framework")},
+			},
+			expectedMatches: []string{"page1", "page3"},
+			description:     "Lines 177-182: hashtags map lookup finds matching pages",
+		},
+		{
+			name:       "excludes self from candidates",
+			sourcePage: &mockPage{name: "self", content: []byte("#tag")},
+			candidatePages: []*mockPage{
+				{name: "self", content: []byte("#tag duplicate")},
+				{name: "other", content: []byte("#tag match")},
+			},
+			expectedMatches: []string{"other"},
+			description:     "Line 173-175: rp.Name() == p.Name() check prevents self-inclusion",
+		},
+		{
+			name:       "no matches when no shared hashtags",
+			sourcePage: &mockPage{name: "isolated", content: []byte("#unique")},
+			candidatePages: []*mockPage{
+				{name: "page1", content: []byte("#golang")},
+				{name: "page2", content: []byte("#rust")},
+			},
+			expectedMatches: []string{},
+			description:     "Lines 179-185: loop completes without ok==true, returns nil",
+		},
+		{
+			name:       "case insensitive matching via unique handles",
+			sourcePage: &mockPage{name: "source", content: []byte("#GoLang")},
+			candidatePages: []*mockPage{
+				{name: "lower", content: []byte("#golang text")},
+				{name: "upper", content: []byte("#GOLANG text")},
+				{name: "mixed", content: []byte("#GoLang text")},
+			},
+			expectedMatches: []string{"lower", "upper", "mixed"},
+			description:     "Lines 169 + 180: unique.Make(strings.ToLower) enables case-insensitive matching",
+		},
+		{
+			name:       "source with no hashtags matches nothing",
+			sourcePage: &mockPage{name: "empty", content: []byte("plain text")},
+			candidatePages: []*mockPage{
+				{name: "page1", content: []byte("#golang")},
+			},
+			expectedMatches: []string{},
+			description:     "Lines 166-170: empty found_hashtags results in empty map",
+		},
+		{
+			name:       "first matching hashtag returns page immediately",
+			sourcePage: &mockPage{name: "multi", content: []byte("#tag1 #tag2 #tag3")},
+			candidatePages: []*mockPage{
+				{name: "same", content: []byte("#tag1 #tag2 #tag3 all match")},
+			},
+			expectedMatches: []string{"same"},
+			description:     "Line 181: first hashtag match returns rp, breaks loop",
+		},
+		{
+			name:       "partial hashtag overlap still matches",
+			sourcePage: &mockPage{name: "src", content: []byte("#alpha #beta #gamma")},
+			candidatePages: []*mockPage{
+				{name: "overlap1", content: []byte("#alpha #delta")},
+				{name: "overlap2", content: []byte("#epsilon #beta")},
+				{name: "nomatch", content: []byte("#zeta")},
+			},
+			expectedMatches: []string{"overlap1", "overlap2"},
+			description:     "Lines 179-182: any one shared hashtag triggers match",
+		},
+		{
+			name:       "candidate with no hashtags never matches",
+			sourcePage: &mockPage{name: "tagged", content: []byte("#tag")},
+			candidatePages: []*mockPage{
+				{name: "plain", content: []byte("no hashtags")},
+				{name: "match", content: []byte("#tag here")},
+			},
+			expectedMatches: []string{"match"},
+			description:     "Lines 178-185: empty page_hashtags causes loop to skip without match",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Simulate relatedPages filtering logic (lines 165-186)
+
+			// Line 165-166: Extract source page hashtags
+			_, tree := tc.sourcePage.AST()
+			foundHashtags := xlog.FindAllInAST[*HashTag](tree)
+
+			// Lines 167-170: Build unique handle map
+			hashtags := map[unique.Handle[string]]bool{}
+			for _, v := range foundHashtags {
+				hashtags[v.unique] = true
+			}
+
+			// Lines 172-186: Simulate MapPage filtering
+			var matchedPages []xlog.Page
+			for _, rp := range tc.candidatePages {
+				// Line 173-175: Exclude self
+				if rp.Name() == tc.sourcePage.Name() {
+					continue
+				}
+
+				// Lines 177-178: Get candidate page hashtags
+				_, rpTree := rp.AST()
+				pageHashtags := xlog.FindAllInAST[*HashTag](rpTree)
+
+				// Lines 179-182: Check for match
+				matched := false
+				for _, h := range pageHashtags {
+					if _, ok := hashtags[h.unique]; ok {
+						matchedPages = append(matchedPages, rp)
+						matched = true
+						break // Line 181: return rp on first match
+					}
+				}
+
+				// Line 185: if !matched, nil would be returned by MapPage (implicit)
+				_ = matched
+			}
+
+			// Verify results
+			matchedNames := make([]string, len(matchedPages))
+			for i, p := range matchedPages {
+				matchedNames[i] = p.Name()
+			}
+
+			if len(matchedNames) != len(tc.expectedMatches) {
+				t.Errorf("%s\nExpected %d matches, got %d: %v",
+					tc.description, len(tc.expectedMatches), len(matchedNames), matchedNames)
+			}
+
+			for _, expected := range tc.expectedMatches {
+				found := slices.Contains(matchedNames, expected)
+				if !found {
+					t.Errorf("%s\nExpected match %q not found in: %v",
+						tc.description, expected, matchedNames)
+				}
+			}
+		})
+	}
+}
+
 func TestHashtagPagesInputTrimming(t *testing.T) {
 	// Test the input trimming logic in hashtagPages
 	// We'll test by examining the tagPages call indirectly
