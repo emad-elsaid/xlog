@@ -188,7 +188,7 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 		})
 
 		return xlog.Partial(tpl, xlog.Locals{
-			"photos": photos,
+			extensionName: photos,
 		})
 	}
 }

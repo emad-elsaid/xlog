@@ -22,9 +22,10 @@ import (
 const (
 	extODT = ".odt"
 	extOrg = ".org"
+	extRST = ".rst"
 )
 
-var SUPPORTED_EXT = []string{extOrg, ".rst", ".rtf", extODT}
+var SUPPORTED_EXT = []string{extOrg, extRST, ".rtf", extODT}
 var pandoc_support bool
 
 func init() {
