@@ -18,15 +18,17 @@ type Command interface {
 
 var commands = []func(Page) []Command{}
 
-// RegisterCommand registers a new command.
+// RegisterCommand registers a new command function. When a page is displayed,
+// all registered command functions are executed to collect commands for the
+// Ctrl+K actions menu.
 func RegisterCommand(c func(Page) []Command) {
 	commands = append(commands, c)
 }
 
-// Commands return the list of commands for a page. when a page is displayed it
-// executes all functions registered with RegisterCommand and collect all
-// results in one slice. result can be passed to the view to render the commands
-// list.
+// Commands returns the list of commands for a page. When a page is displayed,
+// it executes all functions registered with RegisterCommand and collects all
+// results in one slice. The result can be passed to the view to render the
+// commands list for the Ctrl+K actions menu.
 func Commands(p Page) []Command {
 	cmds := []Command{}
 	for c := range commands {
@@ -44,9 +46,11 @@ func RegisterQuickCommand(c func(Page) []Command) {
 	quickCommands = append(quickCommands, c)
 }
 
-// QuickCommands return the list of QuickCommands for a page. it executes all functions
-// registered with RegisterQuickCommand and collect all results in one slice. result
-// can be passed to the view to render the Quick commands list.
+// QuickCommands returns the list of QuickCommands for a page. It executes all
+// functions registered with RegisterQuickCommand and collects all results in
+// one slice. The result can be passed to the view to render the quick commands
+// list, which are displayed prominently at the top right of the page in the
+// default template.
 func QuickCommands(p Page) []Command {
 	cmds := []Command{}
 	for c := range quickCommands {
@@ -58,14 +62,15 @@ func QuickCommands(p Page) []Command {
 
 var links = []func(Page) []Command{}
 
-// Register a new links function, should return a list of Links.
+// RegisterLink registers a new links function. The function should return a
+// list of links that will be displayed in navigation areas such as the footer.
 func RegisterLink(l func(Page) []Command) {
 	links = append(links, l)
 }
 
-// Links returns a list of links for a Page. it executes all functions
-// registered with RegisterLink and collect them in one slice. Can be passed to
-// the view to render in the footer for example.
+// Links returns a list of links for a Page. It executes all functions
+// registered with RegisterLink and collects them in one slice. The result
+// can be passed to the view to render in navigation areas such as the footer.
 func Links(p Page) []Command {
 	lnks := []Command{}
 	for l := range links {
