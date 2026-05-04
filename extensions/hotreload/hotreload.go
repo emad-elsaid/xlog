@@ -35,6 +35,8 @@ func (Hotreload) Init() {
 	xlog.RegisterWidget(xlog.WidgetAfterView, 0, clientWidget)
 }
 
+// NotifyPageChange sends a notification to all connected WebSocket clients
+// when a page is modified, triggering a reload in the browser.
 func NotifyPageChange(p xlog.Page) error {
 	if !p.Exists() {
 		return nil

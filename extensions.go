@@ -13,6 +13,9 @@ type Extension interface {
 
 var extensions = []Extension{}
 
+// RegisterExtension registers a new extension. Extensions must implement the Extension
+// interface and will be initialized when the server starts unless disabled via
+// Config.DisabledExtensions.
 func RegisterExtension(e Extension) {
 	extensions = append(extensions, e)
 }

@@ -38,6 +38,8 @@ func Commands(p Page) []Command {
 
 var quickCommands = []func(Page) []Command{}
 
+// RegisterQuickCommand registers a new quick command function. Quick commands are
+// displayed prominently at the top right of the page in the default template.
 func RegisterQuickCommand(c func(Page) []Command) {
 	quickCommands = append(quickCommands, c)
 }

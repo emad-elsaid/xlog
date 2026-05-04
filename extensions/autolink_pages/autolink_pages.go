@@ -35,6 +35,8 @@ func (a fileInfoByNameLength) Less(i, j int) bool {
 var autolinkPages []*NormalizedPage
 var autolinkPage_lck sync.Mutex
 
+// UpdatePagesList rebuilds the internal cache of pages used for automatic linking.
+// This function is called automatically when pages are modified.
 func UpdatePagesList(xlog.Page) (err error) {
 	autolinkPage_lck.Lock()
 	defer autolinkPage_lck.Unlock()

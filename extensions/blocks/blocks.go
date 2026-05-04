@@ -33,6 +33,8 @@ func (Blocks) Init() {
 	xlog.RegisterWidget(xlog.WidgetHead, 0, style)
 }
 
+// RegisterShortCodes walks the templates directory and registers each template
+// as a shortcode that can be used in pages.
 func RegisterShortCodes() {
 	_ = fs.WalkDir(templates, "templates", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

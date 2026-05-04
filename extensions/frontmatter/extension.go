@@ -29,6 +29,8 @@ func (m MetaProperty) Name() string { return m.NameVal }
 func (m MetaProperty) Icon() string { return "fa-solid fa-table-list" }
 func (m MetaProperty) Value() any   { return m.Val }
 
+// MetaProperties extracts frontmatter metadata from a page and returns them
+// as properties that can be displayed in the page view.
 func MetaProperties(p xlog.Page) []xlog.Property {
 	_, ast := p.AST()
 	if ast == nil {

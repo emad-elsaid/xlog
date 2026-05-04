@@ -112,6 +112,9 @@ func validatePath(p string) error {
 	return nil
 }
 
+// NewPhoto creates a Photo instance from a filesystem path. The path must be
+// within allowed directories. Returns an error if the path is invalid or the
+// file cannot be read.
 func NewPhoto(path string) (*Photo, error) {
 	// #nosec G304 -- Caller is responsible for path validation
 	stat, err := os.Stat(path)

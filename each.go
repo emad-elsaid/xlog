@@ -41,6 +41,8 @@ var (
 	pagesMutex sync.RWMutex
 )
 
+// Pages returns all pages in the xlog directory. The result is cached and the cache
+// is populated on first call. To invalidate the cache, use InvalidatePagesCache.
 func Pages(ctx context.Context) []Page {
 	pagesMutex.RLock()
 	cached := pages

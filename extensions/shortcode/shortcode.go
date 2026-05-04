@@ -37,6 +37,8 @@ var (
 	shortcodesMutex sync.RWMutex
 )
 
+// RegisterShortCode registers a new shortcode with the given name that can be
+// used in markdown content via the {{name}} syntax.
 func RegisterShortCode(name string, shortcode ShortCode) {
 	shortcodesMutex.Lock()
 	defer shortcodesMutex.Unlock()
