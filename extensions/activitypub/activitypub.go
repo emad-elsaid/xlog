@@ -13,6 +13,12 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
+const (
+	attrRel                = "rel"
+	attrType               = "type"
+	activityStreamsContext = "https://www.w3.org/ns/activitystreams"
+)
+
 var domain string
 var username string
 var summary string
@@ -75,14 +81,14 @@ func webfinger(r xlog.Request) xlog.Output {
 			},
 			Links: []map[string]string{
 				{
-					"rel":  "http://webfinger.net/rel/profile-page",
-					"type": "text/html",
-					"href": fmt.Sprintf("https://%s", domain),
+					attrRel:  "http://webfinger.net/rel/profile-page",
+					attrType: "text/html",
+					"href":   fmt.Sprintf("https://%s", domain),
 				},
 				{
-					"rel":  "self",
-					"type": "application/activity+json",
-					"href": fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
+					attrRel:  "self",
+					attrType: "application/activity+json",
+					"href":   fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 				},
 				// OStatus remote subscribe link for legacy compatibility with older Mastodon instances
 				// and fediverse servers. Modern ActivityPub implementations use the inbox for follows,
@@ -123,7 +129,7 @@ func profile(r xlog.Request) xlog.Output {
 
 	return xlog.JsonResponse(
 		profileResponse{
-			Context:           "https://www.w3.org/ns/activitystreams",
+			Context:           activityStreamsContext,
 			ID:                fmt.Sprintf("https://%s/+/activitypub/@%s", domain, username),
 			Type:              "Person",
 			PreferredUsername: username,
@@ -176,7 +182,7 @@ func outbox(r xlog.Request) xlog.Output {
 
 	return xlog.JsonResponse(
 		outboxResponse{
-			Context:    "https://www.w3.org/ns/activitystreams",
+			Context:    activityStreamsContext,
 			ID:         fmt.Sprintf("https://%s/+/activitypub/@%s/outbox", domain, username),
 			Type:       "OrderedCollection",
 			TotalItems: count,
@@ -251,7 +257,7 @@ func outboxPage(r xlog.Request) xlog.Output {
 
 	return xlog.JsonResponse(
 		outboxPageResponse{
-			Context: "https://www.w3.org/ns/activitystreams",
+			Context: activityStreamsContext,
 			ID:      fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex),
 			Type:    "OrderedCollectionPage",
 			Prev:    fmt.Sprintf("https://%s/+/activitypub/@%s/outbox/%d", domain, username, pageIndex-1),

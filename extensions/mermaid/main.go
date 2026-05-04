@@ -10,15 +10,17 @@ import (
 	shortcode "github.com/emad-elsaid/xlog/extensions/shortcode"
 )
 
+const extensionName = "mermaid"
+
 func init() {
 	xlog.RegisterExtension(Mermaid{})
 }
 
 type Mermaid struct{}
 
-func (Mermaid) Name() string { return "mermaid" }
+func (Mermaid) Name() string { return extensionName }
 func (Mermaid) Init() {
-	shortcode.RegisterShortCode("mermaid", shortcode.ShortCode{Render: renderer})
+	shortcode.RegisterShortCode(extensionName, shortcode.ShortCode{Render: renderer})
 }
 
 //go:embed script.html

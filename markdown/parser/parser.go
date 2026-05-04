@@ -1232,15 +1232,15 @@ func (p *parser) processLineContent(line []byte, lineLength int, parent ast.Node
 
 // appendTextSegment creates and appends a text segment with appropriate line break flags.
 func appendTextSegment(parent ast.Node, diff text.Segment, lineBreakFlags uint8, source []byte) {
-	var text *ast.Text
+	var txt *ast.Text
 	if lineBreakFlags&(lineBreakHard|lineBreakVisible) == lineBreakHard|lineBreakVisible {
-		text = ast.NewTextSegment(diff)
+		txt = ast.NewTextSegment(diff)
 	} else {
-		text = ast.NewTextSegment(diff.TrimRightSpace(source))
+		txt = ast.NewTextSegment(diff.TrimRightSpace(source))
 	}
-	text.SetSoftLineBreak(lineBreakFlags&lineBreakSoft != 0)
-	text.SetHardLineBreak(lineBreakFlags&lineBreakHard != 0)
-	parent.AppendChild(parent, text)
+	txt.SetSoftLineBreak(lineBreakFlags&lineBreakSoft != 0)
+	txt.SetHardLineBreak(lineBreakFlags&lineBreakHard != 0)
+	parent.AppendChild(parent, txt)
 }
 
 func (p *parser) parseBlock(block text.BlockReader, parent ast.Node, pc Context) {

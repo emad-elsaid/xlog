@@ -11,7 +11,6 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	"image/png"
-	_ "image/png"
 	"io/fs"
 	"os"
 	"path"
@@ -35,15 +34,17 @@ var templates embed.FS
 
 var supportedExt = types.Slice[string]{".jpg", ".jpeg", ".gif", ".png"}
 
+const extensionName = "photos"
+
 func init() {
 	xlog.RegisterExtension(Photos{})
 }
 
 type Photos struct{}
 
-func (Photos) Name() string { return "photos" }
+func (Photos) Name() string { return extensionName }
 func (Photos) Init() {
-	shortcode.RegisterShortCode("photos", shortcode.ShortCode{Render: photosShortcode("photos")})
+	shortcode.RegisterShortCode(extensionName, shortcode.ShortCode{Render: photosShortcode(extensionName)})
 	shortcode.RegisterShortCode("photos-grid", shortcode.ShortCode{Render: photosShortcode("photos-grid")})
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.RegisterProperty(properties)
@@ -115,15 +116,15 @@ func validatePath(p string) error {
 // NewPhoto creates a Photo instance from a filesystem path. The path must be
 // within allowed directories. Returns an error if the path is invalid or the
 // file cannot be read.
-func NewPhoto(path string) (*Photo, error) {
+func NewPhoto(photoPath string) (*Photo, error) {
 	// #nosec G304 -- Caller is responsible for path validation
-	stat, err := os.Stat(path)
+	stat, err := os.Stat(photoPath)
 	if err != nil {
 		return nil, err
 	}
 
 	// #nosec G304 -- Caller is responsible for path validation
-	f, err := os.Open(path)
+	f, err := os.Open(photoPath)
 	if err != nil {
 		return nil, err
 	}
@@ -144,9 +145,9 @@ func NewPhoto(path string) (*Photo, error) {
 	}
 
 	return &Photo{
-		Thumbnail: "/+/photos/thumbnail/" + path,
-		Page:      "/+/photos/photo/" + path,
-		Original:  path,
+		Thumbnail: "/+/photos/thumbnail/" + photoPath,
+		Page:      "/+/photos/photo/" + photoPath,
+		Original:  photoPath,
 		Exif:      exifData,
 		Time:      t,
 	}, nil
@@ -197,13 +198,26 @@ func resizeHandler(r xlog.Request) xlog.Output {
 
 	// Validate path for security before any file operations
 	if err := validatePath(photo_path); err != nil {
-		return func(w xlog.Response, r xlog.Request) {
-			if _, writeErr := fmt.Fprintf(w, "Error: %v", err); writeErr != nil {
-				fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
-			}
-		}
+		return errorOutput(fmt.Sprintf("Error: %v", err))
 	}
 
+	cacheOutput := tryLoadCache(photo_path)
+	if cacheOutput != nil {
+		return cacheOutput
+	}
+
+	return resizeAndCachePhoto(photo_path)
+}
+
+func errorOutput(message string) xlog.Output {
+	return func(w xlog.Response, r xlog.Request) {
+		if _, writeErr := fmt.Fprint(w, message); writeErr != nil {
+			fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
+		}
+	}
+}
+
+func tryLoadCache(photo_path string) xlog.Output {
 	const cacheDir = ".cache"
 	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
 		return xlog.InternalServerError(err)
@@ -212,65 +226,72 @@ func resizeHandler(r xlog.Request) xlog.Output {
 	cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photo_path))))
 	// #nosec G304 -- Cache file path is constructed from hash, not user input
 	cache, err := os.ReadFile(cacheFile)
-	if err == nil {
-		return func(w xlog.Response, r xlog.Request) {
-			if _, writeErr := w.Write(cache); writeErr != nil {
-				// Log error but can't do much at this point
-				fmt.Fprintf(os.Stderr, "Failed to write cached photo: %v\n", writeErr)
-			}
-		}
+	if err != nil {
+		return nil
 	}
 
 	return func(w xlog.Response, r xlog.Request) {
-		// #nosec G304 -- Path validated via validatePath before this point
-		inputImage, err := os.Open(photo_path)
+		if _, writeErr := w.Write(cache); writeErr != nil {
+			fmt.Fprintf(os.Stderr, "Failed to write cached photo: %v\n", writeErr)
+		}
+	}
+}
+
+func resizeAndCachePhoto(photo_path string) xlog.Output {
+	const cacheDir = ".cache"
+	cacheFile := path.Join(cacheDir, fmt.Sprintf("photo-%x", sha256.Sum256([]byte(photo_path))))
+
+	return func(w xlog.Response, r xlog.Request) {
+		resized, err := resizePhoto(photo_path)
 		if err != nil {
-			if _, writeErr := fmt.Fprint(w, err.Error()); writeErr != nil {
+			if _, writeErr := fmt.Fprintf(w, "Failed to process image: %v", err); writeErr != nil {
 				fmt.Fprintf(os.Stderr, "Failed to write error response: %v\n", writeErr)
 			}
 			return
 		}
-		defer func() {
-			if closeErr := inputImage.Close(); closeErr != nil {
-				fmt.Fprintf(os.Stderr, "Failed to close input image: %v\n", closeErr)
-			}
-		}()
 
-		src, _, err := image.Decode(inputImage)
-		if err != nil {
-			if _, writeErr := fmt.Fprintf(w, "Failed to decode image: %v", err); writeErr != nil {
-				fmt.Fprintf(os.Stderr, "Failed to write decode error: %v\n", writeErr)
-			}
-			return
-		}
-
-		bounds := src.Bounds()
-		dim := bounds.Max
-
-		width := 700
-		height := int(float32(width) / float32(dim.X) * float32(dim.Y))
-
-		dst := image.NewRGBA(image.Rect(0, 0, width, height))
-		draw.NearestNeighbor.Scale(dst, dst.Rect, src, bounds, draw.Over, nil)
-
-		var out bytes.Buffer
-
-		if err := png.Encode(&out, dst); err != nil {
-			if _, writeErr := fmt.Fprintf(w, "Failed to encode image: %v", err); writeErr != nil {
-				fmt.Fprintf(os.Stderr, "Failed to write encode error: %v\n", writeErr)
-			}
-			return
-		}
-
-		if err := os.WriteFile(cacheFile, out.Bytes(), 0600); err != nil {
+		if err := os.WriteFile(cacheFile, resized, 0600); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to cache resized image: %v\n", err)
-			// Continue despite cache failure
 		}
 
-		if _, err := w.Write(out.Bytes()); err != nil {
+		if _, err := w.Write(resized); err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to write resized image: %v\n", err)
 		}
 	}
+}
+
+func resizePhoto(photo_path string) ([]byte, error) {
+	// #nosec G304 -- Path validated via validatePath before this point
+	inputImage, err := os.Open(photo_path)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if closeErr := inputImage.Close(); closeErr != nil {
+			fmt.Fprintf(os.Stderr, "Failed to close input image: %v\n", closeErr)
+		}
+	}()
+
+	src, _, err := image.Decode(inputImage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+
+	bounds := src.Bounds()
+	dim := bounds.Max
+
+	width := 700
+	height := int(float32(width) / float32(dim.X) * float32(dim.Y))
+
+	dst := image.NewRGBA(image.Rect(0, 0, width, height))
+	draw.NearestNeighbor.Scale(dst, dst.Rect, src, bounds, draw.Over, nil)
+
+	var out bytes.Buffer
+	if err := png.Encode(&out, dst); err != nil {
+		return nil, fmt.Errorf("failed to encode image: %w", err)
+	}
+
+	return out.Bytes(), nil
 }
 
 func photoHandler(r xlog.Request) xlog.Output {

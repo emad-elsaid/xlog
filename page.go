@@ -69,10 +69,10 @@ func (p *page) Exists() bool {
 }
 
 func (p *page) Render() template.HTML {
-	src, ast := p.AST()
+	src, astNode := p.AST()
 
 	var buf bytes.Buffer
-	if err := MarkdownConverter().Renderer().Render(&buf, src, ast); err != nil {
+	if err := MarkdownConverter().Renderer().Render(&buf, src, astNode); err != nil {
 		// #nosec G203 -- Error message is html.EscapeString-sanitized before conversion
 		return template.HTML(html.EscapeString(err.Error()))
 	}

@@ -18,8 +18,8 @@ func (s Screenshot) Attrs() map[template.HTMLAttr]any {
 	link := fmt.Sprintf("/+/upload-file/screenshot-form?page=%s", url.PathEscape(s.p.Name()))
 
 	return map[template.HTMLAttr]any{
-		"href":    link,
-		"hx-post": link,
+		attrHref:   link,
+		attrHxPost: link,
 	}
 }
 
@@ -27,7 +27,7 @@ func ScreenshotForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
 	return xlog.Render("screenshot", map[string]any{
-		"action": "/+/upload-file?page=" + url.QueryEscape(name),
-		"csrf":   xlog.CSRF(r),
+		attrAction: "/+/upload-file?page=" + url.QueryEscape(name),
+		attrCSRF:   xlog.CSRF(r),
 	})
 }

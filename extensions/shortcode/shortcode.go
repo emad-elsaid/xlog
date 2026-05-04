@@ -27,12 +27,19 @@ func container(cls string, content xlog.Markdown) template.HTML {
 	return template.HTML(fmt.Sprintf(tpl, cls, render(content)))
 }
 
+const (
+	typeInfo    = "info"
+	typeSuccess = "success"
+	typeWarning = "warning"
+	typeAlert   = "alert"
+)
+
 var (
 	shortcodes = map[string]ShortCode{
-		"info":    {Render: func(c xlog.Markdown) template.HTML { return container("is-info", c) }},
-		"success": {Render: func(c xlog.Markdown) template.HTML { return container("is-success", c) }},
-		"warning": {Render: func(c xlog.Markdown) template.HTML { return container("is-warning", c) }},
-		"alert":   {Render: func(c xlog.Markdown) template.HTML { return container("is-danger", c) }},
+		typeInfo:    {Render: func(c xlog.Markdown) template.HTML { return container("is-info", c) }},
+		typeSuccess: {Render: func(c xlog.Markdown) template.HTML { return container("is-success", c) }},
+		typeWarning: {Render: func(c xlog.Markdown) template.HTML { return container("is-warning", c) }},
+		typeAlert:   {Render: func(c xlog.Markdown) template.HTML { return container("is-danger", c) }},
 	}
 	shortcodesMutex sync.RWMutex
 )

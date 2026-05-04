@@ -491,7 +491,7 @@ func TestCacheDirectoryCreation(t *testing.T) {
 		t.Fatalf("getUrlMeta() error = %v", err)
 	}
 
-	if _, err := os.Stat(".cache"); os.IsNotExist(err) {
+	if _, statErr := os.Stat(".cache"); os.IsNotExist(statErr) {
 		t.Error("cache directory was not created")
 	}
 

@@ -508,8 +508,8 @@ func walkHelper(n Node, walker Walker) (WalkStatus, error) {
 	}
 	if status != WalkSkipChildren {
 		for c := n.FirstChild(); c != nil; c = c.NextSibling() {
-			if st, err := walkHelper(c, walker); err != nil || st == WalkStop {
-				return WalkStop, err
+			if st, walkErr := walkHelper(c, walker); walkErr != nil || st == WalkStop {
+				return WalkStop, walkErr
 			}
 		}
 	}

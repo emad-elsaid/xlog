@@ -6,8 +6,6 @@ import (
 	"html/template"
 	"regexp"
 
-	_ "embed"
-
 	"github.com/emad-elsaid/xlog"
 )
 

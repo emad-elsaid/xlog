@@ -17,7 +17,9 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
-var SUPPORTED_EXT = []string{".htm", ".html", ".xhtml"}
+const extHTML = ".html"
+
+var SUPPORTED_EXT = []string{".htm", extHTML, ".xhtml"}
 var html_support bool
 
 func init() {

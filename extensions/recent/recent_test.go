@@ -140,7 +140,7 @@ func TestRecent_Handler(t *testing.T) {
 				ctx = context.Background()
 			}
 
-			r := httptest.NewRequest(tc.method, tc.path, nil).WithContext(ctx)
+			r := httptest.NewRequest(tc.method, tc.path, http.NoBody).WithContext(ctx)
 			output := recentHandler(r)
 
 			if tc.wantNonNilOut && output == nil {
@@ -220,7 +220,7 @@ func TestRecent_HandlerSorting(t *testing.T) {
 			}
 
 			// Run handler (files must exist during execution for Pages() to find them)
-			r := httptest.NewRequest(http.MethodGet, "/+/recent", nil)
+			r := httptest.NewRequest(http.MethodGet, "/+/recent", http.NoBody)
 			output := recentHandler(r)
 
 			if output == nil {

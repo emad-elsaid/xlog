@@ -9,7 +9,7 @@ import (
 )
 
 func TestDefinitionList(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -17,5 +17,5 @@ func TestDefinitionList(t *testing.T) {
 			DefinitionList,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/definition_list.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/definition_list.txt", t, testutil.ParseCliCaseArg()...)
 }

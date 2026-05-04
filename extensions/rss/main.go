@@ -17,6 +17,8 @@ var domain string
 var description string
 var limit int
 
+const pathFeedRSS = "/+/feed.rss"
+
 func init() {
 	flag.StringVar(&domain, "rss.domain", "", "RSS domain name to be used for RSS feed. without HTTPS://")
 	flag.StringVar(&description, "rss.description", "", "RSS feed description")
@@ -30,9 +32,9 @@ type RSS struct{}
 func (RSS) Name() string { return "rss" }
 func (RSS) Init() {
 	xlog.RegisterWidget(xlog.WidgetHead, 0, metaTag)
-	xlog.RegisterBuildPage("/+/feed.rss", false)
+	xlog.RegisterBuildPage(pathFeedRSS, false)
 	xlog.RegisterLink(links)
-	xlog.Get(`/+/feed.rss`, feed)
+	xlog.Get(pathFeedRSS, feed)
 }
 
 type rssLink struct{}
@@ -41,7 +43,7 @@ func (rssLink) Icon() string { return "fa-solid fa-rss" }
 func (rssLink) Name() string { return "RSS" }
 func (rssLink) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
-		"href": "/+/feed.rss",
+		"href": pathFeedRSS,
 	}
 }
 
@@ -50,7 +52,7 @@ func links(p xlog.Page) []xlog.Command {
 }
 
 func metaTag(p xlog.Page) template.HTML {
-	tag := `<link href="/+/feed.rss" rel="alternate" title="%s" type="application/rss+xml">`
+	tag := `<link href="` + pathFeedRSS + `" rel="alternate" title="%s" type="application/rss+xml">`
 	// #nosec G203 -- Sitename is escaped via template.JSEscapeString before insertion into HTML attribute
 	return template.HTML(fmt.Sprintf(tag, template.JSEscapeString(xlog.Config.Sitename)))
 }
@@ -84,7 +86,7 @@ func feed(r xlog.Request) xlog.Output {
 			Link: (&url.URL{
 				Scheme: "https",
 				Host:   domain,
-				Path:   "/+/feed.rss",
+				Path:   pathFeedRSS,
 			}).String(),
 			Description: description,
 			Language:    "en-US",

@@ -67,7 +67,7 @@ func TestBadRequest(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := BadRequest(tc.message)
 			handler.ServeHTTP(w, r)
@@ -113,7 +113,7 @@ func TestInternalServerError(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := InternalServerError(tc.err)
 			handler.ServeHTTP(w, r)
@@ -145,7 +145,7 @@ func TestNoContent(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodDelete, "/", nil)
+			r := httptest.NewRequest(http.MethodDelete, "/", http.NoBody)
 
 			handler := NoContent()
 			handler.ServeHTTP(w, r)
@@ -197,7 +197,7 @@ func TestPlainText(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := PlainText(tc.text)
 			handler.ServeHTTP(w, r)
@@ -278,7 +278,7 @@ func TestJsonResponse(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := JsonResponse(tc.input)
 			handler.ServeHTTP(w, r)
@@ -316,7 +316,7 @@ func TestJsonResponse_MarshalError(t *testing.T) {
 	}
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 	handler := JsonResponse(unmarshalable{Chan: make(chan int)})
 	handler.ServeHTTP(w, r)
@@ -380,7 +380,7 @@ func TestRequestLoggerHandler_LogInjectionPrevention(t *testing.T) {
 			}))
 
 			recorder := httptest.NewRecorder()
-			req := httptest.NewRequest(tc.method, tc.path, nil)
+			req := httptest.NewRequest(tc.method, tc.path, http.NoBody)
 
 			// Execute handler - should complete without panic
 			handler.ServeHTTP(recorder, req)
@@ -471,7 +471,7 @@ func TestNotFound(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := NotFound(tc.message)
 			handler.ServeHTTP(w, r)
@@ -529,7 +529,7 @@ func TestRedirect(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := Redirect(tc.url)
 			handler.ServeHTTP(w, r)
@@ -594,7 +594,7 @@ func TestNoCache(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := NoCache(tc.wrappedOutput)
 			handler.ServeHTTP(w, r)
@@ -662,7 +662,7 @@ func TestCache(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := Cache(tc.wrappedOutput)
 			handler.ServeHTTP(w, r)
@@ -724,7 +724,7 @@ func TestHandlerFuncToHttpHandler(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := handlerFuncToHttpHandler(tc.handlerFunc)
 			handler.ServeHTTP(w, r)
@@ -815,7 +815,7 @@ func TestRouteRegistration(t *testing.T) {
 
 			// Test route works with correct method
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(tc.expectedMethod, tc.path, nil)
+			r := httptest.NewRequest(tc.expectedMethod, tc.path, http.NoBody)
 			router.ServeHTTP(w, r)
 
 			if w.Code != http.StatusOK {
@@ -835,7 +835,7 @@ func TestRouteRegistration(t *testing.T) {
 			}
 
 			w2 := httptest.NewRecorder()
-			r2 := httptest.NewRequest(wrongMethod, tc.path, nil)
+			r2 := httptest.NewRequest(wrongMethod, tc.path, http.NoBody)
 			router.ServeHTTP(w2, r2)
 
 			if w2.Code != http.StatusMethodNotAllowed {
@@ -877,7 +877,7 @@ func TestPlainTextOutput(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := PlainText(tc.text)
 			handler.ServeHTTP(w, r)
@@ -931,7 +931,7 @@ func TestJsonResponseOutput(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := JsonResponse(tc.data)
 			handler.ServeHTTP(w, r)
@@ -967,7 +967,7 @@ func TestRenderOutput(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := Render(tc.templatePath, tc.data)
 			handler.ServeHTTP(w, r)
@@ -1002,7 +1002,7 @@ func TestPlainTextOutput_WriteError(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := &failingResponseWriter{}
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := PlainText(tc.text)
 			handler.ServeHTTP(w, r)
@@ -1036,7 +1036,7 @@ func TestJsonResponseOutput_WriteError(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := &failingResponseWriter{}
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := JsonResponse(tc.data)
 			handler.ServeHTTP(w, r)
@@ -1069,7 +1069,7 @@ func TestRenderOutput_WriteError(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			w := &failingResponseWriter{}
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			handler := Render(tc.templatePath, tc.data)
 			handler.ServeHTTP(w, r)
@@ -1146,7 +1146,7 @@ func TestCreated(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			req := httptest.NewRequest(http.MethodPost, "/api/users", nil)
+			req := httptest.NewRequest(http.MethodPost, "/api/users", http.NoBody)
 
 			output := Created(tc.location)
 			output(recorder, req)
@@ -1195,7 +1195,7 @@ func TestAccepted(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
-			req := httptest.NewRequest(tc.method, tc.path, nil)
+			req := httptest.NewRequest(tc.method, tc.path, http.NoBody)
 
 			output := Accepted()
 			output(recorder, req)

@@ -150,7 +150,7 @@ func TestBuildRoute(t *testing.T) {
 			}
 
 			// Verify directory was created
-			if _, err := os.Stat(tc.dir); os.IsNotExist(err) {
+			if _, statErr := os.Stat(tc.dir); os.IsNotExist(statErr) {
 				t.Errorf("expected directory %q to exist", tc.dir)
 			}
 
@@ -205,16 +205,16 @@ func TestBuildRoute_FilePermissions(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Errorf("Failed to clean up temp dir: %v", err)
+		if cleanupErr := os.RemoveAll(tmpDir); cleanupErr != nil {
+			t.Errorf("Failed to clean up temp dir: %v", cleanupErr)
 		}
 	}()
 
 	srv := &http.Server{
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			if _, err := w.Write([]byte("content")); err != nil {
-				t.Errorf("Failed to write response: %v", err)
+			if _, writeErr := w.Write([]byte("content")); writeErr != nil {
+				t.Errorf("Failed to write response: %v", writeErr)
 			}
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
@@ -320,8 +320,8 @@ func TestBuild_AssetCopying(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Errorf("Failed to clean up temp dir: %v", err)
+		if cleanupErr := os.RemoveAll(tmpDir); cleanupErr != nil {
+			t.Errorf("Failed to clean up temp dir: %v", cleanupErr)
 		}
 	}()
 
@@ -356,8 +356,8 @@ func TestBuild_ExtensionPages(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Errorf("Failed to clean up temp dir: %v", err)
+		if cleanupErr := os.RemoveAll(tmpDir); cleanupErr != nil {
+			t.Errorf("Failed to clean up temp dir: %v", cleanupErr)
 		}
 	}()
 
@@ -409,8 +409,8 @@ func TestBuild_404Handling(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Errorf("Failed to clean up temp dir: %v", err)
+		if cleanupErr := os.RemoveAll(tmpDir); cleanupErr != nil {
+			t.Errorf("Failed to clean up temp dir: %v", cleanupErr)
 		}
 	}()
 
@@ -427,14 +427,14 @@ func TestBuild_404Handling(t *testing.T) {
 
 	// First create the expected 404 source directory and file
 	notFoundDir := filepath.Join(tmpDir, Config.NotFoundPage)
-	if err := os.MkdirAll(notFoundDir, 0750); err != nil {
-		t.Fatalf("Failed to create 404 dir: %v", err)
+	if mkdirErr := os.MkdirAll(notFoundDir, 0750); mkdirErr != nil {
+		t.Fatalf("Failed to create 404 dir: %v", mkdirErr)
 	}
 
 	notFoundContent := []byte("<html><body>Page Not Found</body></html>")
 	notFoundIndexPath := filepath.Join(notFoundDir, "index.html")
-	if err := os.WriteFile(notFoundIndexPath, notFoundContent, 0600); err != nil {
-		t.Fatalf("Failed to write 404 index file: %v", err)
+	if writeErr := os.WriteFile(notFoundIndexPath, notFoundContent, 0600); writeErr != nil {
+		t.Fatalf("Failed to write 404 index file: %v", writeErr)
 	}
 
 	err = build(tmpDir)
@@ -489,8 +489,8 @@ func TestBuild_ErrorHandling(t *testing.T) {
 					t.Fatalf("Failed to create temp dir: %v", err)
 				}
 				defer func() {
-					if err := os.RemoveAll(testDir); err != nil {
-						t.Logf("Failed to clean up temp dir: %v", err)
+					if cleanupErr := os.RemoveAll(testDir); cleanupErr != nil {
+						t.Logf("Failed to clean up temp dir: %v", cleanupErr)
 					}
 				}()
 			} else {

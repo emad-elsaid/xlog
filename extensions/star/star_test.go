@@ -796,7 +796,7 @@ func (r *testRecorder) Write([]byte) (int, error) {
 }
 
 func newRequestWithPath(pathValue string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, "/test", nil)
+	req, _ := http.NewRequest(http.MethodGet, "/test", http.NoBody)
 	req.SetPathValue("page", pathValue)
 	return req
 }

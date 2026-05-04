@@ -246,8 +246,8 @@ func TestFootnoteConfig_SetOption(t *testing.T) {
 }
 
 func TestFootnoteBlockParser_CanAcceptIndentedLine(t *testing.T) {
-	parser := NewFootnoteBlockParser()
-	if parser.(*footnoteBlockParser).CanAcceptIndentedLine() {
+	p := NewFootnoteBlockParser()
+	if p.(*footnoteBlockParser).CanAcceptIndentedLine() {
 		t.Error("CanAcceptIndentedLine should return false")
 	}
 }

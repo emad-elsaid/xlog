@@ -484,7 +484,7 @@ func TestCalendarHandler_Sorting(t *testing.T) {
 
 // createMockRequest creates a mock *http.Request for testing handlers.
 func createMockRequest(pathValues map[string]string) *http.Request {
-	req, _ := http.NewRequest("GET", "/test", nil)
+	req, _ := http.NewRequest("GET", "/test", http.NoBody)
 	req = req.WithContext(context.Background())
 
 	// Set path values using SetPathValue (available in Go 1.22+)

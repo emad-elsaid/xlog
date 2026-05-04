@@ -22,11 +22,8 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		return nil
 	}
 
-	if autolinkPages == nil {
-		if err := UpdatePagesList(nil); err != nil {
-			// If we fail to initialize pages list, we can't parse autolinks
-			return nil
-		}
+	if err := ensurePagesListInitialized(); err != nil {
+		return nil
 	}
 
 	line, segment := block.PeekLine()
@@ -34,35 +31,10 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		return nil
 	}
 
-	consumes := 0
-	start := segment.Start
-	c := line[0]
-	// advance if current position is not a line head.
-	if c == ' ' || c == '*' || c == '_' || c == '~' || c == '(' {
-		consumes++
-		start++
-		line = line[1:]
-	}
+	consumes, start, line := advanceIfNeeded(line, segment.Start)
+	found, matchLen := findMatchingPage(line)
 
-	var found xlog.Page
-	var m int
-	normalizedLine := strings.ToLower(string(line))
-
-	for _, p := range autolinkPages {
-		if len(line) < len(p.normalizedName) {
-			continue
-		}
-
-		// Found a page
-		if strings.HasPrefix(normalizedLine, p.normalizedName) {
-			found = p.page
-			m = len(p.normalizedName)
-			break
-		}
-	}
-
-	if found == nil ||
-		(len(line) > m && util.IsAlphaNumeric(line[m])) { // next character is word character
+	if !isValidMatch(found, matchLen, line) {
 		block.Advance(consumes)
 		return nil
 	}
@@ -71,13 +43,56 @@ func (s *pageLinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		s := segment.WithStop(segment.Start + 1)
 		ast.MergeOrAppendTextSegment(parent, s)
 	}
-	consumes += m
+
+	consumes += matchLen
 	block.Advance(consumes)
 
-	n := ast.NewTextSegment(text.NewSegment(start, start+m))
+	n := ast.NewTextSegment(text.NewSegment(start, start+matchLen))
 	link := &PageLink{
 		page: found,
 	}
 	link.AppendChild(link, n)
 	return link
+}
+
+func ensurePagesListInitialized() error {
+	if autolinkPages != nil {
+		return nil
+	}
+	return UpdatePagesList(nil)
+}
+
+func advanceIfNeeded(line []byte, start int) (consumes, newStart int, newLine []byte) {
+	c := line[0]
+	if c == ' ' || c == '*' || c == '_' || c == '~' || c == '(' {
+		return 1, start + 1, line[1:]
+	}
+	return 0, start, line
+}
+
+func findMatchingPage(line []byte) (xlog.Page, int) {
+	normalizedLine := strings.ToLower(string(line))
+
+	for _, p := range autolinkPages {
+		if len(line) < len(p.normalizedName) {
+			continue
+		}
+
+		if strings.HasPrefix(normalizedLine, p.normalizedName) {
+			return p.page, len(p.normalizedName)
+		}
+	}
+
+	return nil, 0
+}
+
+func isValidMatch(found xlog.Page, matchLen int, line []byte) bool {
+	if found == nil {
+		return false
+	}
+	// Check if next character is a word character (which would invalidate the match)
+	if len(line) > matchLen && util.IsAlphaNumeric(line[matchLen]) {
+		return false
+	}
+	return true
 }

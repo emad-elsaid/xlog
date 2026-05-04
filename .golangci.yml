@@ -13,6 +13,10 @@ linters:
     - unused
     - misspell
     - gosec
+    - gocritic
+    - gocyclo
+    - godot
+    - goconst
 
   settings:
     errcheck:
@@ -23,10 +27,6 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
-        - shadow
-        - nilness
-        - unusedwrite
-        - inline
     
     gocyclo:
       min-complexity: 15

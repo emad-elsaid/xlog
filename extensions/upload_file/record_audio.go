@@ -18,10 +18,10 @@ func (s RecordAudio) Attrs() map[template.HTMLAttr]any {
 	link := fmt.Sprintf("/+/upload-file/record-audio-form?page=%s", url.PathEscape(s.p.Name()))
 
 	return map[template.HTMLAttr]any{
-		"href":      link,
-		"hx-post":   link,
-		"hx-target": "body",
-		"hx-swap":   "beforeend",
+		attrHref:     link,
+		attrHxPost:   link,
+		attrHxTarget: targetBody,
+		attrHxSwap:   swapEnd,
 	}
 }
 
@@ -29,7 +29,7 @@ func RecordAudioForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
 	return xlog.Render("record-audio", map[string]any{
-		"action": "/+/upload-file?page=" + url.QueryEscape(name),
-		"csrf":   xlog.CSRF(r),
+		attrAction: "/+/upload-file?page=" + url.QueryEscape(name),
+		attrCSRF:   xlog.CSRF(r),
 	})
 }

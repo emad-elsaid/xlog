@@ -1,6 +1,7 @@
 package photos
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -153,7 +154,7 @@ func TestResizeHandler_PathTraversalBlocked(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+tc.pathValue, nil)
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+tc.pathValue, http.NoBody)
 			req.SetPathValue("path", tc.pathValue)
 
 			output := resizeHandler(req)
@@ -199,7 +200,7 @@ func TestPhotoHandler_PathTraversalBlocked(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest("GET", "/+/photos/photo/"+tc.pathValue, nil)
+			req := httptest.NewRequest("GET", "/+/photos/photo/"+tc.pathValue, http.NoBody)
 			req.SetPathValue("path", tc.pathValue)
 
 			output := photoHandler(req)

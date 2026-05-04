@@ -144,7 +144,7 @@ func TestStaticHandler(t *testing.T) {
 	}
 
 	t.Run("serve existing file", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/test.txt", nil)
+		req := httptest.NewRequest("GET", "/test.txt", http.NoBody)
 		rec := httptest.NewRecorder()
 
 		output, err := staticHandler(req)
@@ -167,7 +167,7 @@ func TestStaticHandler(t *testing.T) {
 	})
 
 	t.Run("nonexistent file returns error", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/nonexistent.txt", nil)
+		req := httptest.NewRequest("GET", "/nonexistent.txt", http.NoBody)
 
 		_, err := staticHandler(req)
 		if err == nil {
@@ -176,7 +176,7 @@ func TestStaticHandler(t *testing.T) {
 	})
 
 	t.Run("path traversal is cleaned", func(t *testing.T) {
-		req := httptest.NewRequest("GET", "/./test.txt", nil)
+		req := httptest.NewRequest("GET", "/./test.txt", http.NoBody)
 		rec := httptest.NewRecorder()
 
 		output, err := staticHandler(req)
@@ -198,7 +198,7 @@ func TestStaticHandlerEmbeddedAssets(t *testing.T) {
 	// The 'public' directory is embedded in the binary
 
 	// We know public/style.css exists from the embed directive
-	req := httptest.NewRequest("GET", "/public/style.css", nil)
+	req := httptest.NewRequest("GET", "/public/style.css", http.NoBody)
 
 	output, err := staticHandler(req)
 
@@ -251,7 +251,7 @@ func TestStaticHandlerPriority(t *testing.T) {
 	}
 
 	// Request the file - local version should win due to priorityFS behavior
-	req := httptest.NewRequest("GET", "/override.txt", nil)
+	req := httptest.NewRequest("GET", "/override.txt", http.NoBody)
 	rec := httptest.NewRecorder()
 
 	output, err := staticHandler(req)

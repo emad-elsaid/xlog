@@ -13,6 +13,8 @@ import (
 	"gitlab.com/greyxor/slogor"
 )
 
+const keyPage = "page"
+
 // osExit is a variable that allows testing of os.Exit calls.
 var osExit = os.Exit
 
@@ -121,7 +123,7 @@ func getPageHandler(r Request) Output {
 	}
 
 	return Render("page", Locals{
-		"page": page,
-		"csrf": csrf.Token(r),
+		keyPage: page,
+		"csrf":  csrf.Token(r),
 	})
 }

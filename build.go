@@ -34,7 +34,14 @@ func RegisterBuildPage(p string, encloseInDir bool) {
 func build(dest string) error {
 	srv := server()
 
-	// building Index separately
+	buildIndexPage(srv, dest)
+	buildAllPages(srv, dest)
+	copy404Page(dest)
+	buildExtensionPages(srv, dest)
+	return copyAssets(dest)
+}
+
+func buildIndexPage(srv *http.Server, dest string) {
 	err := buildRoute(
 		srv,
 		"/"+Config.Index,
@@ -45,7 +52,9 @@ func build(dest string) error {
 	if err != nil {
 		slog.Error("Index Page may not exist, make sure your Index Page exists", "index", Config.Index, "error", err)
 	}
+}
 
+func buildAllPages(srv *http.Server, dest string) {
 	errs := MapPage(context.Background(), func(p Page) error {
 		err := buildRoute(
 			srv,
@@ -64,31 +73,38 @@ func build(dest string) error {
 	if err := errors.Join(errs...); err != nil {
 		slog.Error(err.Error())
 	}
+}
 
+func copy404Page(dest string) {
 	// If we render 404 page
 	// Copy 404 page from dest/404/index.html to /dest/404.html
 	// #nosec G304 -- File path constructed from Config.NotFoundPage (controlled config) and dest (build output dir)
-	if in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html")); err == nil {
-		defer func() {
-			if err := in.Close(); err != nil {
-				slog.Error("Failed to close input 404 file", "error", err)
-			}
-		}()
-		// #nosec G304 -- File path is controlled build output destination, not user input
-		out, err := os.Create(path.Join(dest, "404.html"))
-		if err != nil {
-			slog.Error("Failed to open dest/404.html", "error", err)
-		}
-		defer func() {
-			if err := out.Close(); err != nil {
-				slog.Error("Failed to close output 404 file", "error", err)
-			}
-		}()
-		if _, err := io.Copy(out, in); err != nil {
-			slog.Error("Failed to copy 404 file", "error", err)
-		}
+	in, err := os.Open(path.Join(dest, Config.NotFoundPage, "index.html"))
+	if err != nil {
+		return
 	}
+	defer func() {
+		if err := in.Close(); err != nil {
+			slog.Error("Failed to close input 404 file", "error", err)
+		}
+	}()
+	// #nosec G304 -- File path is controlled build output destination, not user input
+	out, err := os.Create(path.Join(dest, "404.html"))
+	if err != nil {
+		slog.Error("Failed to open dest/404.html", "error", err)
+		return
+	}
+	defer func() {
+		if err := out.Close(); err != nil {
+			slog.Error("Failed to close output 404 file", "error", err)
+		}
+	}()
+	if _, err := io.Copy(out, in); err != nil {
+		slog.Error("Failed to copy 404 file", "error", err)
+	}
+}
 
+func buildExtensionPages(srv *http.Server, dest string) {
 	extension_page_enclosed.Range(func(route string, _ bool) bool {
 		err := buildRoute(
 			srv,
@@ -118,7 +134,9 @@ func build(dest string) error {
 
 		return true
 	})
+}
 
+func copyAssets(dest string) error {
 	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -127,29 +145,26 @@ func build(dest string) error {
 		destPath := path.Join(dest, p)
 
 		if entry.IsDir() {
-			if err := os.MkdirAll(destPath, build_perms); err != nil {
-				return err
-			}
-		} else if _, err := os.Stat(destPath); err == nil {
-			slog.Warn("Asset file already exists", "path", destPath)
-		} else {
-			content, err := fs.ReadFile(assets, p)
-			if err != nil {
-				return err
-			}
-
-			if err := os.WriteFile(destPath, content, build_perms); err != nil {
-				return err
-			}
+			return os.MkdirAll(destPath, build_perms)
 		}
 
-		return nil
+		if _, err := os.Stat(destPath); err == nil {
+			slog.Warn("Asset file already exists", "path", destPath)
+			return nil
+		}
+
+		content, err := fs.ReadFile(assets, p)
+		if err != nil {
+			return err
+		}
+
+		return os.WriteFile(destPath, content, build_perms)
 	})
 }
 
 func buildRoute(srv *http.Server, route, dir, file string) error {
 	// #nosec G704 -- Route is internal, constructed from page names in build process, not SSRF
-	req, err := http.NewRequest(http.MethodGet, route, nil)
+	req, err := http.NewRequest(http.MethodGet, route, http.NoBody)
 	if err != nil {
 		return err
 	}
@@ -158,8 +173,8 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	srv.Handler.ServeHTTP(rec, req)
 
 	// #nosec G703 -- Dir is controlled build output directory, no path traversal risk
-	if err := os.MkdirAll(dir, build_perms); err != nil {
-		return err
+	if mkdirErr := os.MkdirAll(dir, build_perms); mkdirErr != nil {
+		return mkdirErr
 	}
 
 	if rec.Result().StatusCode != http.StatusOK {

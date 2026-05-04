@@ -137,22 +137,22 @@ type Meta struct {
 	Image       string
 }
 
-func getUrlMeta(url string) (*Meta, error) {
+func getUrlMeta(urlStr string) (*Meta, error) {
 	const cacheDir = ".cache"
 	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
 		return nil, err
 	}
 
-	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(url))))
+	cacheFile := path.Join(cacheDir, fmt.Sprintf("%x.json", sha256.Sum256([]byte(urlStr))))
 	cache, err := os.ReadFile(cacheFile) // #nosec G304 -- Cache filename is SHA256-based, path traversal impossible
 	var meta Meta
 	if err == nil {
-		if err := json.Unmarshal(cache, &meta); err == nil {
+		if unmarshalErr := json.Unmarshal(cache, &meta); unmarshalErr == nil {
 			return &meta, nil
 		}
 	}
 
-	resp, err := http.Get(url) // #nosec G107 -- SSRF is intended feature behavior. URLs from markdown; user=admin in personal wiki context
+	resp, err := http.Get(urlStr) // #nosec G107 -- SSRF is intended feature behavior. URLs from markdown; user=admin in personal wiki context
 	if resp == nil || err != nil {
 		return nil, err
 	}
@@ -168,13 +168,13 @@ func getUrlMeta(url string) (*Meta, error) {
 	html := string(cont)
 
 	titleMatches := titleReg.FindStringSubmatch(html)
-	title := url
+	title := urlStr
 	if len(titleMatches) >= 1 {
 		title = titleMatches[1]
 	}
 
 	meta = Meta{
-		URL:   url,
+		URL:   urlStr,
 		Title: title,
 	}
 

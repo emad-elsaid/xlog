@@ -106,7 +106,7 @@ func TestEncryptHandler(t *testing.T) {
 			}
 
 			// Create test request
-			req := httptest.NewRequest(http.MethodPost, "/+/gpg/encrypt/"+tc.pageName, nil)
+			req := httptest.NewRequest(http.MethodPost, "/+/gpg/encrypt/"+tc.pageName, http.NoBody)
 			req.SetPathValue("page", tc.pageName)
 			w := httptest.NewRecorder()
 
@@ -209,7 +209,7 @@ func TestDecryptHandler(t *testing.T) {
 			}
 
 			// Create test request
-			req := httptest.NewRequest(http.MethodPost, "/+/gpg/decrypt/"+tc.pageName, nil)
+			req := httptest.NewRequest(http.MethodPost, "/+/gpg/decrypt/"+tc.pageName, http.NoBody)
 			req.SetPathValue("page", tc.pageName)
 			w := httptest.NewRecorder()
 
@@ -289,7 +289,7 @@ func TestEncryptHandlerWriteFailure(t *testing.T) {
 	}
 
 	// Create request
-	req := httptest.NewRequest(http.MethodPost, "/+/gpg/encrypt/"+pageName, nil)
+	req := httptest.NewRequest(http.MethodPost, "/+/gpg/encrypt/"+pageName, http.NoBody)
 	req.SetPathValue("page", pageName)
 	w := httptest.NewRecorder()
 
@@ -335,7 +335,7 @@ func TestDecryptHandlerWriteFailure(t *testing.T) {
 	}
 
 	// Create request
-	req := httptest.NewRequest(http.MethodPost, "/+/gpg/decrypt/"+pageName, nil)
+	req := httptest.NewRequest(http.MethodPost, "/+/gpg/decrypt/"+pageName, http.NoBody)
 	req.SetPathValue("page", pageName)
 	w := httptest.NewRecorder()
 

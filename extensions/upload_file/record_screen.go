@@ -18,8 +18,8 @@ func (s RecordScreen) Attrs() map[template.HTMLAttr]any {
 	link := fmt.Sprintf("/+/upload-file/record-screen-form?page=%s", url.PathEscape(s.p.Name()))
 
 	return map[template.HTMLAttr]any{
-		"href":    link,
-		"hx-post": link,
+		attrHref:   link,
+		attrHxPost: link,
 	}
 }
 
@@ -27,7 +27,7 @@ func RecordScreenForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
 	return xlog.Render("record-screen", map[string]any{
-		"action": "/+/upload-file?page=" + url.QueryEscape(name),
-		"csrf":   xlog.CSRF(r),
+		attrAction: "/+/upload-file?page=" + url.QueryEscape(name),
+		attrCSRF:   xlog.CSRF(r),
 	})
 }

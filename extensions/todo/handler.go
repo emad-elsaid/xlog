@@ -8,6 +8,11 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
+const (
+	taskUnchecked = "[ ] "
+	taskChecked   = "[x] "
+)
+
 var taskListRegexp = regexp.MustCompile(`^\[([\sxX])\]\s*`)
 
 func toggleHandler(r xlog.Request) xlog.Output {
@@ -26,9 +31,9 @@ func toggleHandler(r xlog.Request) xlog.Output {
 		return xlog.BadRequest("pos is longer than the content")
 	}
 
-	replacement := "[ ] "
+	replacement := taskUnchecked
 	if len(r.FormValue("checked")) > 0 {
-		replacement = "[x] "
+		replacement = taskChecked
 	}
 
 	line := content[:pos] + taskListRegexp.ReplaceAllString(content[pos:], replacement)

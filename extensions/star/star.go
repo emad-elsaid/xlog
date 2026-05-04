@@ -14,7 +14,11 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
-const STARRED_PAGES = "starred"
+const (
+	STARRED_PAGES = "starred"
+	actionUnstar  = "Unstar"
+	actionStar    = "Star"
+)
 
 func init() {
 	xlog.RegisterExtension(Star{})
@@ -93,9 +97,9 @@ func (l action) Icon() string {
 }
 func (l action) Name() string {
 	if l.starred {
-		return "Unstar"
+		return actionUnstar
 	} else {
-		return "Star"
+		return actionStar
 	}
 }
 func (l action) Attrs() map[template.HTMLAttr]any {

@@ -23,17 +23,17 @@ Hello
 Bye
 `)
 
-	markdown := markdown.New()
+	md := markdown.New()
 
 	// Request that IDs are automatically assigned to headers.
-	markdown.Parser().AddOptions(parser.WithAutoHeadingID())
+	md.Parser().AddOptions(parser.WithAutoHeadingID())
 	// Alternatively, we can provide our own implementation of parser.IDs
 	// and use,
 	//
 	//   pctx := parser.NewContext(parser.WithIDs(ids))
 	//   doc := parser.Parse(text.NewReader(src), parser.WithContext(pctx))
 
-	doc := markdown.Parser().Parse(text.NewReader(src))
+	doc := md.Parser().Parse(text.NewReader(src))
 
 	// Inspect the parsed Markdown document to find headers and build a
 	// tree for the table of contents.
@@ -51,7 +51,7 @@ Bye
 	treeList := RenderList(tree)
 
 	// Render the Markdown list into HTML.
-	if err := markdown.Renderer().Render(os.Stdout, src, treeList); err != nil {
+	if err := md.Renderer().Render(os.Stdout, src, treeList); err != nil {
 		panic(err)
 	}
 

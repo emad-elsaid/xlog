@@ -3,8 +3,6 @@ package file_operations
 import (
 	"embed"
 
-	_ "embed"
-
 	"github.com/emad-elsaid/xlog"
 )
 

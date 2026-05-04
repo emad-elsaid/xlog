@@ -392,7 +392,7 @@ func TestSearchFormHandler(t *testing.T) {
 				}
 			}()
 
-			req := httptest.NewRequest(http.MethodGet, "/+/search?q="+url.QueryEscape(tc.queryParam), nil)
+			req := httptest.NewRequest(http.MethodGet, "/+/search?q="+url.QueryEscape(tc.queryParam), http.NoBody)
 			_ = searchFormHandler(req)
 		})
 	}
@@ -437,7 +437,7 @@ func TestSearchResultHandler(t *testing.T) {
 				}
 			}()
 
-			req := httptest.NewRequest(http.MethodGet, "/+/search-result?q="+url.QueryEscape(tc.queryParam), nil)
+			req := httptest.NewRequest(http.MethodGet, "/+/search-result?q="+url.QueryEscape(tc.queryParam), http.NoBody)
 			_ = searchResultHandler(req)
 		})
 	}

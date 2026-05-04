@@ -10,7 +10,7 @@ import (
 )
 
 func TestLinkify(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -18,11 +18,11 @@ func TestLinkify(t *testing.T) {
 			Linkify,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/linkify.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/linkify.txt", t, testutil.ParseCliCaseArg()...)
 }
 
 func TestLinkifyWithAllowedProtocols(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -39,7 +39,7 @@ func TestLinkifyWithAllowedProtocols(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:       1,
 			Markdown: `hoge ssh://user@hoge.com. http://example.com/`,
@@ -50,7 +50,7 @@ func TestLinkifyWithAllowedProtocols(t *testing.T) {
 }
 
 func TestLinkifyWithWWWRegexp(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -64,7 +64,7 @@ func TestLinkifyWithWWWRegexp(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:       1,
 			Markdown: `www.google.com www.example.com`,
@@ -75,7 +75,7 @@ func TestLinkifyWithWWWRegexp(t *testing.T) {
 }
 
 func TestLinkifyWithEmailRegexp(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithXHTML(),
 			html.WithUnsafe(),
@@ -89,7 +89,7 @@ func TestLinkifyWithEmailRegexp(t *testing.T) {
 		),
 	)
 	testutil.DoTestCase(
-		markdown,
+		md,
 		testutil.MarkdownTestCase{
 			No:       1,
 			Markdown: `hoge@example.com user@example.com`,

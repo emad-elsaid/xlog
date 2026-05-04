@@ -128,7 +128,7 @@ func TestEditorHandler(t *testing.T) {
 	}
 
 	// Create a test request
-	req := httptest.NewRequest(http.MethodPost, "/+/editor/"+pageName, nil)
+	req := httptest.NewRequest(http.MethodPost, "/+/editor/"+pageName, http.NoBody)
 	req.SetPathValue("page", pageName)
 
 	// Call handler

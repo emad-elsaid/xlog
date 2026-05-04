@@ -1231,7 +1231,7 @@ func TestTagsHandler(t *testing.T) {
 			}
 
 			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
-			r := httptest.NewRequest(http.MethodGet, "/+/tags", nil)
+			r := httptest.NewRequest(http.MethodGet, "/+/tags", http.NoBody)
 			ctx := context.Background()
 			r = r.WithContext(ctx)
 
@@ -1528,7 +1528,7 @@ func TestTagHandler(t *testing.T) {
 			}
 
 			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
-			r := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tagValue, nil)
+			r := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tagValue, http.NoBody)
 			r.SetPathValue("tag", tc.tagValue)
 			ctx := context.Background()
 			r = r.WithContext(ctx)
@@ -1848,9 +1848,6 @@ func TestTagPagesComprehensive(t *testing.T) {
 
 			// Verify page count - may not match if pages don't have tags initialized
 			// This tests the function executes without panic
-			if result == nil {
-				t.Fatal("tagPages returned nil")
-			}
 
 			// The actual page filtering happens via MapPage which requires
 			// proper AST parsing - our simple file writes don't guarantee

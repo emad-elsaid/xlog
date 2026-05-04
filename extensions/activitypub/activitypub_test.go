@@ -12,7 +12,7 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
-func setupTestEnv(t *testing.T) (string, func()) {
+func setupTestEnv(t *testing.T) (tempDir string, cleanup func()) {
 	t.Helper()
 
 	tmpDir := t.TempDir()
@@ -37,7 +37,7 @@ func setupTestEnv(t *testing.T) (string, func()) {
 	icon = "/public/icon.png"
 	image = "/public/image.png"
 
-	cleanup := func() {
+	cleanup = func() {
 		if err := os.Chdir(wd); err != nil {
 			t.Errorf("failed to change back to original directory: %v", err)
 		}
@@ -48,7 +48,8 @@ func setupTestEnv(t *testing.T) (string, func()) {
 		image = "/public/logo.png"
 	}
 
-	return tmpDir, cleanup
+	tempDir = tmpDir
+	return
 }
 
 func TestActivityPubName(t *testing.T) {
@@ -66,7 +67,7 @@ func TestWebfingerWithoutConfig(t *testing.T) {
 	domain = ""
 	username = ""
 
-	req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:test@example.com", nil)
+	req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:test@example.com", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := webfinger(req)
@@ -81,7 +82,7 @@ func TestWebfingerResponse(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:testuser@example.com", nil)
+	req := httptest.NewRequest(http.MethodGet, "/.well-known/webfinger?resource=acct:testuser@example.com", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := webfinger(req)
@@ -132,7 +133,7 @@ func TestProfileWithoutConfig(t *testing.T) {
 	domain = ""
 	username = ""
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	w := httptest.NewRecorder()
 
@@ -148,7 +149,7 @@ func TestProfileWrongUser(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser", http.NoBody)
 	req.SetPathValue("user", "@wronguser")
 	w := httptest.NewRecorder()
 
@@ -164,7 +165,7 @@ func TestProfileResponse(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	w := httptest.NewRecorder()
 
@@ -205,7 +206,7 @@ func TestOutboxWithoutConfig(t *testing.T) {
 	domain = ""
 	username = ""
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	w := httptest.NewRecorder()
 
@@ -221,7 +222,7 @@ func TestOutboxWrongUser(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser/outbox", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser/outbox", http.NoBody)
 	req.SetPathValue("user", "@wronguser")
 	w := httptest.NewRecorder()
 
@@ -237,7 +238,7 @@ func TestOutboxResponse(t *testing.T) {
 	tmpDir, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	w := httptest.NewRecorder()
 
@@ -269,7 +270,7 @@ func TestOutboxPageWithoutConfig(t *testing.T) {
 	domain = ""
 	username = ""
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/1", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	req.SetPathValue("page", "1")
 	w := httptest.NewRecorder()
@@ -286,7 +287,7 @@ func TestOutboxPageWrongUser(t *testing.T) {
 	_, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser/outbox/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@wronguser/outbox/1", http.NoBody)
 	req.SetPathValue("user", "@wronguser")
 	req.SetPathValue("page", "1")
 	w := httptest.NewRecorder()
@@ -303,7 +304,7 @@ func TestOutboxPageInvalidIndex(t *testing.T) {
 	tmpDir, cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/999", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/999", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	req.SetPathValue("page", "999")
 	w := httptest.NewRecorder()
@@ -326,7 +327,7 @@ func TestOutboxPageResponse(t *testing.T) {
 		t.Fatalf("failed to set file modtime: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/activitypub/@testuser/outbox/1", http.NoBody)
 	req.SetPathValue("user", "@testuser")
 	req.SetPathValue("page", "1")
 	w := httptest.NewRecorder()

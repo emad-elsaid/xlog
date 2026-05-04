@@ -13,7 +13,7 @@ import (
 )
 
 func TestMeta(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithExtensions(
 			Meta,
 		),
@@ -31,7 +31,7 @@ Tags:
 
 	var buf bytes.Buffer
 	context := parser.NewContext()
-	if err := markdown.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
+	if err := md.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
 		panic(err)
 	}
 	metaData := Get(context)
@@ -62,7 +62,7 @@ Tags:
 }
 
 func TestMetaTable(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithExtensions(
 			New(WithTable()),
 		),
@@ -84,7 +84,7 @@ Tags:
 `
 
 	var buf bytes.Buffer
-	if err := markdown.Convert([]byte(source), &buf); err != nil {
+	if err := md.Convert([]byte(source), &buf); err != nil {
 		panic(err)
 	}
 	if buf.String() != `<table>
@@ -110,7 +110,7 @@ Tags:
 }
 
 func TestMetaError(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithExtensions(
 			New(WithTable()),
 		),
@@ -130,7 +130,7 @@ Tags:
 
 	var buf bytes.Buffer
 	context := parser.NewContext()
-	if err := markdown.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
+	if err := md.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
 		panic(err)
 	}
 	if buf.String() != `Title: goldmark-meta
@@ -156,7 +156,7 @@ Tags:
 }
 
 func TestMetaTableWithBlankline(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithExtensions(
 			New(WithTable()),
 		),
@@ -180,7 +180,7 @@ Tags:
 `
 
 	var buf bytes.Buffer
-	if err := markdown.Convert([]byte(source), &buf); err != nil {
+	if err := md.Convert([]byte(source), &buf); err != nil {
 		panic(err)
 	}
 	if buf.String() != `<table>
@@ -206,7 +206,7 @@ Tags:
 }
 
 func TestMetaStoreInDocument(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithExtensions(
 			New(
 				WithStoresInDocument(),
@@ -222,7 +222,7 @@ Tags:
 ---
 `
 
-	document := markdown.Parser().Parse(text.NewReader([]byte(source)))
+	document := md.Parser().Parse(text.NewReader([]byte(source)))
 	metaData := document.OwnerDocument().Meta()
 	title := metaData["Title"]
 	s, ok := title.(string)

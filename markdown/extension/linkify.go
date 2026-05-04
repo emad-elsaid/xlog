@@ -237,7 +237,7 @@ func (s *linkifyParser) tryMatchEmail(line []byte) []int {
 	}
 	at := bytes.IndexByte(line, '@')
 	m := []int{0, stop, at, stop - 1}
-	if m == nil || bytes.IndexByte(line[m[2]:m[3]], '.') < 0 {
+	if bytes.IndexByte(line[m[2]:m[3]], '.') < 0 {
 		return nil
 	}
 	lastChar := line[m[1]-1]

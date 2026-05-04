@@ -190,11 +190,11 @@ func TestNewRenderer(t *testing.T) {
 		t.Fatal("NewRenderer() returned nil")
 	}
 
-	renderer := r.(*Renderer)
-	if renderer.Writer == nil {
+	rnd := r.(*Renderer)
+	if rnd.Writer == nil {
 		t.Error("NewRenderer() Writer is nil")
 	}
-	if renderer.HardWraps != false {
+	if rnd.HardWraps != false {
 		t.Error("NewRenderer() HardWraps should be false by default")
 	}
 }
@@ -207,29 +207,29 @@ func TestNewRendererWithOptions(t *testing.T) {
 		WithEastAsianLineBreaks(EastAsianLineBreaksSimple),
 	)
 
-	renderer := r.(*Renderer)
-	if renderer.HardWraps != true {
+	rnd := r.(*Renderer)
+	if rnd.HardWraps != true {
 		t.Error("WithHardWraps() option not applied")
 	}
-	if renderer.XHTML != true {
+	if rnd.XHTML != true {
 		t.Error("WithXHTML() option not applied")
 	}
-	if renderer.Unsafe != true {
+	if rnd.Unsafe != true {
 		t.Error("WithUnsafe() option not applied")
 	}
-	if renderer.EastAsianLineBreaks != EastAsianLineBreaksSimple {
+	if rnd.EastAsianLineBreaks != EastAsianLineBreaksSimple {
 		t.Error("WithEastAsianLineBreaks() option not applied")
 	}
 }
 
 func TestRendererRegisterFuncs(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	registered := make(map[ast.NodeKind]bool)
 	mockReg := &mockRegisterer{registered: registered}
 
-	renderer.RegisterFuncs(mockReg)
+	rnd.RegisterFuncs(mockReg)
 
 	expectedKinds := []ast.NodeKind{
 		ast.KindDocument,
@@ -512,13 +512,13 @@ func TestHasPrefixNoMatch(t *testing.T) {
 
 func TestRenderDocumentEntering(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 	doc := ast.NewDocument()
 
-	status, err := renderer.renderDocument(writer, []byte("test"), doc, true)
+	status, err := rnd.renderDocument(writer, []byte("test"), doc, true)
 	if err != nil {
 		t.Errorf("renderDocument() error = %v", err)
 	}
@@ -534,13 +534,13 @@ func TestRenderDocumentEntering(t *testing.T) {
 
 func TestRenderHeadingH1Opening(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	heading := ast.NewHeading(1)
-	_, _ = renderer.renderHeading(writer, []byte{}, heading, true)
+	_, _ = rnd.renderHeading(writer, []byte{}, heading, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<h1>" {
@@ -550,13 +550,13 @@ func TestRenderHeadingH1Opening(t *testing.T) {
 
 func TestRenderHeadingH1Closing(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	heading := ast.NewHeading(1)
-	_, _ = renderer.renderHeading(writer, []byte{}, heading, false)
+	_, _ = rnd.renderHeading(writer, []byte{}, heading, false)
 	_ = writer.Flush()
 
 	if buf.String() != "</h1>\n" {
@@ -566,13 +566,13 @@ func TestRenderHeadingH1Closing(t *testing.T) {
 
 func TestRenderBlockquoteOpening(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	blockquote := ast.NewBlockquote()
-	_, _ = renderer.renderBlockquote(writer, []byte{}, blockquote, true)
+	_, _ = rnd.renderBlockquote(writer, []byte{}, blockquote, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<blockquote>\n" {
@@ -582,13 +582,13 @@ func TestRenderBlockquoteOpening(t *testing.T) {
 
 func TestRenderBlockquoteClosing(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	blockquote := ast.NewBlockquote()
-	_, _ = renderer.renderBlockquote(writer, []byte{}, blockquote, false)
+	_, _ = rnd.renderBlockquote(writer, []byte{}, blockquote, false)
 	_ = writer.Flush()
 
 	if buf.String() != "</blockquote>\n" {
@@ -598,7 +598,7 @@ func TestRenderBlockquoteClosing(t *testing.T) {
 
 func TestRenderCodeBlock(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
@@ -607,8 +607,8 @@ func TestRenderCodeBlock(t *testing.T) {
 	codeBlock.Lines().Append(text.NewSegment(0, 4))
 	source := []byte("code")
 
-	_, _ = renderer.renderCodeBlock(writer, source, codeBlock, true)
-	_, _ = renderer.renderCodeBlock(writer, source, codeBlock, false)
+	_, _ = rnd.renderCodeBlock(writer, source, codeBlock, true)
+	_, _ = rnd.renderCodeBlock(writer, source, codeBlock, false)
 	_ = writer.Flush()
 
 	expected := "<pre><code>code</code></pre>\n"
@@ -619,13 +619,13 @@ func TestRenderCodeBlock(t *testing.T) {
 
 func TestRenderThematicBreakHTML5(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	hr := ast.NewThematicBreak()
-	_, _ = renderer.renderThematicBreak(writer, []byte{}, hr, true)
+	_, _ = rnd.renderThematicBreak(writer, []byte{}, hr, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<hr>\n" {
@@ -635,13 +635,13 @@ func TestRenderThematicBreakHTML5(t *testing.T) {
 
 func TestRenderThematicBreakXHTML(t *testing.T) {
 	r := NewRenderer(WithXHTML())
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	hr := ast.NewThematicBreak()
-	_, _ = renderer.renderThematicBreak(writer, []byte{}, hr, true)
+	_, _ = rnd.renderThematicBreak(writer, []byte{}, hr, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<hr />\n" {
@@ -651,13 +651,13 @@ func TestRenderThematicBreakXHTML(t *testing.T) {
 
 func TestRenderEmphasisItalic(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	emphasis := ast.NewEmphasis(1)
-	_, _ = renderer.renderEmphasis(writer, []byte{}, emphasis, true)
+	_, _ = rnd.renderEmphasis(writer, []byte{}, emphasis, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<em>" {
@@ -667,13 +667,13 @@ func TestRenderEmphasisItalic(t *testing.T) {
 
 func TestRenderEmphasisBold(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	emphasis := ast.NewEmphasis(2)
-	_, _ = renderer.renderEmphasis(writer, []byte{}, emphasis, true)
+	_, _ = rnd.renderEmphasis(writer, []byte{}, emphasis, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<strong>" {
@@ -683,13 +683,13 @@ func TestRenderEmphasisBold(t *testing.T) {
 
 func TestRenderStringNormal(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	str := ast.NewString([]byte("hello"))
-	_, _ = renderer.renderString(writer, []byte{}, str, true)
+	_, _ = rnd.renderString(writer, []byte{}, str, true)
 	_ = writer.Flush()
 
 	if buf.String() != "hello" {
@@ -699,14 +699,14 @@ func TestRenderStringNormal(t *testing.T) {
 
 func TestRenderStringCode(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	str := ast.NewString([]byte("<code>"))
 	str.SetCode(true)
-	_, _ = renderer.renderString(writer, []byte{}, str, true)
+	_, _ = rnd.renderString(writer, []byte{}, str, true)
 	_ = writer.Flush()
 
 	if buf.String() != "<code>" {
@@ -716,14 +716,14 @@ func TestRenderStringCode(t *testing.T) {
 
 func TestRenderStringRaw(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
 
 	str := ast.NewString([]byte("<tag>"))
 	str.SetRaw(true)
-	_, _ = renderer.renderString(writer, []byte{}, str, true)
+	_, _ = rnd.renderString(writer, []byte{}, str, true)
 	_ = writer.Flush()
 
 	if buf.String() != "&lt;tag&gt;" {
@@ -747,7 +747,7 @@ func TestRenderParagraph(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
 
@@ -756,7 +756,7 @@ func TestRenderParagraph(t *testing.T) {
 				p.SetAttribute([]byte("class"), []byte("test"))
 			}
 
-			_, _ = renderer.renderParagraph(writer, []byte{}, p, tc.entering)
+			_, _ = rnd.renderParagraph(writer, []byte{}, p, tc.entering)
 			_ = writer.Flush()
 
 			result := buf.String()
@@ -789,7 +789,7 @@ func TestRenderTextBlock(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
 
@@ -803,7 +803,7 @@ func TestRenderTextBlock(t *testing.T) {
 				parent.AppendChild(parent, ast.NewText())
 			}
 
-			_, _ = renderer.renderTextBlock(writer, []byte{}, tb, tc.entering)
+			_, _ = rnd.renderTextBlock(writer, []byte{}, tb, tc.entering)
 			_ = writer.Flush()
 
 			if buf.String() != tc.want {
@@ -846,7 +846,7 @@ func TestRenderAutoLink(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
 
@@ -859,7 +859,7 @@ func TestRenderAutoLink(t *testing.T) {
 				al.Protocol = []byte("mailto")
 			}
 
-			_, _ = renderer.renderAutoLink(writer, source, al, true)
+			_, _ = rnd.renderAutoLink(writer, source, al, true)
 			_ = writer.Flush()
 
 			if !bytes.Contains(buf.Bytes(), []byte(tc.wantContain)) {
@@ -884,7 +884,7 @@ func TestRenderCodeSpan(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
 
@@ -893,9 +893,9 @@ func TestRenderCodeSpan(t *testing.T) {
 				source := []byte(tc.text)
 				txt := ast.NewTextSegment(text.NewSegment(0, len(source)))
 				cs.AppendChild(cs, txt)
-				_, _ = renderer.renderCodeSpan(writer, source, cs, tc.entering)
+				_, _ = rnd.renderCodeSpan(writer, source, cs, tc.entering)
 			} else {
-				_, _ = renderer.renderCodeSpan(writer, []byte{}, cs, tc.entering)
+				_, _ = rnd.renderCodeSpan(writer, []byte{}, cs, tc.entering)
 			}
 			_ = writer.Flush()
 
@@ -948,8 +948,8 @@ func TestRenderLink(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer(WithUnsafe())
-			renderer := r.(*Renderer)
-			renderer.Unsafe = tc.unsafe
+			rnd := r.(*Renderer)
+			rnd.Unsafe = tc.unsafe
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -960,7 +960,7 @@ func TestRenderLink(t *testing.T) {
 				link.Title = []byte(tc.title)
 			}
 
-			_, _ = renderer.renderLink(writer, []byte{}, link, tc.entering)
+			_, _ = rnd.renderLink(writer, []byte{}, link, tc.entering)
 			_ = writer.Flush()
 
 			if !bytes.Contains(buf.Bytes(), []byte(tc.wantPart)) {
@@ -1013,7 +1013,7 @@ func TestRenderImage(t *testing.T) {
 				opts = append(opts, WithUnsafe())
 			}
 			r := NewRenderer(opts...)
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1032,7 +1032,7 @@ func TestRenderImage(t *testing.T) {
 			}
 
 			source := []byte(tc.alt)
-			_, _ = renderer.renderImage(writer, source, img, true)
+			_, _ = rnd.renderImage(writer, source, img, true)
 			_ = writer.Flush()
 
 			if !bytes.Contains(buf.Bytes(), []byte(tc.wantPart)) {
@@ -1081,7 +1081,7 @@ func TestRenderRawHTML(t *testing.T) {
 				opts = append(opts, WithUnsafe())
 			}
 			r := NewRenderer(opts...)
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1092,7 +1092,7 @@ func TestRenderRawHTML(t *testing.T) {
 				raw.Segments.Append(text.NewSegment(0, len(source)))
 			}
 
-			_, _ = renderer.renderRawHTML(writer, source, raw, tc.entering)
+			_, _ = rnd.renderRawHTML(writer, source, raw, tc.entering)
 			_ = writer.Flush()
 
 			if buf.String() != tc.want {
@@ -1167,7 +1167,7 @@ func TestRenderText(t *testing.T) {
 				opts = append(opts, WithHardWraps())
 			}
 			r := NewRenderer(opts...)
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1187,7 +1187,7 @@ func TestRenderText(t *testing.T) {
 				txt.SetSoftLineBreak(true)
 			}
 
-			_, _ = renderer.renderText(writer, source, txt, tc.entering)
+			_, _ = rnd.renderText(writer, source, txt, tc.entering)
 			_ = writer.Flush()
 
 			if tc.entering && tc.wantContains != "" {
@@ -1202,7 +1202,7 @@ func TestRenderText(t *testing.T) {
 // TestRenderTexts tests renderTexts helper.
 func TestRenderTexts(t *testing.T) {
 	r := NewRenderer()
-	renderer := r.(*Renderer)
+	rnd := r.(*Renderer)
 
 	var buf bytes.Buffer
 	writer := bufio.NewWriter(&buf)
@@ -1217,7 +1217,7 @@ func TestRenderTexts(t *testing.T) {
 	str := ast.NewString([]byte(" world"))
 	parent.AppendChild(parent, str)
 
-	renderer.renderTexts(writer, source, parent)
+	rnd.renderTexts(writer, source, parent)
 	_ = writer.Flush()
 
 	if !bytes.Contains(buf.Bytes(), []byte("hello")) {
@@ -1271,7 +1271,7 @@ func TestRenderList(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1282,7 +1282,7 @@ func TestRenderList(t *testing.T) {
 			}
 			list.Start = tc.start
 
-			_, _ = renderer.renderList(writer, []byte{}, list, tc.entering)
+			_, _ = rnd.renderList(writer, []byte{}, list, tc.entering)
 			_ = writer.Flush()
 
 			result := buf.String()
@@ -1330,7 +1330,7 @@ func TestRenderListItem(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			r := NewRenderer()
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1344,7 +1344,7 @@ func TestRenderListItem(t *testing.T) {
 				}
 			}
 
-			_, _ = renderer.renderListItem(writer, []byte{}, li, tc.entering)
+			_, _ = rnd.renderListItem(writer, []byte{}, li, tc.entering)
 			_ = writer.Flush()
 
 			result := buf.String()
@@ -1415,7 +1415,7 @@ func TestRenderHTMLBlock(t *testing.T) {
 				opts = append(opts, WithUnsafe())
 			}
 			r := NewRenderer(opts...)
-			renderer := r.(*Renderer)
+			rnd := r.(*Renderer)
 
 			var buf bytes.Buffer
 			writer := bufio.NewWriter(&buf)
@@ -1429,7 +1429,7 @@ func TestRenderHTMLBlock(t *testing.T) {
 				block.ClosureLine = text.NewSegment(0, len(source))
 			}
 
-			_, _ = renderer.renderHTMLBlock(writer, source, block, tc.entering)
+			_, _ = rnd.renderHTMLBlock(writer, source, block, tc.entering)
 			_ = writer.Flush()
 
 			if buf.String() != tc.want {

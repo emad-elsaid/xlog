@@ -207,7 +207,7 @@ func TestPageDeleteHandler_NonExistentPage(t *testing.T) {
 	}
 
 	// Create request for non-existent page.
-	req := httptest.NewRequest(http.MethodDelete, "/+/file/delete?page=non-existent", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/+/file/delete?page=non-existent", http.NoBody)
 	rec := httptest.NewRecorder()
 
 	pd := PageDelete{}
@@ -247,7 +247,7 @@ func TestPageDeleteHandler_ExistingPage(t *testing.T) {
 	}
 
 	// Create request.
-	req := httptest.NewRequest(http.MethodDelete, "/+/file/delete?page="+testPageName, nil)
+	req := httptest.NewRequest(http.MethodDelete, "/+/file/delete?page="+testPageName, http.NoBody)
 	rec := httptest.NewRecorder()
 
 	pd := PageDelete{}
@@ -458,7 +458,7 @@ func TestPageRename_Form_RendersOutput(t *testing.T) {
 	}
 
 	testPageName := "test-form-page"
-	req := httptest.NewRequest(http.MethodGet, "/+/file/rename?page="+testPageName, nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/file/rename?page="+testPageName, http.NoBody)
 
 	pr := PageRename{}
 	output := pr.Form(req)

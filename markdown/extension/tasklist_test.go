@@ -9,7 +9,7 @@ import (
 )
 
 func TestTaskList(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -17,5 +17,5 @@ func TestTaskList(t *testing.T) {
 			TaskList,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/tasklist.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/tasklist.txt", t, testutil.ParseCliCaseArg()...)
 }

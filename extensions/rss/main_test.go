@@ -71,7 +71,7 @@ func TestFeedXMLStructure(t *testing.T) {
 	cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := feed(req)
@@ -123,7 +123,7 @@ func TestFeedItemsCount(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := feed(req)
@@ -160,7 +160,7 @@ func TestFeedItemsSortedByModTime(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := feed(req)
@@ -197,7 +197,7 @@ func TestFeedItemContent(t *testing.T) {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := feed(req)
@@ -239,7 +239,7 @@ func TestFeedContentType(t *testing.T) {
 	cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", nil)
+	req := httptest.NewRequest(http.MethodGet, "/+/feed.rss", http.NoBody)
 	w := httptest.NewRecorder()
 
 	result := feed(req)
@@ -262,7 +262,7 @@ func TestLinks(t *testing.T) {
 	cleanup := setupTestEnv(t)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 	pages := xlog.Pages(req.Context())
 	if len(pages) == 0 {
@@ -321,7 +321,7 @@ func TestMetaTag(t *testing.T) {
 
 			xlog.Config.Sitename = tc.sitename
 
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 			pages := xlog.Pages(req.Context())
 			if len(pages) == 0 {

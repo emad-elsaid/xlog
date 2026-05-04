@@ -15,7 +15,7 @@ import (
 
 func fuzz(f *testing.F) {
 	f.Fuzz(func(t *testing.T, orig string) {
-		markdown := markdown.New(
+		md := markdown.New(
 			markdown.WithParserOptions(
 				parser.WithAutoHeadingID(),
 				parser.WithAttribute(),
@@ -35,7 +35,7 @@ func fuzz(f *testing.F) {
 			),
 		)
 		var b bytes.Buffer
-		if err := markdown.Convert(util.StringToReadOnlyBytes(orig), &b); err != nil {
+		if err := md.Convert(util.StringToReadOnlyBytes(orig), &b); err != nil {
 			panic(err)
 		}
 	})

@@ -259,14 +259,14 @@ func TestNotifyPageChange_WriteErrorHandling(t *testing.T) {
 			clientsMutex.Unlock()
 
 			if tc.closeConnBefore {
-				if err := conn.Close(); err != nil {
-					t.Logf("Failed to close connection: %v", err)
+				if closeErr := conn.Close(); closeErr != nil {
+					t.Logf("Failed to close connection: %v", closeErr)
 				}
 				time.Sleep(50 * time.Millisecond)
 			} else {
 				defer func() {
-					if err := conn.Close(); err != nil {
-						t.Logf("Failed to close connection: %v", err)
+					if closeErr := conn.Close(); closeErr != nil {
+						t.Logf("Failed to close connection: %v", closeErr)
 					}
 				}()
 			}

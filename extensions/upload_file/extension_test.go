@@ -417,7 +417,7 @@ func TestFormHandlers(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create mock request with page parameter
-			req := httptest.NewRequest(http.MethodPost, "/test", nil)
+			req := httptest.NewRequest(http.MethodPost, "/test", http.NoBody)
 			req.Form = map[string][]string{
 				"page": {tc.pageName},
 			}

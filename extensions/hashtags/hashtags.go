@@ -24,6 +24,14 @@ import (
 //go:embed templates
 var templates embed.FS
 
+const (
+	keyHashtags  = "hashtags"
+	nameHashtags = "Hashtags"
+	keyPages     = "pages"
+	iconTags     = "fa-solid fa-tags"
+	pathTags     = "/+/tags"
+)
+
 func init() {
 	h := Hashtags{
 		pages: make(map[xlog.Page][]*HashTag),
@@ -37,12 +45,12 @@ type Hashtags struct {
 	mu    sync.Mutex
 }
 
-func (*Hashtags) Name() string { return "hashtags" }
+func (*Hashtags) Name() string { return keyHashtags }
 func (h *Hashtags) Init() {
-	xlog.Get(`/+/tags`, h.tagsHandler)
+	xlog.Get(pathTags, h.tagsHandler)
 	xlog.Get(`/+/tag/{tag}`, h.tagHandler)
 	xlog.RegisterWidget(xlog.WidgetAfterView, 1, h.relatedPages)
-	xlog.RegisterBuildPage("/+/tags", true)
+	xlog.RegisterBuildPage(pathTags, true)
 	xlog.RegisterLink(links)
 	xlog.RegisterTemplate(templates, "templates")
 	shortcode.RegisterShortCode("hashtag-pages", shortcode.ShortCode{Render: h.hashtagPages})
@@ -116,7 +124,7 @@ func (h *Hashtags) tagsHandler(r xlog.Request) xlog.Output {
 	})
 
 	return xlog.Render("tags", xlog.Locals{
-		"page": xlog.DynamicPage{NameVal: "Hashtags"},
+		"page": xlog.DynamicPage{NameVal: nameHashtags},
 		"tags": tags,
 	})
 }
@@ -125,8 +133,8 @@ func (h *Hashtags) tagHandler(r xlog.Request) xlog.Output {
 	tag := r.PathValue("tag")
 
 	return xlog.Render("tag", xlog.Locals{
-		"page":  xlog.DynamicPage{NameVal: "#" + tag},
-		"pages": h.tagPages(r.Context(), tag),
+		"page":   xlog.DynamicPage{NameVal: "#" + tag},
+		keyPages: h.tagPages(r.Context(), tag),
 	})
 }
 
@@ -178,7 +186,7 @@ func (h *Hashtags) relatedPages(p xlog.Page) template.HTML {
 	})
 
 	return xlog.Partial("related-hashtags-pages", xlog.Locals{
-		"pages": pages,
+		keyPages: pages,
 	})
 }
 
@@ -194,7 +202,7 @@ func (h *Hashtags) hashtagPages(hashtag xlog.Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := xlog.Partial("hashtag-pages", xlog.Locals{"pages": pages})
+	output := xlog.Partial("hashtag-pages", xlog.Locals{keyPages: pages})
 	// #nosec G203 - xlog.Partial executes html/template which auto-escapes, safe to convert
 	return template.HTML(output)
 }
@@ -211,7 +219,7 @@ func (h *Hashtags) hashtagPagesGrid(hashtag xlog.Markdown) template.HTML {
 		return strings.Compare(a.Name(), b.Name())
 	})
 
-	output := xlog.Partial("hashtag-pages-grid", xlog.Locals{"pages": pages})
+	output := xlog.Partial("hashtag-pages-grid", xlog.Locals{keyPages: pages})
 	// #nosec G203 - xlog.Partial executes html/template which auto-escapes, safe to convert
 	return template.HTML(output)
 }
@@ -222,11 +230,11 @@ func links(xlog.Page) []xlog.Command {
 
 type link struct{}
 
-func (l link) Icon() string { return "fa-solid fa-tags" }
-func (l link) Name() string { return "Hashtags" }
+func (l link) Icon() string { return iconTags }
+func (l link) Name() string { return nameHashtags }
 func (l link) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
-		"href": "/+/tags",
+		"href": pathTags,
 	}
 }
 

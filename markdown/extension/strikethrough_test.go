@@ -9,7 +9,7 @@ import (
 )
 
 func TestStrikethrough(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -17,5 +17,5 @@ func TestStrikethrough(t *testing.T) {
 			Strikethrough,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/strikethrough.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/strikethrough.txt", t, testutil.ParseCliCaseArg()...)
 }

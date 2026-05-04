@@ -99,8 +99,8 @@ func TestPageLinkNode(t *testing.T) {
 
 // TestPageLinkParser_Trigger tests the parser triggers.
 func TestPageLinkParser_Trigger(t *testing.T) {
-	parser := &pageLinkParser{}
-	triggers := parser.Trigger()
+	p := &pageLinkParser{}
+	triggers := p.Trigger()
 
 	expectedTriggers := []byte{' ', '*', '_', '~', '('}
 	if len(triggers) != len(expectedTriggers) {
@@ -565,10 +565,10 @@ func setupTestEnvironment(t *testing.T, pageFiles []string) func() {
 
 // TestPageLinkRenderer_RegisterFuncs tests the RegisterFuncs method.
 func TestPageLinkRenderer_RegisterFuncs(t *testing.T) {
-	renderer := &pageLinkRenderer{}
+	r := &pageLinkRenderer{}
 	registry := &mockRegistry{}
 
-	renderer.RegisterFuncs(registry)
+	r.RegisterFuncs(registry)
 
 	if len(registry.registered) != 1 {
 		t.Fatalf("Expected 1 registration, got %d", len(registry.registered))

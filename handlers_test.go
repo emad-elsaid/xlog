@@ -42,7 +42,7 @@ func TestRootHandler(t *testing.T) {
 			defer func() { Config.Index = oldIndex }()
 			Config.Index = tt.configIndex
 
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			w := httptest.NewRecorder()
 
 			output := rootHandler(req)
@@ -85,7 +85,7 @@ func TestGetPageHandler_ExistingPage(t *testing.T) {
 		csrf.Secure(false),
 	)
 
-	req := httptest.NewRequest(http.MethodGet, "/"+testPageName, nil)
+	req := httptest.NewRequest(http.MethodGet, "/"+testPageName, http.NoBody)
 	req.SetPathValue("page", testPageName)
 
 	testPassed := false
@@ -132,7 +132,7 @@ func TestGetPageHandler_NonExistentPage_ReadonlyMode(t *testing.T) {
 	defer func() { Config.Readonly = oldReadonly }()
 	Config.Readonly = true
 
-	req := httptest.NewRequest(http.MethodGet, "/nonexistent", nil)
+	req := httptest.NewRequest(http.MethodGet, "/nonexistent", http.NoBody)
 	req.SetPathValue("page", "nonexistent")
 	w := httptest.NewRecorder()
 
@@ -166,7 +166,7 @@ func TestGetPageHandler_Directory(t *testing.T) {
 	defer func() { Config.Index = oldIndex }()
 	Config.Index = testIndexPage
 
-	req := httptest.NewRequest(http.MethodGet, "/"+dirName, nil)
+	req := httptest.NewRequest(http.MethodGet, "/"+dirName, http.NoBody)
 	req.SetPathValue("page", dirName)
 	w := httptest.NewRecorder()
 
@@ -206,7 +206,7 @@ func TestGetPageHandler_NonExistentPage_DynamicMode(t *testing.T) {
 		csrf.Secure(false),
 	)
 
-	req := httptest.NewRequest(http.MethodGet, "/nonexistent", nil)
+	req := httptest.NewRequest(http.MethodGet, "/nonexistent", http.NoBody)
 	req.SetPathValue("page", "nonexistent")
 
 	testPassed := false
@@ -257,7 +257,7 @@ func TestGetPageHandler_StaticFile(t *testing.T) {
 		t.Fatalf("Failed to create static file: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/"+testFile, nil)
+	req := httptest.NewRequest(http.MethodGet, "/"+testFile, http.NoBody)
 	req.SetPathValue("page", testFile)
 	w := httptest.NewRecorder()
 

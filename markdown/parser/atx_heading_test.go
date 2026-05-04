@@ -158,9 +158,9 @@ func TestATXHeadingParser_Open(t *testing.T) {
 				// Check text content if expected
 				if tc.wantText != "" && heading.Lines().Len() > 0 {
 					line := heading.Lines().At(0)
-					text := string(line.Value(reader.Source()))
-					if text != tc.wantText {
-						t.Errorf("Open() text = %q, want %q", text, tc.wantText)
+					txt := string(line.Value(reader.Source()))
+					if txt != tc.wantText {
+						t.Errorf("Open() text = %q, want %q", txt, tc.wantText)
 					}
 				}
 			}

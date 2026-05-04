@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"image/png"
 	"io/fs"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
@@ -851,7 +852,7 @@ func TestResizeHandler_WithHTTPRequest(t *testing.T) {
 			}
 
 			// Create mock HTTP request
-			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, http.NoBody)
 			req.SetPathValue("path", photoPath)
 
 			// Get handler output function
@@ -897,7 +898,7 @@ func TestPhotoHandler_WithHTTPRequest(t *testing.T) {
 			}
 
 			// Create mock HTTP request
-			req := httptest.NewRequest("GET", "/+/photos/photo/"+photoPath, nil)
+			req := httptest.NewRequest("GET", "/+/photos/photo/"+photoPath, http.NoBody)
 			req.SetPathValue("path", photoPath)
 
 			// Get handler output
@@ -944,7 +945,7 @@ func TestResizeHandler_ImageDecodingErrors(t *testing.T) {
 				_ = os.RemoveAll(".cache")
 			}()
 
-			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, http.NoBody)
 			req.SetPathValue("path", photoPath)
 
 			output := resizeHandler(req)
@@ -1029,7 +1030,7 @@ func TestResizeHandler_AspectRatioPreservation(t *testing.T) {
 				_ = os.RemoveAll(".cache")
 			}()
 
-			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+tmpFile, nil)
+			req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+tmpFile, http.NoBody)
 			req.SetPathValue("path", tmpFile)
 
 			output := resizeHandler(req)
@@ -1072,7 +1073,7 @@ func TestResizeHandler_CacheWriteFailure(t *testing.T) {
 		_ = os.RemoveAll(cacheDir)
 	}()
 
-	req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, nil)
+	req := httptest.NewRequest("GET", "/+/photos/thumbnail/"+photoPath, http.NoBody)
 	req.SetPathValue("path", photoPath)
 
 	output := resizeHandler(req)
@@ -1094,8 +1095,6 @@ func TestPhoto_RenderCallsPartial(t *testing.T) {
 	photo := &Photo{
 		Thumbnail: "/+/photos/thumbnail/vacation/beach.jpg",
 		Page:      "/+/photos/photo/vacation/beach.jpg",
-		Original:  "vacation/beach.jpg",
-		Time:      time.Date(2023, 7, 15, 14, 30, 0, 0, time.UTC),
 	}
 
 	// Verify Photo has the Render method (compile-time check)

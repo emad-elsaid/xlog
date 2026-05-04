@@ -6,13 +6,16 @@ import (
 	"slices"
 	"strings"
 
-	_ "embed"
-
 	"github.com/emad-elsaid/xlog"
 )
 
 //go:embed templates
 var templates embed.FS
+
+const (
+	nameRecent = "Recent"
+	pathRecent = "/+/recent"
+)
 
 func init() {
 	xlog.RegisterExtension(Recent{})
@@ -22,8 +25,8 @@ type Recent struct{}
 
 func (Recent) Name() string { return "recent" }
 func (Recent) Init() {
-	xlog.Get(`/+/recent`, recentHandler)
-	xlog.RegisterBuildPage("/+/recent", true)
+	xlog.Get(pathRecent, recentHandler)
+	xlog.RegisterBuildPage(pathRecent, true)
 	xlog.RegisterTemplate(templates, "templates")
 	xlog.RegisterLink(func(xlog.Page) []xlog.Command { return []xlog.Command{links{}} })
 }
@@ -33,7 +36,7 @@ func recentHandler(r xlog.Request) xlog.Output {
 	slices.SortFunc(rp, comparePagesByRecency)
 
 	return xlog.Render("recent", xlog.Locals{
-		"page":  xlog.DynamicPage{NameVal: "Recent"},
+		"page":  xlog.DynamicPage{NameVal: nameRecent},
 		"pages": rp,
 	})
 }
@@ -51,9 +54,9 @@ func comparePagesByRecency(a, b xlog.Page) int {
 type links struct{}
 
 func (l links) Icon() string { return "fa-solid fa-clock-rotate-left" }
-func (l links) Name() string { return "Recent" }
+func (l links) Name() string { return nameRecent }
 func (l links) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
-		"href": "/+/recent",
+		"href": pathRecent,
 	}
 }

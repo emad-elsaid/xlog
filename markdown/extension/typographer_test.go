@@ -9,7 +9,7 @@ import (
 )
 
 func TestTypographer(t *testing.T) {
-	markdown := markdown.New(
+	md := markdown.New(
 		markdown.WithRendererOptions(
 			html.WithUnsafe(),
 		),
@@ -17,7 +17,7 @@ func TestTypographer(t *testing.T) {
 			Typographer,
 		),
 	)
-	testutil.DoTestCaseFile(markdown, "_test/typographer.txt", t, testutil.ParseCliCaseArg()...)
+	testutil.DoTestCaseFile(md, "_test/typographer.txt", t, testutil.ParseCliCaseArg()...)
 }
 
 func TestUnclosedCounter_Reset(t *testing.T) {

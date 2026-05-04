@@ -67,12 +67,12 @@ func compileTemplates() {
 // Partial executes a template by it's path name. it passes data to the
 // template. returning the output of the template. in case of an error it will
 // return the error string as the output.
-func Partial(path string, data Locals) template.HTML {
-	v := templates.Lookup(path)
+func Partial(templatePath string, data Locals) template.HTML {
+	v := templates.Lookup(templatePath)
 	if v == nil {
 		// Escape path to prevent potential XSS in error message
 		// #nosec G203 - path is escaped with html.EscapeString, safe to convert
-		return template.HTML(fmt.Sprintf("template %s not found", html.EscapeString(path)))
+		return template.HTML(fmt.Sprintf("template %s not found", html.EscapeString(templatePath)))
 	}
 
 	if data == nil {
@@ -86,7 +86,7 @@ func Partial(path string, data Locals) template.HTML {
 	if err := v.Execute(w, data); err != nil {
 		// Escape error details to prevent potential XSS
 		// #nosec G203 - both path and err are escaped with html.EscapeString, safe to convert
-		return template.HTML("rendering error " + html.EscapeString(path) + " " + html.EscapeString(err.Error()))
+		return template.HTML("rendering error " + html.EscapeString(templatePath) + " " + html.EscapeString(err.Error()))
 	}
 
 	// #nosec G203 - w.String() contains output from template.Execute which auto-escapes, safe to convert

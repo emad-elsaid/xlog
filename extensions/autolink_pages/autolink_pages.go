@@ -9,8 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	_ "embed"
-
 	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	east "github.com/emad-elsaid/xlog/markdown/extension/ast"

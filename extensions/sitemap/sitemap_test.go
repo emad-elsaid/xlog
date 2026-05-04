@@ -43,7 +43,7 @@ func TestSitemapHandler(t *testing.T) {
 	defer func() { SITEMAP_DOMAIN = oldDomain }()
 
 	// Create request and response
-	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", http.NoBody)
 	w := httptest.NewRecorder()
 
 	// Call handler
@@ -106,7 +106,7 @@ func TestSitemapHandlerEmptyDirectory(t *testing.T) {
 	defer func() { SITEMAP_DOMAIN = oldDomain }()
 
 	// Create request and response
-	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", http.NoBody)
 	w := httptest.NewRecorder()
 
 	// Call handler - should not crash with empty directory
@@ -153,7 +153,7 @@ func TestSitemapHandlerDifferentDomain(t *testing.T) {
 	defer func() { SITEMAP_DOMAIN = oldDomain }()
 
 	// Create request and response
-	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", http.NoBody)
 	w := httptest.NewRecorder()
 
 	// Call handler
@@ -197,7 +197,7 @@ func TestSitemapHandlerHTTPS(t *testing.T) {
 	defer func() { SITEMAP_DOMAIN = oldDomain }()
 
 	// Create request and response
-	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil)
+	req := httptest.NewRequest(http.MethodGet, "/sitemap.xml", http.NoBody)
 	w := httptest.NewRecorder()
 
 	// Call handler

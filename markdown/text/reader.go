@@ -160,7 +160,7 @@ func (r *reader) PeekLine() ([]byte, Segment) {
 }
 
 // io.RuneReader interface.
-func (r *reader) ReadRune() (rune, int, error) {
+func (r *reader) ReadRune() (ch rune, size int, err error) {
 	return readRuneReader(r)
 }
 
@@ -385,7 +385,7 @@ func (r *blockReader) Value(seg Segment) []byte {
 }
 
 // io.RuneReader interface.
-func (r *blockReader) ReadRune() (rune, int, error) {
+func (r *blockReader) ReadRune() (ch rune, size int, err error) {
 	return readRuneReader(r)
 }
 
@@ -607,7 +607,7 @@ func findSubMatchReader(r Reader, reg *regexp.Regexp) [][]byte {
 	return result
 }
 
-func readRuneReader(r Reader) (rune, int, error) {
+func readRuneReader(r Reader) (ch rune, size int, err error) {
 	line, _ := r.PeekLine()
 	if line == nil {
 		return 0, 0, io.EOF
