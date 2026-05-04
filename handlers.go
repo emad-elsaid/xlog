@@ -99,6 +99,12 @@ func Start(ctx context.Context) {
 		osExit(0)
 	}
 
+	// Handle stats flag after chdir to source directory
+	if Config.ShowStats {
+		Stats(ctx)
+		osExit(0)
+	}
+
 	initExtensions()
 
 	// Register health check endpoint for load balancers and monitoring

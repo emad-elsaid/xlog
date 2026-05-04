@@ -26,6 +26,7 @@ type Configuration struct {
 	RunDoctor          bool   // run configuration diagnostics
 	ShowVersion        bool   // display version information and exit
 	ListPages          bool   // list all pages and exit
+	ShowStats          bool   // display digital garden statistics and exit
 }
 
 var Config Configuration
@@ -51,4 +52,5 @@ func init() {
 	flag.BoolVar(&Config.RunDoctor, "doctor", false, "Run diagnostics to check xlog configuration and environment")
 	flag.BoolVar(&Config.ShowVersion, "version", false, "Print version information and exit")
 	flag.BoolVar(&Config.ListPages, "list", false, "List all markdown pages and exit")
+	flag.BoolVar(&Config.ShowStats, "stats", false, "Display digital garden statistics and exit")
 }
