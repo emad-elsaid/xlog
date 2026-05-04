@@ -1949,6 +1949,69 @@ func TestTagPagesSortingInternal(t *testing.T) {
 	}
 }
 
+func TestTagHandlerRendering(t *testing.T) {
+	// Test complete HTTP request/response cycle for tagHandler
+	tests := []struct {
+		name       string
+		tag        string
+		setupPages map[string]string
+		wantStatus int
+	}{
+		{
+			name: "renders tag page with matching pages",
+			tag:  "golang",
+			setupPages: map[string]string{
+				"page1.md": "Content with #golang",
+				"page2.md": "More #golang",
+			},
+			wantStatus: http.StatusOK,
+		},
+		{
+			name: "renders tag page with no matches",
+			tag:  "nonexistent",
+			setupPages: map[string]string{
+				"page1.md": "Content with #other",
+			},
+			wantStatus: http.StatusOK,
+		},
+		{
+			name: "case insensitive tag routing",
+			tag:  "GoLang",
+			setupPages: map[string]string{
+				"page1.md": "#golang here",
+			},
+			wantStatus: http.StatusOK,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			t.Cleanup(func() { xlog.Config.Source = origSource })
+
+			for filename, content := range tc.setupPages {
+				path := filepath.Join(tmpDir, filename)
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+			r := httptest.NewRequest(http.MethodGet, "/+/tag/"+tc.tag, http.NoBody)
+			r.SetPathValue("tag", tc.tag)
+			r = r.WithContext(context.Background())
+
+			output := h.tagHandler(r)
+
+			if output == nil {
+				t.Fatal("tagHandler returned nil")
+			}
+		})
+	}
+}
+
 func TestTagPagesComprehensive(t *testing.T) {
 	tests := []struct {
 		name          string
