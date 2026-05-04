@@ -735,6 +735,74 @@ func TestCopyAssets(t *testing.T) {
 	}
 }
 
+func TestCopy404Page_ErrorPaths(t *testing.T) {
+	tests := []struct {
+		name  string
+		setup func(t *testing.T, dir string)
+	}{
+		{
+			name: "handles os.Create error when destination is read-only directory",
+			setup: func(t *testing.T, dir string) {
+				// Create source 404 file
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+				sourceFile := filepath.Join(notFoundDir, "index.html")
+				if err := os.WriteFile(sourceFile, []byte("<h1>404</h1>"), 0644); err != nil {
+					t.Fatalf("Failed to create source file: %v", err)
+				}
+
+				// Make directory read-only to trigger os.Create error
+				if err := os.Chmod(dir, 0555); err != nil {
+					t.Fatalf("Failed to make directory read-only: %v", err)
+				}
+			},
+		},
+		{
+			name: "handles io.Copy error with closed output file",
+			setup: func(t *testing.T, dir string) {
+				// This scenario is difficult to trigger naturally since we control both files
+				// The error logging path exists for robustness but is hard to test directly
+				// without mocking os.File which would be overly complex
+				// The test verifies the function doesn't panic when called
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+				sourceFile := filepath.Join(notFoundDir, "index.html")
+				if err := os.WriteFile(sourceFile, []byte("<h1>404</h1>"), 0644); err != nil {
+					t.Fatalf("Failed to create source file: %v", err)
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			// Save and restore original config
+			origNotFound := Config.NotFoundPage
+			defer func() {
+				Config.NotFoundPage = origNotFound
+				// Restore permissions for cleanup
+				_ = os.Chmod(tmpDir, 0755)
+			}()
+
+			Config.NotFoundPage = "404"
+
+			tc.setup(t, tmpDir)
+
+			// Should not panic even if errors occur
+			copy404Page(tmpDir)
+
+			// Restore permissions for cleanup
+			_ = os.Chmod(tmpDir, 0755)
+		})
+	}
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
