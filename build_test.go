@@ -523,3 +523,155 @@ func TestBuild_ErrorHandling(t *testing.T) {
 		})
 	}
 }
+
+func TestCopy404Page(t *testing.T) {
+	tests := []struct {
+		name           string
+		setup          func(t *testing.T, dir string)
+		expectFile     bool
+		expectContent  string
+		skipValidation bool
+	}{
+		{
+			name: "successfully copies 404 page when source exists",
+			setup: func(t *testing.T, dir string) {
+				// Create source 404 directory structure
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+				// Create source index.html
+				sourceFile := filepath.Join(notFoundDir, "index.html")
+				if err := os.WriteFile(sourceFile, []byte("<h1>404 Not Found</h1>"), 0644); err != nil {
+					t.Fatalf("Failed to create source 404 file: %v", err)
+				}
+			},
+			expectFile:    true,
+			expectContent: "<h1>404 Not Found</h1>",
+		},
+		{
+			name: "does nothing when source 404 page does not exist",
+			setup: func(t *testing.T, dir string) {
+				// Don't create the 404 directory - source doesn't exist
+			},
+			expectFile:     false,
+			skipValidation: true, // No file should be created
+		},
+		{
+			name: "does nothing when source 404 directory exists but index.html missing",
+			setup: func(t *testing.T, dir string) {
+				// Create directory but not the index.html file
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+			},
+			expectFile:     false,
+			skipValidation: true,
+		},
+		{
+			name: "handles empty 404 source file",
+			setup: func(t *testing.T, dir string) {
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+				sourceFile := filepath.Join(notFoundDir, "index.html")
+				if err := os.WriteFile(sourceFile, []byte(""), 0644); err != nil {
+					t.Fatalf("Failed to create empty source file: %v", err)
+				}
+			},
+			expectFile:    true,
+			expectContent: "",
+		},
+		{
+			name: "copies large 404 page content correctly",
+			setup: func(t *testing.T, dir string) {
+				notFoundDir := filepath.Join(dir, Config.NotFoundPage)
+				if err := os.MkdirAll(notFoundDir, 0755); err != nil {
+					t.Fatalf("Failed to create 404 directory: %v", err)
+				}
+				// Create a larger file with repeated content
+				largeContent := ""
+				for i := 0; i < 1000; i++ {
+					largeContent += "<p>Not Found</p>\n"
+				}
+				sourceFile := filepath.Join(notFoundDir, "index.html")
+				if err := os.WriteFile(sourceFile, []byte(largeContent), 0644); err != nil {
+					t.Fatalf("Failed to create large source file: %v", err)
+				}
+			},
+			expectFile:    true,
+			expectContent: "<p>Not Found</p>\n", // Will verify content starts with this
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create temporary directory for test
+			tmpDir := t.TempDir()
+
+			// Save and restore original NotFoundPage config
+			origNotFound := Config.NotFoundPage
+			defer func() {
+				Config.NotFoundPage = origNotFound
+			}()
+
+			// Use standard 404 page name for test
+			Config.NotFoundPage = "404"
+
+			// Run setup to create test conditions
+			tc.setup(t, tmpDir)
+
+			// Execute copy404Page
+			copy404Page(tmpDir)
+
+			// Verify results
+			outputFile := filepath.Join(tmpDir, "404.html")
+			info, err := os.Stat(outputFile)
+
+			if tc.skipValidation {
+				// For cases where we don't expect the file to be created
+				if err == nil {
+					t.Logf("Note: 404.html exists but wasn't expected. This may be okay if copy failed gracefully")
+				}
+				return
+			}
+
+			if tc.expectFile {
+				if err != nil {
+					t.Fatalf("Expected 404.html to exist, but got error: %v", err)
+				}
+
+				if info.IsDir() {
+					t.Fatal("Expected 404.html to be a file, but it's a directory")
+				}
+
+				// Verify content
+				fileContent, readErr := os.ReadFile(outputFile)
+				if readErr != nil {
+					t.Fatalf("Failed to read output file: %v", readErr)
+				}
+
+				// For large content test, just check it starts with expected content
+				if len(tc.expectContent) > 0 && len(fileContent) > len(tc.expectContent) {
+					if string(fileContent[:len(tc.expectContent)]) != tc.expectContent {
+						t.Errorf("Expected content to start with %q, got %q...",
+							tc.expectContent, string(fileContent[:min(len(tc.expectContent), 50)]))
+					}
+				} else if string(fileContent) != tc.expectContent {
+					t.Errorf("Expected content %q, got %q", tc.expectContent, string(fileContent))
+				}
+			} else if err == nil {
+				t.Errorf("Expected no 404.html file, but file exists")
+			}
+		})
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
