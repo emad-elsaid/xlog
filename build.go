@@ -1,3 +1,5 @@
+// Package xlog provides static site generation capabilities for digital gardening.
+// The build functionality converts markdown pages into a static HTML site.
 package xlog
 
 import (
