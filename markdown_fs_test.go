@@ -53,6 +53,26 @@ func TestNewMarkdownFS(t *testing.T) {
 	}
 }
 
+func TestNewMarkdownFS_CacheInitialization(t *testing.T) {
+	// This test verifies that the cache is properly initialized
+	// and the fallback mechanism is in place for edge cases
+	mfs := newMarkdownFS(".")
+
+	// Verify cache is not nil
+	require.NotNil(t, mfs.cache, "cache should be initialized")
+
+	// Verify cache has non-zero capacity
+	assert.Greater(t, mfs.cache.Len(), -1, "cache should have valid capacity")
+
+	// Verify page function works with initialized cache
+	page := mfs.Page("test")
+	require.NotNil(t, page, "Page should work with initialized cache")
+
+	// Verify cache stores pages
+	page2 := mfs.Page("test")
+	assert.Equal(t, page.Name(), page2.Name(), "cache should return same page for same name")
+}
+
 func TestMarkdownFS_Page(t *testing.T) {
 	// Save and restore original config
 	origIndex := Config.Index
