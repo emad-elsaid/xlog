@@ -293,11 +293,26 @@ func TestInit(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Init() registers global routes/widgets, so we just verify it doesn't panic
-			// This is minimal coverage to satisfy the requirement
+			// Store original readonly setting
+			origReadonly := xlog.Config.Readonly
+			defer func() {
+				xlog.Config.Readonly = origReadonly
+			}()
+
+			// Set readonly mode for test
+			xlog.Config.Readonly = tc.readonly
+
+			// Verify Init() completes without panic
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("Init() panicked: %v", r)
+				}
+			}()
+
 			s := Search{}
-			// Cannot fully test without mocking the global xlog registration functions
-			// But we can at least verify Name() works
+			s.Init()
+
+			// Verify Name() is correct
 			if s.Name() != ExtensionName {
 				t.Errorf("Search.Name() = %q, want %q", s.Name(), ExtensionName)
 			}
