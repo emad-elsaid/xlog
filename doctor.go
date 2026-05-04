@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -125,32 +126,43 @@ func checkBindAddress(issues *[]string) {
 }
 
 func printDiagnosticSummary(issues, warnings []string) {
-	fmt.Println()
+	exitCode := formatDiagnosticSummary(os.Stdout, issues, warnings)
+	if exitCode != 0 {
+		os.Exit(exitCode)
+	}
+}
+
+// formatDiagnosticSummary formats and writes the diagnostic summary to the given writer.
+// It returns the exit code that should be used (0 for success, 1 for critical issues).
+// This function is testable as it doesn't call os.Exit.
+func formatDiagnosticSummary(w io.Writer, issues, warnings []string) int {
+	_, _ = fmt.Fprintln(w)
 	if len(issues) == 0 && len(warnings) == 0 {
-		fmt.Println("✓ All checks passed! Your xlog configuration looks good.")
-		return
+		_, _ = fmt.Fprintln(w, "✓ All checks passed! Your xlog configuration looks good.")
+		return 0
 	}
 
 	if len(issues) > 0 {
-		fmt.Println("CRITICAL ISSUES:")
+		_, _ = fmt.Fprintln(w, "CRITICAL ISSUES:")
 		for _, issue := range issues {
-			fmt.Println("  " + issue)
+			_, _ = fmt.Fprintln(w, "  "+issue)
 		}
-		fmt.Println()
+		_, _ = fmt.Fprintln(w)
 	}
 
 	if len(warnings) > 0 {
-		fmt.Println("WARNINGS:")
+		_, _ = fmt.Fprintln(w, "WARNINGS:")
 		for _, warning := range warnings {
-			fmt.Println("  " + warning)
+			_, _ = fmt.Fprintln(w, "  "+warning)
 		}
-		fmt.Println()
+		_, _ = fmt.Fprintln(w)
 	}
 
 	if len(issues) > 0 {
-		fmt.Println("Please fix critical issues before running xlog.")
-		os.Exit(1)
-	} else {
-		fmt.Println("Warnings noted. Xlog should run, but you may want to address these.")
+		_, _ = fmt.Fprintln(w, "Please fix critical issues before running xlog.")
+		return 1
 	}
+
+	_, _ = fmt.Fprintln(w, "Warnings noted. Xlog should run, but you may want to address these.")
+	return 0
 }

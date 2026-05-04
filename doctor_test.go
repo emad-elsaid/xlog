@@ -3,6 +3,7 @@ package xlog
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -618,6 +619,188 @@ func TestCheckBindAddress(t *testing.T) {
 			}
 
 			Config.BindAddress = origBindAddress
+		})
+	}
+}
+
+func TestPrintDiagnosticSummary(t *testing.T) {
+	tests := []struct {
+		name            string
+		issues          []string
+		warnings        []string
+		wantContains    []string
+		wantNotContains []string
+		wantExitCode    int
+	}{
+		{
+			name:     "no issues or warnings",
+			issues:   []string{},
+			warnings: []string{},
+			wantContains: []string{
+				"✓ All checks passed!",
+				"Your xlog configuration looks good.",
+			},
+			wantNotContains: []string{
+				"CRITICAL ISSUES:",
+				"WARNINGS:",
+				"Please fix critical issues",
+			},
+			wantExitCode: 0,
+		},
+		{
+			name:     "only warnings",
+			issues:   []string{},
+			warnings: []string{"⚠ Index page not found", "⚠ 404 page not found"},
+			wantContains: []string{
+				"WARNINGS:",
+				"⚠ Index page not found",
+				"⚠ 404 page not found",
+				"Warnings noted. Xlog should run",
+			},
+			wantNotContains: []string{
+				"CRITICAL ISSUES:",
+				"Please fix critical issues",
+			},
+			wantExitCode: 0,
+		},
+		{
+			name:     "only critical issues",
+			issues:   []string{"✗ Source directory does not exist", "✗ Bind address is empty"},
+			warnings: []string{},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"✗ Source directory does not exist",
+				"✗ Bind address is empty",
+				"Please fix critical issues before running xlog.",
+			},
+			wantNotContains: []string{
+				"WARNINGS:",
+				"✓ All checks passed!",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "both issues and warnings",
+			issues:   []string{"✗ Source directory not writable"},
+			warnings: []string{"⚠ Index page not found"},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"✗ Source directory not writable",
+				"WARNINGS:",
+				"⚠ Index page not found",
+				"Please fix critical issues before running xlog.",
+			},
+			wantExitCode: 1,
+		},
+		{
+			name:     "multiple issues and warnings",
+			issues:   []string{"✗ Issue 1", "✗ Issue 2", "✗ Issue 3"},
+			warnings: []string{"⚠ Warning 1", "⚠ Warning 2"},
+			wantContains: []string{
+				"CRITICAL ISSUES:",
+				"✗ Issue 1",
+				"✗ Issue 2",
+				"✗ Issue 3",
+				"WARNINGS:",
+				"⚠ Warning 1",
+				"⚠ Warning 2",
+			},
+			wantExitCode: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Capture output
+			var buf strings.Builder
+			exitCode := formatDiagnosticSummary(&buf, tc.issues, tc.warnings)
+
+			output := buf.String()
+
+			// Check that expected strings are present
+			for _, want := range tc.wantContains {
+				if !strings.Contains(output, want) {
+					t.Errorf("output missing expected string %q\nGot:\n%s", want, output)
+				}
+			}
+
+			// Check that unexpected strings are not present
+			for _, notWant := range tc.wantNotContains {
+				if strings.Contains(output, notWant) {
+					t.Errorf("output contains unexpected string %q\nGot:\n%s", notWant, output)
+				}
+			}
+
+			// Check exit code
+			if exitCode != tc.wantExitCode {
+				t.Errorf("got exit code %d, want %d", exitCode, tc.wantExitCode)
+			}
+		})
+	}
+}
+
+func TestPrintDiagnosticSummary_OutputFormat(t *testing.T) {
+	tests := []struct {
+		name     string
+		issues   []string
+		warnings []string
+		validate func(t *testing.T, output string)
+	}{
+		{
+			name:     "issues appear before warnings",
+			issues:   []string{"✗ Critical error"},
+			warnings: []string{"⚠ Minor warning"},
+			validate: func(t *testing.T, output string) {
+				issuesIdx := strings.Index(output, "CRITICAL ISSUES:")
+				warningsIdx := strings.Index(output, "WARNINGS:")
+				if issuesIdx == -1 {
+					t.Error("missing CRITICAL ISSUES section")
+				}
+				if warningsIdx == -1 {
+					t.Error("missing WARNINGS section")
+				}
+				if issuesIdx >= warningsIdx {
+					t.Error("CRITICAL ISSUES should appear before WARNINGS")
+				}
+			},
+		},
+		{
+			name:     "issues are indented",
+			issues:   []string{"✗ Error message"},
+			warnings: []string{},
+			validate: func(t *testing.T, output string) {
+				if !strings.Contains(output, "  ✗ Error message") {
+					t.Error("issue should be indented with two spaces")
+				}
+			},
+		},
+		{
+			name:     "warnings are indented",
+			issues:   []string{},
+			warnings: []string{"⚠ Warning message"},
+			validate: func(t *testing.T, output string) {
+				if !strings.Contains(output, "  ⚠ Warning message") {
+					t.Error("warning should be indented with two spaces")
+				}
+			},
+		},
+		{
+			name:     "output starts with blank line",
+			issues:   []string{"✗ Error"},
+			warnings: []string{},
+			validate: func(t *testing.T, output string) {
+				if !strings.HasPrefix(output, "\n") {
+					t.Error("output should start with a blank line")
+				}
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf strings.Builder
+			formatDiagnosticSummary(&buf, tc.issues, tc.warnings)
+			tc.validate(t, buf.String())
 		})
 	}
 }
