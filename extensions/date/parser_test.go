@@ -9,6 +9,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
+const (
+	testDate20260326 = "2026-03-26"
+)
+
 func TestDateParser_Parse(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -19,47 +23,47 @@ func TestDateParser_Parse(t *testing.T) {
 		{
 			name:     "ISO format with dashes",
 			input:    " 2026-3-26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Full month name with dashes",
 			input:    " 2026-March-26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Full month name with slashes",
 			input:    " 2026/March/26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Full month name with backslashes",
 			input:    " 2026\\March\\26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Short month name with dashes",
 			input:    " 2026-Mar-26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Day first format with full month",
 			input:    " 26-March-2026",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Day first format with short month",
 			input:    " 26/Mar/2026",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Month first format with short month",
 			input:    " Mar-26-2026",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:     "Month first format with full month",
 			input:    " March/26/2026",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:    "Invalid date format",
@@ -69,7 +73,7 @@ func TestDateParser_Parse(t *testing.T) {
 		{
 			name:     "Text after date is ignored",
 			input:    " 2026-03-26-extra",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:    "Empty input",
@@ -79,7 +83,7 @@ func TestDateParser_Parse(t *testing.T) {
 		{
 			name:     "Date without space prefix still parses",
 			input:    "2026-3-26",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:    "Single character input returns nil",
@@ -89,7 +93,7 @@ func TestDateParser_Parse(t *testing.T) {
 		{
 			name:     "Too many separators stops parsing",
 			input:    " 2026-03-26-15-30",
-			wantDate: "2026-03-26",
+			wantDate: testDate20260326,
 		},
 		{
 			name:    "More than three separators truncates",

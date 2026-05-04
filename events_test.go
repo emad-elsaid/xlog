@@ -9,6 +9,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
+const (
+	eventsTestPageName = "test"
+)
+
 // testPage implements the Page interface for testing events.
 type testPage struct {
 	name    string
@@ -42,7 +46,7 @@ func TestListen(t *testing.T) {
 	}
 
 	// Trigger to verify handler was registered
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 	Trigger(PageChanged, testP)
 
 	if !called {
@@ -94,7 +98,7 @@ func TestListenDifferentEvents(t *testing.T) {
 		return nil
 	})
 
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 
 	// Trigger PageChanged
 	Trigger(PageChanged, testP)
@@ -124,7 +128,7 @@ func TestTriggerNonExistentEvent(t *testing.T) {
 
 	// Create a non-standard event
 	customEvent := PageEvent(999)
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 
 	// Should not panic
 	Trigger(customEvent, testP)
@@ -148,7 +152,7 @@ func TestTriggerWithError(t *testing.T) {
 	Listen(PageChanged, errorHandler)
 	Listen(PageChanged, successHandler)
 
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 
 	// Trigger should not panic even if a handler returns an error
 	Trigger(PageChanged, testP)
@@ -194,7 +198,7 @@ func TestAllPageEvents(t *testing.T) {
 		})
 	}
 
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 
 	for _, event := range events {
 		Trigger(event, testP)
@@ -228,7 +232,7 @@ func TestTriggerEmptyHandlerList(t *testing.T) {
 		PageChanged: {},
 	}
 
-	testP := &testPage{name: "test"}
+	testP := &testPage{name: eventsTestPageName}
 
 	// Should not panic with empty handler list
 	Trigger(PageChanged, testP)

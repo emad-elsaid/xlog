@@ -16,64 +16,80 @@ func (s *inlineMathParser) Trigger() []byte { return []byte{'$'} }
 
 func (s *inlineMathParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	line, startSegment := block.PeekLine()
+	opener := countOpenerDollars(line)
+	block.Advance(opener)
+	savedLine, savedPos := block.Position()
+	node := &InlineMath{}
+
+	if !s.findClosingDelimiter(node, block, startSegment, opener, savedLine, savedPos) {
+		return ast.NewTextSegment(startSegment.WithStop(startSegment.Start + opener))
+	}
+
+	s.trimHalfSpaces(node, block)
+	return node
+}
+
+func countOpenerDollars(line []byte) int {
 	opener := 0
 	for ; opener < len(line) && line[opener] == '$'; opener++ {
 	}
-	block.Advance(opener)
-	l, pos := block.Position()
-	node := &InlineMath{}
+	return opener
+}
+
+func (s *inlineMathParser) findClosingDelimiter(node *InlineMath, block text.Reader, startSegment text.Segment, opener int, savedLine int, savedPos text.Segment) bool {
 	for {
-		line, segment := block.PeekLine()
+		line, seg := block.PeekLine()
 		if line == nil {
-			block.SetPosition(l, pos)
-			return ast.NewTextSegment(startSegment.WithStop(startSegment.Start + opener))
+			block.SetPosition(savedLine, savedPos)
+			return false
 		}
-		for i := 0; i < len(line); i++ {
-			c := line[i]
-			if c == '$' {
-				oldi := i
-				for ; i < len(line) && line[i] == '$'; i++ {
-				}
-				closure := i - oldi
-				if closure == opener && (i+1 >= len(line) || line[i+1] != '$') {
-					segment := segment.WithStop(segment.Start + i - closure)
-					if !segment.IsEmpty() {
-						node.AppendChild(node, ast.NewRawTextSegment(segment))
-					}
-					block.Advance(i)
-					goto end
-				}
-			}
+		if s.processLine(node, block, line, seg, opener) {
+			return true
 		}
 		if !util.IsBlank(line) {
-			node.AppendChild(node, ast.NewRawTextSegment(segment))
+			node.AppendChild(node, ast.NewRawTextSegment(seg))
 		}
 		block.AdvanceLine()
 	}
-end:
+}
 
-	if !node.IsBlank(block.Source()) {
-		// trim first halfspace and last halfspace
-		segment := node.FirstChild().(*ast.Text).Segment
-		shouldTrimmed := true
-		if segment.IsEmpty() || block.Source()[segment.Start] != ' ' {
-			shouldTrimmed = false
+func (s *inlineMathParser) processLine(node *InlineMath, block text.Reader, line []byte, seg text.Segment, opener int) bool {
+	for i := 0; i < len(line); i++ {
+		if line[i] == '$' {
+			oldi := i
+			for ; i < len(line) && line[i] == '$'; i++ {
+			}
+			closure := i - oldi
+			if closure == opener && (i+1 >= len(line) || line[i+1] != '$') {
+				closingSeg := seg.WithStop(seg.Start + i - closure)
+				if !closingSeg.IsEmpty() {
+					node.AppendChild(node, ast.NewRawTextSegment(closingSeg))
+				}
+				block.Advance(i)
+				return true
+			}
 		}
-		segment = node.LastChild().(*ast.Text).Segment
-		if segment.IsEmpty() || block.Source()[segment.Stop-1] != ' ' {
-			shouldTrimmed = false
-		}
-		if shouldTrimmed {
-			t := node.FirstChild().(*ast.Text)
-			segment := t.Segment
-			t.Segment = segment.WithStart(segment.Start + 1)
-			t = node.LastChild().(*ast.Text)
-			segment = node.LastChild().(*ast.Text).Segment
-			t.Segment = segment.WithStop(segment.Stop - 1)
-		}
-
 	}
-	return node
+	return false
+}
+
+func (s *inlineMathParser) trimHalfSpaces(node *InlineMath, block text.Reader) {
+	if node.IsBlank(block.Source()) {
+		return
+	}
+
+	firstSeg := node.FirstChild().(*ast.Text).Segment
+	lastSeg := node.LastChild().(*ast.Text).Segment
+
+	shouldTrim := !firstSeg.IsEmpty() && block.Source()[firstSeg.Start] == ' ' &&
+		!lastSeg.IsEmpty() && block.Source()[lastSeg.Stop-1] == ' '
+
+	if shouldTrim {
+		t := node.FirstChild().(*ast.Text)
+		t.Segment = t.Segment.WithStart(t.Segment.Start + 1)
+		t = node.LastChild().(*ast.Text)
+		t.Segment = t.Segment.WithStop(t.Segment.Stop - 1)
+	}
 }
 
 type mathJaxBlockParser struct{}

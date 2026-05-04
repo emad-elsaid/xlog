@@ -19,9 +19,12 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
-const extODT = ".odt"
+const (
+	extODT = ".odt"
+	extOrg = ".org"
+)
 
-var SUPPORTED_EXT = []string{".org", ".rst", ".rtf", extODT}
+var SUPPORTED_EXT = []string{extOrg, ".rst", ".rtf", extODT}
 var pandoc_support bool
 
 func init() {

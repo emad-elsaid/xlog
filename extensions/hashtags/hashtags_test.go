@@ -25,6 +25,47 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
+const (
+	hashtagGolang      = "#golang"
+	tagGolang          = "golang"
+	tagRust            = "rust"
+	tagGoLang          = "GoLang"
+	tagWord            = "tag"
+	hashtagRust        = "#rust"
+	hashtagConcurrent  = "#concurrent tag"
+	hashtagTestPost    = "#test post"
+	testPageName       = "test"
+	testingTag         = "testing"
+	page1Filename      = "page1.md"
+	page3Filename      = "page3.md"
+	newFilename        = "new.md"
+	mediumFilename     = "medium.md"
+	contentGolang      = "Content with #golang"
+	contentGolangUpper = "Content with #GOLANG"
+	contentRust        = "Content with #rust"
+	moreGolangContent  = "More #golang content"
+	golangOldPost      = "#golang old post"
+	changedTag         = "changed"
+	currentTag         = "current"
+	selfTag            = "self"
+	otherTag           = "other"
+	oldTag             = "old"
+	zebraTag           = "zebra"
+	sameTag            = "same"
+	tag1Name           = "tag1"
+	sourceTag          = "source"
+	uniqueTag          = "unique"
+	go1Tag             = "go1"
+	go2Tag             = "go2"
+	lowerTag           = "lower"
+	upperTag           = "upper"
+	indexTag           = "index"
+	page1Tag           = "page1"
+	page2Tag           = "page2"
+	nonexistentTag     = "nonexistent"
+	hrefGolangTag      = `href="/+/tag/golang"`
+)
+
 func TestHashTagParse(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -34,8 +75,8 @@ func TestHashTagParse(t *testing.T) {
 	}{
 		{
 			name:     "simple hashtag",
-			input:    "#golang",
-			expected: "golang",
+			input:    hashtagGolang,
+			expected: tagGolang,
 			valid:    true,
 		},
 		{

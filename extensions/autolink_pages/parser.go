@@ -70,7 +70,7 @@ func advanceIfNeeded(line []byte, start int) (consumes, newStart int, newLine []
 	return 0, start, line
 }
 
-func findMatchingPage(line []byte) (xlog.Page, int) {
+func findMatchingPage(line []byte) (page xlog.Page, matchLen int) {
 	normalizedLine := strings.ToLower(string(line))
 
 	for _, p := range autolinkPages {

@@ -140,16 +140,16 @@ func processUploadedFile(r xlog.Request) (string, error) {
 	return formatFileOutput(ext, p, mdName), nil
 }
 
-func formatFileOutput(ext, path, filename string) string {
+func formatFileOutput(ext, filePath, filename string) string {
 	switch {
 	case slices.Contains(IMAGES_EXTENSIONS, ext):
-		return fmt.Sprintf("![](/%s)", path)
+		return fmt.Sprintf("![](/%s)", filePath)
 	case slices.Contains(VIDEOS_EXTENSIONS, ext):
-		return fmt.Sprintf("<video controls src=\"/%s\"></video>", path)
+		return fmt.Sprintf("<video controls src=\"/%s\"></video>", filePath)
 	case slices.Contains(AUDIO_EXTENSIONS, ext):
-		return fmt.Sprintf("<audio controls src=\"/%s\"></audio>", path)
+		return fmt.Sprintf("<audio controls src=\"/%s\"></audio>", filePath)
 	default:
-		return fmt.Sprintf("[%s](/%s)", filename, path)
+		return fmt.Sprintf("[%s](/%s)", filename, filePath)
 	}
 }
 

@@ -11,6 +11,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	calendarLinkName = "Calendar"
+)
+
 func TestDateExtensionName(t *testing.T) {
 	ext := Date{}
 	assert.Equal(t, "date", ext.Name())
@@ -32,7 +36,7 @@ func TestCalendarCommand(t *testing.T) {
 		{
 			name:         "Calendar name",
 			method:       "Name",
-			expectedName: "Calendar",
+			expectedName: calendarLinkName,
 		},
 		{
 			name:         "Calendar href",

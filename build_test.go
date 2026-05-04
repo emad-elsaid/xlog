@@ -178,8 +178,8 @@ func TestBuildRoute_InvalidRequest(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer func() {
-		if err := os.RemoveAll(tmpDir); err != nil {
-			t.Errorf("Failed to clean up temp dir: %v", err)
+		if cleanupErr := os.RemoveAll(tmpDir); cleanupErr != nil {
+			t.Errorf("Failed to clean up temp dir: %v", cleanupErr)
 		}
 	}()
 

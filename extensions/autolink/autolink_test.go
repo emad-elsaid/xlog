@@ -10,7 +10,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
-const extName = "autolink"
+const (
+	extName                  = "autolink"
+	expectedExampleComAnchor = `<a href="https://example.com">https://example.com</a>`
+)
 
 func TestAutoLinkName(t *testing.T) {
 	al := AutoLink{}
@@ -106,7 +109,7 @@ func TestAutoLinkRendering(t *testing.T) {
 		{
 			name:     "simple HTTPS URL",
 			input:    "Visit <https://example.com> for more info",
-			expected: `<a href="https://example.com">https://example.com</a>`,
+			expected: expectedExampleComAnchor,
 		},
 		{
 			name:     "simple HTTP URL",
@@ -131,7 +134,7 @@ func TestAutoLinkRendering(t *testing.T) {
 		{
 			name:     "multiple URLs in text",
 			input:    "Visit <https://example.com> and <https://test.org>",
-			expected: `<a href="https://example.com">https://example.com</a>`,
+			expected: expectedExampleComAnchor,
 		},
 		{
 			name:     "GitHub URL",
@@ -388,7 +391,7 @@ func TestAutoLinkRenderNonEntering(t *testing.T) {
 		{
 			name:     "URL renders with complete traversal",
 			input:    "<https://example.com>",
-			wantLink: `<a href="https://example.com">https://example.com</a>`,
+			wantLink: expectedExampleComAnchor,
 		},
 		{
 			name:     "email renders with complete traversal",

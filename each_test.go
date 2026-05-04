@@ -10,6 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	eachTestPageName = "test"
+	page1Name        = "page1"
+	page2Name        = "page2"
+	page3Name        = "page3"
+	pageName         = "page"
+	existingName     = "existing"
+)
+
 func TestIsIgnoredPath(t *testing.T) {
 	assert.True(t, IsIgnoredPath(".git/config"))
 	assert.True(t, IsIgnoredPath(".versions/config"))
@@ -63,7 +72,7 @@ func TestIsNil(t *testing.T) {
 		},
 		{
 			name:     "valid page",
-			value:    &mockPage{name: "test"},
+			value:    &mockPage{name: eachTestPageName},
 			expected: false,
 		},
 	}
@@ -89,8 +98,8 @@ func TestClearPagesCache(t *testing.T) {
 
 	// Set up test pages
 	pages = []Page{
-		&mockPage{name: "page1"},
-		&mockPage{name: "page2"},
+		&mockPage{name: page1Name},
+		&mockPage{name: page2Name},
 	}
 
 	// Clear cache
@@ -165,9 +174,9 @@ func TestEachPage_WithCache(t *testing.T) {
 
 	// Pre-populate cache
 	pages = []Page{
-		&mockPage{name: "page1"},
-		&mockPage{name: "page2"},
-		&mockPage{name: "page3"},
+		&mockPage{name: page1Name},
+		&mockPage{name: page2Name},
+		&mockPage{name: page3Name},
 	}
 
 	ctx := context.Background()
@@ -178,7 +187,7 @@ func TestEachPage_WithCache(t *testing.T) {
 	})
 
 	assert.Equal(t, 3, len(names))
-	assert.Equal(t, []string{"page1", "page2", "page3"}, names)
+	assert.Equal(t, []string{page1Name, page2Name, page3Name}, names)
 }
 
 func TestEachPage_ContextCancellation(t *testing.T) {
@@ -189,7 +198,7 @@ func TestEachPage_ContextCancellation(t *testing.T) {
 	// Pre-populate with many pages
 	testPages := make([]Page, 100)
 	for i := 0; i < 100; i++ {
-		testPages[i] = &mockPage{name: "page"}
+		testPages[i] = &mockPage{name: pageName}
 	}
 	pages = testPages
 
@@ -229,9 +238,9 @@ func TestMapPage_BasicUsage(t *testing.T) {
 
 	// Pre-populate cache
 	pages = []Page{
-		&mockPage{name: "page1"},
-		&mockPage{name: "page2"},
-		&mockPage{name: "page3"},
+		&mockPage{name: page1Name},
+		&mockPage{name: page2Name},
+		&mockPage{name: page3Name},
 	}
 
 	ctx := context.Background()
@@ -243,9 +252,9 @@ func TestMapPage_BasicUsage(t *testing.T) {
 
 	assert.Equal(t, 3, len(result))
 	// Order may vary due to concurrency, so check containment
-	assert.Contains(t, result, "page1")
-	assert.Contains(t, result, "page2")
-	assert.Contains(t, result, "page3")
+	assert.Contains(t, result, page1Name)
+	assert.Contains(t, result, page2Name)
+	assert.Contains(t, result, page3Name)
 }
 
 func TestMapPage_FiltersNil(t *testing.T) {
@@ -282,7 +291,7 @@ func TestMapPage_ContextCancellation(t *testing.T) {
 	// Pre-populate with many pages
 	testPages := make([]Page, 50)
 	for i := 0; i < 50; i++ {
-		testPages[i] = &mockPage{name: "page"}
+		testPages[i] = &mockPage{name: pageName}
 	}
 	pages = testPages
 
@@ -309,7 +318,7 @@ func TestMapPage_ConcurrentExecution(t *testing.T) {
 	numPages := 20
 	testPages := make([]Page, numPages)
 	for i := 0; i < numPages; i++ {
-		testPages[i] = &mockPage{name: "page"}
+		testPages[i] = &mockPage{name: pageName}
 	}
 	pages = testPages
 
@@ -344,7 +353,7 @@ func TestPopulatePagesCache_DoubleCheck(t *testing.T) {
 	}()
 
 	// Pre-populate cache
-	pages = []Page{&mockPage{name: "existing"}}
+	pages = []Page{&mockPage{name: existingName}}
 
 	// Setup mock source (should not be called)
 	callCount := 0
@@ -363,7 +372,7 @@ func TestPopulatePagesCache_DoubleCheck(t *testing.T) {
 	// Should not have called source since cache was already populated
 	assert.Equal(t, 0, callCount, "Should not populate if cache exists (double-check lock)")
 	assert.Equal(t, 1, len(pages), "Cache should remain unchanged")
-	assert.Equal(t, "existing", pages[0].Name())
+	assert.Equal(t, existingName, pages[0].Name())
 }
 
 func TestPopulatePagesCache_MultipleSOURCES(t *testing.T) {

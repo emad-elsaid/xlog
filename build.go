@@ -84,8 +84,8 @@ func copy404Page(dest string) {
 		return
 	}
 	defer func() {
-		if err := in.Close(); err != nil {
-			slog.Error("Failed to close input 404 file", "error", err)
+		if closeErr := in.Close(); closeErr != nil {
+			slog.Error("Failed to close input 404 file", "error", closeErr)
 		}
 	}()
 	// #nosec G304 -- File path is controlled build output destination, not user input
@@ -148,7 +148,7 @@ func copyAssets(dest string) error {
 			return os.MkdirAll(destPath, build_perms)
 		}
 
-		if _, err := os.Stat(destPath); err == nil {
+		if _, statErr := os.Stat(destPath); statErr == nil {
 			slog.Warn("Asset file already exists", "path", destPath)
 			return nil
 		}

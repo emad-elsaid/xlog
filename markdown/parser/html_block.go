@@ -10,6 +10,11 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
+const (
+	htmlTagLink  = "link"
+	htmlTagTitle = "title"
+)
+
 var allowedBlockTags = map[string]bool{
 	"address":    true,
 	"article":    true,
@@ -49,7 +54,7 @@ var allowedBlockTags = map[string]bool{
 	"iframe":     true,
 	"legend":     true,
 	"li":         true,
-	"link":       true,
+	htmlTagLink:  true,
 	"main":       true,
 	"menu":       true,
 	"menuitem":   true,
@@ -70,7 +75,7 @@ var allowedBlockTags = map[string]bool{
 	"tfoot":      true,
 	"th":         true,
 	"thead":      true,
-	"title":      true,
+	htmlTagTitle: true,
 	"tr":         true,
 	"track":      true,
 	"ul":         true,

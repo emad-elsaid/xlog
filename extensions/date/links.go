@@ -15,7 +15,7 @@ func links(xlog.Page) []xlog.Command {
 type Calendar struct{}
 
 func (Calendar) Icon() string { return "fa-regular fa-calendar-days" }
-func (Calendar) Name() string { return "Calendar" }
+func (Calendar) Name() string { return calendarPageName }
 func (Calendar) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
 		"href": "/+/calendar",

@@ -8,6 +8,10 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
+const (
+	testPagePropertyName = "test-page"
+)
+
 // testPropertyPage implements the Page interface for testing properties.
 type testPropertyPage struct {
 	name    string
@@ -67,7 +71,7 @@ func TestPropertiesDefaultProps(t *testing.T) {
 
 	testTime := time.Now().Add(-2 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 
@@ -105,7 +109,7 @@ func TestPropertiesZeroModTime(t *testing.T) {
 	propsSources = []func(Page) []Property{defaultProps}
 
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    "testPagePropertyName",
 		modTime: time.Time{}, // Zero time
 	}
 
@@ -139,7 +143,7 @@ func TestPropertiesMultipleSources(t *testing.T) {
 
 	testTime := time.Now().Add(-1 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 
@@ -182,7 +186,7 @@ func TestPropertiesOverwriteDuplicateNames(t *testing.T) {
 
 	testTime := time.Now().Add(-1 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 
@@ -223,7 +227,7 @@ func TestPropertiesEmptySource(t *testing.T) {
 
 	testTime := time.Now().Add(-1 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 
@@ -242,7 +246,7 @@ func TestPropertiesEmptySource(t *testing.T) {
 func TestLastUpdatePropInterface(t *testing.T) {
 	testTime := time.Now().Add(-3 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 
@@ -277,7 +281,7 @@ func TestPropertiesReturnsMapNotSlice(t *testing.T) {
 
 	testTime := time.Now().Add(-1 * time.Hour)
 	testP := &testPropertyPage{
-		name:    "test-page",
+		name:    testPagePropertyName,
 		modTime: testTime,
 	}
 

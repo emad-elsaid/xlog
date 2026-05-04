@@ -5,6 +5,13 @@ import (
 	"testing"
 )
 
+const (
+	testPageName   = "test"
+	testIconName   = "fa-test"
+	testAttrHref   = "href"
+	testExampleURL = "https://example.com"
+)
+
 // mockCommand implements the Command interface for testing.
 type mockCommand struct {
 	icon  string
@@ -32,7 +39,7 @@ func TestCommands_Empty(t *testing.T) {
 	// Reset to empty
 	commands = []func(Page) []Command{}
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Commands(page)
 
 	if len(result) != 0 {
@@ -52,16 +59,16 @@ func TestRegisterCommand_Single(t *testing.T) {
 	RegisterCommand(func(p Page) []Command {
 		return []Command{
 			mockCommand{
-				icon: "fa-test",
+				icon: testIconName,
 				name: "Test Command",
 				attrs: map[template.HTMLAttr]any{
-					"href": "/test",
+					testAttrHref: "/test",
 				},
 			},
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Commands(page)
 
 	if len(result) != 1 {
@@ -69,8 +76,8 @@ func TestRegisterCommand_Single(t *testing.T) {
 	}
 
 	cmd := result[0]
-	if cmd.Icon() != "fa-test" {
-		t.Errorf("Expected icon 'fa-test', got '%s'", cmd.Icon())
+	if cmd.Icon() != testIconName {
+		t.Errorf("Expected icon %q, got '%s'", testIconName, cmd.Icon())
 	}
 
 	if cmd.Name() != "Test Command" {
@@ -100,7 +107,7 @@ func TestRegisterCommand_Multiple(t *testing.T) {
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Commands(page)
 
 	if len(result) != 3 {
@@ -158,7 +165,7 @@ func TestQuickCommands_Empty(t *testing.T) {
 	// Reset to empty
 	quickCommands = []func(Page) []Command{}
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := QuickCommands(page)
 
 	if len(result) != 0 {
@@ -183,7 +190,7 @@ func TestRegisterQuickCommand_Single(t *testing.T) {
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := QuickCommands(page)
 
 	if len(result) != 1 {
@@ -216,7 +223,7 @@ func TestQuickCommands_Multiple(t *testing.T) {
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := QuickCommands(page)
 
 	if len(result) != 3 {
@@ -232,7 +239,7 @@ func TestLinks_Empty(t *testing.T) {
 	// Reset to empty
 	links = []func(Page) []Command{}
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Links(page)
 
 	if len(result) != 0 {
@@ -254,14 +261,14 @@ func TestRegisterLink_Single(t *testing.T) {
 				icon: "fa-link",
 				name: "External Link",
 				attrs: map[template.HTMLAttr]any{
-					"href":   "https://example.com",
-					"target": "_blank",
+					testAttrHref: testExampleURL,
+					"target":     "_blank",
 				},
 			},
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Links(page)
 
 	if len(result) != 1 {
@@ -273,8 +280,8 @@ func TestRegisterLink_Single(t *testing.T) {
 	}
 
 	attrs := result[0].Attrs()
-	if attrs["href"] != "https://example.com" {
-		t.Errorf("Expected href 'https://example.com', got '%v'", attrs["href"])
+	if attrs[testAttrHref] != testExampleURL {
+		t.Errorf("Expected href %q, got '%v'", testExampleURL, attrs[testAttrHref])
 	}
 }
 
@@ -299,7 +306,7 @@ func TestLinks_Multiple(t *testing.T) {
 		}
 	})
 
-	page := &mockPage{name: "test", exists: true}
+	page := &mockPage{name: testPageName, exists: true}
 	result := Links(page)
 
 	if len(result) != 3 {

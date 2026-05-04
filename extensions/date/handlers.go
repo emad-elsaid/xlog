@@ -11,6 +11,8 @@ import (
 //go:embed templates
 var templates embed.FS
 
+const calendarPageName = "Calendar"
+
 func dateHandler(r xlog.Request) xlog.Output {
 	dateV := r.PathValue("date")
 	date, err := time.Parse("2-1-2006", dateV)
@@ -57,7 +59,7 @@ func calendarHandler(r xlog.Request) xlog.Output {
 	})
 
 	return xlog.Render("calendar", xlog.Locals{
-		"page":     xlog.DynamicPage{NameVal: "Calendar"},
+		"page":     xlog.DynamicPage{NameVal: calendarPageName},
 		"calendar": cal,
 	})
 }
