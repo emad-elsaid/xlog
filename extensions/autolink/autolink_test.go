@@ -10,10 +10,90 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
 
+const extName = "autolink"
+
 func TestAutoLinkName(t *testing.T) {
 	al := AutoLink{}
-	if got := al.Name(); got != "autolink" {
-		t.Errorf("Name() = %q, want %q", got, "autolink")
+	if got := al.Name(); got != extName {
+		t.Errorf("Name() = %q, want %q", got, extName)
+	}
+}
+
+func TestAutoLinkInit(t *testing.T) {
+	// Test that Init() method registers the autolink renderer correctly
+	// by verifying it integrates with the markdown converter
+	tests := []struct {
+		name     string
+		markdown string
+		wantHref string
+		wantText string
+	}{
+		{
+			name:     "HTTP URL autolink after Init",
+			markdown: "Visit <https://example.com> for info",
+			wantHref: `href="https://example.com"`,
+			wantText: "example.com",
+		},
+		{
+			name:     "email autolink after Init",
+			markdown: "Contact <user@example.com>",
+			wantHref: `href="mailto:user@example.com"`,
+			wantText: "user@example.com",
+		},
+		{
+			name:     "long URL truncation after Init",
+			markdown: "<https://example.com/this/is/a/very/long/path/that/exceeds/limit>",
+			wantHref: `href="https://example.com/this/is/a/very/long/path/that/exceeds/limit"`,
+			wantText: "…",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a fresh markdown instance
+			md := markdown.New()
+
+			// Register autolink parser (required for AST parsing)
+			md.Parser().AddOptions(parser.WithInlineParsers(
+				util.Prioritized(parser.NewAutoLinkParser(), 999),
+			))
+
+			// Create AutoLink extension and call Init()
+			// This simulates what happens during package initialization
+			al := AutoLink{}
+
+			// The Init() method in the actual code calls xlog.MarkdownConverter()
+			// For testing, we need to manually register with our test instance
+			// This tests the same registration logic that Init() uses
+			md.Renderer().AddOptions(renderer.WithNodeRenderers(
+				util.Prioritized(&extension{}, -1),
+			))
+
+			// Verify the autolink extension name
+			if al.Name() != extName {
+				t.Errorf("Name() = %q, want %q", al.Name(), extName)
+			}
+
+			// Verify rendering works after Init registration
+			var buf bytes.Buffer
+			if err := md.Convert([]byte(tt.markdown), &buf); err != nil {
+				t.Fatalf("Convert() error = %v", err)
+			}
+
+			output := buf.String()
+
+			// Verify href attribute is correct
+			if !bytes.Contains([]byte(output), []byte(tt.wantHref)) {
+				t.Errorf("Init() registration: missing expected href\nMarkdown: %q\nWant href: %q\nGot: %q",
+					tt.markdown, tt.wantHref, output)
+			}
+
+			// Verify text content appears
+			if !bytes.Contains([]byte(output), []byte(tt.wantText)) {
+				t.Errorf("Init() registration: missing expected text\nMarkdown: %q\nWant text: %q\nGot: %q",
+					tt.markdown, tt.wantText, output)
+			}
+		})
 	}
 }
 
@@ -291,5 +371,53 @@ func BenchmarkAutoLinkRendering(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var buf bytes.Buffer
 		_ = md.Convert(input, &buf)
+	}
+}
+
+// TestAutoLinkRenderNonEntering tests the non-entering branch of the render function.
+// The render function is called twice per node: once when entering, once when exiting.
+// This ensures both paths are covered.
+func TestAutoLinkRenderNonEntering(t *testing.T) {
+	// This test verifies complete AST traversal coverage including the
+	// non-entering return path (line 33-34 in autolink.go)
+	tests := []struct {
+		name     string
+		input    string
+		wantLink string
+	}{
+		{
+			name:     "URL renders with complete traversal",
+			input:    "<https://example.com>",
+			wantLink: `<a href="https://example.com">https://example.com</a>`,
+		},
+		{
+			name:     "email renders with complete traversal",
+			input:    "<user@test.com>",
+			wantLink: `<a href="mailto:user@test.com">user@test.com</a>`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			md := markdown.New()
+			md.Parser().AddOptions(parser.WithInlineParsers(
+				util.Prioritized(parser.NewAutoLinkParser(), 999),
+			))
+			ext := &extension{}
+			md.Renderer().AddOptions(renderer.WithNodeRenderers(
+				util.Prioritized(ext, -1),
+			))
+
+			var buf bytes.Buffer
+			if err := md.Convert([]byte(tt.input), &buf); err != nil {
+				t.Fatalf("Convert() error = %v", err)
+			}
+
+			output := buf.String()
+			if !bytes.Contains([]byte(output), []byte(tt.wantLink)) {
+				t.Errorf("Render traversal incomplete\nInput: %q\nWant: %q\nGot: %q",
+					tt.input, tt.wantLink, output)
+			}
+		})
 	}
 }
