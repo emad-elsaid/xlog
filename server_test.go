@@ -543,6 +543,36 @@ func TestHealthHandler(t *testing.T) {
 	}
 }
 
+func TestHealthHandler_WriteError(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "handles write error gracefully",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			w := &failingResponseWriter{}
+			req := httptest.NewRequest(http.MethodGet, "/+/health", http.NoBody)
+
+			// Should not panic despite write error
+			healthHandler(w, req)
+
+			// Verify write was attempted
+			if !w.writeCalled {
+				t.Error("Write should have been called")
+			}
+
+			// Verify headers were set before write attempt
+			if ct := w.Header().Get("Content-Type"); ct != "text/plain; charset=utf-8" {
+				t.Errorf("healthHandler() Content-Type = %q, want %q", ct, "text/plain; charset=utf-8")
+			}
+		})
+	}
+}
+
 func TestRequestLoggerHandler_LogInjectionPrevention(t *testing.T) {
 	tests := []struct {
 		name   string
