@@ -17,6 +17,7 @@ require (
 	github.com/emad-elsaid/types v0.0.5
 	github.com/gorilla/websocket v1.5.3
 	github.com/hashicorp/golang-lru/v2 v2.0.7
+	github.com/posener/complete/v2 v2.1.0
 	github.com/rjeczalik/notify v0.9.3
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/greyxor/slogor v1.6.9
@@ -44,4 +45,5 @@ require (
 require (
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/posener/script v1.2.0 // indirect
 )

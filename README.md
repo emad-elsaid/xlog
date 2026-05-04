@@ -20,6 +20,28 @@ XLog
 * [Extensions](https://xlog.emadelsaid.com/docs/extensions/)
 * [Writing Your Own Extension](https://xlog.emadelsaid.com/tutorials/Hello%20world%20extension/)
 
+# Shell Completion
+
+Xlog supports shell completion for bash, zsh, and fish. This enables tab completion for all command-line flags.
+
+**Bash:**
+```bash
+# Add to ~/.bashrc
+eval "$(xlog -completion bash)"
+```
+
+**Zsh:**
+```bash
+# Add to ~/.zshrc
+eval "$(xlog -completion zsh)"
+```
+
+**Fish:**
+```fish
+# Add to ~/.config/fish/config.fish
+xlog -completion fish | source
+```
+
 # Vendored Packages
 
 Xlog vendors some of its dependencies for more control over the changes and to allow for major refactoring needed for the project. We would like to thank the original authors for their great work.

@@ -24,6 +24,12 @@ func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
 
+	// Handle completion flag early before any logging or extension initialization
+	if Config.Completion != "" {
+		handleCompletion(Config.Completion)
+		osExit(0)
+	}
+
 	// Setup logger
 	level := slogor.SetLevel(slog.LevelDebug)
 	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
