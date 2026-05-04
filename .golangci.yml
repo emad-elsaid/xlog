@@ -56,6 +56,9 @@ linters:
       - path: markdown/
         linters:
           - all
+      - path: ^markdown/
+        linters:
+          - all  
       - path: (_benchmark|_tools)/
         linters:
           - forbidigo
