@@ -3,6 +3,7 @@ package xlog
 import (
 	"errors"
 	"html/template"
+	"sync"
 	"testing"
 	"time"
 
@@ -241,9 +242,12 @@ func TestTriggerEmptyHandlerList(t *testing.T) {
 func TestEventHandlerReceivesCorrectPage(t *testing.T) {
 	pageEvents = map[PageEvent][]PageEventHandler{}
 
+	var mu sync.Mutex
 	var receivedPage Page
 	handler := func(p Page) error {
+		mu.Lock()
 		receivedPage = p
+		mu.Unlock()
 		return nil
 	}
 
@@ -257,15 +261,19 @@ func TestEventHandlerReceivesCorrectPage(t *testing.T) {
 
 	Trigger(PageDeleted, testP)
 
-	if receivedPage == nil {
+	mu.Lock()
+	page := receivedPage
+	mu.Unlock()
+
+	if page == nil {
 		t.Fatal("Handler did not receive page")
 	}
 
-	if receivedPage.Name() != "deleted-page" {
-		t.Errorf("Expected page name 'deleted-page', got %s", receivedPage.Name())
+	if page.Name() != "deleted-page" {
+		t.Errorf("Expected page name 'deleted-page', got %s", page.Name())
 	}
 
-	if !receivedPage.ModTime().Equal(expectedTime) {
-		t.Errorf("Expected mod time %v, got %v", expectedTime, receivedPage.ModTime())
+	if !page.ModTime().Equal(expectedTime) {
+		t.Errorf("Expected mod time %v, got %v", expectedTime, page.ModTime())
 	}
 }
