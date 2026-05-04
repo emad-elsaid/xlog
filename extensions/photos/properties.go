@@ -31,7 +31,7 @@ func properties(p xlog.Page) []xlog.Property {
 	props := []xlog.Property{}
 
 	photo, ok := p.(*Photo)
-	if !ok {
+	if !ok || photo == nil {
 		return nil
 	}
 

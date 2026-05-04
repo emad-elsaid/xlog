@@ -240,3 +240,221 @@ func TestProperties_AllExifFieldsPresent(t *testing.T) {
 		t.Error("Expected 'capture time' property when photo.Time is set")
 	}
 }
+
+func TestProperties_NilAndEmptyExifHandling(t *testing.T) {
+	// Test that properties gracefully handles various EXIF states
+	tests := []struct {
+		name    string
+		page    *Photo
+		wantNil bool
+		wantLen int
+	}{
+		{
+			name:    "nil Photo pointer returns nil",
+			page:    nil,
+			wantNil: true,
+			wantLen: 0,
+		},
+		{
+			name: "Photo without EXIF returns nil",
+			page: &Photo{
+				Thumbnail: "/test/photo.jpg",
+				Exif:      nil,
+				Time:      time.Date(2024, 3, 15, 14, 30, 0, 0, time.UTC),
+			},
+			wantNil: true,
+			wantLen: 0,
+		},
+		{
+			name: "Photo with EXIF and Time returns properties",
+			page: &Photo{
+				Thumbnail: "/test/photo.jpg",
+				Exif:      &exif.Exif{},
+				Time:      time.Date(2024, 3, 15, 14, 30, 0, 0, time.UTC),
+			},
+			wantNil: false,
+			wantLen: 1, // At minimum capture time
+		},
+		{
+			name: "Photo with EXIF but zero Time returns empty slice",
+			page: &Photo{
+				Thumbnail: "/test/photo.jpg",
+				Exif:      &exif.Exif{},
+				Time:      time.Time{},
+			},
+			wantNil: false,
+			wantLen: 0,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			result := properties(tc.page)
+
+			if result == nil {
+				if !tc.wantNil {
+					t.Error("Expected non-nil properties slice")
+				}
+				return
+			}
+			if tc.wantNil {
+				t.Error("Expected nil properties slice")
+				return
+			}
+
+			if len(result) < tc.wantLen {
+				t.Errorf("properties length = %d, want at least %d", len(result), tc.wantLen)
+			}
+		})
+	}
+}
+
+func TestProperties_PropertyInterface(t *testing.T) {
+	// Test that Property struct correctly implements the interface methods
+	tests := []struct {
+		name      string
+		property  Property
+		wantIcon  string
+		wantName  string
+		wantValue interface{}
+	}{
+		{
+			name: "capture time property",
+			property: Property{
+				IconVal: iconCalendar,
+				NameVal: propCaptureTime,
+				Val:     "Friday 15 March 2024",
+			},
+			wantIcon:  iconCalendar,
+			wantName:  propCaptureTime,
+			wantValue: "Friday 15 March 2024",
+		},
+		{
+			name: "camera make property",
+			property: Property{
+				IconVal: iconCameraRetro,
+				NameVal: propCameraMake,
+				Val:     "Canon",
+			},
+			wantIcon:  iconCameraRetro,
+			wantName:  propCameraMake,
+			wantValue: "Canon",
+		},
+		{
+			name: "ISO property with string value",
+			property: Property{
+				IconVal: iconCameraRetro,
+				NameVal: propISO,
+				Val:     "400",
+			},
+			wantIcon:  iconCameraRetro,
+			wantName:  propISO,
+			wantValue: "400",
+		},
+		{
+			name: "empty property values",
+			property: Property{
+				IconVal: "",
+				NameVal: "",
+				Val:     nil,
+			},
+			wantIcon:  "",
+			wantName:  "",
+			wantValue: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.property.Icon(); got != tc.wantIcon {
+				t.Errorf("Icon() = %q, want %q", got, tc.wantIcon)
+			}
+			if got := tc.property.Name(); got != tc.wantName {
+				t.Errorf("Name() = %q, want %q", got, tc.wantName)
+			}
+			if got := tc.property.Value(); got != tc.wantValue {
+				t.Errorf("Value() = %v, want %v", got, tc.wantValue)
+			}
+		})
+	}
+}
+
+func TestProperties_EdgeCasesInTimeFormatting(t *testing.T) {
+	// Test edge cases in time formatting
+	tests := []struct {
+		name        string
+		time        time.Time
+		shouldHave  []string
+		description string
+	}{
+		{
+			name: "leap day",
+			time: time.Date(2024, time.February, 29, 12, 0, 0, 0, time.UTC),
+			shouldHave: []string{
+				time.Thursday.String(),
+				"29",
+				time.February.String(),
+				"2024",
+			},
+			description: "leap day should format correctly",
+		},
+		{
+			name: "new year's day",
+			time: time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC),
+			shouldHave: []string{
+				time.Monday.String(),
+				"1",
+				time.January.String(),
+				"2024",
+			},
+			description: "first day of year should format correctly",
+		},
+		{
+			name: "year end",
+			time: time.Date(2023, time.December, 31, 23, 59, 59, 0, time.UTC),
+			shouldHave: []string{
+				time.Sunday.String(),
+				"31",
+				time.December.String(),
+				"2023",
+			},
+			description: "last day of year should format correctly",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			photo := &Photo{
+				Thumbnail: "/test/photo.jpg",
+				Exif:      &exif.Exif{},
+				Time:      tc.time,
+			}
+
+			props := properties(photo)
+
+			// Find capture time property
+			var captureTime string
+			found := false
+			for _, prop := range props {
+				p := prop.(Property)
+				if p.Name() == captureTimeProperty {
+					captureTime = p.Value().(string)
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				t.Fatal("capture time property not found")
+			}
+
+			// Verify all expected components are present
+			for _, component := range tc.shouldHave {
+				if !contains(captureTime, component) {
+					t.Errorf("%s: capture time %q missing %q",
+						tc.description, captureTime, component)
+				}
+			}
+		})
+	}
+}
