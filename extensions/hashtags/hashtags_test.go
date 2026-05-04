@@ -1984,10 +1984,10 @@ func TestHashtagsInit(t *testing.T) {
 func TestRelatedPagesLogic(t *testing.T) {
 	// Test the internal logic of relatedPages without requiring templates
 	tests := []struct {
-		name           string
-		currentPage    *mockPage
-		otherPages     []*mockPage
-		expectRelated  int
+		name          string
+		currentPage   *mockPage
+		otherPages    []*mockPage
+		expectRelated int
 	}{
 		{
 			name:        "finds pages with shared hashtags",
@@ -2016,9 +2016,9 @@ func TestRelatedPagesLogic(t *testing.T) {
 			expectRelated: 0,
 		},
 		{
-			name:        "excludes index page immediately",
-			currentPage: &mockPage{name: xlog.Config.Index, content: []byte("#tag")},
-			otherPages:  []*mockPage{},
+			name:          "excludes index page immediately",
+			currentPage:   &mockPage{name: xlog.Config.Index, content: []byte("#tag")},
+			otherPages:    []*mockPage{},
 			expectRelated: -1, // Special: should return empty immediately
 		},
 	}
@@ -2425,11 +2425,11 @@ func TestTagPagesWithRealFiles(t *testing.T) {
 
 	// Create test files with hashtags
 	files := map[string]string{
-		"index.md":  "#golang on index (should be excluded)",
-		"page1.md":  "#golang tutorial",
-		"page2.md":  "#GOLANG advanced",
-		"page3.md":  "#rust basics",
-		"page4.md":  "#GoLang guide",
+		"index.md": "#golang on index (should be excluded)",
+		"page1.md": "#golang tutorial",
+		"page2.md": "#GOLANG advanced",
+		"page3.md": "#rust basics",
+		"page4.md": "#GoLang guide",
 	}
 
 	for name, content := range files {
