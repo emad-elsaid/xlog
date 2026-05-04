@@ -85,17 +85,17 @@ func (p *Photo) Render() template.HTML {
 //   - Paths with null bytes
 func validatePath(p string) error {
 	if p == "" {
-		return errors.New("invalid path: empty path not allowed")
+		return errors.New("invalid path: empty path not allowed - provide a relative file path")
 	}
 
 	// Block null byte injection
 	if strings.Contains(p, "\x00") {
-		return errors.New("invalid path: null bytes not allowed")
+		return errors.New("invalid path: null bytes not allowed - remove null bytes from the path")
 	}
 
 	// Block absolute paths
 	if filepath.IsAbs(p) {
-		return errors.New("invalid path: absolute paths not allowed")
+		return fmt.Errorf("invalid path: absolute paths not allowed - use relative path instead of %q", p)
 	}
 
 	// Clean the path and check for traversal
@@ -106,7 +106,7 @@ func validatePath(p string) error {
 	parts := strings.Split(cleaned, string(filepath.Separator))
 	for _, part := range parts {
 		if part == ".." {
-			return errors.New("invalid path: path traversal detected")
+			return fmt.Errorf("invalid path: path traversal detected in %q - avoid using '..' in paths", p)
 		}
 	}
 
