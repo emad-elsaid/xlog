@@ -139,10 +139,16 @@ func scripts() template.HTML {
 	return template.HTML(b.String())
 }
 
+// IsFontAwesome checks if the given string is a FontAwesome icon class.
+// It returns true if the string starts with "fa", which is the standard FontAwesome prefix.
 func IsFontAwesome(i string) bool {
 	return strings.HasPrefix(i, "fa")
 }
 
+// Banner extracts the banner image URL from a page.
+// It looks for the first image in the first paragraph of the page's AST.
+// Returns an empty string if no banner image is found or if the image destination is invalid.
+// Relative image paths are converted to absolute paths based on the page's directory.
 func Banner(p Page) string {
 	_, a := p.AST()
 	if a == nil {
@@ -177,6 +183,9 @@ func Banner(p Page) string {
 	return dest
 }
 
+// Emoji extracts the first emoji from a page's markdown content.
+// It searches the page's AST for an Emoji node and returns its Unicode representation.
+// Returns an empty string if no emoji is found.
 func Emoji(p Page) string {
 	_, tree := p.AST()
 	if e, ok := FindInAST[*emojiAst.Emoji](tree); ok && e != nil {
