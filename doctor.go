@@ -48,6 +48,7 @@ func runDiagnostics() DiagnosticResult {
 	checkBindAddress(&issues)
 	checkThemeValue(&warnings)
 	checkBrokenLinks(&warnings)
+	checkOrphanPages(&warnings)
 
 	return DiagnosticResult{
 		Issues:   issues,
@@ -169,6 +170,23 @@ func checkBrokenLinks(warnings *[]string) {
 	}
 
 	slog.Warn("Broken internal links detected", "total", totalBroken, "affected_pages", affectedPages)
+}
+
+func checkOrphanPages(warnings *[]string) {
+	stats := calculateStats(context.Background())
+
+	if stats.OrphanedPages == 0 {
+		slog.Info("✓ No orphaned pages (all pages have incoming links)")
+		return
+	}
+
+	if stats.OrphanedPages == 1 {
+		*warnings = append(*warnings, "⚠ Found 1 orphaned page with no incoming links. Consider linking to it from other pages.")
+	} else {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links. Consider linking to them from other pages.", stats.OrphanedPages))
+	}
+
+	slog.Warn("Orphaned pages detected", "count", stats.OrphanedPages)
 }
 
 func printDiagnosticSummary(issues, warnings []string) {

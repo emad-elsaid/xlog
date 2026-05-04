@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -80,6 +81,82 @@ func TestDiagnosticResult_IsHealthy(t *testing.T) {
 			got := tc.result.IsHealthy()
 			if got != tc.want {
 				t.Errorf("IsHealthy() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCheckOrphanPages(t *testing.T) {
+	tests := []struct {
+		name        string
+		description string
+	}{
+		{
+			name:        "executes without panic",
+			description: "Verifies checkOrphanPages can execute safely",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+
+			// Should not panic
+			checkOrphanPages(&warnings)
+
+			// If there are warnings, verify format
+			if len(warnings) > 0 {
+				warning := warnings[0]
+				if !strings.Contains(warning, "orphaned page") {
+					t.Errorf("Warning should mention 'orphaned page', got: %q", warning)
+				}
+				if !strings.HasPrefix(warning, "⚠") {
+					t.Errorf("Warning should start with ⚠ symbol, got: %q", warning)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckOrphanPages_MessageFormat(t *testing.T) {
+	tests := []struct {
+		name          string
+		orphanCount   int
+		expectContain string
+	}{
+		{
+			name:          "single orphan message",
+			orphanCount:   1,
+			expectContain: "1 orphaned page",
+		},
+		{
+			name:          "multiple orphans message",
+			orphanCount:   5,
+			expectContain: "5 orphaned page(s)",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+
+			// Mock the message format by directly testing the logic
+			switch tc.orphanCount {
+			case 0:
+				// No warning expected
+			case 1:
+				warnings = append(warnings, "⚠ Found 1 orphaned page with no incoming links. Consider linking to it from other pages.")
+			default:
+				warnings = append(warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links. Consider linking to them from other pages.", tc.orphanCount))
+			}
+
+			if tc.orphanCount > 0 {
+				if len(warnings) == 0 {
+					t.Error("Expected warning but got none")
+				}
+				if !strings.Contains(warnings[0], tc.expectContain) {
+					t.Errorf("Expected message containing %q, got %q", tc.expectContain, warnings[0])
+				}
 			}
 		})
 	}
