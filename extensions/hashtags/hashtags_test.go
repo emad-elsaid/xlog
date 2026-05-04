@@ -3352,6 +3352,14 @@ func (e *errorWriter) Flush() error {
 	return e.err
 }
 
+func (e *errorWriter) Available() int {
+	return 0
+}
+
+func (e *errorWriter) Buffered() int {
+	return 0
+}
+
 func TestHashtagPagesGridSorting(t *testing.T) {
 	// Test the sorting logic in hashtagPagesGrid (lines 206-212)
 	tests := []struct {
@@ -4113,4 +4121,27 @@ func TestTagsHandlerMutexSafety(t *testing.T) {
 	}
 
 	// Test passes if no race conditions detected
+}
+
+func TestRenderHashtagErrorPathDirect(t *testing.T) {
+	// Test error handling at line 328-330 by calling renderHashtag directly
+	// with a failing writer to ensure the error path is covered
+	tag := &HashTag{value: []byte("testTag")}
+
+	ew := &errorWriter{err: fmt.Errorf("write failure")}
+
+	status, err := renderHashtag(ew, []byte("#testTag"), tag, true)
+
+	if err == nil {
+		t.Error("Expected error from renderHashtag with failing writer, got nil")
+	}
+
+	if status != ast.WalkStop {
+		t.Errorf("Expected WalkStop on error, got %v", status)
+	}
+
+	// Verify the error propagates correctly
+	if err.Error() != "write failure" {
+		t.Errorf("Expected 'write failure' error, got: %v", err)
+	}
 }
