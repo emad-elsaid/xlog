@@ -552,3 +552,240 @@ func TestDoTestCases(t *testing.T) {
 		})
 	}
 }
+
+// TestDoTestCaseFile tests parsing and executing test cases from files.
+func TestDoTestCaseFile(t *testing.T) {
+	// Create a temporary directory for test files
+	tmpDir := t.TempDir()
+
+	tests := []struct {
+		name          string
+		fileContent   string
+		filterNos     []int
+		expectPanic   bool
+		panicContains string
+	}{
+		{
+			name: "valid single test case",
+			fileContent: `1
+//- - - - - - - - -//
+hello
+//- - - - - - - - -//
+HELLO
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "test case with description",
+			fileContent: `1: uppercase conversion test
+//- - - - - - - - -//
+test
+//- - - - - - - - -//
+TEST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "test case with options - EnableEscape",
+			fileContent: `1
+options: {"EnableEscape": true}
+//- - - - - - - - -//
+hello\nworld
+//- - - - - - - - -//
+HELLO
+WORLD
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "test case with options - Trim",
+			fileContent: `1
+options: {"Trim": true}
+//- - - - - - - - -//
+  hello  
+//- - - - - - - - -//
+HELLO
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "multiple test cases",
+			fileContent: `1
+//- - - - - - - - -//
+first
+//- - - - - - - - -//
+FIRST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//
+2
+//- - - - - - - - -//
+second
+//- - - - - - - - -//
+SECOND
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "filtered test cases - select case 1 only",
+			fileContent: `1
+//- - - - - - - - -//
+first
+//- - - - - - - - -//
+FIRST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//
+2
+//- - - - - - - - -//
+second
+//- - - - - - - - -//
+SECOND
+//= = = = = = = = = = = = = = = = = = = = = = = = =//
+3
+//- - - - - - - - -//
+third
+//- - - - - - - - -//
+THIRD
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   []int{1, 3},
+			expectPanic: false,
+		},
+		{
+			name: "blank lines between test cases",
+			fileContent: `1
+//- - - - - - - - -//
+test
+//- - - - - - - - -//
+TEST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//
+
+2
+//- - - - - - - - -//
+second
+//- - - - - - - - -//
+SECOND
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "multiline markdown and expected",
+			fileContent: `1
+//- - - - - - - - -//
+line1
+line2
+line3
+//- - - - - - - - -//
+LINE1
+LINE2
+LINE3
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+		{
+			name: "invalid case number - not a number",
+			fileContent: `not_a_number
+//- - - - - - - - -//
+test
+//- - - - - - - - -//
+TEST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			expectPanic:   true,
+			panicContains: "invalid case No",
+		},
+		{
+			name: "missing first separator",
+			fileContent: `1
+wrong separator
+test`,
+			expectPanic:   true,
+			panicContains: "invalid separator",
+		},
+		{
+			name: "invalid options JSON",
+			fileContent: `1
+options: {invalid json}
+//- - - - - - - - -//
+test
+//- - - - - - - - -//
+TEST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			expectPanic:   true,
+			panicContains: "invalid options",
+		},
+		{
+			name:          "premature end of file after case number",
+			fileContent:   `1`,
+			expectPanic:   true,
+			panicContains: "invalid case",
+		},
+		{
+			name: "description with multiple colons",
+			fileContent: `1: test: with: multiple: colons
+//- - - - - - - - -//
+test
+//- - - - - - - - -//
+TEST
+//= = = = = = = = = = = = = = = = = = = = = = = = =//`,
+			filterNos:   nil,
+			expectPanic: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create test file
+			testFile := tmpDir + "/" + tc.name + ".txt"
+			err := os.WriteFile(testFile, []byte(tc.fileContent), 0600)
+			if err != nil {
+				t.Fatalf("failed to create test file: %v", err)
+			}
+
+			mockT := &mockTestingT{}
+			markdown := &mockMarkdown{}
+
+			if tc.expectPanic {
+				// Test panic recovery
+				defer func() {
+					r := recover()
+					if r == nil {
+						t.Error("expected panic but didn't get one")
+						return
+					}
+					panicMsg := r.(string)
+					if tc.panicContains != "" && !bytes.Contains([]byte(panicMsg), []byte(tc.panicContains)) {
+						t.Errorf("panic message %q does not contain %q", panicMsg, tc.panicContains)
+					}
+				}()
+			}
+
+			// Execute test cases from file
+			DoTestCaseFile(markdown, testFile, mockT, tc.filterNos...)
+
+			// If we got here without panic on a valid file, that's success
+			if !tc.expectPanic {
+				// The function completed successfully
+				// (Individual test case pass/fail is not what we're testing here,
+				// we're testing the file parsing logic)
+			}
+		})
+	}
+}
+
+// TestDoTestCaseFile_FileNotFound tests error handling when file doesn't exist.
+func TestDoTestCaseFile_FileNotFound(t *testing.T) {
+	mockT := &mockTestingT{}
+	markdown := &mockMarkdown{}
+
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Error("expected panic for missing file")
+		}
+	}()
+
+	DoTestCaseFile(markdown, "/nonexistent/file.txt", mockT)
+}
