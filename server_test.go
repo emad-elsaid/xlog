@@ -506,6 +506,43 @@ func anyContains(s, substr string) bool {
 	return false
 }
 
+// TestHealthHandler tests the health check endpoint for deployment monitoring.
+func TestHealthHandler(t *testing.T) {
+	tests := []struct {
+		name           string
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name:           "health check returns OK",
+			expectedStatus: http.StatusOK,
+			expectedBody:   "OK\n",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodGet, "/+/health", http.NoBody)
+
+			healthHandler(recorder, req)
+
+			if status := recorder.Code; status != tc.expectedStatus {
+				t.Errorf("healthHandler() status = %d, want %d", status, tc.expectedStatus)
+			}
+
+			if body := recorder.Body.String(); body != tc.expectedBody {
+				t.Errorf("healthHandler() body = %q, want %q", body, tc.expectedBody)
+			}
+
+			// Verify Content-Type header
+			if ct := recorder.Header().Get("Content-Type"); ct != "text/plain; charset=utf-8" {
+				t.Errorf("healthHandler() Content-Type = %q, want %q", ct, "text/plain; charset=utf-8")
+			}
+		})
+	}
+}
+
 func TestRequestLoggerHandler_LogInjectionPrevention(t *testing.T) {
 	tests := []struct {
 		name   string

@@ -68,6 +68,9 @@ func Start(ctx context.Context) {
 
 	initExtensions()
 
+	// Register health check endpoint for load balancers and monitoring
+	router.HandleFunc("GET /+/health", healthHandler)
+
 	Get("/{$}", rootHandler)
 	Get("/{page...}", getPageHandler)
 

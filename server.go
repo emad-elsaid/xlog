@@ -154,6 +154,16 @@ func Accepted() Output {
 	}
 }
 
+// healthHandler is an HTTP handler that returns 200 OK for health checks.
+// This endpoint is useful for load balancers, Kubernetes probes, and monitoring services.
+func healthHandler(w Response, r Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	if _, err := w.Write([]byte("OK\n")); err != nil {
+		slog.Error("failed to write health check response", "error", err)
+	}
+}
+
 // PlainText returns an output function that writes text to response writer.
 func PlainText(text string) Output {
 	return func(w Response, r Request) {
