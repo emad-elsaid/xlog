@@ -267,6 +267,27 @@ func TestPageDelete(t *testing.T) {
 	if !p2.Delete() {
 		t.Error("Delete of non-existent page should return true")
 	}
+
+	// Test deletion failure when file cannot be removed (permission denied)
+	p3 := &page{name: "readonly"}
+	p3.Write(Markdown("protected content"))
+
+	// Make the parent directory read-only to prevent deletion
+	// #nosec G302 - intentionally using restricted permissions to test error handling
+	if err := os.Chmod(tempDir, 0500); err != nil {
+		t.Fatalf("Failed to chmod directory: %v", err)
+	}
+
+	// Attempt to delete should fail
+	if p3.Delete() {
+		t.Error("Delete should have failed for read-only directory")
+	}
+
+	// Restore permissions for cleanup
+	// #nosec G302 - restoring normal permissions after test
+	if err := os.Chmod(tempDir, 0700); err != nil {
+		t.Fatalf("Failed to restore directory permissions: %v", err)
+	}
 }
 
 func TestPageModTime(t *testing.T) {

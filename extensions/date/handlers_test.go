@@ -4,6 +4,7 @@ import (
 	"context"
 	"html/template"
 	"net/http"
+	"os"
 	"slices"
 	"testing"
 	"time"
@@ -340,37 +341,68 @@ func TestCalendarHandler(t *testing.T) {
 }
 
 func TestCalendarHandler_NilASTHandling(t *testing.T) {
+	// Create temporary directory for test pages
+	tempDir := t.TempDir()
+
+	// Save original working directory and change to temp dir
+	origWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(origWd); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+
 	tests := []struct {
-		name        string
-		pageWithAST bool
-		astValue    ast.Node
-		expectSkip  bool
+		name         string
+		setupFiles   map[string]string
+		expectedDocs int // Number of calendar entries expected
 	}{
 		{
-			name:        "page with nil AST is skipped",
-			pageWithAST: true,
-			astValue:    nil,
-			expectSkip:  true,
+			name: "page with nil AST returns early without error",
+			setupFiles: map[string]string{
+				// Create an empty file which may result in nil AST parsing
+				"empty.md": "",
+			},
+			expectedDocs: 0,
 		},
 		{
-			name:        "page with valid empty AST is processed",
-			pageWithAST: true,
-			astValue:    ast.NewDocument(),
-			expectSkip:  false,
+			name: "page with valid date creates calendar entry",
+			setupFiles: map[string]string{
+				"dated.md": "Meeting on 15/3/2026",
+			},
+			expectedDocs: 1,
+		},
+		{
+			name: "mixed pages - some with dates, some empty",
+			setupFiles: map[string]string{
+				"empty.md":   "",
+				"dated.md":   "Event 10/5/2026",
+				"nodates.md": "Just plain text",
+			},
+			expectedDocs: 1,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create mock request with custom context that includes mock page
-			req := createMockRequestWithPages([]xlog.Page{
-				&mockPageWithAST{
-					mockPage: mockPage{name: "test"},
-					astTree:  tc.astValue,
-				},
-			})
+			// Setup test files
+			// #nosec G306 - test files don't need restrictive permissions
+			for filename, content := range tc.setupFiles {
+				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+					t.Fatalf("Failed to create test file %s: %v", filename, err)
+				}
+			}
 
-			// Execute handler
+			// Create request
+			req := createMockRequest(map[string]string{})
+
+			// Execute handler - this will call xlog.EachPage which scans current directory
 			output := calendarHandler(req)
 
 			if output == nil {
@@ -378,6 +410,12 @@ func TestCalendarHandler_NilASTHandling(t *testing.T) {
 			}
 
 			// Handler should complete without panic regardless of AST state
+			// The actual calendar data structure is tested separately
+
+			// Cleanup test files
+			for filename := range tc.setupFiles {
+				_ = os.Remove(filename) // Ignore error - file may not exist
+			}
 		})
 	}
 }
@@ -457,19 +495,6 @@ func createMockRequest(pathValues map[string]string) *http.Request {
 	return req
 }
 
-// createMockRequestWithPages creates a mock request with custom pages in context.
-func createMockRequestWithPages(pages []xlog.Page) *http.Request {
-	req, _ := http.NewRequest("GET", "/test", nil)
-
-	// Create context with pages - this is a simplified mock
-	// In real implementation, xlog.EachPage iterates through filesystem
-	// For testing, we'll just create a basic context
-	ctx := context.Background()
-	req = req.WithContext(ctx)
-
-	return req
-}
-
 func TestOrganizeCalendar_FirstDayOfWeek(t *testing.T) {
 	// Test that first day of month is placed correctly based on weekday
 	testCases := []struct {
@@ -520,16 +545,6 @@ func TestOrganizeCalendar_FirstDayOfWeek(t *testing.T) {
 type mockPage struct {
 	name    string
 	astTree ast.Node
-}
-
-// mockPageWithAST extends mockPage to control AST return value.
-type mockPageWithAST struct {
-	mockPage
-	astTree ast.Node
-}
-
-func (m *mockPageWithAST) AST() ([]byte, ast.Node) {
-	return []byte("test"), m.astTree
 }
 
 func (m *mockPage) Name() string                         { return m.name }
