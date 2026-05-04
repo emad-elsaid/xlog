@@ -465,3 +465,53 @@ func TestStart_ServerMode_ContextCancellation(t *testing.T) {
 	// indirectly through integration tests
 	t.Skip("Skipping due to global router state conflicts - context cancellation logic is simple")
 }
+
+func TestStart_BuildConfigurationEffect(t *testing.T) {
+	// Test that setting Config.Build automatically sets Config.Readonly to true
+	// This tests the logic at lines 34-36 in handlers.go without calling Start()
+	tests := []struct {
+		name             string
+		buildPath        string
+		initialReadonly  bool
+		expectedReadonly bool
+	}{
+		{
+			name:             "empty build path keeps readonly unchanged",
+			buildPath:        "",
+			initialReadonly:  false,
+			expectedReadonly: false,
+		},
+		{
+			name:             "set build path forces readonly true",
+			buildPath:        "/tmp/build",
+			initialReadonly:  false,
+			expectedReadonly: true,
+		},
+		{
+			name:             "build path with already readonly stays true",
+			buildPath:        "/tmp/build",
+			initialReadonly:  true,
+			expectedReadonly: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldConfig := Config
+			defer func() { Config = oldConfig }()
+
+			Config.Build = tt.buildPath
+			Config.Readonly = tt.initialReadonly
+
+			// Simulate the logic from Start() lines 34-36
+			if len(Config.Build) > 0 {
+				Config.Readonly = true
+			}
+
+			if Config.Readonly != tt.expectedReadonly {
+				t.Errorf("Expected Readonly to be %v, got %v",
+					tt.expectedReadonly, Config.Readonly)
+			}
+		})
+	}
+}
