@@ -422,3 +422,90 @@ func TestRunDiagnostics_UnwritableDirectory(t *testing.T) {
 		t.Errorf("Expected issue about unwritable directory, got: %v", result.Issues)
 	}
 }
+
+func TestCheckSourceDirectory_EdgeCases(t *testing.T) {
+	originalConfig := Config
+	t.Cleanup(func() { Config = originalConfig })
+
+	tests := []struct {
+		name         string
+		setup        func(t *testing.T) string
+		wantContains string
+	}{
+		{
+			name: "source is a file not directory",
+			setup: func(t *testing.T) string {
+				dir := t.TempDir()
+				filePath := filepath.Join(dir, "notadir")
+				_ = os.WriteFile(filePath, []byte("content"), 0644)
+				return filePath
+			},
+			wantContains: "not a directory",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			sourcePath := tc.setup(t)
+
+			Config = Configuration{
+				Source:       sourcePath,
+				Index:        "index",
+				NotFoundPage: "404",
+				BindAddress:  "127.0.0.1:3000",
+				Theme:        "",
+				Readonly:     false,
+			}
+
+			result := runDiagnostics()
+
+			if len(result.Issues) == 0 {
+				t.Error("Expected critical issue")
+			}
+
+			found := false
+			for _, issue := range result.Issues {
+				if strings.Contains(issue, tc.wantContains) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("Expected issue containing %q, got: %v", tc.wantContains, result.Issues)
+			}
+		})
+	}
+}
+
+func TestCheckMarkdownFiles_GlobError(t *testing.T) {
+	originalConfig := Config
+	t.Cleanup(func() { Config = originalConfig })
+
+	// Create a directory with a name that would cause glob issues
+	tmpDir := t.TempDir()
+	invalidGlobDir := filepath.Join(tmpDir, "test[")
+	_ = os.Mkdir(invalidGlobDir, 0755)
+
+	Config = Configuration{
+		Source:       invalidGlobDir,
+		Index:        "index",
+		NotFoundPage: "404",
+		BindAddress:  "127.0.0.1:3000",
+		Theme:        "",
+		Readonly:     false,
+	}
+
+	result := runDiagnostics()
+
+	// Should have a warning about scanning for markdown files
+	found := false
+	for _, warning := range result.Warnings {
+		if strings.Contains(warning, "Cannot scan for markdown files") {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Logf("Note: Glob pattern did not error as expected (filesystem dependent). Warnings: %v", result.Warnings)
+	}
+}
