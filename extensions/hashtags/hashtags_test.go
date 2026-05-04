@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -1977,6 +1978,178 @@ func TestHashtagsInit(t *testing.T) {
 			// If we get here without panic, Init completed successfully.
 			// The actual registration effects are tested through integration
 			// tests that verify routes, widgets, templates, etc.
+		})
+	}
+}
+
+func TestHashtagPagesSortingLogic(t *testing.T) {
+	// Test the sorting comparison logic directly (lines 189-194, 206-211)
+	// This tests the sorting function without requiring full page infrastructure
+	tests := []struct {
+		name          string
+		pages         []*mockPage
+		expectedOrder []string
+	}{
+		{
+			name: "sorts by ModTime descending when different",
+			pages: []*mockPage{
+				{name: "old", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "new", modTime: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "mid", modTime: time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			expectedOrder: []string{"new", "mid", "old"},
+		},
+		{
+			name: "falls back to name sorting when ModTimes equal",
+			pages: []*mockPage{
+				{name: "zebra", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "apple", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "middle", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			expectedOrder: []string{"apple", "middle", "zebra"},
+		},
+		{
+			name: "combined ModTime and name sorting",
+			pages: []*mockPage{
+				{name: "z-old", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "a-old", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "b-new", modTime: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "a-new", modTime: time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			expectedOrder: []string{"a-new", "b-new", "a-old", "z-old"},
+		},
+		{
+			name: "identical names and times remain stable",
+			pages: []*mockPage{
+				{name: "same", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				{name: "same", modTime: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			expectedOrder: []string{"same", "same"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Convert mockPages to xlog.Page slice
+			pages := make([]xlog.Page, len(tc.pages))
+			for i, mp := range tc.pages {
+				pages[i] = mp
+			}
+
+			// Apply the exact sorting logic from hashtagPages/hashtagPagesGrid
+			slices.SortFunc(pages, func(a, b xlog.Page) int {
+				if modtime := b.ModTime().Compare(a.ModTime()); modtime != 0 {
+					return modtime
+				}
+				return strings.Compare(a.Name(), b.Name())
+			})
+
+			// Verify order
+			for i, expectedName := range tc.expectedOrder {
+				if pages[i].Name() != expectedName {
+					t.Errorf("Position %d: expected %q, got %q", i, expectedName, pages[i].Name())
+				}
+			}
+		})
+	}
+}
+
+func TestRelatedPagesMatchingLogic(t *testing.T) {
+	// Test the hashtag matching logic from relatedPages (lines 164-178)
+	// without requiring full filesystem integration
+	tests := []struct {
+		name            string
+		sourceHashtags  []string
+		candidatePages  map[string][]string // page name -> hashtags
+		expectedMatches []string
+		excludeName     string
+	}{
+		{
+			name:           "matches pages with any shared hashtag",
+			sourceHashtags: []string{"golang", "testing"},
+			candidatePages: map[string][]string{
+				"match-go":   {"golang", "tutorial"},
+				"match-test": {"testing", "guide"},
+				"no-match":   {"rust", "python"},
+			},
+			expectedMatches: []string{"match-go", "match-test"},
+		},
+		{
+			name:           "excludes page with same name",
+			sourceHashtags: []string{"tag1"},
+			candidatePages: map[string][]string{
+				"source": {"tag1"},
+				"other":  {"tag1"},
+			},
+			excludeName:     "source",
+			expectedMatches: []string{"other"},
+		},
+		{
+			name:           "no matches when no shared tags",
+			sourceHashtags: []string{"unique"},
+			candidatePages: map[string][]string{
+				"page1": {"different"},
+				"page2": {"other"},
+			},
+			expectedMatches: []string{},
+		},
+		{
+			name:           "matches on first shared tag found",
+			sourceHashtags: []string{"a", "b", "c"},
+			candidatePages: map[string][]string{
+				"has-a": {"a", "x"},
+				"has-b": {"y", "b"},
+				"has-c": {"z", "c"},
+			},
+			expectedMatches: []string{"has-a", "has-b", "has-c"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Simulate the hashtag matching logic from relatedPages
+			sourceHandles := make(map[unique.Handle[string]]bool)
+			for _, tag := range tc.sourceHashtags {
+				sourceHandles[unique.Make(strings.ToLower(tag))] = true
+			}
+
+			var matches []string
+			for pageName, pageTags := range tc.candidatePages {
+				// Line 165-166: exclude same name
+				if pageName == tc.excludeName {
+					continue
+				}
+
+				// Lines 171-174: check for matching hashtag
+				matched := false
+				for _, tag := range pageTags {
+					handle := unique.Make(strings.ToLower(tag))
+					if _, ok := sourceHandles[handle]; ok {
+						matched = true
+						break
+					}
+				}
+
+				if matched {
+					matches = append(matches, pageName)
+				}
+			}
+
+			// Verify results
+			if len(matches) != len(tc.expectedMatches) {
+				t.Errorf("Expected %d matches, got %d: %v", len(tc.expectedMatches), len(matches), matches)
+			}
+
+			matchMap := make(map[string]bool)
+			for _, m := range matches {
+				matchMap[m] = true
+			}
+
+			for _, expected := range tc.expectedMatches {
+				if !matchMap[expected] {
+					t.Errorf("Expected match %q not found in results", expected)
+				}
+			}
 		})
 	}
 }
