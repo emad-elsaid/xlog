@@ -3,6 +3,7 @@ package xlog
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -507,5 +508,111 @@ func TestCheckMarkdownFiles_GlobError(t *testing.T) {
 	}
 	if !found {
 		t.Logf("Note: Glob pattern did not error as expected (filesystem dependent). Warnings: %v", result.Warnings)
+	}
+}
+
+func TestPrintDiagnosticSummary_WithIssues(t *testing.T) {
+	if os.Getenv("TEST_EXIT") == "1" {
+		issues := []string{"Source directory missing", "Cannot bind to address"}
+		warnings := []string{"No 404 page"}
+		printDiagnosticSummary(issues, warnings)
+		return
+	}
+
+	// Run test in subprocess to capture os.Exit
+	cmd := exec.Command(os.Args[0], "-test.run=TestPrintDiagnosticSummary_WithIssues")
+	cmd.Env = append(os.Environ(), "TEST_EXIT=1")
+	err := cmd.Run()
+
+	// Should exit with code 1 (has critical issues)
+	exitErr, ok := err.(*exec.ExitError)
+	if !ok {
+		t.Fatalf("Expected exit error, got: %v", err)
+	}
+	if exitErr.ExitCode() != 1 {
+		t.Errorf("Expected exit code 1, got %d", exitErr.ExitCode())
+	}
+}
+
+func TestPrintDiagnosticSummary_WithWarningsOnly(t *testing.T) {
+	if os.Getenv("TEST_EXIT") == "1" {
+		issues := []string{}
+		warnings := []string{"No index page", "Theme not set"}
+		printDiagnosticSummary(issues, warnings)
+		return
+	}
+
+	// Run test in subprocess to capture os.Exit
+	cmd := exec.Command(os.Args[0], "-test.run=TestPrintDiagnosticSummary_WithWarningsOnly")
+	cmd.Env = append(os.Environ(), "TEST_EXIT=1")
+	err := cmd.Run()
+
+	// Should exit with code 0 (warnings only)
+	if err != nil {
+		t.Errorf("Expected clean exit, got: %v", err)
+	}
+}
+
+func TestPrintDiagnosticSummary_AllGood(t *testing.T) {
+	if os.Getenv("TEST_EXIT") == "1" {
+		issues := []string{}
+		warnings := []string{}
+		printDiagnosticSummary(issues, warnings)
+		return
+	}
+
+	// Run test in subprocess to capture os.Exit
+	cmd := exec.Command(os.Args[0], "-test.run=TestPrintDiagnosticSummary_AllGood")
+	cmd.Env = append(os.Environ(), "TEST_EXIT=1")
+	err := cmd.Run()
+
+	// Should exit with code 0 (all good)
+	if err != nil {
+		t.Errorf("Expected clean exit, got: %v", err)
+	}
+}
+
+func TestDoctor_Integration(t *testing.T) {
+	if os.Getenv("TEST_EXIT") == "1" {
+		// Set up a valid temporary environment
+		tmpDir := t.TempDir()
+		indexPath := filepath.Join(tmpDir, "index.md")
+		_ = os.WriteFile(indexPath, []byte("# Index"), 0644)
+		notFoundPath := filepath.Join(tmpDir, "404.md")
+		_ = os.WriteFile(notFoundPath, []byte("# Not Found"), 0644)
+
+		originalConfig := Config
+		Config = Configuration{
+			Source:       tmpDir,
+			Index:        "index",
+			NotFoundPage: "404",
+			BindAddress:  "127.0.0.1:3000",
+			Theme:        "",
+			Readonly:     false,
+		}
+		defer func() { Config = originalConfig }()
+
+		Doctor()
+		return
+	}
+
+	// Run test in subprocess to capture os.Exit
+	cmd := exec.Command(os.Args[0], "-test.run=TestDoctor_Integration")
+	cmd.Env = append(os.Environ(), "TEST_EXIT=1")
+	var outBuf bytes.Buffer
+	cmd.Stdout = &outBuf
+	cmd.Stderr = &outBuf
+
+	err := cmd.Run()
+
+	// Should exit cleanly with valid config
+	if err != nil {
+		t.Errorf("Expected clean exit, got: %v\nOutput: %s", err, outBuf.String())
+	}
+
+	// Verify diagnostic output was produced
+	output := outBuf.String()
+	if !strings.Contains(output, "Running xlog diagnostics") {
+		t.Errorf("Expected diagnostic log message in output, got: %s", output)
 	}
 }
