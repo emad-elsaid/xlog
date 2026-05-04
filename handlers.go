@@ -36,7 +36,11 @@ func listPages() {
 // building the static pages and exit, or start the HTTP server.
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
-	flag.Parse()
+
+	// Only parse flags if not already parsed (avoids conflict with testing framework)
+	if !flag.Parsed() {
+		flag.Parse()
+	}
 
 	// Handle version flag first - most lightweight operation
 	if Config.ShowVersion {
