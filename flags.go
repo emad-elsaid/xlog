@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+// Version is the current version of xlog.
+// This is set at build time via: go build -ldflags "-X github.com/emad-elsaid/xlog.Version=vX.Y.Z".
+var Version = "dev"
+
 type Configuration struct {
 	Source             string // path to markdown files directory
 	Build              string // path to write built files
@@ -20,6 +24,7 @@ type Configuration struct {
 	Readonly           bool   // is xlog in readonly mode
 	ServeInsecure      bool   // should the server use https for cookie
 	RunDoctor          bool   // run configuration diagnostics
+	ShowVersion        bool   // display version information and exit
 }
 
 var Config Configuration
@@ -43,4 +48,5 @@ func init() {
 	flag.StringVar(&Config.Theme, "theme", "", "bulma theme to use. (light, dark). empty value means system preference is used")
 	flag.StringVar(&Config.Completion, "completion", "", "generate shell completion script (bash, zsh, fish)")
 	flag.BoolVar(&Config.RunDoctor, "doctor", false, "Run diagnostics to check xlog configuration and environment")
+	flag.BoolVar(&Config.ShowVersion, "version", false, "Print version information and exit")
 }

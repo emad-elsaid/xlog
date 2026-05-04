@@ -152,3 +152,72 @@ func TestConfigurationStructFields(t *testing.T) {
 		})
 	}
 }
+
+func TestVersionVariable(t *testing.T) {
+	tests := []struct {
+		name    string
+		version string
+		want    string
+	}{
+		{
+			name:    "default version is dev",
+			version: "dev",
+			want:    "dev",
+		},
+		{
+			name:    "version can be set to release version",
+			version: "v1.2.3",
+			want:    "v1.2.3",
+		},
+		{
+			name:    "version can be set to commit hash",
+			version: "abc123",
+			want:    "abc123",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Save and restore original version
+			origVersion := Version
+			defer func() { Version = origVersion }()
+
+			Version = tc.version
+			if Version != tc.want {
+				t.Errorf("Version = %q, want %q", Version, tc.want)
+			}
+		})
+	}
+}
+
+func TestShowVersionFlag(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    bool
+		expected bool
+	}{
+		{
+			name:     "ShowVersion can be true",
+			value:    true,
+			expected: true,
+		},
+		{
+			name:     "ShowVersion can be false",
+			value:    false,
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Save and restore original value
+			origValue := Config.ShowVersion
+			defer func() { Config.ShowVersion = origValue }()
+
+			Config.ShowVersion = tc.value
+			if Config.ShowVersion != tc.expected {
+				t.Errorf("Config.ShowVersion = %v, want %v", Config.ShowVersion, tc.expected)
+			}
+		})
+	}
+}

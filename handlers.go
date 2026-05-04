@@ -18,11 +18,22 @@ const keyPage = "page"
 // osExit is a variable that allows testing of os.Exit calls.
 var osExit = os.Exit
 
+// printVersion outputs the version information and runtime details.
+func printVersion() {
+	slog.Info("xlog version", "version", Version, "go", runtime.Version(), "os", runtime.GOOS, "arch", runtime.GOARCH)
+}
+
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server.
 func Start(ctx context.Context) {
 	runtime.GOMAXPROCS(runtime.NumCPU() * 2)
 	flag.Parse()
+
+	// Handle version flag first - most lightweight operation
+	if Config.ShowVersion {
+		printVersion()
+		osExit(0)
+	}
 
 	// Handle completion flag early before any logging or extension initialization
 	if Config.Completion != "" {

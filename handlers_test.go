@@ -669,3 +669,41 @@ func BenchmarkGetPageHandler_CachedPage(b *testing.B) {
 		handler.ServeHTTP(w, req)
 	}
 }
+
+func TestPrintVersion(t *testing.T) {
+	// Save and restore original Version
+	origVersion := Version
+	defer func() { Version = origVersion }()
+
+	tests := []struct {
+		name    string
+		version string
+	}{
+		{
+			name:    "dev version",
+			version: "dev",
+		},
+		{
+			name:    "semantic version",
+			version: "v1.2.3",
+		},
+		{
+			name:    "commit hash",
+			version: "abc123def",
+		},
+		{
+			name:    "empty version",
+			version: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			Version = tc.version
+
+			// printVersion calls slog.Info which writes to stderr
+			// We just verify it doesn't panic
+			printVersion()
+		})
+	}
+}
