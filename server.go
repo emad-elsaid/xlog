@@ -191,53 +191,53 @@ func JsonResponse(a any) Output {
 	}
 }
 
+// registerRoute is a helper function that registers an HTTP route with the given method.
+// It logs the registration and adds the handler to the router.
+func registerRoute(method, path string, handler HandlerFunc) {
+	slog.Info(method, "path", path, "func", funcStringer{handler})
+	router.HandleFunc(method+" "+path, handlerFuncToHttpHandler(handler))
+}
+
 // Get defines a new route that gets executed when the request matches path and
 // method is http Get.
 func Get(path string, handler HandlerFunc) {
-	slog.Info("GET", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("GET "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("GET", path, handler)
 }
 
 // Post defines a new route that gets executed when the request matches path and
 // method is http Post.
 func Post(path string, handler HandlerFunc) {
-	slog.Info("POST", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("POST "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("POST", path, handler)
 }
 
 // Delete defines a new route that gets executed when the request matches path and
 // method is http Delete.
 func Delete(path string, handler HandlerFunc) {
-	slog.Info("DELETE", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("DELETE "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("DELETE", path, handler)
 }
 
 // Put defines a new route that gets executed when the request matches path and
 // method is http Put.
 func Put(path string, handler HandlerFunc) {
-	slog.Info("PUT", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("PUT "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("PUT", path, handler)
 }
 
 // Patch defines a new route that gets executed when the request matches path and
 // method is http Patch.
 func Patch(path string, handler HandlerFunc) {
-	slog.Info("PATCH", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("PATCH "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("PATCH", path, handler)
 }
 
 // Head defines a new route that gets executed when the request matches path and
 // method is http Head.
 func Head(path string, handler HandlerFunc) {
-	slog.Info("HEAD", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("HEAD "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("HEAD", path, handler)
 }
 
 // Options defines a new route that gets executed when the request matches path and
 // method is http Options.
 func Options(path string, handler HandlerFunc) {
-	slog.Info("OPTIONS", "path", path, "func", funcStringer{handler})
-	router.HandleFunc("OPTIONS "+path, handlerFuncToHttpHandler(handler))
+	registerRoute("OPTIONS", path, handler)
 }
 
 // Render returns an output function that renders partial with data and writes it as response.
