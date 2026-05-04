@@ -251,3 +251,234 @@ Final paragraph.`
 		t.Errorf("Expected 2 links, got %d", len(links))
 	}
 }
+
+func BenchmarkFindInAST_SmallDocument(b *testing.B) {
+	content := `# Heading
+
+Simple paragraph with [a link](https://example.com).`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = FindInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindInAST_MediumDocument(b *testing.B) {
+	content := `# Main Heading
+
+## Section 1
+
+Paragraph with some **bold** and *italic* text.
+
+[Link 1](https://example.com)
+
+## Section 2
+
+Another paragraph with [link 2](https://example.org).
+
+- List item 1
+- List item 2
+- List item 3
+
+Final paragraph.`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = FindInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindInAST_LargeDocument(b *testing.B) {
+	// Generate large document with many elements
+	content := `# Main Title
+
+## Introduction
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Here's [link 1](https://example.com).
+
+### Background
+
+More text with [link 2](https://example.org) and some **bold content**.
+
+## Methods
+
+1. First method
+2. Second method
+3. Third method
+
+Paragraph explaining the methods with [link 3](https://example.net).
+
+### Detailed Approach
+
+- Point one with *emphasis*
+- Point two with **strong emphasis**
+- Point three with [link 4](https://example.co.uk)
+
+Code example here.
+
+## Results
+
+Multiple paragraphs here describing results. [Link 5](https://example.io).
+
+Another paragraph with more details and [link 6](https://example.dev).
+
+## Conclusion
+
+Final thoughts with [link 7](https://example.com/conclusion).`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = FindInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindAllInAST_SmallDocument(b *testing.B) {
+	content := `# Heading
+
+Paragraph with [link 1](https://example.com) and [link 2](https://example.org).`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = FindAllInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindAllInAST_MediumDocument(b *testing.B) {
+	content := `# Main Heading
+
+## Section 1
+
+Paragraph with [link 1](https://example.com) and [link 2](https://example.org).
+
+## Section 2
+
+Another paragraph with [link 3](https://example.net) and [link 4](https://example.io).
+
+- List with [link 5](https://example.dev)
+- Another item with [link 6](https://example.co.uk)
+
+Final paragraph with [link 7](https://example.com/final).`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = FindAllInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindAllInAST_LargeDocument(b *testing.B) {
+	// Generate document with many links
+	content := `# Main Title
+
+## Introduction
+
+Lorem ipsum [link 1](https://example.com) dolor sit amet.
+
+### Background
+
+More text with [link 2](https://example.org) and [link 3](https://example.net).
+
+## Methods
+
+1. First [link 4](https://example.io)
+2. Second [link 5](https://example.dev)
+3. Third [link 6](https://example.co.uk)
+
+Paragraph with [link 7](https://example.com/methods).
+
+### Detailed Approach
+
+- Point [link 8](https://example.com/p1)
+- Point [link 9](https://example.com/p2)
+- Point [link 10](https://example.com/p3)
+
+## Results
+
+Text with [link 11](https://example.com/r1).
+More [link 12](https://example.com/r2).
+And [link 13](https://example.com/r3).
+
+## Discussion
+
+Analysis with [link 14](https://example.com/d1).
+Further [link 15](https://example.com/d2).
+
+## Conclusion
+
+Final [link 16](https://example.com/conclusion).`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = FindAllInAST[*ast.Link](doc)
+	}
+}
+
+func BenchmarkFindAllInAST_MultipleTypes(b *testing.B) {
+	content := `# Main Title
+
+## Section 1
+
+Paragraph with [link](https://example.com) and **bold** text.
+
+### Subsection
+
+More text with *italic* here.
+
+## Section 2
+
+- List item 1
+- List item 2
+- List item 3
+
+Final paragraph.`
+
+	md := MarkdownConverter()
+	doc := md.Parser().Parse(text.NewReader([]byte(content)))
+
+	b.Run("FindHeadings", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = FindAllInAST[*ast.Heading](doc)
+		}
+	})
+
+	b.Run("FindParagraphs", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = FindAllInAST[*ast.Paragraph](doc)
+		}
+	})
+
+	b.Run("FindLinks", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = FindAllInAST[*ast.Link](doc)
+		}
+	})
+
+	b.Run("FindEmphasis", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = FindAllInAST[*ast.Emphasis](doc)
+		}
+	})
+
+	b.Run("FindLists", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = FindAllInAST[*ast.List](doc)
+		}
+	})
+}
