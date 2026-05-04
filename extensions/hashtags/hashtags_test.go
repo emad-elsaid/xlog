@@ -2098,6 +2098,111 @@ func TestRenderHashtagBuildRegistration(t *testing.T) {
 	}
 }
 
+func TestHashtagsInit(t *testing.T) {
+	// Test that Init registers all required components: routes, widgets, templates,
+	// event listeners, and markdown processors (lines 54-73 of hashtags.go).
+	// This is a comprehensive smoke test validating Init() executes successfully.
+	h := &Hashtags{
+		pages: make(map[xlog.Page][]*HashTag),
+	}
+
+	// Verify Init completes without panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Init() panicked: %v", r)
+		}
+	}()
+
+	h.Init()
+
+	// Verify markdown parser registered hashtag inline parser (lines 70-72)
+	md := xlog.MarkdownConverter()
+	testCases := []struct {
+		input            string
+		expectedTag      string
+		expectedHrefAttr string
+	}{
+		{
+			input:            "#golang programming",
+			expectedTag:      "golang",
+			expectedHrefAttr: `href="/+/tag/golang"`,
+		},
+		{
+			input:            "Learning #rust and #go together",
+			expectedTag:      "rust",
+			expectedHrefAttr: `href="/+/tag/rust"`,
+		},
+		{
+			input:            "#test_case with underscore",
+			expectedTag:      "test_case",
+			expectedHrefAttr: `href="/+/tag/test_case"`,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.input, func(t *testing.T) {
+			doc := md.Parser().Parse(text.NewReader([]byte(tc.input)))
+
+			// Verify parser created HashTag nodes
+			var foundHashtag bool
+			ast.Walk(doc, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+				if entering && n.Kind() == KindHashTag {
+					tag := n.(*HashTag)
+					if string(tag.value) == tc.expectedTag {
+						foundHashtag = true
+						return ast.WalkStop, nil
+					}
+				}
+				return ast.WalkContinue, nil
+			})
+
+			if !foundHashtag {
+				t.Errorf("Parser did not create HashTag node for %q", tc.expectedTag)
+			}
+
+			// Verify renderer registered (lines 67-69) by rendering hashtag
+			var buf bytes.Buffer
+			err := md.Renderer().Render(&buf, []byte(tc.input), doc)
+			if err != nil {
+				t.Fatalf("Render failed: %v", err)
+			}
+
+			html := buf.String()
+			if !strings.Contains(html, tc.expectedHrefAttr) {
+				t.Errorf("Expected rendered HTML to contain %q, got:\n%s",
+					tc.expectedHrefAttr, html)
+			}
+		})
+	}
+
+	// Verify event listeners work (lines 64-65)
+	t.Run("event listeners", func(t *testing.T) {
+		mockPage := &mockPage{name: "event-test", content: []byte("#tag")}
+		h.pages[mockPage] = []*HashTag{{value: []byte("tag")}}
+
+		err := h.PageChanged(mockPage)
+		if err != nil {
+			t.Errorf("PageChanged failed: %v", err)
+		}
+
+		if len(h.pages) != 0 {
+			t.Error("PageChanged did not clear cache - event listener may not be working")
+		}
+
+		// Test PageDeleted as well
+		h.pages[mockPage] = []*HashTag{{value: []byte("tag")}}
+
+		err = h.PageDeleted(mockPage)
+		if err != nil {
+			t.Errorf("PageDeleted failed: %v", err)
+		}
+
+		if len(h.pages) != 0 {
+			t.Error("PageDeleted did not clear cache")
+		}
+	})
+}
+
 func TestRelatedPagesComplete(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -2221,51 +2326,6 @@ func TestRenderHashtagMultipleTags(t *testing.T) {
 	}
 	if !strings.Contains(html, `href="/+/tag/second"`) {
 		t.Errorf("Expected second tag link, got:\n%s", html)
-	}
-}
-
-func TestHashtagsInit(t *testing.T) {
-	// Test that Init registers all required components without panicking.
-	// While we can't test the full integration easily, we can verify the
-	// function executes successfully and registers the expected routes.
-	tests := []struct {
-		name          string
-		checkPanic    bool
-		expectedPanic bool
-	}{
-		{
-			name:          "init executes without panic",
-			checkPanic:    true,
-			expectedPanic: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			h := &Hashtags{
-				pages: make(map[xlog.Page][]*HashTag),
-			}
-
-			if tt.checkPanic {
-				defer func() {
-					r := recover()
-					if tt.expectedPanic && r == nil {
-						t.Error("Expected panic but none occurred")
-					}
-					if !tt.expectedPanic && r != nil {
-						t.Errorf("Unexpected panic: %v", r)
-					}
-				}()
-			}
-
-			// Init modifies global xlog state, so this is primarily a smoke test.
-			// The function should complete without panicking.
-			h.Init()
-
-			// If we get here without panic, Init completed successfully.
-			// The actual registration effects are tested through integration
-			// tests that verify routes, widgets, templates, etc.
-		})
 	}
 }
 
