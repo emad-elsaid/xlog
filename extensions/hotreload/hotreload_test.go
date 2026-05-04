@@ -202,6 +202,97 @@ func TestHandleWebSocket(t *testing.T) {
 	}
 }
 
+func TestNotifyPageChange_WriteErrorHandling(t *testing.T) {
+	tests := []struct {
+		name             string
+		closeConnBefore  bool
+		expectClientGone bool
+	}{
+		{
+			name:             "removes client when write fails on closed connection",
+			closeConnBefore:  true,
+			expectClientGone: true,
+		},
+		{
+			name:             "keeps client when write succeeds",
+			closeConnBefore:  false,
+			expectClientGone: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			clientsMutex.Lock()
+			oldClients := clients
+			clients = make(map[*websocket.Conn]bool)
+			clientsMutex.Unlock()
+			defer func() {
+				clientsMutex.Lock()
+				clients = oldClients
+				clientsMutex.Unlock()
+			}()
+
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				conn, err := upgrader.Upgrade(w, r, nil)
+				if err != nil {
+					return
+				}
+				defer func() {
+					if err := conn.Close(); err != nil {
+						t.Logf("Server close connection: %v", err)
+					}
+				}()
+
+				var msg map[string]string
+				_ = conn.ReadJSON(&msg)
+			}))
+			defer server.Close()
+
+			wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+			conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			clientsMutex.Lock()
+			clients[conn] = true
+			clientsMutex.Unlock()
+
+			if tc.closeConnBefore {
+				if err := conn.Close(); err != nil {
+					t.Logf("Failed to close connection: %v", err)
+				}
+				time.Sleep(50 * time.Millisecond)
+			} else {
+				defer func() {
+					if err := conn.Close(); err != nil {
+						t.Logf("Failed to close connection: %v", err)
+					}
+				}()
+			}
+
+			page := mockPage{name: "test-page", exists: true}
+			err = NotifyPageChange(page)
+			if err != nil {
+				t.Errorf("NotifyPageChange() unexpected error: %v", err)
+			}
+
+			time.Sleep(50 * time.Millisecond)
+
+			clientsMutex.Lock()
+			_, stillPresent := clients[conn]
+			clientsMutex.Unlock()
+
+			if tc.expectClientGone && stillPresent {
+				t.Error("Expected client to be removed after write error, but still present")
+			}
+			if !tc.expectClientGone && !stillPresent {
+				t.Error("Expected client to remain after successful write, but was removed")
+			}
+		})
+	}
+}
+
 // mockPage implements xlog.Page interface for testing.
 type mockPage struct {
 	name   string
