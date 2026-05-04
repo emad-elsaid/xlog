@@ -9,6 +9,9 @@ import (
 	"github.com/emad-elsaid/xlog"
 )
 
+// SITEMAP_DOMAIN is the domain name used for generating absolute URLs in the sitemap.
+// It should be set without protocol or trailing slash (e.g., "example.com").
+// Configured via the -sitemap.domain flag.
 var SITEMAP_DOMAIN string
 
 func init() {
