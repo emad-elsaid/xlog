@@ -43,7 +43,7 @@ func compileTemplates() {
 	for _, tfs := range templatesFSs {
 		_ = fs.WalkDir(tfs, ".", func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to walk template directory at %s: %w", p, err)
 			}
 
 			if strings.HasSuffix(p, ext) && d.Type().IsRegular() {
@@ -53,7 +53,7 @@ func compileTemplates() {
 
 				c, err := fs.ReadFile(tfs, p)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to read template file %s: %w", p, err)
 				}
 
 				template.Must(templates.New(name).Funcs(helpers).Parse(string(c)))
