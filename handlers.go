@@ -13,6 +13,9 @@ import (
 	"gitlab.com/greyxor/slogor"
 )
 
+// osExit is a variable that allows testing of os.Exit calls.
+var osExit = os.Exit
+
 // Define the catch all HTTP routes, parse CLI flags and take actions like
 // building the static pages and exit, or start the HTTP server.
 func Start(ctx context.Context) {
@@ -39,7 +42,7 @@ func Start(ctx context.Context) {
 
 	if err := os.Chdir(Config.Source); err != nil {
 		slog.Error("Failed to change dir to source", "error", err, "source", Config.Source)
-		os.Exit(1)
+		osExit(1)
 	}
 
 	initExtensions()
@@ -50,7 +53,7 @@ func Start(ctx context.Context) {
 	if len(Config.Build) > 0 {
 		if err := build(Config.Build); err != nil {
 			slog.Error("Failed to build static pages", "error", err)
-			os.Exit(1)
+			osExit(1)
 		}
 
 		return
