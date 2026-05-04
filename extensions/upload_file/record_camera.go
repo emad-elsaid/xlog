@@ -25,6 +25,9 @@ func (s RecordCamera) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
+// RecordCameraForm renders the camera recording interface for a specified page.
+// It accepts a page name via the "page" form parameter and returns an HTML interface
+// that allows users to record video using their camera and save it to the page.
 func RecordCameraForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 

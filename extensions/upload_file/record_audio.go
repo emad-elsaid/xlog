@@ -25,6 +25,9 @@ func (s RecordAudio) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
+// RecordAudioForm renders the audio recording interface for a specified page.
+// It accepts a page name via the "page" form parameter and returns an HTML interface
+// that allows users to record audio using their microphone and save it to the page.
 func RecordAudioForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 

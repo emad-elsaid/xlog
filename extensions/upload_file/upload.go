@@ -25,6 +25,9 @@ func (u Upload) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
+// UploadForm renders the file upload form for a specified page.
+// It accepts a page name via the "page" form parameter and returns an HTML form
+// that allows users to upload files to that page's directory.
 func UploadForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 

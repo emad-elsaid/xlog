@@ -23,6 +23,9 @@ func (s Screenshot) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
+// ScreenshotForm renders the screenshot capture interface for a specified page.
+// It accepts a page name via the "page" form parameter and returns an HTML interface
+// that allows users to capture and save screenshots directly to the page.
 func ScreenshotForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 

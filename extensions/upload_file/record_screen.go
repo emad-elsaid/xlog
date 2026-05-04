@@ -23,6 +23,9 @@ func (s RecordScreen) Attrs() map[template.HTMLAttr]any {
 	}
 }
 
+// RecordScreenForm renders the screen recording interface for a specified page.
+// It accepts a page name via the "page" form parameter and returns an HTML interface
+// that allows users to record their screen and save the recording to the page.
 func RecordScreenForm(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 
