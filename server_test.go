@@ -1433,3 +1433,137 @@ func TestAccepted(t *testing.T) {
 		})
 	}
 }
+
+// BenchmarkHandlerFuncToHttpHandler measures the overhead of wrapping
+// a HandlerFunc into an http.HandlerFunc. This executes once per handler
+// registration during server initialization.
+func BenchmarkHandlerFuncToHttpHandler(b *testing.B) {
+	handler := func(r Request) Output {
+		return func(w Response, r Request) {
+			w.WriteHeader(http.StatusOK)
+		}
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = handlerFuncToHttpHandler(handler)
+	}
+}
+
+// BenchmarkResponseFunctions measures the performance of various HTTP response
+// helper functions. These are hot-path operations executing on every error condition.
+func BenchmarkResponseFunctions(b *testing.B) {
+	tests := []struct {
+		name string
+		fn   func() Output
+	}{
+		{
+			name: "NotFound",
+			fn:   func() Output { return NotFound("page not found") },
+		},
+		{
+			name: "BadRequest",
+			fn:   func() Output { return BadRequest("invalid input") },
+		},
+		{
+			name: "Unauthorized",
+			fn:   func() Output { return Unauthorized("auth required") },
+		},
+		{
+			name: "Forbidden",
+			fn:   func() Output { return Forbidden("access denied") },
+		},
+		{
+			name: "InternalServerError",
+			fn:   func() Output { return InternalServerError(errors.New("internal error")) },
+		},
+		{
+			name: "Redirect",
+			fn:   func() Output { return Redirect("/login") },
+		},
+		{
+			name: "NoContent",
+			fn:   NoContent,
+		},
+		{
+			name: "Accepted",
+			fn:   Accepted,
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
+
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				output := tc.fn()
+				output(w, r)
+				w.Body.Reset()
+			}
+		})
+	}
+}
+
+// BenchmarkDefaultMiddlewares measures middleware chain construction overhead.
+// This executes once during server initialization but is critical for startup time.
+func BenchmarkDefaultMiddlewares(b *testing.B) {
+	tests := []struct {
+		name     string
+		readonly bool
+	}{
+		{
+			name:     "with CSRF protection",
+			readonly: false,
+		},
+		{
+			name:     "readonly mode (no CSRF)",
+			readonly: true,
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			// Save and restore original config
+			origReadonly := Config.Readonly
+			defer func() { Config.Readonly = origReadonly }()
+
+			Config.Readonly = tc.readonly
+
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				_ = defaultMiddlewares()
+			}
+		})
+	}
+}
+
+// BenchmarkHandlerChainExecution measures the full execution path through
+// handlerFuncToHttpHandler wrapper, simulating real request handling.
+func BenchmarkHandlerChainExecution(b *testing.B) {
+	handler := func(r Request) Output {
+		return func(w Response, r Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		}
+	}
+
+	httpHandler := handlerFuncToHttpHandler(handler)
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/test", http.NoBody)
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		httpHandler(w, r)
+		w.Body.Reset()
+	}
+}
