@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/gorilla/csrf"
+	csrf "filippo.io/csrf/gorilla"
 	"gitlab.com/greyxor/slogor"
 )
 
@@ -130,6 +130,6 @@ func getPageHandler(r Request) Output {
 
 	return Render("page", Locals{
 		keyPage: page,
-		"csrf":  csrf.Token(r),
+		"csrf":  csrf.Token(r), //nolint:staticcheck // Deprecated but needed for template compatibility
 	})
 }

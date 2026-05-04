@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gorilla/csrf"
+	csrf "filippo.io/csrf/gorilla"
 )
 
 const testIndexPage = "index"
@@ -82,7 +82,6 @@ func TestGetPageHandler_ExistingPage(t *testing.T) {
 	// Setup CSRF (required for token generation)
 	csrfMiddleware := csrf.Protect(
 		[]byte("32-byte-long-auth-key-for-test"),
-		csrf.Secure(false),
 	)
 
 	req := httptest.NewRequest(http.MethodGet, "/"+testPageName, http.NoBody)
@@ -203,7 +202,6 @@ func TestGetPageHandler_NonExistentPage_DynamicMode(t *testing.T) {
 	// Setup CSRF
 	csrfMiddleware := csrf.Protect(
 		[]byte("32-byte-long-auth-key-for-test"),
-		csrf.Secure(false),
 	)
 
 	req := httptest.NewRequest(http.MethodGet, "/nonexistent", http.NoBody)

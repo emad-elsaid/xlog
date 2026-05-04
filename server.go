@@ -12,13 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/csrf"
+	csrf "filippo.io/csrf/gorilla"
 )
 
 var (
 	router = http.NewServeMux()
-	// a function that returns the CSRF token.
-	CSRF = csrf.Token
+	// CSRF returns a placeholder token for templates.
+	// Note: filippo.io/csrf/gorilla uses Fetch metadata headers, not tokens.
+	// This is kept for template compatibility only.
+	CSRF = csrf.Token //nolint:staticcheck // Deprecated but needed for template compatibility
 )
 
 type (
@@ -34,13 +36,6 @@ type (
 
 func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
 	if !Config.Readonly {
-		crsfOpts := []csrf.Option{
-			csrf.Path("/"),
-			csrf.FieldName("csrf"),
-			csrf.CookieName(Config.CsrfCookieName),
-			csrf.Secure(!Config.ServeInsecure),
-		}
-
 		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
 		if len(sessionSecret) == 0 {
 			sessionSecret = make([]byte, 128)
@@ -48,7 +43,7 @@ func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
 		}
 
 		middlewares = append(middlewares,
-			csrf.Protect(sessionSecret, crsfOpts...))
+			csrf.Protect(sessionSecret))
 	}
 
 	middlewares = append(middlewares, requestLoggerHandler)
