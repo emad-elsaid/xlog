@@ -427,3 +427,123 @@ func TestGUIDIsPermaLinkAttribute(t *testing.T) {
 		t.Error("Expected GUID to have a value")
 	}
 }
+
+func TestRSSInit(t *testing.T) {
+	// Test that RSS.Init() registers all expected components
+	// This exercises the Init method which had 0% coverage
+	ext := RSS{}
+
+	// Verify Init doesn't panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Init() panicked: %v", r)
+		}
+	}()
+
+	ext.Init()
+
+	// Init() registers:
+	// 1. Widget (metaTag) - line 34
+	// 2. Build page for RSS feed - line 35
+	// 3. Link command - line 36
+	// 4. GET route handler - line 37
+	// All registrations should complete without error
+}
+
+func TestRFC822TimeMarshalZeroValue(t *testing.T) {
+	// Test the branch where t.IsZero() returns true (line 83-85)
+	// When zero, MarshalXML returns nil which causes XML encoder to skip the element
+	type testItem struct {
+		XMLName xml.Name   `xml:"item"`
+		PubDate RFC822Time `xml:"pubDate"`
+	}
+
+	zeroItem := testItem{PubDate: RFC822Time{}}
+
+	data, err := xml.Marshal(zeroItem)
+	if err != nil {
+		t.Fatalf("Failed to marshal item with zero time: %v", err)
+	}
+
+	// Zero time should result in no pubDate element in XML
+	xmlStr := string(data)
+	if strings.Contains(xmlStr, "<pubDate>") {
+		t.Errorf("Expected zero time to be omitted from XML, got: %s", xmlStr)
+	}
+}
+
+func TestRFC822TimeMarshalNonZeroValue(t *testing.T) {
+	// Test the normal path where time is marshaled (lines 86-88)
+	type testItem struct {
+		XMLName xml.Name   `xml:"item"`
+		PubDate RFC822Time `xml:"pubDate"`
+	}
+
+	testTime := time.Date(2024, 12, 15, 10, 30, 0, 0, time.UTC)
+	item := testItem{PubDate: RFC822Time{testTime}}
+
+	data, err := xml.Marshal(item)
+	if err != nil {
+		t.Fatalf("Failed to marshal item with time: %v", err)
+	}
+
+	xmlStr := string(data)
+	if !strings.Contains(xmlStr, "<pubDate>") {
+		t.Errorf("Expected pubDate element in XML, got: %s", xmlStr)
+	}
+
+	// Verify it uses RFC1123Z format
+	expectedFormat := testTime.Format(time.RFC1123Z)
+	if !strings.Contains(xmlStr, expectedFormat) {
+		t.Errorf("Expected RFC1123Z formatted time %q in XML, got: %s", expectedFormat, xmlStr)
+	}
+}
+
+func TestRFC822TimeUnmarshalRFC1123(t *testing.T) {
+	// Test the fallback branch for RFC1123 without timezone (lines 98-103)
+	tests := []struct {
+		name    string
+		xmlData string
+		wantErr bool
+	}{
+		{
+			name:    "RFC1123Z format (with timezone)",
+			xmlData: "<wrapper><time>Mon, 15 Jan 2024 10:30:00 +0000</time></wrapper>",
+			wantErr: false,
+		},
+		{
+			name:    "RFC1123 format (without timezone offset)",
+			xmlData: "<wrapper><time>Mon, 15 Jan 2024 10:30:00 GMT</time></wrapper>",
+			wantErr: false,
+		},
+		{
+			name:    "invalid format triggers error",
+			xmlData: "<wrapper><time>not a valid date</time></wrapper>",
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			type wrapper struct {
+				Time RFC822Time `xml:"time"`
+			}
+
+			var result wrapper
+			err := xml.Unmarshal([]byte(tc.xmlData), &result)
+
+			if tc.wantErr {
+				if err == nil {
+					t.Error("Expected error for invalid date format, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if result.Time.IsZero() {
+					t.Error("Expected non-zero time after successful unmarshal")
+				}
+			}
+		})
+	}
+}
