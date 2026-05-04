@@ -802,3 +802,90 @@ func TestListPages(t *testing.T) {
 		})
 	}
 }
+
+func TestStart_StatsFlag(t *testing.T) {
+	tests := []struct {
+		name  string
+		files map[string]string
+	}{
+		{
+			name:  "stats with empty garden",
+			files: map[string]string{},
+		},
+		{
+			name: "stats with single page",
+			files: map[string]string{
+				"test.md": "# Test Page\n\nSome content with words.",
+			},
+		},
+		{
+			name: "stats with multiple pages and links",
+			files: map[string]string{
+				"index.md":  "# Home\n\nWelcome to my [garden](garden.md)",
+				"garden.md": "# Garden\n\nLink to [index](index.md)",
+				"orphan.md": "# Orphan\n\nNo links to this page.",
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+
+			// Create test files
+			for filename, content := range tc.files {
+				path := filepath.Join(tmpDir, filename)
+				dir := filepath.Dir(path)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatalf("Failed to create directory: %v", err)
+				}
+				if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+					t.Fatalf("Failed to create test file: %v", err)
+				}
+			}
+
+			// Save original config and osExit
+			oldConfig := Config
+			oldOsExit := osExit
+			origCwd, _ := os.Getwd()
+			defer func() {
+				Config = oldConfig
+				osExit = oldOsExit
+				_ = os.Chdir(origCwd)
+			}()
+
+			// Configure for stats mode (don't rely on flag parsing)
+			Config.Source = tmpDir
+			Config.ShowStats = true
+			Config.Build = ""
+			Config.Index = "index"
+
+			// Capture os.Exit calls
+			exitCode := -1
+			exitCalled := false
+			osExit = func(code int) {
+				exitCode = code
+				exitCalled = true
+				panic("exit called")
+			}
+
+			// Expect a panic from the mocked osExit
+			defer func() {
+				if r := recover(); r != nil {
+					if !exitCalled {
+						t.Fatal("Expected os.Exit to be called")
+					}
+					if exitCode != 0 {
+						t.Errorf("Expected exit code 0, got %d", exitCode)
+					}
+					// Expected panic, test passed
+					return
+				}
+				t.Error("Expected os.Exit to be called when ShowStats is true")
+			}()
+
+			ctx := context.Background()
+			Start(ctx)
+		})
+	}
+}
