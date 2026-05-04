@@ -3491,11 +3491,286 @@ func TestRelatedPagesExcludesCurrentAndFindsMatches(t *testing.T) {
 						!strings.Contains(panicStr, "template") {
 						t.Errorf("Unexpected panic in relatedPages: %v", r)
 					}
-					// Expected panic from xlog.Partial - means we reached line 180
 				}
 			}()
 
 			_ = h.relatedPages(tc.currentPage)
 		})
 	}
+}
+
+// Benchmark suite for hashtags extension performance tracking.
+
+// BenchmarkHashtagParsing benchmarks the hashtag parsing performance across different input sizes.
+func BenchmarkHashtagParsing(b *testing.B) {
+	tests := []struct {
+		name    string
+		content string
+	}{
+		{
+			name:    "single hashtag",
+			content: "Simple text with #golang",
+		},
+		{
+			name:    "multiple hashtags",
+			content: "#golang #webdev #tutorial #programming #bestpractices",
+		},
+		{
+			name:    "hashtag with spaces",
+			content: "#golang tutorial with #web dev and #best practices here",
+		},
+		{
+			name:    "mixed case hashtags",
+			content: "#GoLang #WEBDEV #Programming #TeSt",
+		},
+		{
+			name:    "large document with scattered hashtags",
+			content: strings.Repeat("Lorem ipsum dolor sit amet #golang consectetur adipiscing elit. ", 100) + "#webdev final tag",
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			md := markdown.New()
+
+			// Register hashtag parser
+			h := &HashTag{}
+			md.Parser().AddOptions(parser.WithInlineParsers(
+				util.Prioritized(h, 999),
+			))
+
+			content := []byte(tc.content)
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				tree := md.Parser().Parse(text.NewReader(content))
+				_ = xlog.FindAllInAST[*HashTag](tree)
+			}
+		})
+	}
+}
+
+// BenchmarkTagPages benchmarks the performance of finding all pages with a specific hashtag.
+func BenchmarkTagPages(b *testing.B) {
+	tests := []struct {
+		name      string
+		pageCount int
+		hashtag   string
+	}{
+		{
+			name:      "10 pages single tag",
+			pageCount: 10,
+			hashtag:   tagGolang,
+		},
+		{
+			name:      "50 pages single tag",
+			pageCount: 50,
+			hashtag:   tagGolang,
+		},
+		{
+			name:      "100 pages single tag",
+			pageCount: 100,
+			hashtag:   tagGolang,
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			tmpDir := b.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			defer func() { xlog.Config.Source = origSource }()
+
+			// Create test pages - half with golang tag, half with rust tag
+			for i := 0; i < tc.pageCount; i++ {
+				filename := filepath.Join(tmpDir, fmt.Sprintf("page%d.md", i))
+				var content string
+				if i%2 == 0 {
+					content = fmt.Sprintf("Content with %s #%s", hashtagGolang, tagGolang)
+				} else {
+					content = fmt.Sprintf("Content with %s #%s", hashtagRust, tagRust)
+				}
+				if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+					b.Fatalf("Failed to create test page: %v", err)
+				}
+			}
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				pages := h.tagPages(context.Background(), tc.hashtag)
+				_ = pages
+			}
+		})
+	}
+}
+
+// BenchmarkRelatedPages benchmarks finding pages related by shared hashtags.
+func BenchmarkRelatedPages(b *testing.B) {
+	tests := []struct {
+		name            string
+		pageCount       int
+		hashtagsPerPage int
+	}{
+		{
+			name:            "10 pages 2 tags each",
+			pageCount:       10,
+			hashtagsPerPage: 2,
+		},
+		{
+			name:            "50 pages 3 tags each",
+			pageCount:       50,
+			hashtagsPerPage: 3,
+		},
+		{
+			name:            "100 pages 5 tags each",
+			pageCount:       100,
+			hashtagsPerPage: 5,
+		},
+	}
+
+	tags := []string{tagGolang, tagRust, testingTag, "webdev", "tutorial", "programming", "database", "api"}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			tmpDir := b.TempDir()
+			origSource := xlog.Config.Source
+			xlog.Config.Source = tmpDir
+			defer func() { xlog.Config.Source = origSource }()
+
+			// Create test pages with varying hashtags
+			for i := 0; i < tc.pageCount; i++ {
+				filename := filepath.Join(tmpDir, fmt.Sprintf("page%d.md", i))
+				content := "Content with tags: "
+				for j := 0; j < tc.hashtagsPerPage; j++ {
+					tag := tags[(i+j)%len(tags)]
+					content += fmt.Sprintf("#%s ", tag)
+				}
+				if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+					b.Fatalf("Failed to create test page: %v", err)
+				}
+			}
+
+			h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+
+			// Create a test page to find relations for
+			testPage := &mockPage{
+				name:    "source",
+				content: []byte(fmt.Sprintf("#%s #%s", tagGolang, tagRust)),
+			}
+
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				// Benchmark will panic at xlog.Partial call but measures critical path
+				func() {
+					defer func() { recover() }()
+					_ = h.relatedPages(testPage)
+				}()
+			}
+		})
+	}
+}
+
+// BenchmarkHashtagsFor benchmarks retrieving cached hashtags for a page.
+func BenchmarkHashtagsFor(b *testing.B) {
+	tests := []struct {
+		name     string
+		tagCount int
+	}{
+		{
+			name:     "page with 1 tag",
+			tagCount: 1,
+		},
+		{
+			name:     "page with 5 tags",
+			tagCount: 5,
+		},
+		{
+			name:     "page with 20 tags",
+			tagCount: 20,
+		},
+	}
+
+	for _, tc := range tests {
+		b.Run(tc.name, func(b *testing.B) {
+			h := &Hashtags{
+				pages: make(map[xlog.Page][]*HashTag),
+				mu:    sync.Mutex{},
+			}
+
+			// Create page with specified number of tags
+			content := "Tags: "
+			for i := 0; i < tc.tagCount; i++ {
+				content += fmt.Sprintf("#tag%d ", i)
+			}
+			testPage := &mockPage{
+				name:    testPageName,
+				content: []byte(content),
+			}
+
+			// Pre-populate cache
+			md := markdown.New()
+			hashtagParser := &HashTag{}
+			md.Parser().AddOptions(parser.WithInlineParsers(
+				util.Prioritized(hashtagParser, 999),
+			))
+
+			tree := md.Parser().Parse(text.NewReader(testPage.content))
+			hashtags := xlog.FindAllInAST[*HashTag](tree)
+			h.pages[testPage] = hashtags
+
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				tags := h.hashtagsFor(testPage)
+				_ = tags
+			}
+		})
+	}
+}
+
+// BenchmarkConcurrentHashtagAccess benchmarks concurrent access to hashtag data.
+func BenchmarkConcurrentHashtagAccess(b *testing.B) {
+	h := &Hashtags{
+		pages: make(map[xlog.Page][]*HashTag),
+		mu:    sync.Mutex{},
+	}
+
+	md := markdown.New()
+	hashtagParser := &HashTag{}
+	md.Parser().AddOptions(parser.WithInlineParsers(
+		util.Prioritized(hashtagParser, 999),
+	))
+
+	// Pre-populate with test data
+	pages := make([]*mockPage, 100)
+	for i := 0; i < 100; i++ {
+		pages[i] = &mockPage{
+			name:    fmt.Sprintf("page%d", i),
+			content: []byte(fmt.Sprintf("#tag%d #common", i)),
+		}
+
+		tree := md.Parser().Parse(text.NewReader(pages[i].content))
+		h.pages[pages[i]] = xlog.FindAllInAST[*HashTag](tree)
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	b.RunParallel(func(pb *testing.PB) {
+		i := 0
+		for pb.Next() {
+			page := pages[i%len(pages)]
+			tags := h.hashtagsFor(page)
+			_ = tags
+			i++
+		}
+	})
 }
