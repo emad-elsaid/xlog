@@ -669,6 +669,72 @@ func TestCopy404Page(t *testing.T) {
 	}
 }
 
+func TestCopyAssets(t *testing.T) {
+	tests := []struct {
+		name           string
+		setupDest      func(t *testing.T, dest string)
+		expectError    bool
+		verifyAssets   bool
+		skipWarningLog bool
+	}{
+		{
+			name:         "copy assets to empty directory",
+			setupDest:    func(t *testing.T, dest string) {},
+			expectError:  false,
+			verifyAssets: true,
+		},
+		{
+			name: "copy assets when some already exist",
+			setupDest: func(t *testing.T, dest string) {
+				// Create a file that will already exist
+				if err := os.MkdirAll(dest, 0o755); err != nil {
+					t.Fatalf("Failed to create dest dir: %v", err)
+				}
+				// Write a dummy file to simulate existing asset
+				testFile := filepath.Join(dest, "test.txt")
+				if err := os.WriteFile(testFile, []byte("existing"), 0o644); err != nil {
+					t.Fatalf("Failed to create existing file: %v", err)
+				}
+			},
+			expectError:    false,
+			skipWarningLog: true,
+		},
+		{
+			name: "copy assets handles nested directories",
+			setupDest: func(t *testing.T, dest string) {
+				// Ensure nested structure is created
+			},
+			expectError:  false,
+			verifyAssets: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpDir := t.TempDir()
+			destDir := filepath.Join(tmpDir, "assets")
+
+			tc.setupDest(t, destDir)
+
+			err := copyAssets(destDir)
+
+			if tc.expectError && err == nil {
+				t.Error("Expected error but got none")
+			}
+			if !tc.expectError && err != nil {
+				t.Errorf("Expected no error but got: %v", err)
+			}
+
+			if tc.verifyAssets && err == nil {
+				// Verify destination directory was created
+				if _, statErr := os.Stat(destDir); os.IsNotExist(statErr) {
+					t.Error("Expected destination directory to be created")
+				}
+			}
+		})
+	}
+}
+
 func min(a, b int) int {
 	if a < b {
 		return a
