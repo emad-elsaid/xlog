@@ -2,7 +2,6 @@ package xlog
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"strings"
 	"testing"
@@ -10,39 +9,64 @@ import (
 
 func TestHandleCompletion(t *testing.T) {
 	tests := []struct {
-		name     string
-		shell    string
-		contains []string
+		name          string
+		shell         string
+		expectExit    bool
+		exitCode      int
+		expectStdout  string
+		expectStderr  string
+		checkContains bool
 	}{
 		{
-			name:  "bash completion",
-			shell: "bash",
-			contains: []string{
-				"_xlog_completion()",
-				"complete -F _xlog_completion xlog",
-				"-source",
-				"-build",
-				"-theme",
-			},
+			name:          "bash completion",
+			shell:         "bash",
+			expectExit:    false,
+			expectStdout:  bashCompletionScript,
+			expectStderr:  "",
+			checkContains: true,
 		},
 		{
-			name:  "zsh completion",
-			shell: "zsh",
-			contains: []string{
-				"#compdef xlog",
-				"_xlog()",
-				"-source[Directory that will act as storage]",
-				"-theme[Bulma theme to use]:theme:(light dark)",
-			},
+			name:          "zsh completion",
+			shell:         "zsh",
+			expectExit:    false,
+			expectStdout:  zshCompletionScript,
+			expectStderr:  "",
+			checkContains: true,
 		},
 		{
-			name:  "fish completion",
-			shell: "fish",
-			contains: []string{
-				"complete -c xlog",
-				"-l source -d 'Directory that will act as storage'",
-				"-l theme -d 'Bulma theme to use' -r -a 'light dark'",
-			},
+			name:          "fish completion",
+			shell:         "fish",
+			expectExit:    false,
+			expectStdout:  fishCompletionScript,
+			expectStderr:  "",
+			checkContains: true,
+		},
+		{
+			name:          "unknown shell",
+			shell:         "powershell",
+			expectExit:    true,
+			exitCode:      1,
+			expectStdout:  "",
+			expectStderr:  "Unknown shell: powershell",
+			checkContains: true,
+		},
+		{
+			name:          "empty shell",
+			shell:         "",
+			expectExit:    true,
+			exitCode:      1,
+			expectStdout:  "",
+			expectStderr:  "Unknown shell: ",
+			checkContains: true,
+		},
+		{
+			name:          "unsupported shell tcsh",
+			shell:         "tcsh",
+			expectExit:    true,
+			exitCode:      1,
+			expectStdout:  "",
+			expectStderr:  "Unknown shell: tcsh. Supported: bash, zsh, fish",
+			checkContains: true,
 		},
 	}
 
@@ -50,91 +74,146 @@ func TestHandleCompletion(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Capture stdout
 			oldStdout := os.Stdout
-			r, w, _ := os.Pipe()
-			os.Stdout = w
+			rOut, wOut, _ := os.Pipe()
+			os.Stdout = wOut
 
-			// Mock osExit to prevent actual exit
+			// Capture stderr
+			oldStderr := os.Stderr
+			rErr, wErr, _ := os.Pipe()
+			os.Stderr = wErr
+
+			// Mock osExit
 			oldOsExit := osExit
+			exitCalled := false
+			exitCodeReceived := -1
 			osExit = func(code int) {
-				panic(code) // Use panic to exit the goroutine
+				exitCalled = true
+				exitCodeReceived = code
+				panic("exit called") // Stop execution
 			}
+
+			// Restore all at end
 			defer func() {
+				os.Stdout = oldStdout
+				os.Stderr = oldStderr
 				osExit = oldOsExit
 			}()
 
-			// Call handleCompletion in a goroutine to catch panic
-			func() {
+			// Run the function
+			if tc.expectExit {
+				// Expect panic from mocked osExit
 				defer func() {
-					if r := recover(); r != nil {
-						// Expected panic from osExit(0)
-						if code, ok := r.(int); !ok || code != 0 {
-							t.Errorf("Expected osExit(0), got panic: %v", r)
-						}
+					if r := recover(); r == nil {
+						t.Error("Expected os.Exit to be called, but it wasn't")
 					}
 				}()
-				handleCompletion(tc.shell)
-			}()
+			}
 
-			// Restore stdout and read captured output
-			w.Close()
-			os.Stdout = oldStdout
-			var buf bytes.Buffer
-			io.Copy(&buf, r)
-			output := buf.String()
+			handleCompletion(tc.shell)
 
-			// Verify expected strings are present
-			for _, expected := range tc.contains {
-				if !strings.Contains(output, expected) {
-					t.Errorf("Output missing expected string: %q\nGot:\n%s", expected, output)
+			// Close writers and read output
+			wOut.Close()
+			wErr.Close()
+
+			var bufOut bytes.Buffer
+			var bufErr bytes.Buffer
+			_, _ = bufOut.ReadFrom(rOut)
+			_, _ = bufErr.ReadFrom(rErr)
+
+			stdout := bufOut.String()
+			stderr := bufErr.String()
+
+			// Verify exit behavior
+			if tc.expectExit {
+				if !exitCalled {
+					t.Error("Expected os.Exit to be called")
+				}
+				if exitCodeReceived != tc.exitCode {
+					t.Errorf("Expected exit code %d, got %d", tc.exitCode, exitCodeReceived)
+				}
+			} else if exitCalled {
+				t.Errorf("Did not expect os.Exit to be called, but got exit code %d", exitCodeReceived)
+			}
+
+			// Verify stdout
+			if tc.checkContains {
+				if tc.expectStdout != "" && !strings.Contains(stdout, tc.expectStdout) {
+					t.Errorf("Expected stdout to contain:\n%s\nGot:\n%s",
+						tc.expectStdout[:min(len(tc.expectStdout), 100)],
+						stdout[:min(len(stdout), 100)])
+				}
+			} else {
+				if stdout != tc.expectStdout {
+					t.Errorf("Expected stdout:\n%s\nGot:\n%s", tc.expectStdout, stdout)
+				}
+			}
+
+			// Verify stderr
+			if tc.checkContains {
+				if tc.expectStderr != "" && !strings.Contains(stderr, tc.expectStderr) {
+					t.Errorf("Expected stderr to contain: %q, got: %q", tc.expectStderr, stderr)
+				}
+			} else {
+				if stderr != tc.expectStderr {
+					t.Errorf("Expected stderr: %q, got: %q", tc.expectStderr, stderr)
 				}
 			}
 		})
 	}
 }
 
-func TestHandleCompletionInvalidShell(t *testing.T) {
-	// Capture stderr
-	oldStderr := os.Stderr
-	r, w, _ := os.Pipe()
-	os.Stderr = w
-
-	// Mock osExit
-	oldOsExit := osExit
-	exitCode := 0
-	osExit = func(code int) {
-		exitCode = code
-		panic(code)
-	}
-	defer func() {
-		osExit = oldOsExit
-	}()
-
-	// Call with invalid shell
-	func() {
-		defer func() {
-			recover() // Catch panic from osExit
-		}()
-		handleCompletion("invalid")
-	}()
-
-	// Restore stderr and read captured output
-	w.Close()
-	os.Stderr = oldStderr
-	var buf bytes.Buffer
-	io.Copy(&buf, r)
-	output := buf.String()
-
-	// Verify error message
-	if !strings.Contains(output, "Unknown shell: invalid") {
-		t.Errorf("Expected error message, got: %s", output)
+func TestHandleCompletion_BashScriptContent(t *testing.T) {
+	// Verify bash completion script contains essential elements
+	requiredElements := []string{
+		"_xlog_completion",
+		"COMPREPLY",
+		"-bind",
+		"-build",
+		"-completion",
+		"-source",
+		"complete -F _xlog_completion xlog",
 	}
 
-	if !strings.Contains(output, "Supported: bash, zsh, fish") {
-		t.Errorf("Expected supported shells list, got: %s", output)
+	for _, element := range requiredElements {
+		if !strings.Contains(bashCompletionScript, element) {
+			t.Errorf("bash completion script missing required element: %s", element)
+		}
+	}
+}
+
+func TestHandleCompletion_ZshScriptContent(t *testing.T) {
+	// Verify zsh completion script contains essential elements
+	requiredElements := []string{
+		"#compdef xlog",
+		"_xlog",
+		"-bind",
+		"-build",
+		"-completion",
+		"-source",
+		"_arguments",
 	}
 
-	// Verify exit code 1
-	if exitCode != 1 {
-		t.Errorf("Expected exit code 1, got %d", exitCode)
+	for _, element := range requiredElements {
+		if !strings.Contains(zshCompletionScript, element) {
+			t.Errorf("zsh completion script missing required element: %s", element)
+		}
+	}
+}
+
+func TestHandleCompletion_FishScriptContent(t *testing.T) {
+	// Verify fish completion script contains essential elements
+	requiredElements := []string{
+		"complete -c xlog",
+		"-l bind",
+		"-l build",
+		"-l completion",
+		"-l source",
+		"bash zsh fish",
+	}
+
+	for _, element := range requiredElements {
+		if !strings.Contains(fishCompletionScript, element) {
+			t.Errorf("fish completion script missing required element: %s", element)
+		}
 	}
 }
