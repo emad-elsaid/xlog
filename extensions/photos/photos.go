@@ -161,13 +161,13 @@ func photosShortcode(tpl string) func(xlog.Markdown) template.HTML {
 
 		err := filepath.WalkDir(p, func(file string, d fs.DirEntry, err error) error {
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to access path in %s: %w", p, err)
 			}
 
 			if d.Type().IsRegular() && supportedExt.Include(strings.ToLower(path.Ext(file))) {
 				photo, err := NewPhoto(file)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to create photo from %s: %w", file, err)
 				}
 
 				xlog.RegisterBuildPage(photo.Thumbnail, false)
