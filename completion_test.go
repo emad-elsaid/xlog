@@ -31,8 +31,8 @@ func TestHandleCompletion(t *testing.T) {
 			contains: []string{
 				"#compdef xlog",
 				"_xlog()",
-				"-source[Directory that will act as a storage]",
-				"-theme[bulma theme to use]:theme:(light dark)",
+				"-source[Directory that will act as storage]",
+				"-theme[Bulma theme to use]:theme:(light dark)",
 			},
 		},
 		{
@@ -40,8 +40,8 @@ func TestHandleCompletion(t *testing.T) {
 			shell: "fish",
 			contains: []string{
 				"complete -c xlog",
-				"-l source -d 'Directory that will act as a storage'",
-				"-l theme -d 'bulma theme to use' -r -a 'light dark'",
+				"-l source -d 'Directory that will act as storage'",
+				"-l theme -d 'Bulma theme to use' -r -a 'light dark'",
 			},
 		},
 	}
