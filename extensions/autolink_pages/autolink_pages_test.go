@@ -11,6 +11,7 @@ import (
 	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown/ast"
 	"github.com/emad-elsaid/xlog/markdown/parser"
+	"github.com/emad-elsaid/xlog/markdown/renderer"
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
@@ -562,6 +563,159 @@ func setupTestEnvironment(t *testing.T, pageFiles []string) func() {
 	return cleanup
 }
 
+// TestPageLinkRenderer_RegisterFuncs tests the RegisterFuncs method.
+func TestPageLinkRenderer_RegisterFuncs(t *testing.T) {
+	renderer := &pageLinkRenderer{}
+	registry := &mockRegistry{}
+
+	renderer.RegisterFuncs(registry)
+
+	if len(registry.registered) != 1 {
+		t.Fatalf("Expected 1 registration, got %d", len(registry.registered))
+	}
+
+	if registry.registered[0].kind != KindPageLink {
+		t.Errorf("Expected registration for KindPageLink, got %v", registry.registered[0].kind)
+	}
+
+	if registry.registered[0].handler == nil {
+		t.Error("Handler should not be nil")
+	}
+}
+
+// TestRender_BasicLink tests basic page link rendering.
+func TestRender_BasicLink(t *testing.T) {
+	tests := []struct {
+		name         string
+		pageName     string
+		entering     bool
+		expectedHTML string
+	}{
+		{
+			name:         "Entering state renders opening tag",
+			pageName:     "test-page.md",
+			entering:     true,
+			expectedHTML: `<a href="/test-page.md">`,
+		},
+		{
+			name:         "Exiting state renders closing tag",
+			pageName:     "test-page.md",
+			entering:     false,
+			expectedHTML: `</a>`,
+		},
+		{
+			name:         "Page name with special characters",
+			pageName:     "test page & stuff.md",
+			entering:     true,
+			expectedHTML: `<a href="/test%20page%20&amp;%20stuff.md">`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockPage := &mockPage{name: tt.pageName, filename: tt.pageName}
+			node := &PageLink{page: mockPage}
+
+			buf := &mockBufWriter{}
+			source := []byte("test source")
+
+			status, err := render(buf, source, node, tt.entering)
+
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if status != ast.WalkContinue {
+				t.Errorf("Expected WalkContinue, got %v", status)
+			}
+
+			if buf.content != tt.expectedHTML {
+				t.Errorf("Expected HTML %q, got %q", tt.expectedHTML, buf.content)
+			}
+		})
+	}
+}
+
+// TestRender_WithTodos tests rendering page links with todo indicators.
+func TestRender_WithTodos(t *testing.T) {
+	cleanup := setupTestEnvironment(t, []string{"todo-page.md"})
+	defer cleanup()
+
+	tests := []struct {
+		name            string
+		content         string
+		expectedTodoTag string
+	}{
+		{
+			name: "Page with incomplete todos",
+			content: `# Todo Page
+- [ ] Task 1
+- [x] Task 2
+- [ ] Task 3`,
+			expectedTodoTag: `<span class="tag is-rounded ">1/3</span>`,
+		},
+		{
+			name: "Page with all todos complete",
+			content: `# Todo Page
+- [x] Task 1
+- [x] Task 2`,
+			expectedTodoTag: `<span class="tag is-rounded is-success">2/2</span>`,
+		},
+		{
+			name:            "Page without todos",
+			content:         "# Plain Page\nNo todos here",
+			expectedTodoTag: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := os.WriteFile("todo-page.md", []byte(tt.content), 0600); err != nil {
+				t.Fatalf("Failed to write test file: %v", err)
+			}
+
+			p := xlog.NewPage("todo-page")
+			node := &PageLink{page: p}
+			buf := &mockBufWriter{}
+			source := []byte("test source")
+
+			// Test entering state (where todos are rendered)
+			status, err := render(buf, source, node, true)
+
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+
+			if status != ast.WalkContinue {
+				t.Errorf("Expected WalkContinue, got %v", status)
+			}
+
+			if tt.expectedTodoTag != "" {
+				if !strings.Contains(buf.content, tt.expectedTodoTag) {
+					t.Errorf("Expected HTML to contain %q, got %q", tt.expectedTodoTag, buf.content)
+				}
+			} else {
+				if strings.Contains(buf.content, `<span class="tag`) {
+					t.Errorf("Expected no todo tag, but found one in %q", buf.content)
+				}
+			}
+
+			// Verify base link is present
+			if !strings.Contains(buf.content, `<a href="/todo-page">`) {
+				t.Errorf("Expected link to page, got %q", buf.content)
+			}
+		})
+	}
+}
+
+// TestExtension_Name tests the Name method.
+func TestExtension_Name(t *testing.T) {
+	ext := AutoLinkPages{}
+	if ext.Name() != "autolink-pages" {
+		t.Errorf("Expected name 'autolink-pages', got %q", ext.Name())
+	}
+}
+
 // mockPage is a minimal Page implementation for testing.
 type mockPage struct {
 	name     string
@@ -582,4 +736,69 @@ func (m *mockPage) Write(xlog.Markdown) bool { return false }
 func (m *mockPage) ModTime() time.Time       { return time.Now() }
 func (m *mockPage) AST() ([]byte, ast.Node) {
 	return []byte("# Mock Page\nContent"), ast.NewDocument()
+}
+
+// mockBufWriter implements util.BufWriter for testing.
+type mockBufWriter struct {
+	content string
+	err     error
+}
+
+func (m *mockBufWriter) Write(p []byte) (int, error) {
+	if m.err != nil {
+		return 0, m.err
+	}
+	m.content += string(p)
+	return len(p), nil
+}
+
+func (m *mockBufWriter) WriteByte(c byte) error {
+	if m.err != nil {
+		return m.err
+	}
+	m.content += string([]byte{c})
+	return nil
+}
+
+func (m *mockBufWriter) WriteRune(r rune) (int, error) {
+	if m.err != nil {
+		return 0, m.err
+	}
+	m.content += string(r)
+	return len(string(r)), nil
+}
+
+func (m *mockBufWriter) WriteString(s string) (int, error) {
+	if m.err != nil {
+		return 0, m.err
+	}
+	m.content += s
+	return len(s), nil
+}
+
+func (m *mockBufWriter) Buffered() int {
+	return len(m.content)
+}
+
+func (m *mockBufWriter) Available() int {
+	return 1024 - len(m.content)
+}
+
+func (m *mockBufWriter) Flush() error {
+	return m.err
+}
+
+// mockRegistry implements renderer.NodeRendererFuncRegisterer for testing.
+type mockRegistry struct {
+	registered []struct {
+		kind    ast.NodeKind
+		handler renderer.NodeRendererFunc
+	}
+}
+
+func (m *mockRegistry) Register(kind ast.NodeKind, handler renderer.NodeRendererFunc) {
+	m.registered = append(m.registered, struct {
+		kind    ast.NodeKind
+		handler renderer.NodeRendererFunc
+	}{kind, handler})
 }
