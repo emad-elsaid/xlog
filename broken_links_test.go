@@ -423,3 +423,174 @@ func TestBrokenLink_Struct(t *testing.T) {
 		t.Errorf("LinkDestination = %q, expected '/target'", bl.LinkDestination)
 	}
 }
+
+// Benchmark FindBrokenLinks with varying garden sizes to measure scalability.
+// Digital gardens can grow to thousands of pages, so performance at scale matters.
+func BenchmarkFindBrokenLinks(b *testing.B) {
+	tests := []struct {
+		name      string
+		pageCount int
+		linksPer  int // Average links per page
+	}{
+		{"small garden (10 pages)", 10, 3},
+		{"medium garden (100 pages)", 100, 5},
+		{"large garden (500 pages)", 500, 8},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			// Setup test environment once
+			tmpDir := b.TempDir()
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+
+			if err := os.Chdir(tmpDir); err != nil {
+				b.Fatalf("Failed to change directory: %v", err)
+			}
+
+			// Create test pages with realistic content
+			for i := 0; i < tt.pageCount; i++ {
+				filename := filepath.Join(tmpDir, "page"+filepath.FromSlash(string(rune('0'+i%10))), "content.md")
+				dir := filepath.Dir(filename)
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					b.Fatalf("Failed to create directory: %v", err)
+				}
+
+				// Generate page content with internal links
+				content := "# Page " + string(rune('0'+i)) + "\n\nSome content here.\n\n"
+				for j := 0; j < tt.linksPer; j++ {
+					targetIdx := (i + j + 1) % tt.pageCount
+					content += "Link to [page" + string(rune('0'+targetIdx%10)) + "](page" +
+						string(rune('0'+targetIdx%10)) + "/content)\n"
+				}
+
+				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+					b.Fatalf("Failed to write file: %v", err)
+				}
+			}
+
+			Config.Source = tmpDir
+			_ = clearPagesCache(nil)
+
+			// Reset timer after setup
+			b.ResetTimer()
+
+			// Run benchmark
+			for i := 0; i < b.N; i++ {
+				_ = FindBrokenLinks(context.Background())
+			}
+		})
+	}
+}
+
+// BenchmarkIsExternalLink measures performance of external link detection.
+// This function is called for every link in every page, so it's a hot path.
+func BenchmarkIsExternalLink(b *testing.B) {
+	tests := []struct {
+		name string
+		dest string
+	}{
+		{"http URL", "http://example.com/path/to/page"},
+		{"https URL", "https://example.com/very/long/path/to/resource"},
+		{"mailto", "mailto:user@example.com"},
+		{"internal relative", "page-name"},
+		{"internal absolute", "/folder/page-name"},
+		{"protocol relative", "//cdn.example.com/resource"},
+		{"tel link", "tel:+1234567890"},
+		{"ftp link", "ftp://files.example.com/file.zip"},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = isExternalLink(tt.dest)
+			}
+		})
+	}
+}
+
+// BenchmarkLinkToPageName measures performance of link-to-page-name conversion.
+// Like isExternalLink, this is called for every internal link.
+func BenchmarkLinkToPageName(b *testing.B) {
+	tests := []struct {
+		name string
+		dest string
+	}{
+		{"simple", "page-name"},
+		{"with slash", "/page-name"},
+		{"with extension", "page-name.md"},
+		{"with fragment", "page-name#section"},
+		{"with query", "page-name?foo=bar"},
+		{"folder path", "folder/subfolder/page"},
+		{"complex", "/folder/page.md#anchor?query=value"},
+		{"redundant slashes", "//folder//subfolder//page"},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				_ = linkToPageName(tt.dest)
+			}
+		})
+	}
+}
+
+// BenchmarkFindBrokenLinks_BrokenRatio tests performance with varying ratios of broken links.
+// Pages with many broken links might perform differently due to allocation patterns.
+func BenchmarkFindBrokenLinks_BrokenRatio(b *testing.B) {
+	tests := []struct {
+		name        string
+		pageCount   int
+		brokenRatio float64 // Ratio of links that are broken (0.0 to 1.0)
+	}{
+		{"no broken links", 50, 0.0},
+		{"10% broken", 50, 0.1},
+		{"50% broken", 50, 0.5},
+		{"all broken", 50, 1.0},
+	}
+
+	for _, tt := range tests {
+		b.Run(tt.name, func(b *testing.B) {
+			tmpDir := b.TempDir()
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+
+			if err := os.Chdir(tmpDir); err != nil {
+				b.Fatalf("Failed to change directory: %v", err)
+			}
+
+			linksPerPage := 10
+			brokenCount := int(float64(linksPerPage) * tt.brokenRatio)
+			validCount := linksPerPage - brokenCount
+
+			// Create pages
+			for i := 0; i < tt.pageCount; i++ {
+				filename := "page" + string(rune('0'+(i%10))) + ".md"
+				content := "# Page " + string(rune('0'+i)) + "\n\n"
+
+				// Add valid links
+				for j := 0; j < validCount; j++ {
+					targetIdx := (i + j + 1) % tt.pageCount
+					content += "[link](page" + string(rune('0'+(targetIdx%10))) + ")\n"
+				}
+
+				// Add broken links
+				for j := 0; j < brokenCount; j++ {
+					content += "[broken](nonexistent-page-" + string(rune('0'+j)) + ")\n"
+				}
+
+				if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+					b.Fatalf("Failed to write file: %v", err)
+				}
+			}
+
+			Config.Source = tmpDir
+			_ = clearPagesCache(nil)
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				_ = FindBrokenLinks(context.Background())
+			}
+		})
+	}
+}
