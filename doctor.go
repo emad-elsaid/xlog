@@ -7,11 +7,34 @@ import (
 	"path/filepath"
 )
 
+// DiagnosticResult holds the results of running diagnostics.
+type DiagnosticResult struct {
+	Issues   []string
+	Warnings []string
+}
+
+// HasCriticalIssues returns true if there are any critical issues.
+func (d DiagnosticResult) HasCriticalIssues() bool {
+	return len(d.Issues) > 0
+}
+
+// IsHealthy returns true if there are no issues or warnings.
+func (d DiagnosticResult) IsHealthy() bool {
+	return len(d.Issues) == 0 && len(d.Warnings) == 0
+}
+
 // Doctor runs diagnostic checks on the xlog configuration and environment.
 // It reports potential issues that could affect xlog's operation.
+// This is the CLI entry point that calls os.Exit for critical issues.
 func Doctor() {
 	slog.Info("Running xlog diagnostics...")
+	result := runDiagnostics()
+	printDiagnosticSummary(result.Issues, result.Warnings)
+}
 
+// runDiagnostics performs all diagnostic checks and returns the results.
+// This function is testable as it doesn't call os.Exit.
+func runDiagnostics() DiagnosticResult {
 	issues := []string{}
 	warnings := []string{}
 
@@ -22,7 +45,10 @@ func Doctor() {
 	checkWritePermissions(&issues)
 	checkBindAddress(&issues)
 
-	printDiagnosticSummary(issues, warnings)
+	return DiagnosticResult{
+		Issues:   issues,
+		Warnings: warnings,
+	}
 }
 
 func checkSourceDirectory(issues *[]string) {

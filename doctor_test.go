@@ -10,7 +10,6 @@ func TestDoctor(t *testing.T) {
 	tests := []struct {
 		name          string
 		setup         func(t *testing.T) (cleanup func())
-		expectExit    bool
 		expectIssues  bool
 		expectWarning bool
 	}{
@@ -22,6 +21,7 @@ func TestDoctor(t *testing.T) {
 				origIndex := Config.Index
 				origNotFound := Config.NotFoundPage
 				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
 
 				// Create temp directory with all required files
 				tmpDir := t.TempDir()
@@ -29,6 +29,7 @@ func TestDoctor(t *testing.T) {
 				Config.Index = "index"
 				Config.NotFoundPage = "404"
 				Config.Readonly = false
+				Config.BindAddress = "127.0.0.1:3000"
 
 				// Create index and 404 pages
 				indexPath := filepath.Join(tmpDir, "index.md")
@@ -46,9 +47,9 @@ func TestDoctor(t *testing.T) {
 					Config.Index = origIndex
 					Config.NotFoundPage = origNotFound
 					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
 				}
 			},
-			expectExit:    false,
 			expectIssues:  false,
 			expectWarning: false,
 		},
@@ -57,26 +58,36 @@ func TestDoctor(t *testing.T) {
 			setup: func(t *testing.T) func() {
 				origSource := Config.Source
 				origIndex := Config.Index
+				origNotFound := Config.NotFoundPage
 				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
 
 				tmpDir := t.TempDir()
 				Config.Source = tmpDir
 				Config.Index = "index"
+				Config.NotFoundPage = "404"
 				Config.Readonly = true
+				Config.BindAddress = "127.0.0.1:3000"
 
-				// Create index page
+				// Create index and 404 pages
 				indexPath := filepath.Join(tmpDir, "index.md")
 				if err := os.WriteFile(indexPath, []byte("# Index"), 0644); err != nil {
 					t.Fatalf("Failed to create index: %v", err)
 				}
 
+				notFoundPath := filepath.Join(tmpDir, "404.md")
+				if err := os.WriteFile(notFoundPath, []byte("# Not Found"), 0644); err != nil {
+					t.Fatalf("Failed to create 404 page: %v", err)
+				}
+
 				return func() {
 					Config.Source = origSource
 					Config.Index = origIndex
+					Config.NotFoundPage = origNotFound
 					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
 				}
 			},
-			expectExit:    false,
 			expectIssues:  false,
 			expectWarning: false,
 		},
@@ -86,11 +97,13 @@ func TestDoctor(t *testing.T) {
 				origSource := Config.Source
 				origIndex := Config.Index
 				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
 
 				tmpDir := t.TempDir()
 				Config.Source = tmpDir
 				Config.Index = "nonexistent"
-				Config.Readonly = true // readonly to avoid write permission check
+				Config.Readonly = true
+				Config.BindAddress = "127.0.0.1:3000"
 
 				// Create some markdown file but not the index
 				if err := os.WriteFile(filepath.Join(tmpDir, "other.md"), []byte("# Other"), 0644); err != nil {
@@ -101,9 +114,9 @@ func TestDoctor(t *testing.T) {
 					Config.Source = origSource
 					Config.Index = origIndex
 					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
 				}
 			},
-			expectExit:    false,
 			expectIssues:  false,
 			expectWarning: true,
 		},
@@ -114,12 +127,14 @@ func TestDoctor(t *testing.T) {
 				origIndex := Config.Index
 				origNotFound := Config.NotFoundPage
 				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
 
 				tmpDir := t.TempDir()
 				Config.Source = tmpDir
 				Config.Index = "index"
 				Config.NotFoundPage = "nonexistent-404"
 				Config.Readonly = true
+				Config.BindAddress = "127.0.0.1:3000"
 
 				// Create index page
 				indexPath := filepath.Join(tmpDir, "index.md")
@@ -132,9 +147,9 @@ func TestDoctor(t *testing.T) {
 					Config.Index = origIndex
 					Config.NotFoundPage = origNotFound
 					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
 				}
 			},
-			expectExit:    false,
 			expectIssues:  false,
 			expectWarning: true,
 		},
@@ -143,10 +158,12 @@ func TestDoctor(t *testing.T) {
 			setup: func(t *testing.T) func() {
 				origSource := Config.Source
 				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
 
 				tmpDir := t.TempDir()
 				Config.Source = tmpDir
 				Config.Readonly = true
+				Config.BindAddress = "127.0.0.1:3000"
 
 				// Create directory but no markdown files
 				// Create a non-markdown file
@@ -157,11 +174,52 @@ func TestDoctor(t *testing.T) {
 				return func() {
 					Config.Source = origSource
 					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
 				}
 			},
-			expectExit:    false,
 			expectIssues:  false,
 			expectWarning: true,
+		},
+		{
+			name: "nonexistent source directory shows critical issue",
+			setup: func(t *testing.T) func() {
+				origSource := Config.Source
+				origBindAddress := Config.BindAddress
+				origReadonly := Config.Readonly
+
+				Config.Source = "/nonexistent/path/to/nowhere"
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = true // Prevent write check on non-existent dir
+
+				return func() {
+					Config.Source = origSource
+					Config.BindAddress = origBindAddress
+					Config.Readonly = origReadonly
+				}
+			},
+			expectIssues:  true,
+			expectWarning: true, // Will also have warnings about missing files
+		},
+		{
+			name: "empty bind address shows critical issue",
+			setup: func(t *testing.T) func() {
+				origSource := Config.Source
+				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
+
+				tmpDir := t.TempDir()
+				Config.Source = tmpDir
+				Config.Readonly = true
+				Config.BindAddress = ""
+
+				return func() {
+					Config.Source = origSource
+					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
+				}
+			},
+			expectIssues:  true,
+			expectWarning: true, // Empty dir will have warnings
 		},
 	}
 
@@ -170,26 +228,27 @@ func TestDoctor(t *testing.T) {
 			cleanup := tc.setup(t)
 			defer cleanup()
 
-			// Doctor() prints to stdout and may call os.Exit
-			// We'll test that it runs without panic for now
-			// In a real scenario, we'd capture stdout and check for specific messages
+			// Call runDiagnostics directly to test without os.Exit
+			result := runDiagnostics()
 
-			// Note: This test doesn't capture os.Exit() calls
-			// For production, we'd refactor Doctor() to return errors instead
-			// of calling os.Exit directly, but that would break the interface
+			hasIssues := len(result.Issues) > 0
+			hasWarnings := len(result.Warnings) > 0
 
-			// Just ensure Doctor doesn't panic
-			defer func() {
-				if r := recover(); r != nil {
-					t.Errorf("Doctor() panicked: %v", r)
-				}
-			}()
+			if tc.expectIssues && !hasIssues {
+				t.Error("Expected critical issues but found none")
+			}
 
-			// For tests that expect exit, we'd need to mock os.Exit
-			// Skipping exit verification for simplicity
-			// Note: Doctor() prints to stdout, so test output will be verbose
-			// In production, we'd use dependency injection for output
-			// For now, just verify config validation logic separately in specific tests
+			if !tc.expectIssues && hasIssues {
+				t.Errorf("Expected no critical issues but found: %v", result.Issues)
+			}
+
+			if tc.expectWarning && !hasWarnings {
+				t.Error("Expected warnings but found none")
+			}
+
+			if !tc.expectWarning && hasWarnings {
+				t.Errorf("Expected no warnings but found: %v", result.Warnings)
+			}
 		})
 	}
 }
@@ -421,6 +480,235 @@ func TestDoctor_BindAddressValidation(t *testing.T) {
 
 			if !tc.shouldFail && isEmpty {
 				t.Error("Expected bind address validation to pass, but it failed")
+			}
+		})
+	}
+}
+
+func TestDiagnosticResult_HasCriticalIssues(t *testing.T) {
+	tests := []struct {
+		name     string
+		result   DiagnosticResult
+		expected bool
+	}{
+		{
+			name:     "no issues",
+			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{}},
+			expected: false,
+		},
+		{
+			name:     "has one issue",
+			result:   DiagnosticResult{Issues: []string{"critical error"}, Warnings: []string{}},
+			expected: true,
+		},
+		{
+			name:     "has multiple issues",
+			result:   DiagnosticResult{Issues: []string{"error1", "error2"}, Warnings: []string{}},
+			expected: true,
+		},
+		{
+			name:     "has warnings but no issues",
+			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.result.HasCriticalIssues(); got != tc.expected {
+				t.Errorf("HasCriticalIssues() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestDiagnosticResult_IsHealthy(t *testing.T) {
+	tests := []struct {
+		name     string
+		result   DiagnosticResult
+		expected bool
+	}{
+		{
+			name:     "healthy - no issues or warnings",
+			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{}},
+			expected: true,
+		},
+		{
+			name:     "unhealthy - has issues",
+			result:   DiagnosticResult{Issues: []string{"error"}, Warnings: []string{}},
+			expected: false,
+		},
+		{
+			name:     "unhealthy - has warnings",
+			result:   DiagnosticResult{Issues: []string{}, Warnings: []string{"warning"}},
+			expected: false,
+		},
+		{
+			name:     "unhealthy - has both",
+			result:   DiagnosticResult{Issues: []string{"error"}, Warnings: []string{"warning"}},
+			expected: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.result.IsHealthy(); got != tc.expected {
+				t.Errorf("IsHealthy() = %v, want %v", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestRunDiagnostics_Comprehensive(t *testing.T) {
+	tests := []struct {
+		name           string
+		setup          func(t *testing.T) (cleanup func())
+		expectHealthy  bool
+		issueCount     int
+		warningCount   int
+		expectIssue    string   // Expected substring in issues
+		expectWarnings []string // Expected substrings in warnings
+	}{
+		{
+			name: "completely healthy system",
+			setup: func(t *testing.T) func() {
+				tmpDir := t.TempDir()
+
+				origSource := Config.Source
+				origIndex := Config.Index
+				origNotFound := Config.NotFoundPage
+				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
+
+				Config.Source = tmpDir
+				Config.Index = "index"
+				Config.NotFoundPage = "404"
+				Config.Readonly = false
+				Config.BindAddress = "127.0.0.1:3000"
+
+				// Create all required files
+				_ = os.WriteFile(filepath.Join(tmpDir, "index.md"), []byte("# Index"), 0644)
+				_ = os.WriteFile(filepath.Join(tmpDir, "404.md"), []byte("# 404"), 0644)
+
+				return func() {
+					Config.Source = origSource
+					Config.Index = origIndex
+					Config.NotFoundPage = origNotFound
+					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
+				}
+			},
+			expectHealthy: true,
+			issueCount:    0,
+			warningCount:  0,
+		},
+		{
+			name: "multiple warnings, no critical issues",
+			setup: func(t *testing.T) func() {
+				tmpDir := t.TempDir()
+
+				origSource := Config.Source
+				origIndex := Config.Index
+				origNotFound := Config.NotFoundPage
+				origReadonly := Config.Readonly
+				origBindAddress := Config.BindAddress
+
+				Config.Source = tmpDir
+				Config.Index = "missing"
+				Config.NotFoundPage = "missing404"
+				Config.Readonly = true
+				Config.BindAddress = "127.0.0.1:3000"
+
+				// Don't create files - will trigger warnings
+
+				return func() {
+					Config.Source = origSource
+					Config.Index = origIndex
+					Config.NotFoundPage = origNotFound
+					Config.Readonly = origReadonly
+					Config.BindAddress = origBindAddress
+				}
+			},
+			expectHealthy: false,
+			issueCount:    0,
+			warningCount:  3, // Missing index, missing 404, no markdown files
+			expectWarnings: []string{
+				"Index page not found",
+				"404 page not found",
+				"No markdown files",
+			},
+		},
+		{
+			name: "file instead of directory as source",
+			setup: func(t *testing.T) func() {
+				tmpDir := t.TempDir()
+				filePath := filepath.Join(tmpDir, "notadir")
+				_ = os.WriteFile(filePath, []byte("test"), 0644)
+
+				origSource := Config.Source
+				origBindAddress := Config.BindAddress
+				origReadonly := Config.Readonly
+
+				Config.Source = filePath
+				Config.BindAddress = "127.0.0.1:3000"
+				Config.Readonly = true // Prevent write check on non-directory
+
+				return func() {
+					Config.Source = origSource
+					Config.BindAddress = origBindAddress
+					Config.Readonly = origReadonly
+				}
+			},
+			expectHealthy: false,
+			issueCount:    1,
+			expectIssue:   "not a directory",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cleanup := tc.setup(t)
+			defer cleanup()
+
+			result := runDiagnostics()
+
+			if got := result.IsHealthy(); got != tc.expectHealthy {
+				t.Errorf("IsHealthy() = %v, want %v (issues: %v, warnings: %v)",
+					got, tc.expectHealthy, result.Issues, result.Warnings)
+			}
+
+			if len(result.Issues) != tc.issueCount {
+				t.Errorf("Expected %d issues, got %d: %v", tc.issueCount, len(result.Issues), result.Issues)
+			}
+
+			if tc.warningCount > 0 && len(result.Warnings) != tc.warningCount {
+				t.Errorf("Expected %d warnings, got %d: %v", tc.warningCount, len(result.Warnings), result.Warnings)
+			}
+
+			if tc.expectIssue != "" {
+				found := false
+				for _, issue := range result.Issues {
+					if contains(issue, tc.expectIssue) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected issue containing %q, but got: %v", tc.expectIssue, result.Issues)
+				}
+			}
+
+			for _, expectedWarning := range tc.expectWarnings {
+				found := false
+				for _, warning := range result.Warnings {
+					if contains(warning, expectedWarning) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, but got: %v", expectedWarning, result.Warnings)
+				}
 			}
 		})
 	}
