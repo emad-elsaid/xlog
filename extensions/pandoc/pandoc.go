@@ -23,9 +23,10 @@ const (
 	extODT = ".odt"
 	extOrg = ".org"
 	extRST = ".rst"
+	extRTF = ".rtf"
 )
 
-var SUPPORTED_EXT = []string{extOrg, extRST, ".rtf", extODT}
+var SUPPORTED_EXT = []string{extOrg, extRST, extRTF, extODT}
 var pandoc_support bool
 
 func init() {
