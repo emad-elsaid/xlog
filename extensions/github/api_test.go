@@ -313,6 +313,7 @@ func TestClient_Integration(t *testing.T) {
 
 	if c == nil {
 		t.Fatal("client() returned nil")
+		return
 	}
 
 	// Verify it's a proper GitHub client

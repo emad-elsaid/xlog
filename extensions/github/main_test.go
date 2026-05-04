@@ -196,6 +196,7 @@ func TestGithubFlagRegistration(t *testing.T) {
 	f := flag.Lookup("github.url")
 	if f == nil {
 		t.Fatal("github.url flag should be registered")
+		return
 	}
 
 	expectedUsage := "Repository url for 'edit on Github' quick action e.g https://github.com/emad-elsaid/xlog/edit/master/docs"
