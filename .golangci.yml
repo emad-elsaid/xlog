@@ -1,3 +1,5 @@
+version: 2
+
 run:
   timeout: 5m
   modules-download-mode: readonly
@@ -15,47 +17,52 @@ linters:
     - gocyclo
     - godot
     - goconst
+
+formatters:
+  enable:
     - gofmt
 
-linters-settings:
-  errcheck:
-    check-blank: false
-    check-type-assertions: false
-  
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
-  
-  gocyclo:
-    min-complexity: 15
-  
-  gocritic:
-    enabled-checks:
-      - appendCombine
-      - boolExprSimplify
-      - dupImport
-      - equalFold
-      - httpNoBody
-      - importShadow
-      - rangeValCopy
-      - sloppyLen
-      - stringConcatSimplify
-      - typeUnparen
-      - unnamedResult
+linters:
+  settings:
+    errcheck:
+      check-blank: false
+      check-type-assertions: false
+    
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+    
+    gocyclo:
+      min-complexity: 15
+    
+    gocritic:
+      enabled-checks:
+        - appendCombine
+        - boolExprSimplify
+        - dupImport
+        - equalFold
+        - httpNoBody
+        - importShadow
+        - rangeValCopy
+        - sloppyLen
+        - stringConcatSimplify
+        - typeUnparen
+        - unnamedResult
+
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - errcheck
+      - path: markdown/
+        linters:
+          - all
+      - path: (_benchmark|_tools)/
+        linters:
+          - forbidigo
 
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gosec
-        - errcheck
-    - path: markdown/
-      linters:
-        - all
-    - path: (_benchmark|_tools)/
-      linters:
-        - forbidigo
-  
   max-issues-per-linter: 0
   max-same-issues: 0
