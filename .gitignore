@@ -5,3 +5,4 @@ public/ignored.js
 cmd/assets/node_modules
 /cover.out
 *.out
+/xlog
