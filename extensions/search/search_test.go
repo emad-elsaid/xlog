@@ -467,3 +467,217 @@ func createTestFile(t *testing.T, dir, filename, content string) {
 		t.Fatalf("Failed to create test file %s: %v", filename, err)
 	}
 }
+
+// BenchmarkSearchMinimalKeyword benchmarks search with minimum length keyword.
+func BenchmarkSearchMinimalKeyword(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "test content abc def")
+	createBenchFile(b, dir, "page2.md", "another test page xyz")
+	createBenchFile(b, dir, "page3.md", "more abc test content")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "abc")
+		_ = results
+	}
+}
+
+// BenchmarkSearchLongKeyword benchmarks search with longer keyword.
+func BenchmarkSearchLongKeyword(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "contains programming language")
+	createBenchFile(b, dir, "page2.md", "other content here")
+	createBenchFile(b, dir, "page3.md", "programming tutorial")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "programming")
+		_ = results
+	}
+}
+
+// BenchmarkSearchSpecialChars benchmarks search with regex special characters.
+func BenchmarkSearchSpecialChars(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "formula a+b=c here")
+	createBenchFile(b, dir, "page2.md", "another formula")
+	createBenchFile(b, dir, "page3.md", "contains a+b too")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "a+b")
+		_ = results
+	}
+}
+
+// BenchmarkSearchScalability benchmarks search performance with varying page counts.
+func BenchmarkSearchScalability(b *testing.B) {
+	sizes := []struct {
+		name      string
+		pageCount int
+	}{
+		{"10pages", 10},
+		{"50pages", 50},
+		{"100pages", 100},
+	}
+
+	for _, sz := range sizes {
+		b.Run(sz.name, func(b *testing.B) {
+			dir := b.TempDir()
+
+			// Create N pages with varied content
+			for i := 0; i < sz.pageCount; i++ {
+				content := ""
+				if i%3 == 0 {
+					content = "contains keyword test here"
+				} else {
+					content = "other content without match"
+				}
+				filename := "page" + string(rune('0'+i%10)) + string(rune('a'+i/10)) + ".md"
+				createBenchFile(b, dir, filename, content)
+			}
+
+			origDir, _ := os.Getwd()
+			defer func() { _ = os.Chdir(origDir) }()
+			if err := os.Chdir(dir); err != nil {
+				b.Fatalf("Failed to change directory: %v", err)
+			}
+
+			ctx := context.Background()
+			b.ResetTimer()
+			b.ReportAllocs()
+
+			for i := 0; i < b.N; i++ {
+				results := search(ctx, "test")
+				_ = results
+			}
+		})
+	}
+}
+
+// BenchmarkSearchNoMatch benchmarks search with no matching results.
+func BenchmarkSearchNoMatch(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "golang programming")
+	createBenchFile(b, dir, "page2.md", "python scripting")
+	createBenchFile(b, dir, "page3.md", "javascript coding")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "rust")
+		_ = results
+	}
+}
+
+// BenchmarkSearchFilenameMatch benchmarks search matching page names.
+func BenchmarkSearchFilenameMatch(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "golang-guide.md", "tutorial content")
+	createBenchFile(b, dir, "python-basics.md", "intro content")
+	createBenchFile(b, dir, "golang-advanced.md", "expert content")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "golang")
+		_ = results
+	}
+}
+
+// BenchmarkSearchContentMatch benchmarks search matching page content.
+func BenchmarkSearchContentMatch(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "this is a tutorial about golang programming")
+	createBenchFile(b, dir, "page2.md", "python is another language")
+	createBenchFile(b, dir, "page3.md", "golang is simple and efficient")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		results := search(ctx, "golang")
+		_ = results
+	}
+}
+
+// BenchmarkSearchShortKeyword benchmarks search with keyword below minimum.
+func BenchmarkSearchShortKeyword(b *testing.B) {
+	dir := b.TempDir()
+	createBenchFile(b, dir, "page1.md", "test content")
+
+	origDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(origDir) }()
+	if err := os.Chdir(dir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	ctx := context.Background()
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		// Should return early without regex compilation
+		results := search(ctx, "ab")
+		_ = results
+	}
+}
+
+// Helper function for benchmark file creation.
+func createBenchFile(b *testing.B, dir, filename, content string) {
+	b.Helper()
+	path := filepath.Join(dir, filename)
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		b.Fatalf("Failed to create benchmark file %s: %v", filename, err)
+	}
+}
