@@ -30,6 +30,19 @@ func Start(ctx context.Context) {
 		osExit(0)
 	}
 
+	// Handle doctor flag early before extension initialization but after basic setup
+	if Config.RunDoctor {
+		// Setup minimal logger for doctor output
+		level := slogor.SetLevel(slog.LevelInfo)
+		timeFmt := slogor.SetTimeFormat(time.TimeOnly)
+		handler := slogor.NewHandler(os.Stderr, level, timeFmt)
+		logger := slog.New(handler)
+		slog.SetDefault(logger)
+
+		Doctor()
+		osExit(0)
+	}
+
 	// Setup logger
 	level := slogor.SetLevel(slog.LevelDebug)
 	timeFmt := slogor.SetTimeFormat(time.TimeOnly)
