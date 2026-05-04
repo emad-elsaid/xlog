@@ -802,3 +802,288 @@ func (m *mockRegistry) Register(kind ast.NodeKind, handler renderer.NodeRenderer
 		handler renderer.NodeRendererFunc
 	}{kind, handler})
 }
+
+// ==================== Benchmarks ====================
+
+// BenchmarkUpdatePagesList measures the performance of rebuilding the pages cache.
+// This is critical as it runs on every page modification.
+func BenchmarkUpdatePagesList(b *testing.B) {
+	benchmarks := []struct {
+		name      string
+		pageCount int
+	}{
+		{"10_pages", 10},
+		{"50_pages", 50},
+		{"100_pages", 100},
+		{"500_pages", 500},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			cleanup := setupBenchEnvironment(b, bm.pageCount)
+			defer cleanup()
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				err := UpdatePagesList(nil)
+				if err != nil {
+					b.Fatalf("UpdatePagesList failed: %v", err)
+				}
+			}
+		})
+	}
+}
+
+// BenchmarkContainLinkToFrom measures link detection performance.
+// This is critical for backlinks calculation which scans all pages.
+func BenchmarkContainLinkToFrom(b *testing.B) {
+	sourcePage := &mockPage{name: "source/page.md", filename: "source/page.md"}
+	targetPage := &mockPage{name: "target/page.md", filename: "target/page.md"}
+
+	benchmarks := []struct {
+		name      string
+		createAST func() ast.Node
+	}{
+		{
+			name: "single_link",
+			createAST: func() ast.Node {
+				link := ast.NewLink()
+				link.Destination = []byte("../target/page.md")
+				link.AppendChild(link, ast.NewString([]byte("link text")))
+				para := ast.NewParagraph()
+				para.AppendChild(para, link)
+				return para
+			},
+		},
+		{
+			name: "no_link",
+			createAST: func() ast.Node {
+				para := ast.NewParagraph()
+				para.AppendChild(para, ast.NewString([]byte("Just some text without links")))
+				return para
+			},
+		},
+		{
+			name: "deep_nesting_with_link",
+			createAST: func() ast.Node {
+				// Create deeply nested structure
+				root := ast.NewDocument()
+				for i := 0; i < 5; i++ {
+					section := ast.NewParagraph()
+					for j := 0; j < 10; j++ {
+						text := ast.NewString([]byte("text "))
+						section.AppendChild(section, text)
+					}
+					// Add link in middle
+					if i == 2 {
+						link := ast.NewLink()
+						link.Destination = []byte("../target/page.md")
+						link.AppendChild(link, ast.NewString([]byte("link")))
+						section.AppendChild(section, link)
+					}
+					root.AppendChild(root, section)
+				}
+				return root
+			},
+		},
+		{
+			name: "many_links_no_match",
+			createAST: func() ast.Node {
+				para := ast.NewParagraph()
+				for i := 0; i < 20; i++ {
+					link := ast.NewLink()
+					link.Destination = []byte("/other/page.md")
+					link.AppendChild(link, ast.NewString([]byte("link")))
+					para.AppendChild(para, link)
+					para.AppendChild(para, ast.NewString([]byte(" ")))
+				}
+				return para
+			},
+		},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			node := bm.createAST()
+			b.ResetTimer()
+
+			for i := 0; i < b.N; i++ {
+				_ = containLinkToFrom(node, sourcePage, targetPage)
+			}
+		})
+	}
+}
+
+// BenchmarkBacklinksSection measures backlinks calculation performance.
+// This runs on every page render to show which pages link to the current page.
+func BenchmarkBacklinksSection(b *testing.B) {
+	benchmarks := []struct {
+		name      string
+		pageCount int
+		linkRatio float64 // Percentage of pages that link to target
+	}{
+		{"10_pages_50pct_linked", 10, 0.5},
+		{"50_pages_20pct_linked", 50, 0.2},
+		{"100_pages_10pct_linked", 100, 0.1},
+		{"100_pages_50pct_linked", 100, 0.5},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			cleanup := setupBenchEnvironmentWithLinks(b, bm.pageCount, bm.linkRatio)
+			defer cleanup()
+
+			targetPage := xlog.NewPage("target")
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				// Recover from template panic in benchmark
+				func() {
+					defer func() { _ = recover() }()
+					_ = backlinksSection(targetPage)
+				}()
+			}
+		})
+	}
+}
+
+// BenchmarkPageLinkParser measures autolink parsing performance.
+// This runs during markdown parsing for every potential page name.
+func BenchmarkPageLinkParser(b *testing.B) {
+	// Setup mock pages
+	autolinkPage_lck.Lock()
+	autolinkPages = []*NormalizedPage{
+		{
+			page:           &mockPage{name: "very-long-page-name.md", filename: "very-long-page-name.md"},
+			normalizedName: "very-long-page-name.md",
+		},
+		{
+			page:           &mockPage{name: "medium.md", filename: "medium.md"},
+			normalizedName: "medium.md",
+		},
+		{
+			page:           &mockPage{name: "a.md", filename: "a.md"},
+			normalizedName: "a.md",
+		},
+	}
+	autolinkPage_lck.Unlock()
+
+	p := &pageLinkParser{}
+
+	benchmarks := []struct {
+		name  string
+		input string
+	}{
+		{"match_first", " very-long-page-name.md is great"},
+		{"match_last", " a.md is short"},
+		{"no_match", " nonexistent-page.md"},
+		{"match_with_continuation", " medium.md continues here"},
+	}
+
+	for _, bm := range benchmarks {
+		b.Run(bm.name, func(b *testing.B) {
+			source := []byte(bm.input)
+			parent := ast.NewParagraph()
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				reader := text.NewReader(source)
+				pc := parser.NewContext()
+				_ = p.Parse(parent, reader, pc)
+			}
+		})
+	}
+}
+
+// setupBenchEnvironment creates a temporary directory with the specified number of pages.
+func setupBenchEnvironment(b *testing.B, pageCount int) func() {
+	b.Helper()
+
+	tmpDir := b.TempDir()
+	originalWd, _ := os.Getwd()
+
+	if err := os.Chdir(tmpDir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	// Create pages
+	for i := 0; i < pageCount; i++ {
+		pageName := ""
+		switch {
+		case i%10 == 0:
+			pageName = "very-long-page-name-with-many-words.md"
+		case i%3 == 0:
+			pageName = "medium-length.md"
+		default:
+			pageName = "short.md"
+		}
+
+		filename := pageName
+		if i > 0 {
+			filename = pageName[:len(pageName)-3] + "-" + string(rune('a'+i%26)) + ".md"
+		}
+
+		content := "# Page " + filename + "\nTest content for benchmarking"
+		if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+			b.Fatalf("Failed to write file: %v", err)
+		}
+	}
+
+	originalIndex := xlog.Config.Index
+	xlog.Config.Index = "index"
+
+	cleanup := func() {
+		xlog.Config.Index = originalIndex
+		if err := os.Chdir(originalWd); err != nil {
+			b.Errorf("Failed to restore directory: %v", err)
+		}
+	}
+
+	return cleanup
+}
+
+// setupBenchEnvironmentWithLinks creates pages where some link to a target page.
+func setupBenchEnvironmentWithLinks(b *testing.B, pageCount int, linkRatio float64) func() {
+	b.Helper()
+
+	tmpDir := b.TempDir()
+	originalWd, _ := os.Getwd()
+
+	if err := os.Chdir(tmpDir); err != nil {
+		b.Fatalf("Failed to change directory: %v", err)
+	}
+
+	// Create target page
+	targetContent := "# Target Page\nThis is the target"
+	if err := os.WriteFile("target.md", []byte(targetContent), 0600); err != nil {
+		b.Fatalf("Failed to write target: %v", err)
+	}
+
+	// Create other pages
+	for i := 0; i < pageCount; i++ {
+		filename := "page-" + string(rune('a'+i%26)) + string(rune('a'+(i/26)%26)) + ".md"
+
+		content := "# Page " + filename + "\n"
+		// Some pages link to target based on linkRatio
+		if float64(i)/float64(pageCount) < linkRatio {
+			content += "Link to [target](/target)\n"
+		}
+		content += "Regular content here\n"
+
+		if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+			b.Fatalf("Failed to write file: %v", err)
+		}
+	}
+
+	originalIndex := xlog.Config.Index
+	xlog.Config.Index = "index"
+
+	cleanup := func() {
+		xlog.Config.Index = originalIndex
+		if err := os.Chdir(originalWd); err != nil {
+			b.Errorf("Failed to restore directory: %v", err)
+		}
+	}
+
+	return cleanup
+}
