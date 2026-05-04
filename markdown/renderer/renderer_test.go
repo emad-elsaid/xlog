@@ -448,3 +448,209 @@ func TestRenderer_SetOptionerPropagation(t *testing.T) {
 		})
 	}
 }
+
+// Benchmark tests for renderer performance characteristics.
+
+func BenchmarkNewRenderer(b *testing.B) {
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		_ = NewRenderer()
+	}
+}
+
+func BenchmarkNewRenderer_WithOptions(b *testing.B) {
+	opts := []Option{
+		WithOption(OptionName("opt1"), "value1"),
+		WithOption(OptionName("opt2"), 42),
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = NewRenderer(opts...)
+	}
+}
+
+func BenchmarkNewRenderer_WithNodeRenderers(b *testing.B) {
+	renderer := &mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			return ast.WalkContinue, nil
+		},
+	}
+	opts := []Option{
+		WithNodeRenderers(util.Prioritized(renderer, 100)),
+	}
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = NewRenderer(opts...)
+	}
+}
+
+func BenchmarkRenderer_Render_SimpleNode(b *testing.B) {
+	r := NewRenderer(WithNodeRenderers(util.Prioritized(&mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			if entering {
+				_, _ = w.WriteString("output")
+			}
+			return ast.WalkContinue, nil
+		},
+	}, 100)))
+
+	node := newMockNode(mockKind)
+	source := []byte("test")
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, node)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, node)
+	}
+}
+
+func BenchmarkRenderer_Render_WithChildren(b *testing.B) {
+	r := NewRenderer(WithNodeRenderers(util.Prioritized(&mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			if entering && n.Kind() == mockKind {
+				_, _ = w.WriteString("child")
+			}
+			return ast.WalkContinue, nil
+		},
+	}, 100)))
+
+	doc := ast.NewDocument()
+	for i := 0; i < 10; i++ {
+		child := newMockNode(mockKind)
+		doc.AppendChild(doc, child)
+	}
+	source := []byte("test")
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, doc)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, doc)
+	}
+}
+
+func BenchmarkRenderer_Render_DeepTree(b *testing.B) {
+	r := NewRenderer(WithNodeRenderers(util.Prioritized(&mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			if entering && n.Kind() == mockKind {
+				_, _ = w.WriteString("x")
+			}
+			return ast.WalkContinue, nil
+		},
+	}, 100)))
+
+	// Build a deep tree structure.
+	doc := ast.NewDocument()
+	current := ast.Node(doc)
+	for i := 0; i < 50; i++ {
+		child := newMockNode(mockKind)
+		current.AppendChild(current, child)
+		current = ast.Node(child)
+	}
+	source := []byte("test")
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, doc)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, doc)
+	}
+}
+
+func BenchmarkRenderer_Render_LargeSource(b *testing.B) {
+	r := NewRenderer(WithNodeRenderers(util.Prioritized(&mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			if entering {
+				_, _ = w.Write(source)
+			}
+			return ast.WalkContinue, nil
+		},
+	}, 100)))
+
+	node := newMockNode(mockKind)
+	// Create 10KB source data.
+	source := bytes.Repeat([]byte("Lorem ipsum dolor sit amet, consectetur adipiscing elit. "), 200)
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, node)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, node)
+	}
+}
+
+func BenchmarkRenderer_Render_MultipleRenderers(b *testing.B) {
+	// Use the same mockKind for simplicity - the benchmark measures
+	// overhead of multiple registered renderers, not different node types.
+	r := NewRenderer(
+		WithNodeRenderers(
+			util.Prioritized(&mockNodeRenderer{
+				renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+					if entering && n.Kind() == mockKind {
+						_, _ = w.WriteString("A")
+					}
+					return ast.WalkContinue, nil
+				},
+			}, 100),
+		),
+	)
+
+	doc := ast.NewDocument()
+	for i := 0; i < 10; i++ {
+		child := newMockNode(mockKind)
+		doc.AppendChild(doc, child)
+	}
+	source := []byte("test")
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, doc)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, doc)
+	}
+}
+
+func BenchmarkRenderer_Render_EmptyDocument(b *testing.B) {
+	r := NewRenderer(WithNodeRenderers(util.Prioritized(&mockNodeRenderer{
+		renderFunc: func(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+			return ast.WalkContinue, nil
+		},
+	}, 100)))
+
+	doc := ast.NewDocument()
+	source := []byte{}
+	var buf bytes.Buffer
+
+	// First render to initialize.
+	_ = r.Render(&buf, source, doc)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_ = r.Render(&buf, source, doc)
+	}
+}
