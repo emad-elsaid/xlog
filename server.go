@@ -84,7 +84,7 @@ func handlerFuncToHttpHandler(handler HandlerFunc) http.HandlerFunc {
 // NotFound returns an output function that writes 404 NotFound to http response.
 func NotFound(msg string) Output {
 	return func(w Response, r Request) {
-		http.Error(w, "", http.StatusNotFound)
+		http.Error(w, msg, http.StatusNotFound)
 	}
 }
 

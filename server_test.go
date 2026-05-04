@@ -452,7 +452,7 @@ func TestNotFound(t *testing.T) {
 			name:           "simple not found message",
 			message:        "page not found",
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "\n",
+			expectedBody:   "page not found\n",
 		},
 		{
 			name:           "empty message",
@@ -464,7 +464,7 @@ func TestNotFound(t *testing.T) {
 			name:           "detailed message",
 			message:        "resource /users/123 does not exist",
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "\n",
+			expectedBody:   "resource /users/123 does not exist\n",
 		},
 	}
 
@@ -701,7 +701,7 @@ func TestHandlerFuncToHttpHandler(t *testing.T) {
 				return NotFound("resource not found")
 			},
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "\n",
+			expectedBody:   "resource not found\n",
 		},
 		{
 			name: "redirect handler",
