@@ -114,7 +114,10 @@ func buildExtensionPages(srv *http.Server, dest string) {
 		)
 
 		if err != nil {
-			slog.Error("Failed to process extension page", "route", route, "error", err)
+			slog.Error("Failed to build extension page",
+				"route", route,
+				"error", err,
+				"hint", "check if the route handler is registered and returns valid HTML")
 		}
 
 		return true
@@ -129,7 +132,10 @@ func buildExtensionPages(srv *http.Server, dest string) {
 		)
 
 		if err != nil {
-			slog.Error("Failed to process extension page", "route", route, "error", err)
+			slog.Error("Failed to build extension page",
+				"route", route,
+				"error", err,
+				"hint", "check if the route handler is registered and returns valid content")
 		}
 
 		return true
@@ -139,26 +145,32 @@ func buildExtensionPages(srv *http.Server, dest string) {
 func copyAssets(dest string) error {
 	return fs.WalkDir(assets, ".", func(p string, entry fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to walk asset path %q: %w", p, err)
 		}
 
 		destPath := path.Join(dest, p)
 
 		if entry.IsDir() {
-			return os.MkdirAll(destPath, build_perms)
+			if mkdirErr := os.MkdirAll(destPath, build_perms); mkdirErr != nil {
+				return fmt.Errorf("failed to create asset directory %q: %w", destPath, mkdirErr)
+			}
+			return nil
 		}
 
 		if _, statErr := os.Stat(destPath); statErr == nil {
-			slog.Warn("Asset file already exists", "path", destPath)
+			slog.Warn("Asset file already exists, skipping", "path", destPath)
 			return nil
 		}
 
 		content, err := fs.ReadFile(assets, p)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to read embedded asset %q: %w", p, err)
 		}
 
-		return os.WriteFile(destPath, content, build_perms)
+		if err := os.WriteFile(destPath, content, build_perms); err != nil {
+			return fmt.Errorf("failed to write asset file %q: %w", destPath, err)
+		}
+		return nil
 	})
 }
 
@@ -166,7 +178,7 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	// #nosec G704 -- Route is internal, constructed from page names in build process, not SSRF
 	req, err := http.NewRequest(http.MethodGet, route, http.NoBody)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create request for route %q: %w", route, err)
 	}
 
 	rec := httptest.NewRecorder()
@@ -174,16 +186,16 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 
 	// #nosec G703 -- Dir is controlled build output directory, no path traversal risk
 	if mkdirErr := os.MkdirAll(dir, build_perms); mkdirErr != nil {
-		return mkdirErr
+		return fmt.Errorf("failed to create directory %q: %w", dir, mkdirErr)
 	}
 
 	if rec.Result().StatusCode != http.StatusOK {
-		return errors.New(rec.Result().Status)
+		return fmt.Errorf("route %q returned HTTP %s (expected 200 OK)", route, rec.Result().Status)
 	}
 
 	body, err := io.ReadAll(rec.Result().Body)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read response body for route %q: %w", route, err)
 	}
 	defer func() {
 		if err := rec.Result().Body.Close(); err != nil {
@@ -192,5 +204,8 @@ func buildRoute(srv *http.Server, route, dir, file string) error {
 	}()
 
 	// #nosec G703 -- File is controlled build output destination, no path traversal risk
-	return os.WriteFile(file, body, build_perms)
+	if err := os.WriteFile(file, body, build_perms); err != nil {
+		return fmt.Errorf("failed to write output file %q: %w", file, err)
+	}
+	return nil
 }
