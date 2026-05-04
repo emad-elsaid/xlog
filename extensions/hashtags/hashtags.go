@@ -40,12 +40,17 @@ func init() {
 	xlog.RegisterExtension(&h)
 }
 
+// Hashtags extension provides hashtag parsing and navigation functionality.
+// It maintains a thread-safe cache of parsed hashtags per page.
 type Hashtags struct {
 	pages map[xlog.Page][]*HashTag
 	mu    sync.Mutex
 }
 
+// Name returns the unique identifier for the hashtags extension.
 func (*Hashtags) Name() string { return keyHashtags }
+
+// Init registers routes, widgets, templates, and shortcodes for the hashtags extension.
 func (h *Hashtags) Init() {
 	xlog.Get(pathTags, h.tagsHandler)
 	xlog.Get(`/+/tag/{tag}`, h.tagHandler)
@@ -67,6 +72,7 @@ func (h *Hashtags) Init() {
 	))
 }
 
+// PageChanged clears the hashtag cache for a page when its content changes.
 func (h *Hashtags) PageChanged(p xlog.Page) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -76,6 +82,7 @@ func (h *Hashtags) PageChanged(p xlog.Page) error {
 	return nil
 }
 
+// PageDeleted clears the hashtag cache for a deleted page.
 func (h *Hashtags) PageDeleted(p xlog.Page) error {
 	return h.PageChanged(p)
 }
@@ -230,28 +237,40 @@ func links(xlog.Page) []xlog.Command {
 
 type link struct{}
 
+// Icon returns the FontAwesome icon class for the hashtags link.
 func (l link) Icon() string { return iconTags }
+
+// Name returns the display name for the hashtags navigation link.
 func (l link) Name() string { return nameHashtags }
+
+// Attrs returns HTML attributes for rendering the hashtags link.
 func (l link) Attrs() map[template.HTMLAttr]any {
 	return map[template.HTMLAttr]any{
 		"href": pathTags,
 	}
 }
 
+// HashTag represents a hashtag node in the markdown AST.
+// It stores both the raw value and a case-insensitive unique handle for matching.
 type HashTag struct {
 	ast.BaseInline
 	value  []byte
 	unique unique.Handle[string]
 }
 
+// RegisterFuncs registers the render function for hashtag nodes.
 func (h *HashTag) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
 	reg.Register(KindHashTag, renderHashtag)
 }
 
+// Trigger returns the character that triggers hashtag parsing ('#').
 func (h *HashTag) Trigger() []byte {
 	return []byte{'#'}
 }
 
+// Parse extracts a hashtag from the markdown text stream.
+// It accepts letters, numbers, dashes, and underscores, stopping at whitespace or punctuation.
+// Hashtags are case-insensitive and support Unicode characters.
 func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	l, _ := block.PeekLine()
 	if len(l) < 1 {
@@ -284,6 +303,7 @@ func (h *HashTag) Parse(parent ast.Node, block text.Reader, pc parser.Context) a
 	}
 }
 
+// Dump outputs debug information about the hashtag node for AST introspection.
 func (h *HashTag) Dump(source []byte, level int) {
 	m := map[string]string{
 		"value": fmt.Sprintf("%#v", h.value),
@@ -291,8 +311,10 @@ func (h *HashTag) Dump(source []byte, level int) {
 	ast.DumpHelper(h, source, level, m, nil)
 }
 
+// KindHashTag uniquely identifies hashtag nodes in the AST.
 var KindHashTag = ast.NewNodeKind("Hashtag")
 
+// Kind returns the unique node kind identifier for hashtag nodes.
 func (h *HashTag) Kind() ast.NodeKind {
 	return KindHashTag
 }
