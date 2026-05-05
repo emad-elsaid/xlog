@@ -90,24 +90,6 @@ func (p *page) Content() Markdown {
 	return Markdown(dat)
 }
 
-func (p *page) preProcessedContent() Markdown {
-	// Read modification time before acquiring lock to reduce lock contention
-	// ModTime() performs filesystem I/O which is thread-safe
-	modtime := p.ModTime()
-
-	p.l.Lock()
-	defer p.l.Unlock()
-
-	if p.content == nil || !modtime.Equal(p.lastUpdate) {
-		c := p.Content()
-		c = PreProcess(c)
-		p.content = &c
-		p.lastUpdate = modtime
-	}
-
-	return Markdown(*p.content)
-}
-
 func (p *page) Delete() bool {
 	p.clearCache()
 
@@ -154,31 +136,30 @@ func (p *page) AST() (source []byte, tree ast.Node) {
 	p.l.Lock()
 	defer p.l.Unlock()
 
-	content := p.preProcessedContentLocked()
-
-	// Re-parse AST if cache is empty or content changed (detected via lastUpdate in preProcessedContentLocked)
-	if p.ast == nil {
-		p.ast = MarkdownConverter().Parser().Parse(text.NewReader([]byte(content)))
-	}
-
-	return []byte(content), p.ast
-}
-
-// preProcessedContentLocked returns preprocessed content. Must be called with p.l held.
-func (p *page) preProcessedContentLocked() Markdown {
+	// Get current file modification time
 	modtime := p.ModTime()
 
+	// Regenerate cached content if:
+	// 1. Cache is empty (content == nil)
+	// 2. File has been modified since last cache (modtime changed)
 	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()
 		c = PreProcess(c)
 		p.content = &c
 		p.lastUpdate = modtime
-		
+
 		// Content changed, invalidate AST cache so it gets regenerated
 		p.ast = nil
 	}
 
-	return Markdown(*p.content)
+	content := Markdown(*p.content)
+
+	// Re-parse AST if cache is empty
+	if p.ast == nil {
+		p.ast = MarkdownConverter().Parser().Parse(text.NewReader([]byte(content)))
+	}
+
+	return []byte(content), p.ast
 }
 
 func (p *page) clearCache() {

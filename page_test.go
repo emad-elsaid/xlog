@@ -806,18 +806,19 @@ func TestPreProcessedContentConcurrency(t *testing.T) {
 
 	// Test 1: Verify cache works correctly under concurrent access
 	const goroutines = 10
-	results := make(chan Markdown, goroutines)
+	results := make(chan []byte, goroutines)
 
 	for i := 0; i < goroutines; i++ {
 		go func() {
-			results <- p.preProcessedContent()
+			src, _ := p.AST()
+			results <- src
 		}()
 	}
 
 	// All goroutines should get the same preprocessed content
 	first := <-results
 	for i := 1; i < goroutines; i++ {
-		if result := <-results; result != first {
+		if result := <-results; !bytes.Equal(result, first) {
 			t.Error("Concurrent calls returned different preprocessed content")
 		}
 	}
@@ -829,11 +830,11 @@ func TestPreProcessedContentConcurrency(t *testing.T) {
 		t.Fatalf("failed to update test file: %v", err)
 	}
 
-	updated := p.preProcessedContent()
-	if updated == first {
+	updatedSrc, _ := p.AST()
+	if bytes.Equal(updatedSrc, first) {
 		t.Error("Cache should be invalidated after file modification")
 	}
-	if !bytes.Contains([]byte(updated), []byte("New content")) {
+	if !bytes.Contains(updatedSrc, []byte("New content")) {
 		t.Error("Updated content not reflected in preprocessed output")
 	}
 }
@@ -1095,8 +1096,8 @@ func TestASTConcurrentReadWrite(t *testing.T) {
 	// Concurrent readers and writers
 	const (
 		readers    = 20
-		writers    = 5   // Reduced to decrease filesystem pressure
-		iterations = 30  // Reduced for faster test
+		writers    = 5  // Reduced to decrease filesystem pressure
+		iterations = 30 // Reduced for faster test
 	)
 
 	done := make(chan bool)
@@ -1106,7 +1107,7 @@ func TestASTConcurrentReadWrite(t *testing.T) {
 		go func(id int) {
 			for j := 0; j < iterations; j++ {
 				src, astNode := p.AST()
-				
+
 				// Verify AST is valid and corresponds to source
 				// Note: During heavy concurrent load, empty source might occur
 				// due to filesystem timing. This is acceptable as clearCache()
@@ -1114,7 +1115,7 @@ func TestASTConcurrentReadWrite(t *testing.T) {
 				if astNode == nil && len(src) > 0 {
 					t.Errorf("Reader %d: AST is nil but source is non-empty", id)
 				}
-				
+
 				// Small delay to increase race window
 				time.Sleep(time.Microsecond)
 			}
@@ -1128,7 +1129,7 @@ func TestASTConcurrentReadWrite(t *testing.T) {
 			for j := 0; j < iterations; j++ {
 				newContent := Markdown("# Update\n\nVersion " + string(rune('A'+id)) + ".")
 				p.Write(newContent)
-				
+
 				// Small delay to allow filesystem to commit
 				time.Sleep(100 * time.Microsecond)
 			}
@@ -1252,17 +1253,17 @@ func TestASTConsistencyUnderLoad(t *testing.T) {
 		go func(readerID int) {
 			for i := 0; i < updates*2; i++ {
 				src, astNode := p.AST()
-				
-				// AST must always be valid when source is non-empty
-				if len(src) > 0 && astNode == nil {
-					inconsistencies <- "AST is nil but source is non-empty"
+
+				// AST must always be non-nil (goldmark always returns valid AST)
+				if astNode == nil {
+					inconsistencies <- "AST should never be nil"
 				}
-				
-				// Source and AST should both be empty or both be populated
-				if (len(src) == 0) != (astNode == nil) {
-					inconsistencies <- "Source/AST state mismatch"
+
+				// Source should never be nil when returned from AST()
+				if src == nil {
+					inconsistencies <- "Source should never be nil"
 				}
-				
+
 				time.Sleep(time.Millisecond)
 			}
 			done <- true
@@ -1286,4 +1287,3 @@ func TestASTConsistencyUnderLoad(t *testing.T) {
 		}
 	}
 }
-
