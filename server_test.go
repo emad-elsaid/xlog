@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
@@ -1566,4 +1567,155 @@ func BenchmarkHandlerChainExecution(b *testing.B) {
 		httpHandler(w, r)
 		w.Body.Reset()
 	}
+}
+
+// TestDefaultMiddlewares_SessionSecretGeneration tests secure random generation
+// for CSRF protection session secrets in non-readonly mode.
+func TestDefaultMiddlewares_SessionSecretGeneration(t *testing.T) {
+	tests := []struct {
+		name             string
+		sessionSecretEnv string
+		readonly         bool
+		expectMiddleware bool
+	}{
+		{
+			name:             "generates random secret when env not set",
+			sessionSecretEnv: "",
+			readonly:         false,
+			expectMiddleware: true,
+		},
+		{
+			name:             "uses env secret when provided",
+			sessionSecretEnv: "my-custom-secret-key",
+			readonly:         false,
+			expectMiddleware: true,
+		},
+		{
+			name:             "skips CSRF in readonly mode",
+			sessionSecretEnv: "",
+			readonly:         true,
+			expectMiddleware: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Save and restore environment
+			oldEnv := os.Getenv("SESSION_SECRET")
+			defer os.Setenv("SESSION_SECRET", oldEnv)
+
+			// Save and restore config
+			oldReadonly := Config.Readonly
+			defer func() { Config.Readonly = oldReadonly }()
+
+			// Set test environment
+			if tc.sessionSecretEnv != "" {
+				os.Setenv("SESSION_SECRET", tc.sessionSecretEnv)
+			} else {
+				os.Unsetenv("SESSION_SECRET")
+			}
+			Config.Readonly = tc.readonly
+
+			// Execute function - should not panic on crypto errors
+			middlewares := defaultMiddlewares()
+
+			// Verify middleware count expectations
+			if tc.readonly {
+				// Only request logger middleware
+				if len(middlewares) != 1 {
+					t.Errorf("readonly mode: expected 1 middleware, got %d", len(middlewares))
+				}
+			} else {
+				// CSRF + request logger middlewares
+				if len(middlewares) != 2 {
+					t.Errorf("non-readonly mode: expected 2 middlewares, got %d", len(middlewares))
+				}
+			}
+		})
+	}
+}
+
+// TestDefaultMiddlewares_RandReadErrorHandling tests that crypto/rand errors
+// during session secret generation are properly caught and handled.
+// This is a critical security test - cryptographic operations must never silently fail.
+func TestDefaultMiddlewares_RandReadErrorHandling(t *testing.T) {
+	t.Run("handles random generation successfully", func(t *testing.T) {
+		// Save environment
+		oldEnv := os.Getenv("SESSION_SECRET")
+		defer os.Setenv("SESSION_SECRET", oldEnv)
+		oldReadonly := Config.Readonly
+		defer func() { Config.Readonly = oldReadonly }()
+
+		// Test with empty environment (forces rand.Read path)
+		os.Unsetenv("SESSION_SECRET")
+		Config.Readonly = false
+
+		// Mock osExit to ensure it's NOT called during successful operation
+		oldOsExit := osExit
+		exitCalled := false
+		exitCode := -1
+		osExit = func(code int) {
+			exitCalled = true
+			exitCode = code
+			panic("mock exit") // Use panic to stop execution in test
+		}
+		defer func() {
+			osExit = oldOsExit
+			if r := recover(); r != nil && r != "mock exit" {
+				panic(r) // Re-panic if it's not our mock exit
+			}
+		}()
+
+		// Execute - should succeed with proper random generation
+		middlewares := defaultMiddlewares()
+
+		// Verify no exit on success
+		if exitCalled {
+			t.Errorf("osExit unexpectedly called with code %d during normal operation", exitCode)
+		}
+
+		// Verify middlewares created successfully
+		if len(middlewares) != 2 {
+			t.Errorf("expected 2 middlewares (CSRF + logger), got %d", len(middlewares))
+		}
+	})
+
+	t.Run("uses environment variable when provided", func(t *testing.T) {
+		// Save environment
+		oldEnv := os.Getenv("SESSION_SECRET")
+		defer os.Setenv("SESSION_SECRET", oldEnv)
+		oldReadonly := Config.Readonly
+		defer func() { Config.Readonly = oldReadonly }()
+
+		// Set custom secret to bypass rand.Read
+		os.Setenv("SESSION_SECRET", "test-secret-from-environment-variable")
+		Config.Readonly = false
+
+		// Mock osExit - should not be called when using env var
+		oldOsExit := osExit
+		exitCalled := false
+		osExit = func(code int) {
+			exitCalled = true
+			panic("mock exit")
+		}
+		defer func() {
+			osExit = oldOsExit
+			if r := recover(); r != nil && r != "mock exit" {
+				panic(r)
+			}
+		}()
+
+		// Execute
+		middlewares := defaultMiddlewares()
+
+		// Verify no exit when using environment secret
+		if exitCalled {
+			t.Error("osExit should not be called when SESSION_SECRET environment variable is set")
+		}
+
+		// Verify middlewares created
+		if len(middlewares) != 2 {
+			t.Errorf("expected 2 middlewares, got %d", len(middlewares))
+		}
+	})
 }

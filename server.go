@@ -39,7 +39,10 @@ func defaultMiddlewares() (middlewares []func(http.Handler) http.Handler) {
 		sessionSecret := []byte(os.Getenv("SESSION_SECRET"))
 		if len(sessionSecret) == 0 {
 			sessionSecret = make([]byte, 128)
-			rand.Read(sessionSecret)
+			if _, err := rand.Read(sessionSecret); err != nil {
+				slog.Error("Failed to generate session secret", "error", err)
+				osExit(1)
+			}
 		}
 
 		middlewares = append(middlewares,
