@@ -107,24 +107,24 @@ func (h *Hashtags) tagsHandler(r xlog.Request) xlog.Output {
 	var lck sync.Mutex
 
 	xlog.EachPage(r.Context(), func(a xlog.Page) {
-		set := map[string]bool{}
+		// Build local tag map for this page to minimize lock duration
+		localTags := map[string]bool{}
 		_, tree := a.AST()
 		hashes := xlog.FindAllInAST[*HashTag](tree)
+
 		for _, v := range hashes {
 			val := strings.ToLower(string(v.value))
-
-			// don't use same tag twice for same page
-			if _, ok := set[val]; ok {
-				continue
+			// Don't use same tag twice for same page
+			if !localTags[val] {
+				localTags[val] = true
 			}
+		}
 
-			set[val] = true
-
+		// Lock once to merge all tags for this page
+		if len(localTags) > 0 {
 			lck.Lock()
-			if ps, ok := tags[val]; ok {
-				tags[val] = append(ps, a)
-			} else {
-				tags[val] = []xlog.Page{a}
+			for tag := range localTags {
+				tags[tag] = append(tags[tag], a)
 			}
 			lck.Unlock()
 		}

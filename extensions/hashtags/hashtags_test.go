@@ -4990,3 +4990,34 @@ func TestTagsHandlerDirectLogic(t *testing.T) {
 		})
 	}
 }
+
+// BenchmarkTagsHandlerLockContention benchmarks the lock contention in tagsHandler's tag map building.
+// This benchmark specifically targets the hot loop in tagsHandler (lines 105-131) where each page's
+// hashtags are processed and added to the shared map under mutex protection.
+func BenchmarkTagsHandlerLockContention(b *testing.B) {
+	tmpDir := b.TempDir()
+	origSource := xlog.Config.Source
+	xlog.Config.Source = tmpDir
+	b.Cleanup(func() { xlog.Config.Source = origSource })
+
+	// Create test pages with multiple hashtags to maximize lock contention
+	// Each page has 5 hashtags, simulating a realistic wiki scenario
+	for i := 0; i < 100; i++ {
+		content := fmt.Sprintf("Page %d with #tag1 #tag2 #tag3 #tag4 #tag5", i)
+		path := filepath.Join(tmpDir, fmt.Sprintf("page%d.md", i))
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+			b.Fatalf("Failed to create test file: %v", err)
+		}
+	}
+
+	h := &Hashtags{pages: make(map[xlog.Page][]*HashTag)}
+	r := httptest.NewRequest(http.MethodGet, "/+/tags", http.NoBody)
+	r = r.WithContext(context.Background())
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = h.tagsHandler(r)
+	}
+}
