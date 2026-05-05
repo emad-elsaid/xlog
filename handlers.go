@@ -109,6 +109,12 @@ func Start(ctx context.Context) {
 		osExit(0)
 	}
 
+	// Handle export-json flag after chdir to source directory
+	if Config.ExportJSON {
+		ExportJSON(ctx)
+		osExit(0)
+	}
+
 	initExtensions()
 
 	// Register health check endpoint for load balancers and monitoring

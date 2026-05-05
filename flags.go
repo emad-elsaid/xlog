@@ -27,6 +27,7 @@ type Configuration struct {
 	ShowVersion        bool   // display version information and exit
 	ListPages          bool   // list all pages and exit
 	ShowStats          bool   // display digital garden statistics and exit
+	ExportJSON         bool   // export page metadata as JSON and exit
 }
 
 var Config Configuration
@@ -53,4 +54,5 @@ func init() {
 	flag.BoolVar(&Config.ShowVersion, "version", false, "Print version information and exit")
 	flag.BoolVar(&Config.ListPages, "list", false, "List all markdown pages and exit")
 	flag.BoolVar(&Config.ShowStats, "stats", false, "Display digital garden statistics and exit")
+	flag.BoolVar(&Config.ExportJSON, "export-json", false, "Export page metadata as JSON and exit")
 }
