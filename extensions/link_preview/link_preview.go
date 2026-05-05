@@ -137,6 +137,24 @@ type Meta struct {
 	Image       string
 }
 
+// fetchURL performs HTTP GET and handles response body closing correctly.
+func fetchURL(urlStr string) ([]byte, error) {
+	resp, err := http.Get(urlStr) // #nosec G107 -- SSRF is intended feature behavior. URLs from markdown; user=admin in personal wiki context
+	if err != nil {
+		// According to Go docs, resp may be non-nil even when err != nil
+		// We should close the body if present to enable connection reuse
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	return io.ReadAll(resp.Body)
+}
+
 func getUrlMeta(urlStr string) (*Meta, error) {
 	const cacheDir = ".cache"
 	if err := os.Mkdir(cacheDir, 0700); err != nil && !os.IsExist(err) {
@@ -152,15 +170,7 @@ func getUrlMeta(urlStr string) (*Meta, error) {
 		}
 	}
 
-	resp, err := http.Get(urlStr) // #nosec G107 -- SSRF is intended feature behavior. URLs from markdown; user=admin in personal wiki context
-	if resp == nil || err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	cont, err := io.ReadAll(resp.Body)
+	cont, err := fetchURL(urlStr)
 	if err != nil {
 		return nil, err
 	}
