@@ -477,3 +477,26 @@ func TestEachPage_PopulatesCache(t *testing.T) {
 	assert.NotNil(t, pages, "Cache should be populated after EachPage")
 	assert.Equal(t, 3, len(pages), "Cache should contain all pages from source")
 }
+
+func TestMapPage_RaceCondition(t *testing.T) {
+	// Save original and restore
+	originalPages := pages
+	defer func() { pages = originalPages }()
+
+	// Create enough pages to test concurrent behavior
+	numPages := 50
+	testPages := make([]Page, numPages)
+	for i := 0; i < numPages; i++ {
+		testPages[i] = &mockPage{name: pageName}
+	}
+	pages = testPages
+
+	ctx := context.Background()
+
+	// This test verifies thread-safe result collection
+	result := MapPage(ctx, func(p Page) string {
+		return p.Name()
+	})
+
+	assert.Equal(t, numPages, len(result), "Should return all pages")
+}

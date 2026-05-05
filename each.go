@@ -101,16 +101,7 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(concurrency)
 
-	output := make([]T, 0, len(cached))
 	ch := make(chan T, concurrency)
-	done := make(chan bool)
-
-	go func() {
-		for v := range ch {
-			output = append(output, v)
-		}
-		done <- true
-	}()
 
 Loop:
 	for _, p := range cached {
@@ -131,11 +122,19 @@ Loop:
 		}
 	}
 
-	if err := grp.Wait(); err != nil {
-		slog.Error("Error during parallel page iteration", "error", err)
+	// Close channel after all workers complete
+	go func() {
+		if err := grp.Wait(); err != nil {
+			slog.Error("Error during parallel page iteration", "error", err)
+		}
+		close(ch)
+	}()
+
+	// Collect results in main goroutine - eliminates race condition
+	output := make([]T, 0, len(cached))
+	for v := range ch {
+		output = append(output, v)
 	}
-	close(ch)
-	<-done
 
 	return output
 }
