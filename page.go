@@ -151,17 +151,40 @@ func (p *page) ModTime() time.Time {
 }
 
 func (p *page) AST() (source []byte, tree ast.Node) {
-	lastModified := p.lastUpdate
-	content := p.preProcessedContent()
+	p.l.Lock()
+	defer p.l.Unlock()
 
-	if p.ast == nil || p.lastUpdate != lastModified {
+	content := p.preProcessedContentLocked()
+
+	// Re-parse AST if cache is empty or content changed (detected via lastUpdate in preProcessedContentLocked)
+	if p.ast == nil {
 		p.ast = MarkdownConverter().Parser().Parse(text.NewReader([]byte(content)))
 	}
 
 	return []byte(content), p.ast
 }
 
+// preProcessedContentLocked returns preprocessed content. Must be called with p.l held.
+func (p *page) preProcessedContentLocked() Markdown {
+	modtime := p.ModTime()
+
+	if p.content == nil || !modtime.Equal(p.lastUpdate) {
+		c := p.Content()
+		c = PreProcess(c)
+		p.content = &c
+		p.lastUpdate = modtime
+		
+		// Content changed, invalidate AST cache so it gets regenerated
+		p.ast = nil
+	}
+
+	return Markdown(*p.content)
+}
+
 func (p *page) clearCache() {
+	p.l.Lock()
+	defer p.l.Unlock()
+
 	p.content = nil
 	p.ast = nil
 	p.lastUpdate = time.Time{}
