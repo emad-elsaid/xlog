@@ -237,3 +237,110 @@ func TestPageSourceIntegration(t *testing.T) {
 	// Since the page doesn't exist, Exists() should return false
 	assert.False(t, page.Exists(), "Page should not exist")
 }
+
+// TestNewPageNeverReturnsNil verifies the critical safety guarantee that NewPage
+// never returns nil, preventing panic vulnerabilities in handlers that use page names
+// from user input (e.g., PathValue, FormValue).
+func TestNewPageNeverReturnsNil(t *testing.T) {
+	// Save original sources and restore after test
+	originalSources := sources
+	defer func() { sources = originalSources }()
+
+	tests := []struct {
+		name         string
+		setupSources func()
+		pageName     string
+	}{
+		{
+			name: "empty sources list",
+			setupSources: func() {
+				sources = []PageSource{}
+			},
+			pageName: "any-page",
+		},
+		{
+			name: "source returns nil for page",
+			setupSources: func() {
+				sources = []PageSource{
+					&mockPageSource{pages: nil}, // Returns nil
+				}
+			},
+			pageName: "missing-page",
+		},
+		{
+			name: "source returns non-existing page",
+			setupSources: func() {
+				sources = []PageSource{
+					&mockPageSource{
+						pages: map[string]Page{
+							"other": &mockPage{name: "other", exists: true},
+						},
+					},
+				}
+			},
+			pageName: "missing-page",
+		},
+		{
+			name: "empty page name",
+			setupSources: func() {
+				sources = []PageSource{
+					&mockPageSource{pages: map[string]Page{}},
+				}
+			},
+			pageName: "",
+		},
+		{
+			name: "special characters in page name",
+			setupSources: func() {
+				sources = []PageSource{
+					&mockPageSource{pages: map[string]Page{}},
+				}
+			},
+			pageName: "../../../etc/passwd",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setupSources()
+
+			// The critical assertion: NewPage must NEVER return nil
+			page := NewPage(tt.pageName)
+			require.NotNil(t, page, "NewPage must never return nil to prevent panics in handlers")
+
+			// The page should have the correct name
+			assert.Equal(t, tt.pageName, page.Name())
+
+			// It's acceptable for Exists() to return false for non-existent pages
+			// We just need the page object itself to be non-nil
+		})
+	}
+}
+
+// TestNewPageSafeForHandlers demonstrates the vulnerability this fix prevents.
+// Handlers that call NewPage with user-supplied input must not panic.
+func TestNewPageSafeForHandlers(t *testing.T) {
+	// Save original sources and restore after test
+	originalSources := sources
+	defer func() { sources = originalSources }()
+
+	// Simulate handler scenario with no matching pages
+	sources = []PageSource{
+		&mockPageSource{pages: map[string]Page{}},
+	}
+
+	// This simulates: page := xlog.NewPage(r.PathValue("page"))
+	userSuppliedName := "non-existent-page"
+	page := NewPage(userSuppliedName)
+
+	// Critical: this must not panic
+	require.NotNil(t, page, "NewPage must return non-nil to prevent panic in handlers")
+
+	// Handler code like `slog.Info("Editing page", "name", page)` should work
+	// Even though the page doesn't exist
+	assert.NotPanics(t, func() {
+		_ = page.Name()
+		_ = page.Exists()
+		_ = page.FileName()
+	}, "Basic page operations must not panic even for non-existent pages")
+}
