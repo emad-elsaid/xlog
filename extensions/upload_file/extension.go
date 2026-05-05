@@ -128,6 +128,11 @@ func processUploadedFile(r xlog.Request) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer func() {
+		if closeErr := out.Close(); closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
 
 	if _, seekErr := f.Seek(0, io.SeekStart); seekErr != nil {
 		return "", seekErr
