@@ -837,3 +837,232 @@ func TestPreProcessedContentConcurrency(t *testing.T) {
 		t.Error("Updated content not reflected in preprocessed output")
 	}
 }
+
+// TestWriteDoesNotTriggerEventOnFailure verifies that PageChanged event is NOT
+// triggered when page write operations fail. This ensures data consistency across
+// extensions that listen to page events.
+func TestWriteDoesNotTriggerEventOnFailure(t *testing.T) {
+	tests := []struct {
+		name    string
+		setup   func(t *testing.T) (string, *page)
+		cleanup func(string)
+	}{
+		{
+			name: "directory creation failure",
+			setup: func(t *testing.T) (string, *page) {
+				t.Helper()
+				tempDir := t.TempDir()
+
+				// Create a file where we need a directory
+				dirPath := filepath.Join(tempDir, "blocked")
+				if err := os.WriteFile(dirPath, []byte("blocking"), 0600); err != nil {
+					t.Fatalf("failed to create blocking file: %v", err)
+				}
+
+				origDir, _ := os.Getwd()
+				if err := os.Chdir(tempDir); err != nil {
+					t.Fatalf("failed to change directory: %v", err)
+				}
+
+				p := &page{name: "blocked/page"}
+				return origDir, p
+			},
+			cleanup: func(origDir string) {
+				_ = os.Chdir(origDir)
+			},
+		},
+		{
+			name: "write to read-only file",
+			setup: func(t *testing.T) (string, *page) {
+				t.Helper()
+				tempDir := t.TempDir()
+				origDir, _ := os.Getwd()
+
+				if err := os.Chdir(tempDir); err != nil {
+					t.Fatalf("failed to change directory: %v", err)
+				}
+
+				// Create a read-only file
+				p := &page{name: "readonly"}
+				// #nosec G306 - Test requires readonly file to verify error handling
+				if err := os.WriteFile(p.FileName(), []byte("original"), 0400); err != nil {
+					t.Fatalf("failed to create read-only file: %v", err)
+				}
+
+				return origDir, p
+			},
+			cleanup: func(origDir string) {
+				_ = os.Chdir(origDir)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// Clear event handlers for isolated testing
+			pageEvents = map[PageEvent][]PageEventHandler{}
+
+			origDir, p := tc.setup(t)
+			defer tc.cleanup(origDir)
+
+			eventTriggered := false
+			Listen(PageChanged, func(page Page) error {
+				eventTriggered = true
+				return nil
+			})
+
+			// Attempt to write - should fail
+			success := p.Write(Markdown("test content"))
+
+			if success {
+				t.Error("Expected Write to fail, but it succeeded")
+			}
+
+			if eventTriggered {
+				t.Error("PageChanged event should NOT be triggered when write fails")
+			}
+		})
+	}
+}
+
+// TestDeleteDoesNotTriggerEventOnFailure verifies that PageDeleted event is NOT
+// triggered when page deletion fails. This prevents extensions from updating their
+// state for deletions that didn't actually occur.
+func TestDeleteDoesNotTriggerEventOnFailure(t *testing.T) {
+	// Clear event handlers for isolated testing
+	pageEvents = map[PageEvent][]PageEventHandler{}
+
+	tempDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	// Create a page in a directory
+	p := &page{name: "protected"}
+	p.Write(Markdown("content"))
+
+	if !p.Exists() {
+		t.Fatal("Page should exist before test")
+	}
+
+	// Make directory read-only to prevent deletion
+	// #nosec G302 - intentionally using restricted permissions to test error handling
+	if err := os.Chmod(tempDir, 0500); err != nil {
+		t.Fatalf("Failed to chmod directory: %v", err)
+	}
+
+	// Restore permissions in cleanup
+	defer func() {
+		// #nosec G302 - restoring normal permissions after test
+		if err := os.Chmod(tempDir, 0700); err != nil {
+			t.Errorf("Failed to restore directory permissions: %v", err)
+		}
+	}()
+
+	eventTriggered := false
+	Listen(PageDeleted, func(page Page) error {
+		eventTriggered = true
+		return nil
+	})
+
+	// Attempt to delete - should fail
+	success := p.Delete()
+
+	if success {
+		t.Error("Expected Delete to fail, but it succeeded")
+	}
+
+	if eventTriggered {
+		t.Error("PageDeleted event should NOT be triggered when delete fails")
+	}
+}
+
+// TestWriteSuccessTriggersEvent verifies that PageChanged IS triggered on success.
+// This is the positive test case ensuring we didn't break the happy path.
+func TestWriteSuccessTriggersEvent(t *testing.T) {
+	// Clear event handlers for isolated testing
+	pageEvents = map[PageEvent][]PageEventHandler{}
+
+	tempDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	eventTriggered := false
+	var receivedPage Page
+	Listen(PageChanged, func(page Page) error {
+		eventTriggered = true
+		receivedPage = page
+		return nil
+	})
+
+	p := &page{name: "test"}
+	success := p.Write(Markdown("content"))
+
+	if !success {
+		t.Fatal("Write should succeed")
+	}
+
+	if !eventTriggered {
+		t.Error("PageChanged event SHOULD be triggered when write succeeds")
+	}
+
+	if receivedPage == nil || receivedPage.Name() != "test" {
+		t.Error("Event handler should receive the correct page")
+	}
+}
+
+// TestDeleteSuccessTriggersEvent verifies that PageDeleted IS triggered on success.
+func TestDeleteSuccessTriggersEvent(t *testing.T) {
+	// Clear event handlers for isolated testing
+	pageEvents = map[PageEvent][]PageEventHandler{}
+
+	tempDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	// Create a page first
+	p := &page{name: "test"}
+	p.Write(Markdown("content"))
+
+	eventTriggered := false
+	var receivedPage Page
+	Listen(PageDeleted, func(page Page) error {
+		eventTriggered = true
+		receivedPage = page
+		return nil
+	})
+
+	success := p.Delete()
+
+	if !success {
+		t.Fatal("Delete should succeed")
+	}
+
+	if !eventTriggered {
+		t.Error("PageDeleted event SHOULD be triggered when delete succeeds")
+	}
+
+	if receivedPage == nil || receivedPage.Name() != "test" {
+		t.Error("Event handler should receive the correct page")
+	}
+}

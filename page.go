@@ -109,8 +109,6 @@ func (p *page) preProcessedContent() Markdown {
 }
 
 func (p *page) Delete() bool {
-	defer Trigger(PageDeleted, p)
-
 	p.clearCache()
 
 	if p.Exists() {
@@ -120,13 +118,12 @@ func (p *page) Delete() bool {
 			return false
 		}
 	}
+
+	Trigger(PageDeleted, p)
 	return true
 }
 
 func (p *page) Write(content Markdown) bool {
-	defer Trigger(PageChanged, p)
-
-	p.clearCache()
 	name := p.FileName()
 	if err := os.MkdirAll(filepath.Dir(name), 0700); err != nil {
 		slog.Error("Can't create page directory", "page", p.Name(), "error", err)
@@ -138,6 +135,9 @@ func (p *page) Write(content Markdown) bool {
 		slog.Error("Can't write page", "page", p.Name(), "error", err)
 		return false
 	}
+
+	p.clearCache()
+	Trigger(PageChanged, p)
 	return true
 }
 
