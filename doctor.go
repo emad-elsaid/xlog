@@ -2,10 +2,12 @@ package xlog
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -52,6 +54,9 @@ func runDiagnostics() DiagnosticResult {
 	checkBrokenLinks(&warnings)
 	checkOrphanPages(&warnings)
 	checkDuplicateContent(&warnings)
+
+	// Configuration validation
+	checkConfigurationFlags(&warnings)
 
 	return DiagnosticResult{
 		Issues:   issues,
@@ -384,4 +389,93 @@ func formatDiagnosticSummary(w io.Writer, issues, warnings []string) int {
 
 	_, _ = fmt.Fprintln(w, "Warnings noted. Xlog should run, but you may want to address these.")
 	return 0
+}
+
+// checkGPGConfiguration validates the GPG configuration.
+func checkGPGConfiguration(gpgFlag string, warnings *[]string) {
+	if gpgFlag == "" {
+		return
+	}
+
+	// Check if gpg binary exists
+	if _, err := exec.LookPath("gpg"); err != nil {
+		*warnings = append(*warnings, "⚠ gpg flag is set but gpg binary not found in PATH. Install gpg or remove -gpg flag.")
+	}
+}
+
+// checkEditorCommand validates the editor command configuration.
+func checkEditorCommand(editor string, warnings *[]string) {
+	if editor == "" {
+		return
+	}
+
+	// Extract binary name from command (handle cases like "emacs -nw")
+	fields := strings.Fields(editor)
+	if len(fields) == 0 {
+		return
+	}
+
+	// Check if editor binary exists
+	if _, err := exec.LookPath(fields[0]); err != nil {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ editor command '%s' not found in PATH. Pages may fail to open for editing.", fields[0]))
+	}
+}
+
+// checkGitHubURLFormat validates the GitHub URL format.
+func checkGitHubURLFormat(githubURL string, warnings *[]string) {
+	if githubURL == "" {
+		return
+	}
+
+	// Basic URL validation
+	if !strings.HasPrefix(githubURL, "http://") && !strings.HasPrefix(githubURL, "https://") {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ github.url should start with http:// or https://: %s", githubURL))
+		return
+	}
+
+	// Recommend HTTPS for GitHub
+	if strings.HasPrefix(githubURL, "http://") {
+		*warnings = append(*warnings, "⚠ github.url should use https:// instead of http:// for security")
+	}
+}
+
+// checkBindPortPermissions validates bind port permissions.
+func checkBindPortPermissions(bindAddr string, warnings *[]string) {
+	// Extract port from address (format: "host:port")
+	parts := strings.Split(bindAddr, ":")
+	if len(parts) < 2 {
+		return
+	}
+
+	portStr := parts[len(parts)-1]
+	var port int
+	if _, err := fmt.Sscanf(portStr, "%d", &port); err != nil {
+		return
+	}
+
+	// Warn about privileged ports (< 1024)
+	if port < 1024 && port > 0 {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Binding to privileged port %d requires root/sudo. Use port >= 1024 or run with elevated privileges.", port))
+	}
+}
+
+// checkConfigurationFlags validates command-line flag configurations.
+func checkConfigurationFlags(warnings *[]string) {
+	// Check GPG configuration
+	if gpgFlag := flag.Lookup("gpg"); gpgFlag != nil && gpgFlag.Value.String() != "" {
+		checkGPGConfiguration(gpgFlag.Value.String(), warnings)
+	}
+
+	// Check editor command
+	if editorFlag := flag.Lookup("editor"); editorFlag != nil && editorFlag.Value.String() != "" {
+		checkEditorCommand(editorFlag.Value.String(), warnings)
+	}
+
+	// Check GitHub URL
+	if githubURLFlag := flag.Lookup("github.url"); githubURLFlag != nil && githubURLFlag.Value.String() != "" {
+		checkGitHubURLFormat(githubURLFlag.Value.String(), warnings)
+	}
+
+	// Check bind port
+	checkBindPortPermissions(Config.BindAddress, warnings)
 }

@@ -903,3 +903,239 @@ func TestCheckDuplicateContent(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckGPGConfiguration(t *testing.T) {
+	tests := []struct {
+		name         string
+		gpgFlag      string
+		mockGPGPath  string
+		expectWarn   bool
+		warnContains string
+	}{
+		{
+			name:       "no gpg flag set",
+			gpgFlag:    "",
+			expectWarn: false,
+		},
+		{
+			name:         "gpg flag set but binary not found",
+			gpgFlag:      "test-key-id",
+			mockGPGPath:  "/nonexistent/gpg",
+			expectWarn:   true,
+			warnContains: "gpg binary not found",
+		},
+		{
+			name:        "gpg flag set and binary exists",
+			gpgFlag:     "test-key-id",
+			mockGPGPath: "/usr/bin/gpg",
+			expectWarn:  false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+
+			// Simulate different gpg configurations
+			origPath := os.Getenv("PATH")
+			if tc.mockGPGPath != "" {
+				os.Setenv("PATH", filepath.Dir(tc.mockGPGPath))
+			}
+			defer os.Setenv("PATH", origPath)
+
+			checkGPGConfiguration(tc.gpgFlag, &warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+			if tc.expectWarn && len(warnings) > 0 {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnContains, warnings)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckEditorCommand(t *testing.T) {
+	tests := []struct {
+		name         string
+		editor       string
+		expectWarn   bool
+		warnContains string
+	}{
+		{
+			name:       "empty editor uses default",
+			editor:     "",
+			expectWarn: false,
+		},
+		{
+			name:         "invalid editor command",
+			editor:       "nonexistent-editor-xyz123",
+			expectWarn:   true,
+			warnContains: "editor command",
+		},
+		{
+			name:       "valid editor",
+			editor:     "cat",
+			expectWarn: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+			checkEditorCommand(tc.editor, &warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+			if tc.expectWarn && len(warnings) > 0 {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnContains, warnings)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckGitHubURLFormat(t *testing.T) {
+	tests := []struct {
+		name         string
+		githubURL    string
+		expectWarn   bool
+		warnContains string
+	}{
+		{
+			name:       "empty URL is valid",
+			githubURL:  "",
+			expectWarn: false,
+		},
+		{
+			name:       "valid GitHub URL",
+			githubURL:  "https://github.com/user/repo/edit/master/docs",
+			expectWarn: false,
+		},
+		{
+			name:         "invalid URL format",
+			githubURL:    "not-a-url",
+			expectWarn:   true,
+			warnContains: "github.url",
+		},
+		{
+			name:         "URL without https",
+			githubURL:    "http://github.com/user/repo",
+			expectWarn:   true,
+			warnContains: "https",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+			checkGitHubURLFormat(tc.githubURL, &warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+			if tc.expectWarn && len(warnings) > 0 {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnContains, warnings)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckBindPortPermissions(t *testing.T) {
+	tests := []struct {
+		name         string
+		bindAddr     string
+		expectWarn   bool
+		warnContains string
+	}{
+		{
+			name:       "standard port above 1024",
+			bindAddr:   "127.0.0.1:3000",
+			expectWarn: false,
+		},
+		{
+			name:         "privileged port 80",
+			bindAddr:     "127.0.0.1:80",
+			expectWarn:   true,
+			warnContains: "privileged port",
+		},
+		{
+			name:         "privileged port 443",
+			bindAddr:     "0.0.0.0:443",
+			expectWarn:   true,
+			warnContains: "privileged port",
+		},
+		{
+			name:       "port 1024 exactly",
+			bindAddr:   "localhost:1024",
+			expectWarn: false,
+		},
+		{
+			name:       "invalid format ignored",
+			bindAddr:   "invalid",
+			expectWarn: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			warnings := []string{}
+			checkBindPortPermissions(tc.bindAddr, &warnings)
+
+			if tc.expectWarn && len(warnings) == 0 {
+				t.Errorf("Expected warning but got none")
+			}
+			if !tc.expectWarn && len(warnings) > 0 {
+				t.Errorf("Expected no warning but got: %v", warnings)
+			}
+			if tc.expectWarn && len(warnings) > 0 {
+				found := false
+				for _, w := range warnings {
+					if strings.Contains(w, tc.warnContains) {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("Expected warning containing %q, got: %v", tc.warnContains, warnings)
+				}
+			}
+		})
+	}
+}
