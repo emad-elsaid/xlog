@@ -91,10 +91,12 @@ func (p *page) Content() Markdown {
 }
 
 func (p *page) preProcessedContent() Markdown {
+	// Read modification time before acquiring lock to reduce lock contention
+	// ModTime() performs filesystem I/O which is thread-safe
+	modtime := p.ModTime()
+
 	p.l.Lock()
 	defer p.l.Unlock()
-
-	modtime := p.ModTime()
 
 	if p.content == nil || !modtime.Equal(p.lastUpdate) {
 		c := p.Content()

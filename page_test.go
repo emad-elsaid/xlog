@@ -783,3 +783,57 @@ func TestPageRender_LoggingIntegration(t *testing.T) {
 	// they are now logged with structured context (page name, error details)
 	// This enhances production observability and debugging capability
 }
+
+func TestPreProcessedContentConcurrency(t *testing.T) {
+	tempDir := t.TempDir()
+	origDir, _ := os.Getwd()
+	defer func() {
+		if err := os.Chdir(origDir); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+	if err := os.Chdir(tempDir); err != nil {
+		t.Fatalf("failed to change to temp directory: %v", err)
+	}
+
+	// Create a test page
+	content := "# Test Page\n\nConcurrency test content."
+	if err := os.WriteFile("concurrent.md", []byte(content), 0600); err != nil {
+		t.Fatalf("failed to create test file: %v", err)
+	}
+
+	p := &page{name: "concurrent"}
+
+	// Test 1: Verify cache works correctly under concurrent access
+	const goroutines = 10
+	results := make(chan Markdown, goroutines)
+
+	for i := 0; i < goroutines; i++ {
+		go func() {
+			results <- p.preProcessedContent()
+		}()
+	}
+
+	// All goroutines should get the same preprocessed content
+	first := <-results
+	for i := 1; i < goroutines; i++ {
+		if result := <-results; result != first {
+			t.Error("Concurrent calls returned different preprocessed content")
+		}
+	}
+
+	// Test 2: Verify cache invalidation works when file is modified
+	time.Sleep(10 * time.Millisecond) // Ensure different modification time
+	newContent := "# Updated\n\nNew content after modification."
+	if err := os.WriteFile("concurrent.md", []byte(newContent), 0600); err != nil {
+		t.Fatalf("failed to update test file: %v", err)
+	}
+
+	updated := p.preProcessedContent()
+	if updated == first {
+		t.Error("Cache should be invalidated after file modification")
+	}
+	if !bytes.Contains([]byte(updated), []byte("New content")) {
+		t.Error("Updated content not reflected in preprocessed output")
+	}
+}
