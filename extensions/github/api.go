@@ -14,6 +14,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	htmlTagUL    = "<ul>"
+	htmlTagULEnd = "</ul>"
+)
+
 var githubTokenPossibleVariables = []string{"GITHUB_TOKEN", "GITHUB_API_TOKEN"}
 var errTokenNotAvailable = errors.New("Github token env variable not found in any of: " + strings.Join(githubTokenPossibleVariables, ", "))
 var perPage = 100
@@ -71,7 +76,7 @@ func issues(ctx context.Context, query string) string {
 		return fmt.Sprintf("No results for query: %s", query)
 	}
 
-	issues := "<ul>"
+	issues := htmlTagUL
 	for _, i := range result.Issues {
 		assignee := i.GetUser()
 
@@ -84,7 +89,7 @@ func issues(ctx context.Context, query string) string {
 </span>
 </li>`, assignee.GetAvatarURL(), i.GetHTMLURL(), i.GetTitle())
 	}
-	issues += "</ul>"
+	issues += htmlTagULEnd
 
 	return issues
 }

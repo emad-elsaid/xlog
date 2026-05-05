@@ -137,13 +137,18 @@ func checkBindAddress(issues *[]string) {
 	}
 }
 
+const (
+	themeDark  = "dark"
+	themeLight = "light"
+)
+
 func checkThemeValue(warnings *[]string) {
 	if Config.Theme == "" {
 		slog.Info("✓ Theme not set (will use system preference)")
 		return
 	}
 
-	validThemes := []string{"light", "dark"}
+	validThemes := []string{themeLight, themeDark}
 	for _, valid := range validThemes {
 		if Config.Theme == valid {
 			slog.Info("✓ Theme is valid", "theme", Config.Theme)

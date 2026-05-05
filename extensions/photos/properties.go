@@ -11,11 +11,14 @@ import (
 )
 
 const (
-	iconCalendar    = "fa-regular fa-calendar"
-	iconCameraRetro = "fa-solid fa-camera-retro"
-	propCaptureTime = "capture time"
-	propCameraMake  = "camera make"
-	propISO         = "ISO"
+	iconCalendar     = "fa-regular fa-calendar"
+	iconCameraRetro  = "fa-solid fa-camera-retro"
+	propCaptureTime  = "capture time"
+	propCameraMake   = "camera make"
+	propISO          = "ISO"
+	propFocalLength  = "focal Length"
+	propAperture     = "aperture"
+	propShutterSpeed = "shutter speed"
 )
 
 type Property struct {
@@ -98,7 +101,7 @@ func appendRationalExifProps(props *[]xlog.Property, e *exif.Exif) {
 		if nom, denom, err := focal.Rat2(0); err == nil {
 			*props = append(*props, Property{
 				IconVal: iconCameraRetro,
-				NameVal: "focal Length",
+				NameVal: propFocalLength,
 				Val:     fmt.Sprintf("%dmm", nom/denom),
 			})
 		}
@@ -108,7 +111,7 @@ func appendRationalExifProps(props *[]xlog.Property, e *exif.Exif) {
 		if nom, denom, err := aperture.Rat2(0); err == nil {
 			*props = append(*props, Property{
 				IconVal: iconCameraRetro,
-				NameVal: "aperture",
+				NameVal: propAperture,
 				Val:     fmt.Sprintf("f/%.1f", float32(nom)/float32(denom)),
 			})
 		}
@@ -118,7 +121,7 @@ func appendRationalExifProps(props *[]xlog.Property, e *exif.Exif) {
 		if snom, sdenom, err := shutter.Rat2(0); err == nil {
 			*props = append(*props, Property{
 				IconVal: iconCameraRetro,
-				NameVal: "shutter speed",
+				NameVal: propShutterSpeed,
 				Val:     fmt.Sprintf("1/%.0fs", math.Pow(2, float64(snom)/float64(sdenom))),
 			})
 		}
