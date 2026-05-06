@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/emad-elsaid/xlog/markdown/ast"
 )
 
 // DiagnosticResult holds the results of running diagnostics.
@@ -185,21 +187,67 @@ func checkBrokenLinks(warnings *[]string) {
 	slog.Warn("Broken internal links detected", "total", totalBroken, "affected_pages", affectedPages)
 }
 
-func checkOrphanPages(warnings *[]string) {
-	stats := calculateStats(context.Background())
+// findOrphanedPages returns a list of page names that have no incoming links.
+func findOrphanedPages(ctx context.Context) []string {
+	allPages := Pages(ctx)
+	incomingLinks := make(map[string]int)
 
-	if stats.OrphanedPages == 0 {
+	// Build incoming link counts
+	for _, p := range allPages {
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+			content := p.Content()
+
+			// Extract implicit [[page]] links
+			pageLinkPattern := `\[\[([^\]]+)\]\]`
+			matches := findPageLinks(string(content), pageLinkPattern)
+			for _, pageName := range matches {
+				incomingLinks[pageName]++
+			}
+
+			// Extract explicit markdown links from AST
+			_, tree := p.AST()
+			markdownLinks := FindAllInAST[*ast.Link](tree)
+			for _, link := range markdownLinks {
+				dest := string(link.Destination)
+				if dest == "" || isExternalLink(dest) || strings.HasPrefix(dest, "#") {
+					continue
+				}
+				targetPageName := linkToPageName(dest)
+				incomingLinks[targetPageName]++
+			}
+		}
+	}
+
+	// Find pages with no incoming links
+	var orphans []string
+	for _, p := range allPages {
+		if incomingLinks[p.Name()] == 0 {
+			orphans = append(orphans, p.Name())
+		}
+	}
+
+	return orphans
+}
+
+func checkOrphanPages(warnings *[]string) {
+	orphans := findOrphanedPages(context.Background())
+
+	if len(orphans) == 0 {
 		slog.Info("✓ No orphaned pages (all pages have incoming links)")
 		return
 	}
 
-	if stats.OrphanedPages == 1 {
-		*warnings = append(*warnings, "⚠ Found 1 orphaned page with no incoming links. Consider linking to it from other pages.")
+	if len(orphans) == 1 {
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found 1 orphaned page with no incoming links: %s", orphans[0]))
 	} else {
-		*warnings = append(*warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links. Consider linking to them from other pages.", stats.OrphanedPages))
+		pageList := strings.Join(orphans, ", ")
+		*warnings = append(*warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links: %s", len(orphans), pageList))
 	}
 
-	slog.Warn("Orphaned pages detected", "count", stats.OrphanedPages)
+	slog.Warn("Orphaned pages detected", "count", len(orphans), "pages", orphans)
 }
 
 func checkDuplicateContent(warnings *[]string) {

@@ -122,17 +122,20 @@ func TestCheckOrphanPages_MessageFormat(t *testing.T) {
 	tests := []struct {
 		name          string
 		orphanCount   int
+		orphanNames   []string
 		expectContain string
 	}{
 		{
 			name:          "single orphan message",
 			orphanCount:   1,
+			orphanNames:   []string{"orphan-page"},
 			expectContain: "1 orphaned page",
 		},
 		{
 			name:          "multiple orphans message",
-			orphanCount:   5,
-			expectContain: "5 orphaned page(s)",
+			orphanCount:   3,
+			orphanNames:   []string{"page1", "page2", "page3"},
+			expectContain: "3 orphaned page(s)",
 		},
 	}
 
@@ -145,9 +148,10 @@ func TestCheckOrphanPages_MessageFormat(t *testing.T) {
 			case 0:
 				// No warning expected
 			case 1:
-				warnings = append(warnings, "⚠ Found 1 orphaned page with no incoming links. Consider linking to it from other pages.")
+				warnings = append(warnings, fmt.Sprintf("⚠ Found 1 orphaned page with no incoming links: %s", tc.orphanNames[0]))
 			default:
-				warnings = append(warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links. Consider linking to them from other pages.", tc.orphanCount))
+				pageList := strings.Join(tc.orphanNames, ", ")
+				warnings = append(warnings, fmt.Sprintf("⚠ Found %d orphaned page(s) with no incoming links: %s", tc.orphanCount, pageList))
 			}
 
 			if tc.orphanCount > 0 {
@@ -156,6 +160,12 @@ func TestCheckOrphanPages_MessageFormat(t *testing.T) {
 				}
 				if !strings.Contains(warnings[0], tc.expectContain) {
 					t.Errorf("Expected message containing %q, got %q", tc.expectContain, warnings[0])
+				}
+				// Verify page names are included
+				for _, pageName := range tc.orphanNames {
+					if !strings.Contains(warnings[0], pageName) {
+						t.Errorf("Expected warning to contain page name %q, got %q", pageName, warnings[0])
+					}
 				}
 			}
 		})
