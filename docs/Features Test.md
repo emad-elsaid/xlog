@@ -246,11 +246,131 @@ Embed another page, header-particles in this case
 
 # Tables
 
+Regular markdown table:
+
 | Heading1 | Heading2 |
 |-----------|------------|
 | Value 1.1   | Value 1.2   |
 | Value 2.1  | Value 2.2   |
 | Value 3.1  | Value 3.2   |
+
+## SQL Queries on Large Tables
+
+Tables with 100+ rows automatically enable SQL querying. A query interface appears above the table,
+allowing you to filter and analyze data using standard SQL syntax. The table is accessible as `input`.
+
+Example queries:
+```sql
+SELECT * FROM input WHERE Age > 30 ORDER BY Name
+SELECT Name, City FROM input WHERE City = 'London'
+SELECT City, COUNT(*) as Count FROM input GROUP BY City
+```
+
+Demo table with 101 records:
+
+| ID | Name | Age | City |
+|----|------|-----|------|
+| 1 | Alice Johnson | 28 | London |
+| 2 | Bob Smith | 34 | Paris |
+| 3 | Charlie Brown | 45 | Berlin |
+| 4 | Diana Prince | 31 | Madrid |
+| 5 | Edward Norton | 29 | Rome |
+| 6 | Fiona Apple | 38 | Vienna |
+| 7 | George Martin | 42 | Prague |
+| 8 | Hannah Baker | 26 | Amsterdam |
+| 9 | Ian McKellen | 55 | Brussels |
+| 10 | Julia Roberts | 33 | Dublin |
+| 11 | Kevin Spacey | 47 | Copenhagen |
+| 12 | Laura Palmer | 24 | Stockholm |
+| 13 | Michael Scott | 41 | Oslo |
+| 14 | Nancy Drew | 27 | Helsinki |
+| 15 | Oliver Twist | 36 | Warsaw |
+| 16 | Patricia Highsmith | 52 | Budapest |
+| 17 | Quentin Blake | 39 | Athens |
+| 18 | Rachel Green | 30 | Lisbon |
+| 19 | Steven King | 48 | London |
+| 20 | Tina Fey | 35 | Paris |
+| 21 | Uma Thurman | 44 | Berlin |
+| 22 | Victor Hugo | 50 | Madrid |
+| 23 | Wendy Williams | 32 | Rome |
+| 24 | Xavier Dolan | 29 | Vienna |
+| 25 | Yara Shahidi | 25 | Prague |
+| 26 | Zachary Levi | 37 | Amsterdam |
+| 27 | Amy Adams | 43 | Brussels |
+| 28 | Benjamin Button | 28 | Dublin |
+| 29 | Catherine Zeta | 46 | Copenhagen |
+| 30 | Daniel Craig | 51 | Stockholm |
+| 31 | Emma Stone | 31 | Oslo |
+| 32 | Frank Ocean | 33 | Helsinki |
+| 33 | Grace Kelly | 40 | Warsaw |
+| 34 | Henry Cavill | 38 | Budapest |
+| 35 | Isabelle Huppert | 54 | Athens |
+| 36 | James Bond | 42 | Lisbon |
+| 37 | Kate Winslet | 45 | London |
+| 38 | Leonardo DiCaprio | 47 | Paris |
+| 39 | Marion Cotillard | 44 | Berlin |
+| 40 | Natalie Portman | 40 | Madrid |
+| 41 | Oscar Isaac | 42 | Rome |
+| 42 | Penelope Cruz | 47 | Vienna |
+| 43 | Quinn Fabray | 26 | Prague |
+| 44 | Ryan Gosling | 41 | Amsterdam |
+| 45 | Scarlett Johansson | 37 | Brussels |
+| 46 | Tom Hanks | 65 | Dublin |
+| 47 | Ursula Andress | 58 | Copenhagen |
+| 48 | Viola Davis | 56 | Stockholm |
+| 49 | Will Smith | 53 | Oslo |
+| 50 | Xena Warrior | 35 | Helsinki |
+| 51 | Yvonne Strahovski | 39 | Warsaw |
+| 52 | Zoe Saldana | 43 | Budapest |
+| 53 | Aaron Paul | 42 | Athens |
+| 54 | Bryce Dallas | 40 | Lisbon |
+| 55 | Chris Hemsworth | 38 | London |
+| 56 | Daisy Ridley | 30 | Paris |
+| 57 | Ethan Hawke | 51 | Berlin |
+| 58 | Felicity Jones | 38 | Madrid |
+| 59 | Gary Oldman | 64 | Rome |
+| 60 | Helen Mirren | 76 | Vienna |
+| 61 | Idris Elba | 49 | Prague |
+| 62 | Jennifer Lawrence | 31 | Amsterdam |
+| 63 | Kit Harington | 35 | Brussels |
+| 64 | Lupita Nyongo | 39 | Dublin |
+| 65 | Matt Damon | 51 | Copenhagen |
+| 66 | Nicole Kidman | 55 | Stockholm |
+| 67 | Owen Wilson | 53 | Oslo |
+| 68 | Priyanka Chopra | 40 | Helsinki |
+| 69 | Quincy Jones | 89 | Warsaw |
+| 70 | Reese Witherspoon | 46 | Budapest |
+| 71 | Sam Worthington | 46 | Athens |
+| 72 | Tilda Swinton | 61 | Lisbon |
+| 73 | Uzo Aduba | 41 | London |
+| 74 | Vin Diesel | 55 | Paris |
+| 75 | Winona Ryder | 51 | Berlin |
+| 76 | Xavier Samuel | 39 | Madrid |
+| 77 | Yahya Abdul | 46 | Rome |
+| 78 | Zendaya Coleman | 26 | Vienna |
+| 79 | Antonio Banderas | 62 | Prague |
+| 80 | Bella Hadid | 26 | Amsterdam |
+| 81 | Chadwick Boseman | 43 | Brussels |
+| 82 | Demi Moore | 60 | Dublin |
+| 83 | Eddie Redmayne | 41 | Copenhagen |
+| 84 | Florence Pugh | 27 | Stockholm |
+| 85 | Gal Gadot | 37 | Oslo |
+| 86 | Hugh Jackman | 54 | Helsinki |
+| 87 | Irina Shayk | 37 | Warsaw |
+| 88 | Jake Gyllenhaal | 42 | Budapest |
+| 89 | Keira Knightley | 37 | Athens |
+| 90 | Liam Neeson | 70 | Lisbon |
+| 91 | Margot Robbie | 32 | London |
+| 92 | Naomi Watts | 54 | Paris |
+| 93 | Orlando Bloom | 46 | Berlin |
+| 94 | Pierce Brosnan | 69 | Madrid |
+| 95 | Queen Latifah | 53 | Rome |
+| 96 | Robert Downey | 57 | Vienna |
+| 97 | Sophie Turner | 27 | Prague |
+| 98 | Timothee Chalamet | 27 | Amsterdam |
+| 99 | Uma Karuna | 34 | Brussels |
+| 100 | Viggo Mortensen | 64 | Dublin |
+| 101 | Willem Dafoe | 67 | Copenhagen |
 
 # Horizontal Rule
 
