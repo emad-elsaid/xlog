@@ -60,6 +60,11 @@ func (p *htmlSource) Each(ctx context.Context, f func(xlog.Page)) {
 			return errors.New("context stopped")
 
 		default:
+			// Skip hidden directories
+			if name != "." && d.IsDir() && xlog.IsIgnoredPath(name) {
+				return fs.SkipDir
+			}
+
 			ext := path.Ext(name)
 			basename := name[:len(name)-len(ext)]
 

@@ -201,7 +201,6 @@ func findOrphanedPages(ctx context.Context) []string {
 			content := p.Content()
 
 			// Extract implicit [[page]] links
-			pageLinkPattern := `\[\[([^\]]+)\]\]`
 			matches := findPageLinks(string(content), pageLinkPattern)
 			for _, pageName := range matches {
 				incomingLinks[pageName]++

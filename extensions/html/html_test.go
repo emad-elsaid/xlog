@@ -157,6 +157,71 @@ func TestHTMLSource_Each_ContextCancellation(t *testing.T) {
 	}
 }
 
+func TestHTMLSource_Each_SkipsHiddenDirectories(t *testing.T) {
+	tmpDir := t.TempDir()
+	oldWd, _ := os.Getwd()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(oldWd); err != nil {
+			t.Errorf("Failed to restore directory: %v", err)
+		}
+	}()
+
+	// Create test HTML files including some in hidden directories
+	if err := os.WriteFile("visible.html", []byte("<h1>Visible</h1>"), 0600); err != nil {
+		t.Fatalf("Failed to create visible.html: %v", err)
+	}
+	if err := os.MkdirAll(".hidden", 0750); err != nil {
+		t.Fatalf("Failed to create .hidden: %v", err)
+	}
+	if err := os.WriteFile(".hidden/should_skip.html", []byte("<h1>Hidden</h1>"), 0600); err != nil {
+		t.Fatalf("Failed to create .hidden/should_skip.html: %v", err)
+	}
+	if err := os.MkdirAll(".git/objects", 0750); err != nil {
+		t.Fatalf("Failed to create .git/objects: %v", err)
+	}
+	if err := os.WriteFile(".git/objects/file.html", []byte("<h1>Git</h1>"), 0600); err != nil {
+		t.Fatalf("Failed to create .git/objects/file.html: %v", err)
+	}
+	if err := os.MkdirAll("normal/subdir", 0750); err != nil {
+		t.Fatalf("Failed to create normal/subdir: %v", err)
+	}
+	if err := os.WriteFile("normal/subdir/visible2.html", []byte("<h1>Normal</h1>"), 0600); err != nil {
+		t.Fatalf("Failed to create normal/subdir/visible2.html: %v", err)
+	}
+
+	source := &htmlSource{}
+	found := make(map[string]bool)
+
+	ctx := context.Background()
+	source.Each(ctx, func(p xlog.Page) {
+		found[p.Name()] = true
+	})
+
+	// Should find visible pages
+	expected := []string{"visible", "normal/subdir/visible2"}
+	for _, name := range expected {
+		if !found[name] {
+			t.Errorf("Expected to find page '%s'", name)
+		}
+	}
+
+	// Should NOT find pages in hidden directories
+	hidden := []string{".hidden/should_skip", ".git/objects/file"}
+	for _, name := range hidden {
+		if found[name] {
+			t.Errorf("Should not have found page in hidden directory: '%s'", name)
+		}
+	}
+
+	// Verify we only found the expected count
+	if len(found) != len(expected) {
+		t.Errorf("Expected %d pages, got %d. Found: %v", len(expected), len(found), found)
+	}
+}
+
 func TestPage_Name(t *testing.T) {
 	p := &page{name: "test/page", ext: ".html"}
 	if p.Name() != "test/page" {

@@ -15,6 +15,9 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 )
 
+// pageLinkPattern matches page link syntax [[page_name]] in markdown content.
+const pageLinkPattern = `\[\[([^\]]+)\]\]`
+
 // Markdown is used instead of string to make sure it's clear the string is markdown string.
 type Markdown string
 

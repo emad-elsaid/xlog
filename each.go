@@ -101,7 +101,9 @@ func MapPage[T any](ctx context.Context, f func(Page) T) []T {
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(concurrency)
 
-	ch := make(chan T, concurrency)
+	// Buffer must be large enough to hold all results to prevent deadlock
+	// when number of pages exceeds concurrency limit
+	ch := make(chan T, len(cached))
 
 Loop:
 	for _, p := range cached {

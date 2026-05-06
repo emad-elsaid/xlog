@@ -285,6 +285,73 @@ func TestEncryptedPages_Each_IgnoresNonEncryptedFiles(t *testing.T) {
 	}
 }
 
+// TestEncryptedPages_Each_SkipsHiddenDirectories verifies Each skips hidden directories like .git.
+func TestEncryptedPages_Each_SkipsHiddenDirectories(t *testing.T) {
+	origGpgId := gpgId
+	defer func() { gpgId = origGpgId }()
+
+	gpgId = testGPGKeyID
+
+	tmpDir := t.TempDir()
+	origWd, _ := os.Getwd()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("failed to change directory: %v", err)
+	}
+	defer func() {
+		if err := os.Chdir(origWd); err != nil {
+			t.Errorf("failed to restore directory: %v", err)
+		}
+	}()
+
+	// Create test structure with hidden directories
+	testPages := []string{
+		"visible.md.pgp",
+		".hidden/should_skip.md.pgp",
+		".git/objects/should_skip.md.pgp",
+		"normal/visible2.md.pgp",
+	}
+
+	for _, pagePath := range testPages {
+		if err := os.MkdirAll(filepath.Dir(pagePath), 0700); err != nil {
+			t.Fatalf("failed to create directory for %s: %v", pagePath, err)
+		}
+		if err := os.WriteFile(pagePath, []byte("encrypted"), 0600); err != nil {
+			t.Fatalf("failed to write file %s: %v", pagePath, err)
+		}
+	}
+
+	ps := &encryptedPages{}
+	foundPages := make(map[string]bool)
+
+	ps.Each(context.Background(), func(p xlog.Page) {
+		foundPages[p.Name()] = true
+	})
+
+	// Should only find pages in visible directories
+	expectedPages := map[string]bool{
+		"visible":         true,
+		"normal/visible2": true,
+	}
+
+	if len(foundPages) != len(expectedPages) {
+		t.Errorf("Each() found %d pages, want %d. Found: %v", len(foundPages), len(expectedPages), foundPages)
+	}
+
+	for name := range expectedPages {
+		if !foundPages[name] {
+			t.Errorf("Each() did not find expected page %q", name)
+		}
+	}
+
+	// Verify hidden directory pages were NOT found
+	hiddenPages := []string{".hidden/should_skip", ".git/objects/should_skip"}
+	for _, name := range hiddenPages {
+		if foundPages[name] {
+			t.Errorf("Each() should not have found page in hidden directory: %q", name)
+		}
+	}
+}
+
 // TestPGPExtension_Name verifies the extension name.
 func TestPGPExtension_Name(t *testing.T) {
 	ext := PGP{}

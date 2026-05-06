@@ -234,6 +234,68 @@ func TestPandocEach(t *testing.T) {
 	}
 }
 
+func TestPandocEach_SkipsHiddenDirectories(t *testing.T) {
+	tmpDir := t.TempDir()
+	oldWd, _ := os.Getwd()
+	defer func() { _ = os.Chdir(oldWd) }()
+	_ = os.Chdir(tmpDir)
+
+	testFiles := map[string]string{
+		"visible.org":                  "* Visible",
+		".hidden/should_skip.org":      "* Hidden",
+		".git/objects/should_skip.rst": "Hidden in Git",
+		"normal/visible2.rtf":          "{\\rtf1}",
+	}
+
+	for filename, content := range testFiles {
+		dir := filepath.Dir(filename)
+		if dir != "." {
+			if err := os.MkdirAll(dir, 0750); err != nil {
+				t.Fatalf("Failed to create directory %s: %v", dir, err)
+			}
+		}
+		if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+			t.Fatalf("Failed to create test file %s: %v", filename, err)
+		}
+	}
+
+	p := &pandoc{}
+	var foundPages []string
+
+	p.Each(context.Background(), func(page xlog.Page) {
+		foundPages = append(foundPages, page.Name())
+	})
+
+	// Should find visible pages
+	expectedPages := []string{"visible", filepath.Join("normal", "visible2")}
+	if len(foundPages) != len(expectedPages) {
+		t.Errorf("Expected %d pages, got %d: %v", len(expectedPages), len(foundPages), foundPages)
+	}
+
+	for _, expected := range expectedPages {
+		found := false
+		for _, actual := range foundPages {
+			if actual == expected {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Expected to find page %q", expected)
+		}
+	}
+
+	// Should NOT find pages in hidden directories
+	hiddenPages := []string{".hidden/should_skip", ".git/objects/should_skip"}
+	for _, hidden := range hiddenPages {
+		for _, actual := range foundPages {
+			if actual == hidden {
+				t.Errorf("Should not have found page in hidden directory: %q", hidden)
+			}
+		}
+	}
+}
+
 func TestPageName(t *testing.T) {
 	tests := []struct {
 		name     string

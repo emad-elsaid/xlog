@@ -55,7 +55,6 @@ func extractLinks(p Page, content string) []string {
 	linkSet := make(map[string]bool)
 
 	// Extract implicit [[page]] links
-	pageLinkPattern := `\[\[([^\]]+)\]\]`
 	matches := findPageLinks(content, pageLinkPattern)
 	for _, match := range matches {
 		linkSet[match] = true

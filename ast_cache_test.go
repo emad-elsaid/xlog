@@ -82,9 +82,9 @@ func TestASTQueryCache_ConcurrentAccess(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	concurrency := 100
+	numWorkers := 100
 
-	for i := 0; i < concurrency; i++ {
+	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

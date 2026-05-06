@@ -47,8 +47,15 @@ func calendarHandler(r xlog.Request) xlog.Output {
 			return
 		}
 
+		// Track dates already seen for this page to avoid duplicates
+		seenDates := make(map[time.Time]bool)
 		for _, v := range xlog.FindAllInAST[*DateNode](ast) {
-			calendar = append(calendar, pair{Time: v.time, Page: p})
+			// Normalize time to day precision (ignore hour/minute/second)
+			normalized := time.Date(v.time.Year(), v.time.Month(), v.time.Day(), 0, 0, 0, 0, v.time.Location())
+			if !seenDates[normalized] {
+				calendar = append(calendar, pair{Time: normalized, Page: p})
+				seenDates[normalized] = true
+			}
 		}
 	})
 
@@ -124,10 +131,16 @@ func organizeCalendar(pairs []pair) []Year {
 				if days[dayOffset][weekday] == nil {
 					days[dayOffset][weekday] = &Day{Date: currentDay}
 				}
+				// Use a map to deduplicate pages for this day
+				pageMap := make(map[string]xlog.Page)
 				for _, p := range pairs {
 					if p.Time.Day() == currentDay.Day() {
-						days[dayOffset][weekday].Pages = append(days[dayOffset][weekday].Pages, p.Page)
+						pageMap[p.Page.Name()] = p.Page
 					}
+				}
+				// Convert map back to slice
+				for _, page := range pageMap {
+					days[dayOffset][weekday].Pages = append(days[dayOffset][weekday].Pages, page)
 				}
 				currentDay = currentDay.AddDate(0, 0, 1)
 			}

@@ -52,7 +52,6 @@ func calculateStats(ctx context.Context) GardenStats {
 
 			// Extract implicit [[page]] links from markdown content using regex
 			// This approach avoids circular dependencies with extension packages
-			pageLinkPattern := `\[\[([^\]]+)\]\]`
 			matches := findPageLinks(string(content), pageLinkPattern)
 
 			// Extract explicit markdown links from AST
