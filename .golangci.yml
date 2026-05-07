@@ -40,7 +40,6 @@ linters:
         - httpNoBody
         - importShadow
         - rangeValCopy
-        - sloppyLen
         - stringConcatSimplify
         - typeUnparen
         - unnamedResult
