@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 )
@@ -1045,9 +1046,12 @@ func TestDeleteSuccessTriggersEvent(t *testing.T) {
 	p := &page{name: "test"}
 	p.Write(Markdown("content"))
 
+	var mu sync.Mutex
 	eventTriggered := false
 	var receivedPage Page
 	Listen(PageDeleted, func(page Page) error {
+		mu.Lock()
+		defer mu.Unlock()
 		eventTriggered = true
 		receivedPage = page
 		return nil
@@ -1059,11 +1063,16 @@ func TestDeleteSuccessTriggersEvent(t *testing.T) {
 		t.Fatal("Delete should succeed")
 	}
 
-	if !eventTriggered {
+	mu.Lock()
+	triggered := eventTriggered
+	page := receivedPage
+	mu.Unlock()
+
+	if !triggered {
 		t.Error("PageDeleted event SHOULD be triggered when delete succeeds")
 	}
 
-	if receivedPage == nil || receivedPage.Name() != "test" {
+	if page == nil || page.Name() != "test" {
 		t.Error("Event handler should receive the correct page")
 	}
 }
