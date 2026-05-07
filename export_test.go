@@ -17,7 +17,7 @@ func TestExportJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer os.Chdir(origDir)
-	
+
 	originalSources := sources
 	defer func() {
 		sourcesMutex.Lock()
@@ -48,12 +48,12 @@ func TestExportJSON(t *testing.T) {
 	if chdirErr != nil {
 		t.Fatal(chdirErr)
 	}
-	
+
 	// Replace global sources with test-specific markdownFS
 	sourcesMutex.Lock()
 	sources = []PageSource{newMarkdownFS(tmpDir)}
 	sourcesMutex.Unlock()
-	
+
 	// Clear pages cache to force using new sources
 	_ = clearPagesCache(nil)
 

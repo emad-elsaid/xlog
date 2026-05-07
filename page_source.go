@@ -24,7 +24,7 @@ var (
 func NewPage(name string) (p Page) {
 	sourcesMutex.RLock()
 	defer sourcesMutex.RUnlock()
-	
+
 	for i := range sources {
 		p = sources[i].Page(name)
 		if p != nil && p.Exists() {

@@ -72,7 +72,7 @@ func TestCalculateStats(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
 	defer func() { _ = os.Chdir(origDir) }()
-	
+
 	originalSources := sources
 	defer func() {
 		sourcesMutex.Lock()
@@ -97,12 +97,12 @@ func TestCalculateStats(t *testing.T) {
 	}
 
 	Config.Source = tmpDir
-	
+
 	// Replace global sources with test-specific markdownFS
 	sourcesMutex.Lock()
 	sources = []PageSource{newMarkdownFS(tmpDir)}
 	sourcesMutex.Unlock()
-	
+
 	_ = clearPagesCache(nil)
 
 	stats := calculateStats(context.Background())
@@ -211,7 +211,7 @@ func TestCalculateStatsWithLinks(t *testing.T) {
 	tmpDir := t.TempDir()
 	origDir, _ := os.Getwd()
 	defer func() { _ = os.Chdir(origDir) }()
-	
+
 	originalSources := sources
 	defer func() {
 		sourcesMutex.Lock()
@@ -244,12 +244,12 @@ func TestCalculateStatsWithLinks(t *testing.T) {
 	}
 
 	Config.Source = tmpDir
-	
+
 	// Replace global sources with test-specific markdownFS
 	sourcesMutex.Lock()
 	sources = []PageSource{newMarkdownFS(tmpDir)}
 	sourcesMutex.Unlock()
-	
+
 	_ = clearPagesCache(nil)
 
 	stats := calculateStats(context.Background())

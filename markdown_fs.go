@@ -135,25 +135,25 @@ func (m *markdownFS) Each(ctx context.Context, f func(Page)) {
 			return fs.SkipDir
 		}
 
-	select {
+		select {
 
-	case <-ctx.Done():
-		return errors.New("context stopped")
+		case <-ctx.Done():
+			return errors.New("context stopped")
 
-	default:
-		ext := path.Ext(name)
+		default:
+			ext := path.Ext(name)
 
-		if ext == ".md" {
-			// Get path relative to m.path before stripping extension
-			relPath, err := filepath.Rel(m.path, name)
-			if err != nil {
-				return nil
+			if ext == ".md" {
+				// Get path relative to m.path before stripping extension
+				relPath, err := filepath.Rel(m.path, name)
+				if err != nil {
+					return nil
+				}
+				basename := relPath[:len(relPath)-len(ext)]
+				f(m.Page(basename))
 			}
-			basename := relPath[:len(relPath)-len(ext)]
-			f(m.Page(basename))
-		}
 
-	}
+		}
 
 		return nil
 	})

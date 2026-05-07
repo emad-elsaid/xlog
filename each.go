@@ -172,13 +172,13 @@ func populatePagesCache(ctx context.Context) {
 	}
 
 	pages = make([]Page, 0, 1000)
-	
+
 	// Read sources with RLock
 	sourcesMutex.RLock()
 	sourcesSnapshot := make([]PageSource, len(sources))
 	copy(sourcesSnapshot, sources)
 	sourcesMutex.RUnlock()
-	
+
 	for _, s := range sourcesSnapshot {
 		select {
 		case <-ctx.Done():
