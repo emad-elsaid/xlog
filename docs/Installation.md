@@ -1,9 +1,7 @@
 # Installation
 
-```callout-info
 **Works with Any Text Editor**  
 XLog doesn't include a built-in editor. Instead, it works with your favorite text editor (Vim, Emacs, VS Code, Sublime, etc.). You edit markdown files locally, and XLog provides live preview in your browser.
-```
 
 ## Quick Start (Recommended)
 
@@ -61,9 +59,7 @@ docker pull ghcr.io/emad-elsaid/xlog:latest
 docker run -p 3000:3000 -v ~/.xlog:/files ghcr.io/emad-elsaid/xlog:latest
 ```
 
-```callout-info
 The Docker container mounts `~/.xlog` as a volume and will write pages to it.
-```
 
 ### Docker Compose (From Source)
 
