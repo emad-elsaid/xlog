@@ -58,6 +58,21 @@ func TestPreprocessor(t *testing.T) {
 			input:    "[[Start]] middle [[End]]",
 			expected: "[Start](/Start) middle [End](/End)",
 		},
+		{
+			name:     "escaped wiki link with backslash",
+			input:    `\[[Page Name]]`,
+			expected: "[[Page Name]]",
+		},
+		{
+			name:     "mixed escaped and unescaped",
+			input:    `\[[Escaped]] and [[Not Escaped]]`,
+			expected: "[[Escaped]] and [Not Escaped](/Not_Escaped)",
+		},
+		{
+			name:     "escaped in code description",
+			input:    `Use \[[Page Name]] to link`,
+			expected: "Use [[Page Name]] to link",
+		},
 	}
 
 	for _, tc := range tests {
