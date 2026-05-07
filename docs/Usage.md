@@ -20,10 +20,7 @@ This starts a web server that:
 - Lets you click "Edit" to open files in your desktop editor
 - Shows automatic backlinks and page relationships
 
-```callout-info
-**Desktop Editing Workflow**  
-XLog doesn't provide browser-based editing. Instead, clicking "Edit" opens the file in your configured text editor (Vim, VS Code, Emacs, etc.). You edit locally, save the file, and see changes instantly in your browser.
-```
+/info **Desktop Editing Workflow** - XLog doesn't provide browser-based editing. Instead, clicking "Edit" opens the file in your configured text editor (Vim, VS Code, Emacs, etc.). You edit locally, save the file, and see changes instantly in your browser.
 
 ### Generate a Static Site
 
@@ -91,10 +88,7 @@ xlog -bind :8080
 xlog -bind 0.0.0.0:3000
 ```
 
-```callout-warning
-**Security Note**  
-Binding to `0.0.0.0` makes XLog accessible from your network. Only use this on trusted networks or with proper authentication.
-```
+/warning **Security Note** - Binding to `0.0.0.0` makes XLog accessible from your network. Only use this on trusted networks or with proper authentication.
 
 #### `-source` - Specify Content Directory
 
@@ -216,10 +210,7 @@ By default, XLog expects HTTPS for CSRF protection. Allow HTTP:
 ```bash
 xlog -serve-insecure
 ```
-
-```callout-warning
-Only use this for local development. Production deployments should use HTTPS.
-```
+/warning Only use this for local development. Production deployments should use HTTPS.
 
 #### `-gpg` - Encrypt Pages with GPG
 

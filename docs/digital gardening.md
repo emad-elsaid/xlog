@@ -136,9 +136,7 @@ Mention other pages naturally in your writing. XLog converts them to links autom
 Rough notes are valuable. Publish work-in-progress. Mark pages as incomplete with:
 
 ```markdown
-```callout-warning
-🚧 Work in Progress - Rough notes, needs expansion
-```
+/warning 🚧 Work in Progress - Rough notes, needs expansion
 ```
 
 ### Refine Over Time
