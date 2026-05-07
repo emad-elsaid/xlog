@@ -2,6 +2,7 @@ package xlog
 
 import (
 	"context"
+	"sync"
 )
 
 type PageSource interface {
@@ -11,15 +12,19 @@ type PageSource interface {
 	Each(context.Context, func(Page))
 }
 
-var sources = []PageSource{
-	newMarkdownFS("."),
-}
+var (
+	sources      = []PageSource{newMarkdownFS(".")}
+	sourcesMutex sync.RWMutex
+)
 
 // NewPage creates a Page instance for the given page name by querying all registered page sources.
 // It returns the first existing page found across all sources. If no existing page is found,
 // it returns a non-existing page object (never nil) to prevent panics in handlers.
 // Page sources are checked in registration order (most recently registered first).
 func NewPage(name string) (p Page) {
+	sourcesMutex.RLock()
+	defer sourcesMutex.RUnlock()
+	
 	for i := range sources {
 		p = sources[i].Page(name)
 		if p != nil && p.Exists() {
@@ -47,5 +52,7 @@ func NewPage(name string) (p Page) {
 // New sources take precedence over previously registered sources when resolving pages.
 // This allows extensions to override or supplement the default markdown file system.
 func RegisterPageSource(p PageSource) {
+	sourcesMutex.Lock()
+	defer sourcesMutex.Unlock()
 	sources = append([]PageSource{p}, sources...)
 }
