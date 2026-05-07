@@ -292,6 +292,23 @@ xlog -activitypub.username "yourusername" \
 xlog -disqus "your-disqus-domain.disqus.com"
 ```
 
+#### Giscus Comments
+
+Enable GitHub Discussions-powered comments:
+
+```bash
+xlog -giscus-repo "owner/repo" \
+     -giscus-repo-id "R_kgDOG1234" \
+     -giscus-category "Announcements" \
+     -giscus-category-id "DIC_kwDOG5678"
+```
+
+Get configuration values from [giscus.app](https://giscus.app). Optional flags:
+
+- `-giscus-mapping` - Mapping method (default: `pathname`)
+- `-giscus-theme` - Visual theme (default: `preferred_color_scheme`)
+- `-giscus-lang` - Interface language (default: `en`)
+
 #### Twitter Card Integration
 
 ```bash
@@ -427,7 +444,7 @@ xlog -bind :3001
 ## Next Steps
 
 - [Workflow Guide](Workflow.md) - Understand the editor + preview workflow
-- [Extensions](extensions.md) - Learn about XLog's 37 built-in extensions
+- [Extensions](extensions.md) - Learn about XLog's 38 built-in extensions
 - [Installation](Installation.md) - Editor setup and configuration
 
 ## See All Flags
