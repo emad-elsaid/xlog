@@ -12,6 +12,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/embed"
 	_ "github.com/emad-elsaid/xlog/extensions/file_operations"
 	_ "github.com/emad-elsaid/xlog/extensions/frontmatter"
+	_ "github.com/emad-elsaid/xlog/extensions/giscus"
 	_ "github.com/emad-elsaid/xlog/extensions/github"
 	_ "github.com/emad-elsaid/xlog/extensions/gpg"
 	_ "github.com/emad-elsaid/xlog/extensions/hashtags"

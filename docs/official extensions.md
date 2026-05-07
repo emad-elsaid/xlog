@@ -1,6 +1,6 @@
 # XLog Extensions
 
-XLog includes 37 built-in extensions that add features for knowledge bases, content creation, and developer workflows. All extensions are enabled by default (see [Usage](Usage.md) to disable specific ones).
+XLog includes 38 built-in extensions that add features for knowledge bases, content creation, and developer workflows. All extensions are enabled by default (see [Usage](Usage.md) to disable specific ones).
 
 ## Knowledge Base Extensions
 
@@ -76,6 +76,7 @@ Deploy and integrate with external services:
 | **Manifest** | Web app manifest.json for PWA support. |
 | **ActivityPub** | Webfinger and ActivityPub actor for Fediverse integration. |
 | **Disqus** | Add Disqus comments to pages. |
+| **Giscus** | Add Giscus comments powered by GitHub Discussions. |
 
 ## Formatting Extensions
 
@@ -136,6 +137,31 @@ Press Ctrl+K or click Search to find any content across your knowledge base inst
 3. Make changes and save
 4. Browser automatically reloads with updated content
 5. No manual refresh needed
+
+### Giscus Comments
+
+Enable GitHub Discussions-powered comments on your pages:
+
+```bash
+xlog -giscus-repo "owner/repo" \
+     -giscus-repo-id "R_kgDOG1234" \
+     -giscus-category "Announcements" \
+     -giscus-category-id "DIC_kwDOG5678" \
+     -giscus-mapping "pathname" \
+     -giscus-theme "preferred_color_scheme" \
+     -giscus-lang "en"
+```
+
+To get your repository and category IDs, visit [giscus.app](https://giscus.app) and follow the configuration wizard. You'll need:
+
+1. A public GitHub repository with Discussions enabled
+2. The [giscus app](https://github.com/apps/giscus) installed on that repository
+3. A Discussion category (recommended: Announcements type)
+
+Optional parameters:
+- `-giscus-mapping`: How to match pages to discussions (pathname, url, title, og:title)
+- `-giscus-theme`: Visual theme (light, dark, preferred_color_scheme, etc.)
+- `-giscus-lang`: Interface language (en, ar, zh, etc.)
 
 ## Disabling Extensions
 
