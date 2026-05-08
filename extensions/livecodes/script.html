@@ -1,7 +1,14 @@
 <script src="/js/livecodes.umd.js"></script>
 <script>
-  // Initialize LiveCodes playgrounds
-  (async () => {
+  // Initialize LiveCodes playgrounds when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLiveCodesPlaygrounds);
+  } else {
+    // DOM already loaded, run immediately
+    initLiveCodesPlaygrounds();
+  }
+  
+  async function initLiveCodesPlaygrounds() {
     if (typeof livecodes === 'undefined') {
       console.error('LiveCodes library not loaded');
       return;
@@ -74,5 +81,5 @@
       // Create the playground with proper language configuration
       await livecodes.createPlayground(container, { config });
     }
-  })();
+  }
 </script>
