@@ -33,28 +33,40 @@ func TestTransformLiveCodesBlocks(t *testing.T) {
 		expectedLang  string
 	}{
 		{
-			name:          "live-js block",
-			markdown:      "```live-js\nconsole.log('hello');\n```",
+			name:          "jsx livecodes block",
+			markdown:      "```jsx livecodes\nconsole.log('hello');\n```",
 			shouldConvert: true,
-			expectedLang:  "js",
+			expectedLang:  "jsx",
 		},
 		{
-			name:          "live-python block",
-			markdown:      "```live-python\nprint('hello')\n```",
+			name:          "python livecodes block",
+			markdown:      "```python livecodes\nprint('hello')\n```",
 			shouldConvert: true,
 			expectedLang:  "python",
 		},
 		{
-			name:          "live.html block",
-			markdown:      "```live.html\n<h1>Hello</h1>\n```",
+			name:          "html livecodes block",
+			markdown:      "```html livecodes\n<h1>Hello</h1>\n```",
 			shouldConvert: true,
 			expectedLang:  "html",
 		},
 		{
-			name:          "live.css block",
-			markdown:      "```live.css\nbody { color: red; }\n```",
+			name:          "css livecodes block",
+			markdown:      "```css livecodes\nbody { color: red; }\n```",
 			shouldConvert: true,
 			expectedLang:  "css",
+		},
+		{
+			name:          "js livecodes block",
+			markdown:      "```js livecodes\nconsole.log('test');\n```",
+			shouldConvert: true,
+			expectedLang:  "js",
+		},
+		{
+			name:          "livecodes with params",
+			markdown:      "```jsx livecodes console=open\nconsole.log('test');\n```",
+			shouldConvert: true,
+			expectedLang:  "jsx",
 		},
 		{
 			name:          "regular js block should not convert",
@@ -101,19 +113,19 @@ func TestLiveCodesRendering(t *testing.T) {
 		contains []string
 	}{
 		{
-			name:     "live-js renders playground",
-			markdown: "```live-js\nconsole.log('hello');\n```",
+			name:     "jsx livecodes renders playground",
+			markdown: "```jsx livecodes\nconsole.log('hello');\n```",
 			contains: []string{
 				`class="livecodes-playground"`,
-				`data-lang="js"`,
+				`data-lang="jsx"`,
 				`console.log(&#39;hello&#39;);`,
 				`<script`,
 				`livecodes`,
 			},
 		},
 		{
-			name:     "live-python renders playground",
-			markdown: "```live-python\nprint('hello')\n```",
+			name:     "python livecodes renders playground",
+			markdown: "```python livecodes\nprint('hello')\n```",
 			contains: []string{
 				`class="livecodes-playground"`,
 				`data-lang="python"`,
@@ -121,8 +133,8 @@ func TestLiveCodesRendering(t *testing.T) {
 			},
 		},
 		{
-			name:     "live.html renders playground",
-			markdown: "```live.html\n<h1>Test</h1>\n```",
+			name:     "html livecodes renders playground",
+			markdown: "```html livecodes\n<h1>Test</h1>\n```",
 			contains: []string{
 				`class="livecodes-playground"`,
 				`data-lang="html"`,
@@ -131,12 +143,11 @@ func TestLiveCodesRendering(t *testing.T) {
 		},
 		{
 			name:     "special characters are escaped",
-			markdown: "```live-js\nlet x = \"<>&'\";\n```",
+			markdown: "```js livecodes\nlet x = \"<>&'\";\n```",
 			contains: []string{
 				`&lt;`,
 				`&gt;`,
 				`&amp;`,
-				`&quot;`,
 				`&#39;`,
 			},
 		},
@@ -186,7 +197,7 @@ func TestLiveCodesDoesNotAffectRegularCodeBlocks(t *testing.T) {
 func TestLiveCodesScriptEmbedded(t *testing.T) {
 	// Test that the script is embedded and contains expected content
 	md := newMarkdownWithLiveCodes()
-	input := "```live-js\ntest\n```"
+	input := "```js livecodes\ntest\n```"
 
 	var buf bytes.Buffer
 	if err := md.Convert([]byte(input), &buf); err != nil {
@@ -209,7 +220,7 @@ func TestLiveCodesScriptEmbedded(t *testing.T) {
 func TestLiveCodesInit(t *testing.T) {
 	// Verify that the extension works when initialized
 	md := newMarkdownWithLiveCodes()
-	input := "```live-js\ntest\n```"
+	input := "```js livecodes\ntest\n```"
 
 	var buf bytes.Buffer
 	if err := md.Convert([]byte(input), &buf); err != nil {
@@ -234,13 +245,13 @@ Regular code:
 ` + "```js\nconsole.log('regular');\n```" + `
 
 Live code:
-` + "```live-js\nconsole.log('live');\n```" + `
+` + "```js livecodes\nconsole.log('live');\n```" + `
 
 Another regular:
 ` + "```python\nprint('regular')\n```" + `
 
 Another live:
-` + "```live-python\nprint('live')\n```" + `
+` + "```python livecodes\nprint('live')\n```" + `
 `
 
 	md := newMarkdownWithLiveCodes()

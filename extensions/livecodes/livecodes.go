@@ -2,6 +2,7 @@ package livecodes
 
 import (
 	"fmt"
+	"html"
 	"html/template"
 	"strings"
 	"sync/atomic"
@@ -59,7 +60,7 @@ func (l *LiveCodesBlock) Kind() ast.NodeKind {
 	return KindLiveCodesBlock
 }
 
-// transformLiveCodesBlocks transforms fenced code blocks with "live" prefix to LiveCodes blocks.
+// transformLiveCodesBlocks transforms fenced code blocks with "livecodes" in info string.
 type transformLiveCodesBlocks struct{}
 
 func (t transformLiveCodesBlocks) Transform(doc *ast.Document, reader text.Reader, pc parser.Context) {
@@ -78,9 +79,14 @@ func (t transformLiveCodesBlocks) Transform(doc *ast.Document, reader text.Reade
 				continue
 			}
 
-			lang := string(n.Language(source))
-			// Support "live-<language>" syntax (e.g., live-js, live-python)
-			if !strings.HasPrefix(lang, "live-") && !strings.HasPrefix(lang, "live.") {
+			// Get the full info string (e.g., "jsx livecodes" or "python livecodes console=open")
+			var infoString string
+			if n.Info != nil {
+				infoString = string(n.Info.Segment.Value(source))
+			}
+
+			// Check if "livecodes" appears in the info string
+			if !strings.Contains(infoString, "livecodes") {
 				continue
 			}
 
@@ -91,10 +97,17 @@ func (t transformLiveCodesBlocks) Transform(doc *ast.Document, reader text.Reade
 	})
 
 	for _, b := range blocks {
-		lang := string(b.Language(source))
-		// Extract actual language (e.g., "live-js" -> "js", "live.html" -> "html")
-		actualLang := strings.TrimPrefix(lang, "live-")
-		actualLang = strings.TrimPrefix(actualLang, "live.")
+		var infoString string
+		if b.Info != nil {
+			infoString = string(b.Info.Segment.Value(source))
+		}
+
+		// Extract the language (first word before "livecodes")
+		parts := strings.Fields(infoString)
+		actualLang := ""
+		if len(parts) > 0 && parts[0] != "livecodes" {
+			actualLang = parts[0]
+		}
 
 		replacement := LiveCodesBlock{
 			FencedCodeBlock: *b,
@@ -137,29 +150,17 @@ func (r *liveCodesRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 	playgroundID := fmt.Sprintf("livecodes-%d", id)
 
 	// Create the playground container with the code embedded
-	html := fmt.Sprintf(`<div class="livecodes-playground" data-lang="%s" id="%s">
+	htmlStr := fmt.Sprintf(`<div class="livecodes-playground" data-lang="%s" id="%s">
 <pre style="display:none;"><code>%s</code></pre>
 <div class="livecodes-loading">Loading playground...</div>
 </div>
-`, htmlEscape(node.language), htmlEscape(playgroundID), htmlEscape(content))
+`, html.EscapeString(node.language), html.EscapeString(playgroundID), html.EscapeString(content))
 
-	// #nosec G203 - Content is escaped via htmlEscape function
-	output := template.HTML(html + script)
+	// #nosec G203 - Content is escaped via html.EscapeString
+	output := template.HTML(htmlStr + script)
 	if _, err := w.Write([]byte(output)); err != nil {
 		return ast.WalkStop, err
 	}
 
 	return ast.WalkContinue, nil
-}
-
-// htmlEscape escapes HTML special characters.
-func htmlEscape(s string) string {
-	replacer := strings.NewReplacer(
-		"&", "&amp;",
-		"<", "&lt;",
-		">", "&gt;",
-		`"`, "&quot;",
-		"'", "&#39;",
-	)
-	return replacer.Replace(s)
 }
