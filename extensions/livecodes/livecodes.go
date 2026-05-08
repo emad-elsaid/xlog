@@ -1,13 +1,12 @@
 package livecodes
 
 import (
+	"embed"
 	"fmt"
 	"html"
 	"html/template"
 	"strings"
 	"sync/atomic"
-
-	_ "embed"
 
 	"github.com/emad-elsaid/xlog"
 	"github.com/emad-elsaid/xlog/markdown"
@@ -17,6 +16,9 @@ import (
 	"github.com/emad-elsaid/xlog/markdown/text"
 	"github.com/emad-elsaid/xlog/markdown/util"
 )
+
+//go:embed js
+var js embed.FS
 
 const extensionName = "livecodes"
 
@@ -28,6 +30,7 @@ type LiveCodes struct{}
 
 func (LiveCodes) Name() string { return extensionName }
 func (LiveCodes) Init() {
+	xlog.RegisterStaticDir(js)
 	LiveCodes{}.Extend(xlog.MarkdownConverter())
 }
 
