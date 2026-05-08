@@ -36,10 +36,10 @@ For example, xlog has templates defined inside `templates/` one of them is `page
 | Strikethrough                                   | `~~`                         | ~~Strikethrough~~                              |
 | Subscript                                       | `<sub>`                      | X<sub>2</sub>                                  |
 | Superscript                                     | `<sup>`                      | X<sup>2</sup>                                  |
-| Linking                                         | `[text](url)`                | [Emad Elsaid](https://www.emadelsaid.com)      |
+| Auto-linking page names                         | Just write the page name     | index, Features Test                           |
+| Explicit linking                                | `[text](url)`                | [Emad Elsaid](https://www.emadelsaid.com)      |
 | Wiki-style linking                              | `\[[Page Name]]`             | [[index]], [[Features Test]]                   |
 | Shorting Long URLs:                             |                              | https://en.wikipedia.org/wiki/Computer_science |
-| Auto linking text if it's a page name           |                              | index, Features Test                           |
 | Emoji                                           | `:EMOJICODE:`                | :wrench:                                       |
 | Detect date                                     | `DD-MM-YYYY`                 | 1-January-2023                                 |
 | Detect hashtag                                  | `#`                          | #Testing                                       |

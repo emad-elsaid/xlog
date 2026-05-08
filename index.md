@@ -37,9 +37,10 @@ Use XLog's embedded web server during writing to instantly see changes. Generate
 
 # 🔑 Core Features
 
-- **Fast** - Renders large knowledge bases in seconds
+- **Automatic Page Linking** - Simply mention a page name; XLog creates the link automatically
+- **Bidirectional Backlinks** - Automatic backlinks show page relationships
 - **Live Preview** - Hot-reload shows changes as you save
-- **Interconnected** - Automatic backlinks and page relationships
+- **Fast** - Renders large knowledge bases in seconds
 - **Extensible** - 37 built-in extensions, easy to add more
 - **Git-Native** - Filesystem-based, version control friendly
 - **Flexible Output** - Serve locally or generate static sites

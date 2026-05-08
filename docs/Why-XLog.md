@@ -101,13 +101,23 @@ Use any text editor you want. XLog doesn't force you into a specific editing env
 
 What makes XLog different from other static site generators and knowledge base tools:
 
+### Automatic Page Linking
+
+XLog's killer feature: just write naturally and mention page names. XLog automatically converts them
+to links without requiring `[Page Name](/link)` syntax. This creates a networked knowledge graph
+effortlessly as you write. Most static generators require manual linking; XLog handles it
+automatically.
+
 ### Automatic Backlinks
 
-Unlike most static generators, XLog automatically detects when pages link to each other and shows bidirectional relationships. This creates a networked knowledge graph without manual effort.
+Unlike most static generators, XLog automatically detects when pages link to each other and shows
+bidirectional relationships. Combined with automatic page linking, this creates a true knowledge
+graph without manual effort.
 
 ### Live Preview + Static Generation
 
-Get both worlds: fast development with live preview during writing, and static HTML for deployment. No build step needed during editing.
+Get both worlds: fast development with live preview during writing, and static HTML for deployment.
+No build step needed during editing.
 
 ### 37 Built-In Extensions
 

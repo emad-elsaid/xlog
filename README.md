@@ -10,11 +10,12 @@ XLog is a static site generator optimized for digital gardens and personal wikis
 
 ## Features
 
-- **Fast** - Written in Go, renders large knowledge bases in seconds
+- **Automatic Page Linking** - Just mention a page name and XLog converts it to a link automatically. No more `[syntax](/required)`
 - **Live Preview** - Embedded web server with hot-reload shows changes instantly
-- **Interconnected** - Automatic backlinks and bidirectional page relationships
-- **Extensible** - 37 built-in extensions for photos, todos, search, and more
+- **Bidirectional Backlinks** - Automatic backlinks show all pages linking to the current page
+- **Fast** - Written in Go, renders large knowledge bases in seconds
 - **Git-Native** - Filesystem-based, works with any text editor and version control
+- **Extensible** - 37 built-in extensions for photos, todos, search, and more
 - **Flexible Output** - Serve locally or generate static sites for deployment
 
 ## Quick Start
@@ -69,6 +70,7 @@ XLog runs a web server that watches your markdown files. When you click "Edit" i
 XLog includes 37 extensions that enhance your knowledge base:
 
 **Knowledge Base:**
+- **Automatic Page Linking** - Write naturally; XLog automatically converts page mentions to links
 - **Backlinks** - Automatic bidirectional links between pages
 - **Hashtags** - Tag pages and browse by topic
 - **Search** - Full-text search across all notes
