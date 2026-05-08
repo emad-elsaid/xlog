@@ -1,0 +1,85 @@
+<script src="/js/livecodes.umd.js"></script>
+<script>
+  // Initialize LiveCodes playgrounds when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLiveCodesPlaygrounds);
+  } else {
+    // DOM already loaded, run immediately
+    initLiveCodesPlaygrounds();
+  }
+  
+  async function initLiveCodesPlaygrounds() {
+    if (typeof livecodes === 'undefined') {
+      console.error('LiveCodes library not loaded');
+      return;
+    }
+
+    // Detect editor type based on language
+    function getEditorType(lang) {
+      const markupLangs = ['html', 'markdown', 'md', 'pug', 'haml', 'asciidoc', 'astro', 'mdx', 'mjml', 'bbcode'];
+      const styleLangs = ['css', 'scss', 'sass', 'less', 'stylus', 'postcss', 'tailwindcss', 'unocss', 'windicss'];
+      
+      const lowerLang = lang.toLowerCase();
+      if (markupLangs.includes(lowerLang)) return 'markup';
+      if (styleLangs.includes(lowerLang)) return 'style';
+      return 'script';
+    }
+
+    const playgrounds = document.querySelectorAll('.livecodes-playground');
+    
+    for (const container of playgrounds) {
+      const lang = container.dataset.lang;
+      const codeElement = container.querySelector('pre code');
+      const code = codeElement ? codeElement.textContent : '';
+      
+      // Extract meta parameters from data attributes
+      const params = {};
+      const height = container.dataset.height;
+      const consoleParam = container.dataset.console;
+      const theme = container.dataset.theme;
+      const editor = container.dataset.editor;
+      
+      // Remove the loading message and pre element
+      container.innerHTML = '';
+      
+      // Set container height if specified
+      if (height) {
+        container.style.height = height;
+      }
+      
+      // Detect the correct editor type for the language
+      const editorType = getEditorType(lang);
+      
+      // Build config object
+      const config = {
+        mode: 'full',
+        activeEditor: editorType,
+        [editorType]: {
+          language: lang,
+          content: code
+        }
+      };
+      
+      // Only show the relevant editor language (hide HTML/CSS for Python, etc.)
+      config.languages = [lang];
+      
+      // Apply optional parameters
+      if (consoleParam) {
+        config.tools = config.tools || {};
+        config.tools.active = 'console';
+        config.tools.status = consoleParam === 'open' ? 'open' : consoleParam === 'full' ? 'full' : 'closed';
+      }
+      
+      if (theme) {
+        config.theme = theme;
+      }
+      
+      if (editor) {
+        config.editor = editor;
+      }
+      
+      // Create the playground with proper language configuration
+      await livecodes.createPlayground(container, { config });
+    }
+  }
+</script>

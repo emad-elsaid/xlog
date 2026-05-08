@@ -21,6 +21,7 @@ import (
 	_ "github.com/emad-elsaid/xlog/extensions/html"
 	_ "github.com/emad-elsaid/xlog/extensions/images"
 	_ "github.com/emad-elsaid/xlog/extensions/link_preview"
+	_ "github.com/emad-elsaid/xlog/extensions/livecodes"
 	_ "github.com/emad-elsaid/xlog/extensions/manifest"
 	_ "github.com/emad-elsaid/xlog/extensions/mathjax"
 	_ "github.com/emad-elsaid/xlog/extensions/mermaid"

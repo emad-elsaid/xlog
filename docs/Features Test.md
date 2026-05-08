@@ -36,10 +36,10 @@ For example, xlog has templates defined inside `templates/` one of them is `page
 | Strikethrough                                   | `~~`                         | ~~Strikethrough~~                              |
 | Subscript                                       | `<sub>`                      | X<sub>2</sub>                                  |
 | Superscript                                     | `<sup>`                      | X<sup>2</sup>                                  |
-| Linking                                         | `[text](url)`                | [Emad Elsaid](https://www.emadelsaid.com)      |
+| Auto-linking page names                         | Just write the page name     | index, Features Test                           |
+| Explicit linking                                | `[text](url)`                | [Emad Elsaid](https://www.emadelsaid.com)      |
 | Wiki-style linking                              | `\[[Page Name]]`             | [[index]], [[Features Test]]                   |
 | Shorting Long URLs:                             |                              | https://en.wikipedia.org/wiki/Computer_science |
-| Auto linking text if it's a page name           |                              | index, Features Test                           |
 | Emoji                                           | `:EMOJICODE:`                | :wrench:                                       |
 | Detect date                                     | `DD-MM-YYYY`                 | 1-January-2023                                 |
 | Detect hashtag                                  | `#`                          | #Testing                                       |
@@ -70,6 +70,53 @@ fmt.Println("hello world")
 ## Code using "\`\`\`" and language name "\`\`\`go"
 ```go
 fmt.Println("Hello World")
+```
+
+## [LiveCodes](https://livecodes.io/) Interactive Playgrounds
+
+Interactive React component:
+```jsx livecodes
+import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+Interactive Python code (only shows Python tab, no HTML/CSS):
+```python livecodes
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")
+```
+
+Interactive JavaScript with console open and custom height:
+```js livecodes console=open height=500px
+console.log("Hello from LiveCodes!");
+
+const greet = (name) => {
+  return `Hello, ${name}!`;
+};
+
+console.log(greet("World"));
+```
+
+Light theme example:
+```jsx livecodes theme=light
+export default () => <h1 style={{color: '#333'}}>Light Theme!</h1>
 ```
 
 ## [MathJax](https://www.mathjax.org/) Block with `$$`
@@ -222,7 +269,8 @@ In a single line with `/SHORTCODE`:
 
 /warning This is a `warning`
 
-[Mermaid](https://mermaid.js.org/) Graphs:
+## [Mermaid](https://mermaid.js.org/) Graphs
+
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
@@ -242,7 +290,9 @@ gantt
     another task      : 24d
 ```
 
-Embed another page, header-particles in this case
+## Embed another page
+
+/embed header-particles in this case
 /embed header-particles
 
 # Tables
