@@ -242,6 +242,48 @@ gantt
     another task      : 24d
 ```
 
+[LiveCodes](https://livecodes.io/) Interactive Playgrounds:
+
+Interactive React component:
+```jsx livecodes
+import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+Interactive Python code:
+```python livecodes
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+for i in range(10):
+    print(f"fibonacci({i}) = {fibonacci(i)}")
+```
+
+Interactive JavaScript:
+```js livecodes
+console.log("Hello from LiveCodes!");
+
+const greet = (name) => {
+  return `Hello, ${name}!`;
+};
+
+console.log(greet("World"));
+```
+
 Embed another page, header-particles in this case
 /embed header-particles
 
