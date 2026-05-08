@@ -1,8 +1,12 @@
-<script type="module">
+<script src="/public/livecodes.umd.js"></script>
+<script>
   // Initialize LiveCodes playgrounds
   (async () => {
-    const { createPlayground } = await import('https://cdn.jsdelivr.net/npm/livecodes@0.7.0/index.js');
-    
+    if (typeof livecodes === 'undefined') {
+      console.error('LiveCodes library not loaded');
+      return;
+    }
+
     const playgrounds = document.querySelectorAll('.livecodes-playground');
     
     for (const container of playgrounds) {
@@ -14,7 +18,7 @@
       container.innerHTML = '';
       
       // Create the playground
-      await createPlayground(container, {
+      await livecodes.createPlayground(container, {
         config: {
           activeEditor: lang,
           [lang]: {
