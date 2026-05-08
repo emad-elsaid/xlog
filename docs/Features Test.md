@@ -222,7 +222,8 @@ In a single line with `/SHORTCODE`:
 
 /warning This is a `warning`
 
-[Mermaid](https://mermaid.js.org/) Graphs:
+## [Mermaid](https://mermaid.js.org/) Graphs
+
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
@@ -242,7 +243,7 @@ gantt
     another task      : 24d
 ```
 
-[LiveCodes](https://livecodes.io/) Interactive Playgrounds:
+## [LiveCodes](https://livecodes.io/) Interactive Playgrounds
 
 Interactive React component:
 ```jsx livecodes
@@ -284,7 +285,9 @@ const greet = (name) => {
 console.log(greet("World"));
 ```
 
-Embed another page, header-particles in this case
+## Embed another page
+
+/embed header-particles in this case
 /embed header-particles
 
 # Tables
