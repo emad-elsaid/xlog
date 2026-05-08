@@ -1,0 +1,31 @@
+<script type="module">
+  // Initialize LiveCodes playgrounds
+  (async () => {
+    const { createPlayground } = await import('https://cdn.jsdelivr.net/npm/livecodes@0.7.0/index.js');
+    
+    const playgrounds = document.querySelectorAll('.livecodes-playground');
+    
+    for (const container of playgrounds) {
+      const lang = container.dataset.lang;
+      const codeElement = container.querySelector('pre code');
+      const code = codeElement ? codeElement.textContent : '';
+      
+      // Remove the loading message and pre element
+      container.innerHTML = '';
+      
+      // Create the playground
+      await createPlayground(container, {
+        config: {
+          activeEditor: lang,
+          [lang]: {
+            language: lang,
+            content: code
+          }
+        },
+        params: {
+          lite: false
+        }
+      });
+    }
+  })();
+</script>
