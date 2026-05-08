@@ -158,7 +158,9 @@ func (t transformLiveCodesBlocks) Transform(doc *ast.Document, reader text.Reade
 }
 
 // liveCodesRenderer renders LiveCodes blocks.
-type liveCodesRenderer struct{}
+type liveCodesRenderer struct {
+	scriptEmitted bool
+}
 
 var playgroundCounter uint64
 
@@ -200,9 +202,15 @@ func (r *liveCodesRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 </div>
 `, html.EscapeString(node.language), html.EscapeString(playgroundID), dataAttrs, html.EscapeString(content))
 
+	// Only emit the script once per page
+	output := htmlStr
+	if !r.scriptEmitted {
+		output = htmlStr + script
+		r.scriptEmitted = true
+	}
+
 	// #nosec G203 - Content is escaped via html.EscapeString
-	output := template.HTML(htmlStr + script)
-	if _, err := w.Write([]byte(output)); err != nil {
+	if _, err := w.Write([]byte(template.HTML(output))); err != nil {
 		return ast.WalkStop, err
 	}
 
