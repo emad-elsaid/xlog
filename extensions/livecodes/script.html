@@ -7,6 +7,17 @@
       return;
     }
 
+    // Detect editor type based on language
+    function getEditorType(lang) {
+      const markupLangs = ['html', 'markdown', 'md', 'pug', 'haml', 'asciidoc', 'astro', 'mdx', 'mjml', 'bbcode'];
+      const styleLangs = ['css', 'scss', 'sass', 'less', 'stylus', 'postcss', 'tailwindcss', 'unocss', 'windicss'];
+      
+      const lowerLang = lang.toLowerCase();
+      if (markupLangs.includes(lowerLang)) return 'markup';
+      if (styleLangs.includes(lowerLang)) return 'style';
+      return 'script';
+    }
+
     const playgrounds = document.querySelectorAll('.livecodes-playground');
     
     for (const container of playgrounds) {
@@ -17,17 +28,18 @@
       // Remove the loading message and pre element
       container.innerHTML = '';
       
-      // Create the playground
+      // Detect the correct editor type for the language
+      const editorType = getEditorType(lang);
+      
+      // Create the playground with proper language configuration
       await livecodes.createPlayground(container, {
         config: {
-          activeEditor: lang,
-          [lang]: {
+          mode: 'full',
+          activeEditor: editorType,
+          [editorType]: {
             language: lang,
             content: code
           }
-        },
-        params: {
-          lite: false
         }
       });
     }
