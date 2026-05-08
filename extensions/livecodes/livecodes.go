@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"io/fs"
 	"strings"
 	"sync/atomic"
 
@@ -31,7 +32,24 @@ type LiveCodes struct{}
 func (LiveCodes) Name() string { return extensionName }
 func (LiveCodes) Init() {
 	xlog.RegisterStaticDir(js)
+	registerBuildFiles()
 	LiveCodes{}.Extend(xlog.MarkdownConverter())
+}
+
+func registerBuildFiles() {
+	_ = fs.WalkDir(js, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		xlog.RegisterBuildPage("/"+path, false)
+
+		return nil
+	})
 }
 
 func (LiveCodes) Extend(md markdown.Markdown) {
