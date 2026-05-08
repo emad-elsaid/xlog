@@ -92,7 +92,7 @@ export default function Counter() {
 }
 ```
 
-Interactive Python code:
+Interactive Python code (only shows Python tab, no HTML/CSS):
 ```python livecodes
 def fibonacci(n):
     if n <= 1:
@@ -103,8 +103,8 @@ for i in range(10):
     print(f"fibonacci({i}) = {fibonacci(i)}")
 ```
 
-Interactive JavaScript:
-```js livecodes
+Interactive JavaScript with console open and custom height:
+```js livecodes console=open height=500px
 console.log("Hello from LiveCodes!");
 
 const greet = (name) => {
@@ -112,6 +112,11 @@ const greet = (name) => {
 };
 
 console.log(greet("World"));
+```
+
+Light theme example:
+```jsx livecodes theme=light
+export default () => <h1 style={{color: '#333'}}>Light Theme!</h1>
 ```
 
 ## [MathJax](https://www.mathjax.org/) Block with `$$`

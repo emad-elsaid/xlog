@@ -25,23 +25,54 @@
       const codeElement = container.querySelector('pre code');
       const code = codeElement ? codeElement.textContent : '';
       
+      // Extract meta parameters from data attributes
+      const params = {};
+      const height = container.dataset.height;
+      const consoleParam = container.dataset.console;
+      const theme = container.dataset.theme;
+      const editor = container.dataset.editor;
+      
       // Remove the loading message and pre element
       container.innerHTML = '';
+      
+      // Set container height if specified
+      if (height) {
+        container.style.height = height;
+      }
       
       // Detect the correct editor type for the language
       const editorType = getEditorType(lang);
       
-      // Create the playground with proper language configuration
-      await livecodes.createPlayground(container, {
-        config: {
-          mode: 'full',
-          activeEditor: editorType,
-          [editorType]: {
-            language: lang,
-            content: code
-          }
+      // Build config object
+      const config = {
+        mode: 'full',
+        activeEditor: editorType,
+        [editorType]: {
+          language: lang,
+          content: code
         }
-      });
+      };
+      
+      // Only show the relevant editor language (hide HTML/CSS for Python, etc.)
+      config.languages = [lang];
+      
+      // Apply optional parameters
+      if (consoleParam) {
+        config.tools = config.tools || {};
+        config.tools.active = 'console';
+        config.tools.status = consoleParam === 'open' ? 'open' : consoleParam === 'full' ? 'full' : 'closed';
+      }
+      
+      if (theme) {
+        config.theme = theme;
+      }
+      
+      if (editor) {
+        config.editor = editor;
+      }
+      
+      // Create the playground with proper language configuration
+      await livecodes.createPlayground(container, { config });
     }
   })();
 </script>

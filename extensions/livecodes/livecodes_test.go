@@ -124,12 +124,14 @@ func TestLiveCodesRendering(t *testing.T) {
 			},
 		},
 		{
-			name:     "python livecodes renders playground",
-			markdown: "```python livecodes\nprint('hello')\n```",
+			name:     "livecodes with params",
+			markdown: "```python livecodes height=600px console=open\nprint('test')\n```",
 			contains: []string{
 				`class="livecodes-playground"`,
 				`data-lang="python"`,
-				`print(&#39;hello&#39;)`,
+				`data-height="600px"`,
+				`data-console="open"`,
+				`print(&#39;test&#39;)`,
 			},
 		},
 		{

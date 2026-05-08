@@ -75,6 +75,7 @@ var KindLiveCodesBlock = ast.NewNodeKind("LiveCodesBlock")
 type LiveCodesBlock struct {
 	ast.FencedCodeBlock
 	language string
+	params   map[string]string // Meta parameters (height, console, theme, etc.)
 }
 
 func (l *LiveCodesBlock) Kind() ast.NodeKind {
@@ -123,16 +124,32 @@ func (t transformLiveCodesBlocks) Transform(doc *ast.Document, reader text.Reade
 			infoString = string(b.Info.Segment.Value(source))
 		}
 
-		// Extract the language (first word before "livecodes")
+		// Extract the language (first word before "livecodes") and parameters
 		parts := strings.Fields(infoString)
 		actualLang := ""
-		if len(parts) > 0 && parts[0] != "livecodes" {
-			actualLang = parts[0]
+		params := make(map[string]string)
+
+		for _, part := range parts {
+			if part == "livecodes" {
+				continue
+			}
+
+			// Check if it's a key=value parameter
+			if strings.Contains(part, "=") {
+				kv := strings.SplitN(part, "=", 2)
+				if len(kv) == 2 {
+					params[kv[0]] = kv[1]
+				}
+			} else if actualLang == "" {
+				// First non-parameter part is the language
+				actualLang = part
+			}
 		}
 
 		replacement := LiveCodesBlock{
 			FencedCodeBlock: *b,
 			language:        actualLang,
+			params:          params,
 		}
 
 		parent := b.Parent()
@@ -170,12 +187,18 @@ func (r *liveCodesRenderer) render(w util.BufWriter, source []byte, n ast.Node, 
 	id := atomic.AddUint64(&playgroundCounter, 1)
 	playgroundID := fmt.Sprintf("livecodes-%d", id)
 
+	// Build data attributes from parameters
+	dataAttrs := ""
+	for key, value := range node.params {
+		dataAttrs += fmt.Sprintf(` data-%s="%s"`, html.EscapeString(key), html.EscapeString(value))
+	}
+
 	// Create the playground container with the code embedded
-	htmlStr := fmt.Sprintf(`<div class="livecodes-playground" data-lang="%s" id="%s">
+	htmlStr := fmt.Sprintf(`<div class="livecodes-playground" data-lang="%s" id="%s"%s>
 <pre style="display:none;"><code>%s</code></pre>
 <div class="livecodes-loading">Loading playground...</div>
 </div>
-`, html.EscapeString(node.language), html.EscapeString(playgroundID), html.EscapeString(content))
+`, html.EscapeString(node.language), html.EscapeString(playgroundID), dataAttrs, html.EscapeString(content))
 
 	// #nosec G203 - Content is escaped via html.EscapeString
 	output := template.HTML(htmlStr + script)
