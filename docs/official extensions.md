@@ -54,6 +54,7 @@ For technical documentation and advanced use cases:
 | **sql_table** | Query long tables with SQL. Interactive data exploration. |
 | **Github** | "Edit on GitHub" quick action for collaborative documentation. |
 | **PGP** | Encrypt/decrypt .md.pgp files using GPG. Secure private notes. |
+| **LiveCodes** | **Embed interactive code playgrounds in pages**. Supports 90+ languages/frameworks. |
 
 ## Format Support Extensions
 
@@ -162,6 +163,48 @@ Optional parameters:
 - `-giscus-mapping`: How to match pages to discussions (pathname, url, title, og:title)
 - `-giscus-theme`: Visual theme (light, dark, preferred_color_scheme, etc.)
 - `-giscus-lang`: Interface language (en, ar, zh, etc.)
+
+### LiveCodes Interactive Playgrounds
+
+Embed live, interactive code playgrounds using [LiveCodes](https://livecodes.io/). Add `livecodes` to code fence:
+
+````markdown
+```jsx livecodes
+import { useState } from "react";
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  );
+}
+```
+````
+
+Supports 90+ languages including JavaScript, Python, Go, Rust, and more. Optional parameters:
+
+- `height=500px` - Set playground height
+- `console=open` - Show console panel (open, closed, full)
+- `theme=light` - Set theme (light, dark)
+- `editor=monaco` - Choose editor type
+
+Example with parameters:
+
+````markdown
+```python livecodes console=open height=400px
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+print([fibonacci(i) for i in range(10)])
+```
+````
+
+See [LiveCodes documentation](https://livecodes.io/docs/markdown-to-livecodes/) for details.
 
 ## Disabling Extensions
 
