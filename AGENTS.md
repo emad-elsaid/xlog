@@ -49,7 +49,7 @@ go run ./cmd/xlog -build <output-dir>
 
 ## Key Constraints
 
-- Go 1.25 minimum (go.mod)
+- Go 1.26 minimum (go.mod)
 - Main branch: `master`
 - Docker: builds to `ghcr.io/emad-elsaid/xlog`, serves on port 3000, mounts `~/.xlog:/files`
 
