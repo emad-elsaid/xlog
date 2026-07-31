@@ -96,6 +96,10 @@ func (p *page) Name() string {
 }
 
 func (p *page) FileName() string {
+	if !xlog.ValidPageName(p.name) {
+		return ""
+	}
+
 	return filepath.FromSlash(p.name) + p.ext
 }
 

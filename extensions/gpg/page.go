@@ -21,8 +21,14 @@ type page struct {
 	ast  ast.Node
 }
 
-func (p *page) Name() string     { return p.name }
-func (p *page) FileName() string { return filepath.FromSlash(p.name) + EXT }
+func (p *page) Name() string { return p.name }
+func (p *page) FileName() string {
+	if !xlog.ValidPageName(p.name) {
+		return ""
+	}
+
+	return filepath.FromSlash(p.name) + EXT
+}
 
 func (p *page) Exists() bool {
 	_, err := os.Stat(p.FileName())

@@ -62,7 +62,48 @@ func (p *page) Name() string {
 	return p.name
 }
 
+// ValidPageName reports whether a page name is safe to resolve to a file
+// inside the source directory. It rejects absolute paths, Windows drive
+// letters, backslashes, and "." or ".." path segments, all of which could
+// otherwise escape the source directory when the process has chdir'd into it.
+// Page sources should reject names that fail this check before performing any
+// filesystem operation.
+func ValidPageName(name string) bool {
+	if name == "" {
+		return true
+	}
+
+	// Reject absolute paths on any OS.
+	if filepath.IsAbs(filepath.FromSlash(name)) {
+		return false
+	}
+
+	// Reject Windows drive-relative paths like "C:foo".
+	if len(name) >= 2 && name[1] == ':' {
+		return false
+	}
+
+	// Reject backslashes; page names use forward slashes as separators only.
+	if strings.ContainsRune(name, '\\') {
+		return false
+	}
+
+	// Reject "." and ".." path segments that could escape the source dir.
+	for _, segment := range strings.Split(name, "/") {
+		switch segment {
+		case ".", "..":
+			return false
+		}
+	}
+
+	return true
+}
+
 func (p *page) FileName() string {
+	if !ValidPageName(p.name) {
+		return ""
+	}
+
 	return filepath.FromSlash(p.name) + ".md"
 }
 

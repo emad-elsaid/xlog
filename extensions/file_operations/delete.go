@@ -25,7 +25,10 @@ func (f PageDelete) Attrs() map[template.HTMLAttr]any {
 func (f PageDelete) Handler(r xlog.Request) xlog.Output {
 	name := r.FormValue("page")
 	page := xlog.NewPage(name)
-	if page == nil || !page.Exists() {
+	if page == nil || page.FileName() == "" {
+		return xlog.BadRequest("invalid page name")
+	}
+	if !page.Exists() {
 		slog.Error("Can't delete page", "page", page, "name", name)
 	} else {
 		page.Delete()

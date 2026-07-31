@@ -443,6 +443,103 @@ func TestFileOps_Init_NormalMode(t *testing.T) {
 	// The actual route registration is verified through integration tests.
 }
 
+func TestPageDeleteHandler_RejectsTraversal(t *testing.T) {
+	tmpDir := t.TempDir()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to get working directory: %v", err)
+	}
+	defer func() { _ = os.Chdir(oldWd) }()
+
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	// Create a victim file outside the source directory.
+	victimDir := filepath.Dir(tmpDir)
+	victimPath := filepath.Join(victimDir, "victim.md")
+	if err := os.WriteFile(victimPath, []byte("do not delete"), 0600); err != nil {
+		t.Fatalf("Failed to create victim file: %v", err)
+	}
+	defer func() { _ = os.Remove(victimPath) }()
+
+	traversals := []string{"../victim", "..%2Fvictim"}
+	for _, page := range traversals {
+		t.Run(page, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodDelete, "/+/file/delete?page="+page, http.NoBody)
+			rec := httptest.NewRecorder()
+
+			pd := PageDelete{}
+			output := pd.Handler(req)
+			output(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, rec.Code)
+			}
+
+			if _, err := os.Stat(victimPath); err != nil {
+				t.Errorf("Victim file should not be deleted, got error: %v", err)
+			}
+		})
+	}
+}
+
+func TestPageRenameHandler_RejectsTraversal(t *testing.T) {
+	tmpDir := t.TempDir()
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("Failed to get working directory: %v", err)
+	}
+	defer func() { _ = os.Chdir(oldWd) }()
+
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatalf("Failed to change to temp directory: %v", err)
+	}
+
+	// Create a page inside the source directory.
+	oldName := "index"
+	if err := os.WriteFile(filepath.Join(tmpDir, oldName+".md"), []byte("# Index"), 0600); err != nil {
+		t.Fatalf("Failed to create test page: %v", err)
+	}
+
+	// Create a victim file outside the source directory.
+	victimDir := filepath.Dir(tmpDir)
+	victimPath := filepath.Join(victimDir, "victim2.md")
+	if err := os.WriteFile(victimPath, []byte("PROTECTED SECRET CONTENT"), 0600); err != nil {
+		t.Fatalf("Failed to create victim file: %v", err)
+	}
+	defer func() { _ = os.Remove(victimPath) }()
+
+	traversals := []string{"../victim2"}
+	for _, newName := range traversals {
+		t.Run(newName, func(t *testing.T) {
+			formData := url.Values{}
+			formData.Set("old", oldName)
+			formData.Set("new", newName)
+
+			req := httptest.NewRequest(http.MethodPost, "/+/file/rename", strings.NewReader(formData.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			rec := httptest.NewRecorder()
+
+			pr := PageRename{}
+			output := pr.Handler(req)
+			output(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Errorf("Expected status %d, got %d", http.StatusBadRequest, rec.Code)
+			}
+
+			content, err := os.ReadFile(victimPath)
+			if err != nil {
+				t.Fatalf("Victim file should still exist, got error: %v", err)
+			}
+			if string(content) != "PROTECTED SECRET CONTENT" {
+				t.Errorf("Victim file should not be overwritten, got content: %q", string(content))
+			}
+		})
+	}
+}
+
 func TestPageRename_Form_RendersOutput(t *testing.T) {
 	// This test verifies Form method exists and returns an Output function.
 	// Full template rendering requires server initialization which is beyond unit test scope.

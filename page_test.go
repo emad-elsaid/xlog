@@ -39,6 +39,57 @@ func TestPageFileName(t *testing.T) {
 	}
 }
 
+func TestValidPageName(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		{"", true},
+		{"simple", true},
+		{"with/slash", true},
+		{"nested/path/page", true},
+		{"../victim", false},
+		{"a/../b", false},
+		{"..", false},
+		{".", false},
+		{"foo/./bar", false},
+		{"/etc/passwd", false},
+		{`..\victim`, false},
+		{`C:foo`, false},
+		{`C:\foo`, false},
+		{"notes/..", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ValidPageName(tt.name); got != tt.want {
+				t.Errorf("ValidPageName(%q) = %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPageFileNameRejectsUnsafeNames(t *testing.T) {
+	unsafe := []string{
+		"../victim",
+		"a/../b",
+		"..",
+		"/etc/passwd",
+		`..\victim`,
+		`C:foo`,
+		"foo/./bar",
+	}
+
+	for _, name := range unsafe {
+		t.Run(name, func(t *testing.T) {
+			p := &page{name: name}
+			if p.FileName() != "" {
+				t.Errorf("Expected empty filename for unsafe name %q, got %q", name, p.FileName())
+			}
+		})
+	}
+}
+
 func TestPageExists(t *testing.T) {
 	tempDir := t.TempDir()
 	origDir, _ := os.Getwd()

@@ -40,8 +40,12 @@ func (f PageRename) Handler(r xlog.Request) xlog.Output {
 		return xlog.BadRequest("file doesn't exist")
 	}
 
-	ext := path.Ext(old.FileName())
 	basename := r.FormValue("new")
+	if newPage := xlog.NewPage(basename); newPage.FileName() == "" {
+		return xlog.BadRequest("invalid file name")
+	}
+
+	ext := path.Ext(old.FileName())
 	newName := basename + ext
 
 	if err := os.Rename(old.FileName(), newName); err != nil {
