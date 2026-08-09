@@ -1,0 +1,91 @@
+name: Xlog
+description: Build an Xlog static site and deploy it to GitHub Pages
+
+inputs:
+  args:
+    description: >
+      Arguments passed to the xlog binary, the same flags listed by
+      `xlog -h`. For example: `--build . --sitename "My Site" --theme dark`
+    required: false
+    default: --build .
+  version:
+    description: >
+      xlog release tag to use, e.g. `v1.8.0`. Defaults to the latest
+      published release.
+    required: false
+    default: latest
+  remove-root-markdown:
+    description: >
+      Remove root-level markdown files (e.g. README.md) from the built site
+      before it is uploaded.
+    required: false
+    default: "false"
+  fetch-depth:
+    description: >
+      Number of commits to fetch in the checkout. 0 fetches the full history,
+      which is required for the timestamp restoration step.
+    required: false
+    default: "0"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v7.0.1
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Allow non-ASCII filenames
+      shell: bash
+      run: git config core.quotepath false
+
+    - name: Restore file timestamps
+      uses: chetan/git-restore-mtime-action@v2.3
+
+    - name: Resolve xlog version
+      id: version
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+      run: |
+        VERSION="$INPUT_VERSION"
+        if [ "$VERSION" = "latest" ]; then
+          VERSION="$(gh release view --repo emad-elsaid/xlog --json tagName --jq .tagName)"
+        fi
+        test -n "$VERSION" || { echo "Could not resolve xlog version" >&2; exit 1; }
+        echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Detect architecture
+      id: arch
+      shell: bash
+      run: |
+        case "$(uname -m)" in
+          x86_64)   ARCH=amd64 ;;
+          aarch64)  ARCH=arm64 ;;
+          i386|i686) ARCH=386 ;;
+          *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+        esac
+        echo "arch=${ARCH}" >> "$GITHUB_OUTPUT"
+
+    - name: Install xlog
+      shell: bash
+      run: |
+        curl -fsSL "https://github.com/emad-elsaid/xlog/releases/download/${{ steps.version.outputs.version }}/xlog-${{ steps.version.outputs.version }}-linux-${{ steps.arch.outputs.arch }}.tar.gz" \
+          | tar -xz -C "$RUNNER_TEMP"
+
+    - name: Build site
+      shell: bash
+      run: |
+        "$RUNNER_TEMP/xlog" ${{ inputs.args }}
+        if [ "${{ inputs.remove-root-markdown }}" = "true" ]; then
+          rm -f -- *.md
+        fi
+        chmod -R 0777 .
+
+    - name: Upload GitHub Pages artifact
+      uses: actions/upload-pages-artifact@v5.0.0
+      with:
+        path: .
+
+    - name: Deploy to GitHub Pages
+      uses: actions/deploy-pages@v5.0.0
