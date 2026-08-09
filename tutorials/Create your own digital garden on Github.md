@@ -47,46 +47,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: emad-elsaid/xlog/action@master
         with:
-          fetch-depth: 0
-
-      - name: Allow non-ASCII character
-        run: git config core.quotepath false
-
-      - name: restore timestamps
-        uses: chetan/git-restore-mtime-action@v1
-
-      - name: Install xlog
-        env:
-          XLOG_VERSION: v1.6.6
-        run: curl --location https://github.com/emad-elsaid/xlog/releases/download/${XLOG_VERSION}/xlog-${XLOG_VERSION}-linux-amd64.tar.gz | tar -xz -C ..
-
-      - name: Build
-        run: |
-          ../xlog \
-          --build . \
-          --sitename "user-name"
-          rm *.md
-          chmod -R 0777 .
-
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          path: .
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          version: v1.8.0
+          args: --build . --sitename "user-name"
+          remove-root-markdown: true
 ```
 5. if your main branch name is different than `master` please change it in the previous file.
 6. Make sure you replace any occurrence of **user-name** with your user name.
