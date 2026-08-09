@@ -9,11 +9,8 @@ inputs:
     required: false
     default: --build .
   version:
-    description: >
-      xlog release tag to use, e.g. `v1.8.0`. Defaults to the latest
-      published release.
-    required: false
-    default: latest
+    description: xlog release tag to use, e.g. `v1.8.0`
+    required: true
   remove-root-markdown:
     description: >
       Remove root-level markdown files (e.g. README.md) from the built site
@@ -42,20 +39,6 @@ runs:
     - name: Restore file timestamps
       uses: chetan/git-restore-mtime-action@v2.3
 
-    - name: Resolve xlog version
-      id: version
-      shell: bash
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        VERSION="$INPUT_VERSION"
-        if [ "$VERSION" = "latest" ]; then
-          VERSION="$(gh release view --repo emad-elsaid/xlog --json tagName --jq .tagName)"
-        fi
-        test -n "$VERSION" || { echo "Could not resolve xlog version" >&2; exit 1; }
-        echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-
     - name: Detect architecture
       id: arch
       shell: bash
@@ -71,7 +54,7 @@ runs:
     - name: Install xlog
       shell: bash
       run: |
-        curl -fsSL "https://github.com/emad-elsaid/xlog/releases/download/${{ steps.version.outputs.version }}/xlog-${{ steps.version.outputs.version }}-linux-${{ steps.arch.outputs.arch }}.tar.gz" \
+        curl -fsSL "https://github.com/emad-elsaid/xlog/releases/download/${{ inputs.version }}/xlog-${{ inputs.version }}-linux-${{ steps.arch.outputs.arch }}.tar.gz" \
           | tar -xz -C "$RUNNER_TEMP"
 
     - name: Build site
